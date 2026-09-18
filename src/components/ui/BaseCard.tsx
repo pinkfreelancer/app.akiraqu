@@ -46,12 +46,12 @@ export const BaseCard: React.FC<BaseCardProps> = ({
         >
           <div className="flex items-center gap-2.5">
             {Icon && (
-              <Icon className={`w-4 h-4 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />
+              <Icon className={`w-4 h-4 ${isDark ? 'text-slate-300' : 'text-slate-700'}`} />
             )}
             <div>
               {typeof title === 'string' ? (
-                <span className={`text-xs font-mono font-bold tracking-wider uppercase ${
-                  isDark ? 'text-white' : 'text-slate-900'
+                <span className={`text-xs font-semibold tracking-tight ${
+                  isDark ? 'text-slate-100' : 'text-slate-900'
                 }`}>
                   {title}
                 </span>
@@ -59,7 +59,7 @@ export const BaseCard: React.FC<BaseCardProps> = ({
                 title
               )}
               {subtitle && (
-                <p className={`text-[10px] font-mono mt-0.5 ${
+                <p className={`text-xs mt-0.5 ${
                   isDark ? 'text-slate-400' : 'text-slate-500'
                 }`}>
                   {subtitle}

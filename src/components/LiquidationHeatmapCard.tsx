@@ -123,7 +123,7 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
               <h3 className="font-bold text-base tracking-tight">
                 {isId ? 'Peta Panas Likuidasi & Klaster Leverage' : 'Liquidation Heatmap & Leverage Clusters'}
               </h3>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 uppercase">
+              <span className="px-2 py-0.5 rounded text-xs font-mono font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 uppercase">
                 {isId ? 'Model Hibrida' : 'Hybrid Model'}
               </span>
             </div>
@@ -142,39 +142,39 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
               id="liq-tab-summary"
               type="button"
               onClick={() => setActiveTab('summary')}
-              className={`px-3 py-1 rounded transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-1 rounded transition-colors cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'summary'
-                  ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-slate-800 text-white font-semibold shadow-xs'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               <span>{isId ? 'Ringkas (Pemula)' : 'Summary (Beginner)'}</span>
             </button>
             <button
               id="liq-tab-clusters"
               type="button"
               onClick={() => setActiveTab('clusters')}
-              className={`px-3 py-1 rounded transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-1 rounded transition-colors cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'clusters'
-                  ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-slate-800 text-white font-semibold shadow-xs'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Layers className="w-3.5 h-3.5" />
+              <Layers className="w-3.5 h-3.5 text-cyan-400" />
               <span>{isId ? 'Klaster & Kedalaman' : 'Clusters & Depth'}</span>
             </button>
             <button
               id="liq-tab-playbook"
               type="button"
               onClick={() => setActiveTab('playbook')}
-              className={`px-3 py-1 rounded transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-1 rounded transition-colors cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'playbook'
-                  ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-slate-800 text-white font-semibold shadow-xs'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Compass className="w-3.5 h-3.5" />
+              <Compass className="w-3.5 h-3.5 text-purple-400" />
               <span>{isId ? 'Panduan Taktis' : 'Tactical Playbook'}</span>
             </button>
           </div>
@@ -188,9 +188,9 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                   id={`liq-tier-filter-${tier.toLowerCase()}`}
                   type="button"
                   onClick={() => setSelectedTier(tier)}
-                  className={`px-2 py-1 rounded text-[11px] transition-colors cursor-pointer ${
+                  className={`px-2 py-1 rounded text-xs transition-colors cursor-pointer ${
                     selectedTier === tier
-                      ? 'bg-slate-700 text-cyan-300 font-bold'
+                      ? 'bg-slate-700 text-cyan-300 font-semibold'
                       : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
@@ -246,9 +246,9 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
               />
             </div>
           </div>
-          <div className="flex justify-between text-[10px] font-mono text-slate-400 mt-1">
-            <span className="text-amber-400">Shorts: {summary.shortLiqRatio}%</span>
-            <span className="text-cyan-400">Longs: {summary.longLiqRatio}%</span>
+          <div className="flex justify-between text-xs font-mono text-slate-400 mt-1">
+            <span className="text-amber-400 font-medium">Shorts: {summary.shortLiqRatio}%</span>
+            <span className="text-cyan-400 font-medium">Longs: {summary.longLiqRatio}%</span>
           </div>
         </div>
 
@@ -279,7 +279,7 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
               {isId ? 'Tidak ada klaster terdekat' : 'No near cluster'}
             </div>
           )}
-          <div className="text-[10px] font-mono text-slate-400 mt-1">
+          <div className="text-xs font-mono text-slate-400 mt-1">
             Est. Vol:{' '}
             <span className="text-amber-300 font-bold">${summary.majorShortMagnet?.estimatedVolumeUsd || 0}M</span> (
             {summary.majorShortMagnet?.leverageTier || '50x'})
@@ -313,7 +313,7 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
               {isId ? 'Tidak ada klaster terdekat' : 'No near cluster'}
             </div>
           )}
-          <div className="text-[10px] font-mono text-slate-400 mt-1">
+          <div className="text-xs font-mono text-slate-400 mt-1">
             Est. Vol:{' '}
             <span className="text-cyan-300 font-bold">${summary.majorLongMagnet?.estimatedVolumeUsd || 0}M</span> (
             {summary.majorLongMagnet?.leverageTier || '50x'})
@@ -344,7 +344,7 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
               </span>
             </div>
           </div>
-          <div className="text-[10px] font-mono text-slate-400 mt-1">
+          <div className="text-xs font-mono text-slate-400 mt-1">
             {summary.clusters.length} {isId ? 'klaster aktif teridentifikasi' : 'active clusters identified'}
           </div>
         </div>
@@ -550,7 +550,7 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
             <div className="p-4 rounded-xl bg-slate-900/50 border border-amber-500/20">
               <div className="flex items-center justify-between pb-2 mb-3 border-b border-amber-500/20">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                   <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wide">
                     {isId ? 'Klaster Likuidasi Short (Di Atas Harga)' : 'Short Liquidation Clusters (Overhead)'}
                   </span>
@@ -586,18 +586,18 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                             <span>${formatPrice(cluster.price)}</span>
                             <Copy className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 text-amber-400 transition-opacity" />
                           </button>
-                          <span className="px-1.5 py-0.2 rounded text-[10px] bg-slate-800 text-amber-300 border border-amber-500/30 font-semibold">
+                          <span className="px-1.5 py-0.5 rounded text-xs bg-slate-800 text-amber-300 border border-amber-500/30 font-semibold">
                             {cluster.leverageTier}
                           </span>
                           {cluster.isMajorMagnet && (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] bg-amber-500 text-slate-950 font-bold uppercase">
+                            <span className="px-1.5 py-0.5 rounded text-[11px] bg-amber-500/30 text-amber-200 border border-amber-500/50 font-semibold">
                               ★ Magnet
                             </span>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-amber-400 font-bold">${cluster.estimatedVolumeUsd}M</span>
-                          <span className="text-slate-400 text-[10px]">
+                          <span className="text-slate-400 text-xs">
                             ({cluster.distancePct > 0 ? '+' : ''}{cluster.distancePct.toFixed(2)}%)
                           </span>
                         </div>
@@ -620,7 +620,7 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
             <div className="p-4 rounded-xl bg-slate-900/50 border border-cyan-500/20">
               <div className="flex items-center justify-between pb-2 mb-3 border-b border-cyan-500/20">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-pulse" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-500" />
                   <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wide">
                     {isId ? 'Klaster Likuidasi Long (Di Bawah Harga)' : 'Long Liquidation Clusters (Downside)'}
                   </span>
@@ -656,18 +656,18 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                             <span>${formatPrice(cluster.price)}</span>
                             <Copy className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 text-cyan-400 transition-opacity" />
                           </button>
-                          <span className="px-1.5 py-0.2 rounded text-[10px] bg-slate-800 text-cyan-300 border border-cyan-500/30 font-semibold">
+                          <span className="px-1.5 py-0.5 rounded text-xs bg-slate-800 text-cyan-300 border border-cyan-500/30 font-semibold">
                             {cluster.leverageTier}
                           </span>
                           {cluster.isMajorMagnet && (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] bg-cyan-500 text-slate-950 font-bold uppercase">
+                            <span className="px-1.5 py-0.5 rounded text-[11px] bg-cyan-500/30 text-cyan-200 border border-cyan-500/50 font-semibold">
                               ★ Magnet
                             </span>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-cyan-400 font-bold">${cluster.estimatedVolumeUsd}M</span>
-                          <span className="text-slate-400 text-[10px]">
+                          <span className="text-slate-400 text-xs">
                             ({cluster.distancePct.toFixed(2)}%)
                           </span>
                         </div>
@@ -691,13 +691,13 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
 
       {/* Main Content: Tactical Playbook Tab */}
       {activeTab === 'playbook' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
           <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
             <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
               <TrendingUp className="w-4 h-4" />
               <span>{isId ? '1. Strategi Squeeze Run' : '1. Squeeze Front-Run'}</span>
             </div>
-            <p className="text-slate-300 leading-relaxed text-[11px]">
+            <p className="text-slate-300 leading-relaxed text-xs">
               {isId
                 ? 'Ketika terjadi ketidakseimbangan likuidasi Short (>60%), algoritma market maker cenderung mendorong harga ke klaster utama untuk memicu cascading stop-loss. Tempatkan Take-Profit tepat di batas bawah klaster sebelum terjadi pembalikan (reversal).'
                 : 'When short liquidation imbalance exceeds 60%, algorithmic market makers push price into major overhead clusters to trigger cascading buy stops. Place Take-Profit orders right inside the cluster before exhaustion.'}
@@ -709,7 +709,7 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
               <ShieldAlert className="w-4 h-4" />
               <span>{isId ? '2. Proteksi Stop-Loss' : '2. SL Invalidation Buffer'}</span>
             </div>
-            <p className="text-slate-300 leading-relaxed text-[11px]">
+            <p className="text-slate-300 leading-relaxed text-xs">
               {isId
                 ? 'JANGAN meletakkan Stop Loss di dalam klaster padat (misal zona 50x-100x). Area ini adalah target utama sapuan likuiditas (wick sweep). Letakkan SL di luar area likuidasi terluar dengan penyangga ATR minimal 1.5x.'
                 : 'NEVER place your Stop Loss directly inside a dense liquidation cluster (50x-100x zones). These are prime liquidity raid targets. Buffer your SL beyond the outer boundary of the cluster with at least 1.5x ATR.'}
@@ -721,7 +721,7 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
               <Compass className="w-4 h-4" />
               <span>{isId ? '3. Reversal Absorption' : '3. Reversal Absorption'}</span>
             </div>
-            <p className="text-slate-300 leading-relaxed text-[11px]">
+            <p className="text-slate-300 leading-relaxed text-xs">
               {isId
                 ? 'Setelah klaster likuidasi besar tersapu (ditandai dengan lonjakan volume tinggi dan ekor candle panjang), perhatikan Order Flow CVD. Jika delta mulai berbalik, itu sinyal masuk pembalikan arah dengan probabilitas tinggi.'
                 : 'After a major cluster is swept (marked by sudden high volume wicks and delta absorption), observe Order Flow CVD. A delta reversal indicates smart money absorption, offering high RRR mean-reversion entries.'}
@@ -731,7 +731,7 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
       )}
 
       {/* Footer Note */}
-      <div className="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-500">
+      <div className="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-xs font-mono text-slate-400">
         <span>
           {isId
             ? 'Kalkulasi hibrida: Menggabungkan level visual pada chart candlestick dan metrik kedalaman derivatif'

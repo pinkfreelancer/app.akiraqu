@@ -80,30 +80,30 @@ export const TerminalStatusBar: React.FC<TerminalStatusBarProps> = ({
       >
         {/* Left: Feed Provenance & Exchange Latency */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <div className="flex items-center gap-1.5 font-bold">
+          <div className="flex items-center gap-1.5 font-semibold">
             <span
               className={`w-2 h-2 rounded-full ${
                 wsStatus === 'connected'
-                  ? 'bg-emerald-400 animate-pulse'
+                  ? 'bg-emerald-500'
                   : wsStatus === 'connecting'
-                  ? 'bg-amber-400 animate-pulse'
-                  : 'bg-rose-400'
+                  ? 'bg-amber-500'
+                  : 'bg-rose-500'
               }`}
             />
-            <span className={wsStatus === 'connected' ? (isDark ? 'text-emerald-300' : 'text-emerald-600') : ''}>
+            <span className={wsStatus === 'connected' ? (isDark ? 'text-emerald-400' : 'text-emerald-700') : ''}>
               {selectedExchange} {selectedMarketType}
             </span>
           </div>
 
           <span className={`text-slate-600 ${isDark ? 'text-slate-700' : 'text-slate-300'}`}>|</span>
 
-          <span className="font-mono tabular-nums">
+          <span className="font-mono tabular-nums text-slate-300">
             {latencyMs.toFixed(0)}ms
           </span>
 
           <span className={`hidden sm:inline ${isDark ? 'text-slate-700' : 'text-slate-300'}`}>|</span>
 
-          <span className="hidden sm:inline text-cyan-400 font-semibold truncate max-w-[140px]">
+          <span className="hidden sm:inline text-slate-200 font-medium truncate max-w-[140px]">
             {selectedSymbol} • {selectedTimeframe}
           </span>
 
@@ -130,12 +130,12 @@ export const TerminalStatusBar: React.FC<TerminalStatusBarProps> = ({
             onClick={onOpenCommandBar}
             className={`flex items-center gap-1 px-2 py-0.5 rounded border transition-colors cursor-pointer ${
               isDark
-                ? 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-white hover:border-cyan-500/40'
+                ? 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700'
                 : 'bg-white border-slate-300 text-slate-800 hover:text-slate-950 hover:border-slate-400'
             }`}
             title={lang === 'id' ? 'Buka Pencarian & Perintah Cepat (⌘K atau /)' : 'Open Quick Search & Commands (⌘K or /)'}
           >
-            <Command className={`w-3 h-3 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />
+            <Command className={`w-3 h-3 ${isDark ? 'text-slate-400' : 'text-slate-600'}`} />
             <span>[⌘K] {lang === 'id' ? 'Perintah' : 'Commands'}</span>
           </button>
 
@@ -144,19 +144,19 @@ export const TerminalStatusBar: React.FC<TerminalStatusBarProps> = ({
             className={`flex items-center gap-1 px-2 py-0.5 rounded border transition-colors cursor-pointer ${
               workspaceMode === 'launchpad'
                 ? isDark
-                  ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 font-bold'
-                  : 'bg-cyan-50 border-cyan-300 text-cyan-800 font-bold'
+                  ? 'bg-slate-800 border-slate-700 text-white font-semibold'
+                  : 'bg-slate-100 border-slate-300 text-slate-900 font-semibold'
                 : isDark
-                ? 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-cyan-300 hover:border-cyan-500/40'
+                ? 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700'
                 : 'bg-white border-slate-300 text-slate-700 hover:text-slate-950 hover:border-slate-400'
             }`}
             title={lang === 'id' ? 'Ganti Tampilan: Meja Kerja Multi-Panel vs Alur Bertahap (W)' : 'Toggle Workspace: Multi-Panel vs Stepped Flow (W)'}
           >
-            <LayoutGrid className={`w-3 h-3 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />
+            <LayoutGrid className={`w-3 h-3 ${isDark ? 'text-slate-400' : 'text-slate-600'}`} />
             <span>[W] {workspaceMode === 'launchpad' ? (lang === 'id' ? 'Multi-Panel' : 'Multi-Panel') : (lang === 'id' ? 'Alur Bertahap' : 'Stepped Flow')}</span>
           </button>
 
-          <span className={`text-[10px] font-semibold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+          <span className={`text-xs font-semibold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
             [1-4] TF
           </span>
 
@@ -169,24 +169,24 @@ export const TerminalStatusBar: React.FC<TerminalStatusBarProps> = ({
             }`}
             title="Pintasan Keyboard (?)"
           >
-            <HelpCircle className={`w-3 h-3 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />
+            <HelpCircle className={`w-3 h-3 ${isDark ? 'text-slate-400' : 'text-slate-600'}`} />
             <span>[?]</span>
           </button>
         </div>
 
         {/* Right: Real-time Clocks & Provenance */}
         <div className="flex items-center gap-2.5 shrink-0">
-          <div className={`flex items-center gap-1 text-[10px] font-mono tabular-nums ${
+          <div className={`flex items-center gap-1 text-xs font-mono tabular-nums ${
             isDark ? 'text-slate-300' : 'text-slate-700'
           }`}>
             <Clock className={`w-3 h-3 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
             <span>{currentTime}</span>
             <span className={isDark ? 'text-slate-600' : 'text-slate-400'}>/</span>
-            <span className={`font-bold ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`}>{utcTime}</span>
+            <span className={`font-semibold ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>{utcTime}</span>
           </div>
 
           <div
-            className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+            className={`px-2 py-0.5 rounded text-xs font-semibold tracking-wide ${
               isDark
                 ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/30'
                 : 'bg-emerald-50 text-emerald-800 border border-emerald-300'

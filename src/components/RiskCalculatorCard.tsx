@@ -544,12 +544,12 @@ Generated  : ${new Date().toLocaleString()}`;
               <h3 className={`text-sm sm:text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-800'}`}>
                 {t.risk.title}
               </h3>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-600 text-[10px] font-mono font-bold tracking-tight">
-                <Coins className="w-3 h-3 text-emerald-500" />
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-600 text-xs font-mono font-semibold tracking-tight">
+                <Coins className="w-3.5 h-3.5 text-emerald-500" />
                 {t.risk.microBadge || 'Mulai dari $1'}
               </span>
             </div>
-            <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{t.risk.subtitle}</p>
+            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{t.risk.subtitle}</p>
           </div>
         </div>
 
@@ -559,8 +559,8 @@ Generated  : ${new Date().toLocaleString()}`;
             <div className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-xs ${
               isDark ? 'bg-[#0b0f19] border-emerald-500/30 text-emerald-300' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
             }`}>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="text-[10px] text-slate-400 font-semibold">{lang === 'id' ? 'Live:' : 'Live:'}</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span className="text-xs text-slate-400 font-semibold">{lang === 'id' ? 'Live:' : 'Live:'}</span>
               <span className="font-bold font-mono">${formatCryptoPrice(currentPrice)}</span>
             </div>
           )}
@@ -570,7 +570,7 @@ Generated  : ${new Date().toLocaleString()}`;
           }`}>
             <span>{t.risk.rrrBadge}</span>
             <span className={`text-sm font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{currentRRR}:1</span>
-            <span className={`text-[10px] ${currentRRR >= 2 ? 'text-emerald-500' : 'text-amber-500'}`}>
+            <span className={`text-xs ${currentRRR >= 2 ? 'text-emerald-500' : 'text-amber-500'}`}>
               {currentRRR >= 2 ? t.risk.favorable : t.risk.suboptimal}
             </span>
           </div>
@@ -611,9 +611,9 @@ Generated  : ${new Date().toLocaleString()}`;
             <button
               type="button"
               onClick={() => handleDirectionSwitch('LONG')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-semibold transition-colors cursor-pointer ${
                 isLong
-                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30'
+                  ? 'bg-emerald-600 text-white'
                   : 'text-slate-400 hover:text-emerald-400'
               }`}
             >
@@ -624,9 +624,9 @@ Generated  : ${new Date().toLocaleString()}`;
             <button
               type="button"
               onClick={() => handleDirectionSwitch('SHORT')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-semibold transition-colors cursor-pointer ${
                 !isLong
-                  ? 'bg-rose-500 text-slate-950 shadow-md shadow-rose-500/30'
+                  ? 'bg-rose-600 text-white'
                   : 'text-slate-400 hover:text-rose-400'
               }`}
             >
@@ -706,14 +706,14 @@ Generated  : ${new Date().toLocaleString()}`;
           </div>
 
           {/* Category Filter Tabs */}
-          <div className="flex items-center flex-wrap gap-1 p-1 bg-[#090d16] rounded-lg border border-[#1e293b] text-[11px] font-mono">
+          <div className="flex items-center flex-wrap gap-1 p-1 bg-[#090d16] rounded-lg border border-[#1e293b] text-xs font-mono">
             <button
               type="button"
               onClick={() => setStrategyCategoryFilter('ALL')}
-              className={`px-2 py-1 rounded transition cursor-pointer ${
+              className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
                 strategyCategoryFilter === 'ALL'
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-slate-700 text-white font-semibold'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               {lang === 'id' ? 'Semua' : 'All'}
@@ -721,10 +721,10 @@ Generated  : ${new Date().toLocaleString()}`;
             <button
               type="button"
               onClick={() => setStrategyCategoryFilter('SMC_ICT')}
-              className={`px-2 py-1 rounded transition cursor-pointer ${
+              className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
                 strategyCategoryFilter === 'SMC_ICT'
-                  ? 'bg-purple-500 text-white font-bold shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-purple-950/70 text-purple-200 font-semibold border border-purple-500/50'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               {t.risk.catSmcIct}
@@ -732,10 +732,10 @@ Generated  : ${new Date().toLocaleString()}`;
             <button
               type="button"
               onClick={() => setStrategyCategoryFilter('TREND_MOMENTUM')}
-              className={`px-2 py-1 rounded transition cursor-pointer ${
+              className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
                 strategyCategoryFilter === 'TREND_MOMENTUM'
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-cyan-950/70 text-cyan-200 font-semibold border border-cyan-500/50'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               {t.risk.catTrend}
@@ -743,10 +743,10 @@ Generated  : ${new Date().toLocaleString()}`;
             <button
               type="button"
               onClick={() => setStrategyCategoryFilter('BREAKOUT_RANGE')}
-              className={`px-2 py-1 rounded transition cursor-pointer ${
+              className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
                 strategyCategoryFilter === 'BREAKOUT_RANGE'
-                  ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-amber-950/70 text-amber-200 font-semibold border border-amber-500/50'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               {t.risk.catRange}
@@ -971,15 +971,15 @@ Generated  : ${new Date().toLocaleString()}`;
 
             {/* Quick Presets Starting from $1 */}
             <div className="flex flex-wrap items-center gap-1.5 mt-2.5 pt-2 border-t border-[#1e293b]/70">
-              <span className="text-[10px] font-mono text-slate-400">{t.risk.presetsTitle || 'Preset'}:</span>
+              <span className="text-xs font-mono text-slate-400">{t.risk.presetsTitle || 'Preset'}:</span>
               {CAPITAL_PRESETS.map((preset) => (
                 <button
                   key={preset}
                   type="button"
                   onClick={() => setBalance(preset)}
-                  className={`px-2 py-0.5 rounded text-[11px] font-mono transition-all cursor-pointer ${
+                  className={`px-2 py-0.5 rounded text-xs font-mono transition-colors cursor-pointer ${
                     balance === preset
-                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm shadow-cyan-500/30 ring-1 ring-cyan-400'
+                      ? 'bg-cyan-950/80 text-cyan-200 font-semibold border border-cyan-500/60'
                       : 'bg-[#0f172a] border border-[#1e293b] text-slate-300 hover:border-cyan-500/50 hover:text-white'
                   }`}
                 >
@@ -1010,15 +1010,15 @@ Generated  : ${new Date().toLocaleString()}`;
             />
             {/* Quick Risk Presets */}
             <div className="flex flex-wrap items-center gap-1.5 mt-2 pt-1.5 border-t border-[#1e293b]/70">
-              <span className="text-[10px] font-mono text-slate-400">Risk %:</span>
+              <span className="text-xs font-mono text-slate-400">Risk %:</span>
               {RISK_PRESETS.map((preset) => (
                 <button
                   key={preset}
                   type="button"
                   onClick={() => setRiskPct(preset)}
-                  className={`px-2 py-0.5 rounded text-[11px] font-mono transition-all cursor-pointer ${
+                  className={`px-2 py-0.5 rounded text-xs font-mono transition-colors cursor-pointer ${
                     riskPct === preset
-                      ? 'bg-amber-500 text-slate-950 font-bold shadow-sm shadow-amber-500/30'
+                      ? 'bg-amber-950/80 text-amber-200 font-semibold border border-amber-500/60'
                       : 'bg-[#0f172a] border border-[#1e293b] text-slate-300 hover:border-amber-500/50 hover:text-white'
                   }`}
                 >
@@ -1036,7 +1036,7 @@ Generated  : ${new Date().toLocaleString()}`;
                 <span>{t.risk.leverage}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${leverageTier.bg} ${leverageTier.color}`}>
+                <span className={`px-2 py-0.5 rounded text-xs font-bold border ${leverageTier.bg} ${leverageTier.color}`}>
                   {leverageTier.label}
                 </span>
                 <span className="text-amber-300 font-extrabold text-sm">
@@ -1059,15 +1059,15 @@ Generated  : ${new Date().toLocaleString()}`;
 
             {/* Quick Leverage Presets */}
             <div className="flex flex-wrap items-center gap-1 mt-2 pt-1.5 border-t border-[#1e293b]/70">
-              <span className="text-[10px] font-mono text-slate-400">Lev:</span>
+              <span className="text-xs font-mono text-slate-400">Lev:</span>
               {LEVERAGE_PRESETS.map((lev) => (
                 <button
                   key={lev}
                   type="button"
                   onClick={() => setCustomLeverage(lev)}
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-mono transition-all cursor-pointer ${
+                  className={`px-1.5 py-0.5 rounded text-xs font-mono transition-colors cursor-pointer ${
                     customLeverage === lev
-                      ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
+                      ? 'bg-amber-950/80 text-amber-200 font-semibold border border-amber-500/60'
                       : 'bg-[#0f172a] border border-[#1e293b] text-slate-300 hover:text-white hover:border-amber-400'
                   }`}
                 >
@@ -1099,10 +1099,10 @@ Generated  : ${new Date().toLocaleString()}`;
                   role="tab"
                   aria-selected={entryMode === 'SINGLE'}
                   onClick={() => setEntryMode('SINGLE')}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                     entryMode === 'SINGLE'
-                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-slate-700 text-white font-semibold'
+                      : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
                   {t.risk.singleEntry}
@@ -1112,10 +1112,10 @@ Generated  : ${new Date().toLocaleString()}`;
                   role="tab"
                   aria-selected={entryMode === 'DCA_LADDER'}
                   onClick={() => setEntryMode('DCA_LADDER')}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1 ${
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer flex items-center gap-1 ${
                     entryMode === 'DCA_LADDER'
-                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-slate-700 text-white font-semibold'
+                      : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
                   <Layers className="w-3 h-3" />
@@ -1126,10 +1126,10 @@ Generated  : ${new Date().toLocaleString()}`;
                   role="tab"
                   aria-selected={entryMode === 'BREAKOUT_TRIGGER'}
                   onClick={() => setEntryMode('BREAKOUT_TRIGGER')}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1 ${
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer flex items-center gap-1 ${
                     entryMode === 'BREAKOUT_TRIGGER'
-                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-slate-700 text-white font-semibold'
+                      : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
                   <Zap className="w-3 h-3" />

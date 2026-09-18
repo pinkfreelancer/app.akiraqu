@@ -248,20 +248,20 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="chart-toggle-avwap"
             type="button"
             onClick={() => setShowAVWAP(!showAVWAP)}
-            className={`px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer border min-h-[30px] flex items-center gap-1 ${
-              showAVWAP ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' : 'text-slate-500 border-transparent hover:text-slate-300'
+            className={`px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer border min-h-[30px] flex items-center gap-1 ${
+              showAVWAP ? 'bg-indigo-950/60 text-indigo-300 border-indigo-500/50' : 'text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
             title="Anchored VWAP (Daily Session, Swing High, Swing Low)"
           >
-            <Waves className="w-3 h-3 text-indigo-400" />
+            <Waves className="w-3.5 h-3.5 text-indigo-400" />
             <span>AVWAP</span>
           </button>
           <button
             id="chart-toggle-smc"
             type="button"
             onClick={() => setShowSMC(!showSMC)}
-            className={`px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer border min-h-[30px] ${
-              showSMC ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'text-slate-500 border-transparent hover:text-slate-300'
+            className={`px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer border min-h-[30px] ${
+              showSMC ? 'bg-amber-950/60 text-amber-300 border-amber-500/50' : 'text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
           >
             SMC / OB
@@ -270,8 +270,8 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="chart-toggle-fib"
             type="button"
             onClick={() => setShowFib(!showFib)}
-            className={`px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer border min-h-[30px] ${
-              showFib ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'text-slate-500 border-transparent hover:text-slate-300'
+            className={`px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer border min-h-[30px] ${
+              showFib ? 'bg-sky-950/60 text-sky-300 border-sky-500/50' : 'text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
           >
             Fib GP
@@ -280,8 +280,8 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="chart-toggle-sr"
             type="button"
             onClick={() => setShowSR(!showSR)}
-            className={`px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer border min-h-[30px] ${
-              showSR ? 'bg-blue-500/20 text-blue-300 border-blue-500/40' : 'text-slate-500 border-transparent hover:text-slate-300'
+            className={`px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer border min-h-[30px] ${
+              showSR ? 'bg-blue-950/60 text-blue-300 border-blue-500/50' : 'text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
           >
             S/R
@@ -290,14 +290,14 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="chart-toggle-liq-heatmap"
             type="button"
             onClick={() => setShowLiqHeatmap(!showLiqHeatmap)}
-            className={`px-2 py-1 rounded text-[11px] font-medium transition-all cursor-pointer border flex items-center gap-1 min-h-[30px] ${
+            className={`px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer border flex items-center gap-1 min-h-[30px] ${
               showLiqHeatmap
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-xs'
-                : 'text-slate-500 border-transparent hover:text-slate-300'
+                ? 'bg-amber-950/60 text-amber-300 border-amber-500/50'
+                : 'text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
             title={lang === 'id' ? 'Tampilkan Heatmap Klaster Likuidasi' : 'Toggle Liquidation Heatmap Overlay'}
           >
-            <Flame className="w-3 h-3 text-amber-400" />
+            <Flame className="w-3.5 h-3.5 text-amber-400" />
             <span>Liq Heatmap</span>
           </button>
 
@@ -306,10 +306,10 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="btn-chart-maximize"
             type="button"
             onClick={() => setIsChartFullscreen(!isChartFullscreen)}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium transition-all cursor-pointer border min-h-[30px] ${
+            className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors cursor-pointer border min-h-[30px] ${
               isChartFullscreen
-                ? 'bg-cyan-500 text-slate-950 font-bold border-cyan-400'
-                : 'text-slate-400 hover:text-white bg-slate-800/80 border-slate-700 hover:border-cyan-500/40'
+                ? 'bg-slate-700 text-white font-semibold border-slate-500'
+                : 'text-slate-300 hover:text-white bg-slate-800/80 border-slate-700 hover:border-slate-500'
             }`}
             title={isChartFullscreen ? (lang === 'id' ? 'Kecilkan Grafik (ESC)' : 'Exit Fullscreen Chart (ESC)') : (lang === 'id' ? 'Maksimalkan Grafik Layar Penuh' : 'Maximize Chart View')}
           >
@@ -891,14 +891,14 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
       )}
 
       {/* Footer Notes */}
-      <div className="flex items-center justify-between pt-2 border-t border-[#1e293b]/60 text-[11px] text-slate-500 font-mono">
+      <div className="flex items-center justify-between pt-2 border-t border-[#1e293b]/60 text-xs text-slate-400 font-mono">
         <span>
           {lang === 'id'
             ? `Menampilkan ${candles.length} periode • Sumber: Umpan Bursa Langsung (Binance) + Cache Algoritma`
             : `Displaying ${candles.length} periods • Source: Live Exchange Feed + Algo Cache`}
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
           {lang === 'id' ? 'Garis Silang Interaktif Aktif' : 'Interactive Crosshair Active'}
         </span>
       </div>
