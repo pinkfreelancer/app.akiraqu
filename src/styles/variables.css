@@ -1,0 +1,16 @@
+/* Terminal CSS Variables and Color Token Definitions */
+:root {
+  --terminal-bg-dark: #090d16;
+  --terminal-surface-dark: #0b0f19;
+  --terminal-card-dark: #0f172a;
+  --terminal-border-dark: #1e293b;
+  --terminal-cyan-dark: #22d3ee;
+
+  --terminal-bg-light: #f8fafc;
+  --terminal-surface-light: #ffffff;
+  --terminal-card-light: #ffffff;
+  --terminal-border-light: #e2e8f0;
+  --terminal-cyan-light: #0e7490;
+
+  --font-mono-numbers: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}

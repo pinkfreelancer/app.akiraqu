@@ -1,0 +1,49 @@
+[
+  {
+    "endpoint": "/api/v1/analyze",
+    "method": "POST",
+    "description": "Trigger confluence analysis engine for selected crypto symbol and timeframe",
+    "auth_required": false,
+    "request_payload": {
+      "symbol": "BTC/USDT",
+      "timeframe": "1h",
+      "idempotencyKey": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+      "useAI": true
+    },
+    "response_payload": {
+      "status": "success",
+      "data": {
+        "symbol": "BTC/USDT",
+        "timeframe": "1h",
+        "score": 85,
+        "bias": "Strong Bullish",
+        "indicators": {},
+        "riskPlan": {},
+        "narrative": ""
+      }
+    },
+    "status_codes": [
+      { "code": 200, "condition": "Analysis evaluated successfully" },
+      { "code": 400, "condition": "Invalid input format (schema validation failed)" },
+      { "code": 429, "condition": "Rate limit exceeded" }
+    ]
+  },
+  {
+    "endpoint": "/api/v1/health",
+    "method": "GET",
+    "description": "System health, uptime, and latency status",
+    "auth_required": false,
+    "response_payload": {
+      "status": "ok",
+      "uptime": 142.5,
+      "latency": 4.2,
+      "timestamp": "2026-09-06T12:00:00.000Z"
+    }
+  },
+  {
+    "endpoint": "/api/v1/symbols",
+    "method": "GET",
+    "description": "Curated list of crypto tickers with market stats and 24h volume",
+    "auth_required": false
+  }
+]

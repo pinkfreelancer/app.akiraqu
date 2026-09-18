@@ -1,0 +1,9 @@
+# .cursorrules for NexusTrade AI: Multi-Indicator Institutional Crypto Analyzer
+# Senior AI Architect Guidelines
+
+- Prefer TypeScript strict mode with zero any types.
+- Follow Clean Architecture: separate domain entities, use-cases, and UI controllers.
+- Enforce dual-output pattern (Human-readable Markdown + Machine-readable JSON).
+- Use Tailwind CSS v4 utility classes exclusively with responsive prefixes.
+- Follow UX DNA: strictly implement User Journey flows and Information Architecture defined in Stage 2.
+- Keep components modular (< 250 lines) with extracted helper types in /src/types.

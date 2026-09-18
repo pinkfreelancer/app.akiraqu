@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AKIRA.QU - Quantitative Crypto Intelligence &amp; Trading Hub</title>
+    <meta name="description" content="AKIRA.QU - Next-Gen Quantitative Crypto Intelligence &amp; Trading Hub" />
+    <meta property="og:title" content="AKIRA.QU - Quantitative Crypto Intelligence &amp; Trading Hub" />
+    <meta property="og:description" content="AKIRA.QU - Next-Gen Quantitative Crypto Intelligence &amp; Trading Hub" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+      // Protect against wallet browser extensions throwing "Cannot redefine property: ethereum"
+      (function() {
+        try {
+          var originalDefineProperty = Object.defineProperty;
+          Object.defineProperty = function(obj, prop, descriptor) {
+            if (obj === window && prop === 'ethereum') {
+              try {
+                return originalDefineProperty.call(Object, obj, prop, Object.assign({}, descriptor, { configurable: true }));
+              } catch (_err) {
+                return obj;
+              }
+            }
+            return originalDefineProperty.call(Object, obj, prop, descriptor);
+          };
+        } catch (_e) {}
+
+        window.addEventListener('error', function(event) {
+          if (event && event.message && event.message.includes('ethereum')) {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+          }
+        }, true);
+      })();
+    </script>
+  </head>
+  <body class="bg-[#090d16] text-[#f8fafc] antialiased selection:bg-cyan-500/20 selection:text-cyan-300">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

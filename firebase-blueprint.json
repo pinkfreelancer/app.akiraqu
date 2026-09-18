@@ -1,0 +1,29 @@
+{
+  "entities": {
+    "User": {
+      "fields": {
+        "uid": { "type": "string", "description": "Unique Google user ID" },
+        "email": { "type": "string", "description": "User Gmail address" },
+        "displayName": { "type": "string", "description": "User Google display name" },
+        "photoURL": { "type": "string", "description": "User profile picture URL" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of account creation" },
+        "lastLoginAt": { "type": "string", "description": "ISO timestamp of last sign in" },
+        "preferences": { "type": "object", "description": "User preferences like theme, language, default pair" }
+      },
+      "rules": "read, write: if request.auth != null && request.auth.uid == uid;"
+    },
+    "TradingJournal": {
+      "fields": {
+        "userId": { "type": "string", "description": "Owner user ID" },
+        "pair": { "type": "string", "description": "Crypto symbol traded (e.g. BTC/USDT)" },
+        "type": { "type": "string", "description": "LONG or SHORT" },
+        "entryPrice": { "type": "number", "description": "Entry execution price" },
+        "exitPrice": { "type": "number", "description": "Exit price" },
+        "pnl": { "type": "number", "description": "Realized profit or loss in USD" },
+        "notes": { "type": "string", "description": "Strategy analysis and review" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      },
+      "rules": "read, write: if request.auth != null && request.auth.uid == userId;"
+    }
+  }
+}
