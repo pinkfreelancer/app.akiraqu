@@ -11,8 +11,10 @@ import {
   LiveTradeTick,
   LiveOrderBookLevel,
   StageId,
+  TradingPersona,
 } from '../types/crypto.types';
 import { Language, getTranslation, Translations } from '../i18n/translations';
+import { EngineThemeId, normalizeEngineTheme, isDarkEngineTheme, applyThemeToDocument } from '../types/theme.types';
 import { useTerminalSystem, TerminalHealthStatus } from '../hooks/useTerminalSystem';
 import { useAnalysisEngine } from '../hooks/useAnalysisEngine';
 import { useMarketData } from '../hooks/useMarketData';
@@ -31,15 +33,38 @@ export interface TerminalContextValue {
   selectStage: (stage: StageId) => void;
   openBacktest: (indicatorKey?: IndicatorKey) => void;
 
+  // Account & Execution Environment Domain (Global Account Switcher)
+  accountMode: 'DEMO' | 'REAL';
+  setAccountMode: (mode: 'DEMO' | 'REAL') => void;
+  toggleAccountMode: () => void;
+  demoBalance: number;
+  setDemoBalance: React.Dispatch<React.SetStateAction<number>>;
+
+  // Focus Mode & Grid Customization Domain
+  focusedFrame: string | null;
+  setFocusedFrame: (frameId: string | null) => void;
+  visibleFrames: Record<string, boolean>;
+  toggleFrameVisibility: (frameKey: string) => void;
+  resetFrameVisibility: () => void;
+
   // Localization & Theming Domain
   lang: Language;
   toggleLang: (newLang: Language) => void;
-  theme: 'light' | 'dark';
+  theme: EngineThemeId;
+  setEngineTheme: (theme: EngineThemeId, customColor?: string) => void;
+  customThemeColor: string;
+  setCustomThemeColor: (color: string) => void;
   toggleTheme: () => void;
   isDark: boolean;
   t: Translations;
 
   // Display & Ergonomics Domain
+  persona: TradingPersona;
+  setPersona: (p: TradingPersona) => void;
+  privacyBlurActive: boolean;
+  togglePrivacyBlur: () => void;
+  isAkiraDrawerOpen: boolean;
+  setIsAkiraDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
   workspaceMode: 'classic' | 'launchpad';
   toggleWorkspaceMode: () => void;
   setWorkspaceModeDirect: (mode: 'classic' | 'launchpad') => void;
@@ -97,27 +122,6 @@ export interface TerminalContextValue {
 const TerminalContext = createContext<TerminalContextValue | null>(null);
 
 export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Theme state
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    return (localStorage.getItem('nexus_theme') as 'light' | 'dark') || 'dark';
-  });
-
-  const isDark = theme === 'dark';
-
-  // Language state
-  const [lang, setLang] = useState<Language>('id');
-  const t = useMemo(() => getTranslation(lang), [lang]);
-
-  // System hook (health status, symbols list, fullscreen, fullwidth)
-  const {
-    symbols,
-    healthStatus,
-    isFullscreen,
-    toggleFullscreen,
-    isFullWidth,
-    toggleFullWidth,
-  } = useTerminalSystem();
-
   // Navigation hook
   const {
     viewMode,
@@ -128,46 +132,177 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     navigateToTerminal,
     selectStage,
     openBacktest,
-  } = useTerminalNavigation();
+  } = useTerminalNavigation('ticker');
 
-  // Trading parameters state
+  // Localization state
+  const [lang, setLang] = useState<Language>(() => {
+    const saved = localStorage.getItem('nexus_lang') as Language | null;
+    return saved === 'en' || saved === 'id' ? saved : 'id';
+  });
+  const t = useMemo(() => getTranslation(lang), [lang]);
+
+  // Terminal System
+  const {
+    symbols,
+    setSymbols,
+    healthStatus,
+    isFullscreen,
+    toggleFullscreen,
+    isFullWidth,
+    toggleFullWidth,
+  } = useTerminalSystem();
+
+  // Workspace Mode
+  const [workspaceMode, setWorkspaceMode] = useState<'classic' | 'launchpad'>(() => {
+    const saved = localStorage.getItem('nexus_workspace_mode') as 'classic' | 'launchpad' | null;
+    return saved === 'launchpad' ? 'launchpad' : 'classic';
+  });
+
+  // Global Account Switcher State (Demo Sandbox vs Real Live Account)
+  const [accountMode, setAccountModeState] = useState<'DEMO' | 'REAL'>(() => {
+    const saved = localStorage.getItem('akira_account_mode') as 'DEMO' | 'REAL' | null;
+    return saved === 'REAL' ? 'REAL' : 'DEMO';
+  });
+
+  const [demoBalance, setDemoBalance] = useState<number>(() => {
+    const saved = localStorage.getItem('akira_demo_balance');
+    return saved ? parseFloat(saved) : 100000.0;
+  });
+
+  const setAccountMode = useCallback((mode: 'DEMO' | 'REAL') => {
+    setAccountModeState(mode);
+    localStorage.setItem('akira_account_mode', mode);
+  }, []);
+
+  const toggleAccountMode = useCallback(() => {
+    setAccountModeState((prev) => {
+      const next = prev === 'DEMO' ? 'REAL' : 'DEMO';
+      localStorage.setItem('akira_account_mode', next);
+      return next;
+    });
+  }, []);
+
+  // Trading Persona State ('basic' | 'pro' | 'whales')
+  const [persona, setPersonaState] = useState<TradingPersona>(() => {
+    const saved = localStorage.getItem('akira_trading_persona') as TradingPersona | null;
+    return saved === 'basic' || saved === 'pro' || saved === 'whales' ? saved : 'pro';
+  });
+
+  const setPersona = useCallback((p: TradingPersona) => {
+    setPersonaState(p);
+    localStorage.setItem('akira_trading_persona', p);
+  }, []);
+
+  // Privacy Blur State (hides/blurs sensitive financial balances)
+  const [privacyBlurActive, setPrivacyBlurActive] = useState<boolean>(() => {
+    return localStorage.getItem('akira_privacy_blur') === 'true';
+  });
+
+  const togglePrivacyBlur = useCallback(() => {
+    setPrivacyBlurActive((prev) => {
+      const next = !prev;
+      localStorage.setItem('akira_privacy_blur', String(next));
+      return next;
+    });
+  }, []);
+
+  // Akira AI Insights Drawer State
+  const [isAkiraDrawerOpen, setIsAkiraDrawerOpen] = useState(false);
+
+  // Focus Mode & Grid Customization State
+  const [focusedFrame, setFocusedFrame] = useState<string | null>(null);
+  const [visibleFrames, setVisibleFrames] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('akira_visible_frames');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // ignore
+    }
+    return {
+      chart: true,
+      orderbook: true,
+      mmbot: true,
+      playbook: true,
+      liquidation: true,
+    };
+  });
+
+  const toggleFrameVisibility = useCallback((frameKey: string) => {
+    setVisibleFrames((prev) => {
+      const next = { ...prev, [frameKey]: !prev[frameKey] };
+      localStorage.setItem('akira_visible_frames', JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const resetFrameVisibility = useCallback(() => {
+    const defaultFrames = {
+      chart: true,
+      orderbook: true,
+      mmbot: true,
+      playbook: true,
+      liquidation: true,
+    };
+    setVisibleFrames(defaultFrames);
+    localStorage.setItem('akira_visible_frames', JSON.stringify(defaultFrames));
+  }, []);
+
+  // Trading parameters
   const [selectedSymbol, setSelectedSymbol] = useState<string>('BTC/USDT');
   const [selectedTimeframe, setSelectedTimeframe] = useState<Timeframe>('1H');
   const [selectedExchange, setSelectedExchange] = useState<SupportedExchange>(() => {
-    return (localStorage.getItem('nexus_exchange') as SupportedExchange) || 'BINANCE';
+    const saved = localStorage.getItem('nexus_exchange') as SupportedExchange | null;
+    return saved === 'BINANCE' || saved === 'BYBIT' || saved === 'OKX' ? saved : 'BINANCE';
   });
   const [selectedMarketType, setSelectedMarketType] = useState<MarketType>(() => {
-    return (localStorage.getItem('nexus_market_type') as MarketType) || 'SPOT';
+    const saved = localStorage.getItem('nexus_market_type') as MarketType | null;
+    return saved === 'SPOT' || saved === 'FUTURES' ? saved : 'SPOT';
   });
 
-  // Workspace Mode (Classic vs Launchpad)
-  const [workspaceMode, setWorkspaceMode] = useState<'classic' | 'launchpad'>(() => {
-    const saved = localStorage.getItem('nexus_workspace_mode');
-    return saved === 'launchpad' || saved === 'classic' ? saved : 'launchpad';
-  });
-
-  // Modal dialog states
+  // Modals state
   const [isCommandBarOpen, setIsCommandBarOpen] = useState(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isAssuranceModalOpen, setIsAssuranceModalOpen] = useState(false);
 
-  // Sync theme to DOM & localStorage
-  useEffect(() => {
-    localStorage.setItem('nexus_theme', theme);
-    const root = window.document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-      root.classList.remove('light');
-    } else {
-      root.classList.add('light');
-      root.classList.remove('dark');
+  // Theme state supporting 4 visual engines
+  const [theme, setThemeState] = useState<EngineThemeId>(() => {
+    const saved = localStorage.getItem('akira_theme_engine') || localStorage.getItem('nexus_theme');
+    return normalizeEngineTheme(saved);
+  });
+
+  const [customThemeColor, setCustomThemeColorState] = useState<string>(() => {
+    return localStorage.getItem('akira_custom_theme_color') || '#F89DB5';
+  });
+
+  const isDark = isDarkEngineTheme(theme);
+
+  const setEngineTheme = useCallback((newTheme: EngineThemeId, customColor?: string) => {
+    const normalized = normalizeEngineTheme(newTheme);
+    setThemeState(normalized);
+    localStorage.setItem('akira_theme_engine', normalized);
+    localStorage.setItem('nexus_theme', isDarkEngineTheme(normalized) ? 'dark' : 'light');
+
+    if (customColor) {
+      setCustomThemeColorState(customColor);
+      localStorage.setItem('akira_custom_theme_color', customColor);
     }
-  }, [theme]);
+  }, []);
+
+  const setCustomThemeColor = useCallback((color: string) => {
+    setCustomThemeColorState(color);
+    localStorage.setItem('akira_custom_theme_color', color);
+    applyThemeToDocument('custom', color);
+  }, []);
 
   const toggleTheme = useCallback(() => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-  }, []);
+    setEngineTheme(isDark ? 'modern-pink-light' : 'cyber-pink-dark');
+  }, [isDark, setEngineTheme]);
+
+  // Sync theme to DOM & localStorage
+  useEffect(() => {
+    applyThemeToDocument(theme, customThemeColor);
+  }, [theme, customThemeColor]);
 
   const toggleWorkspaceMode = useCallback(() => {
     setWorkspaceMode((prev) => {
@@ -391,9 +526,33 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     lang,
     toggleLang,
     theme,
+    setEngineTheme,
+    customThemeColor,
+    setCustomThemeColor,
     toggleTheme,
     isDark,
     t,
+
+    // Account & Execution Environment Domain
+    accountMode,
+    setAccountMode,
+    toggleAccountMode,
+    demoBalance,
+    setDemoBalance,
+
+    // Focus Mode & Grid Customization Domain
+    focusedFrame,
+    setFocusedFrame,
+    visibleFrames,
+    toggleFrameVisibility,
+    resetFrameVisibility,
+
+    persona,
+    setPersona,
+    privacyBlurActive,
+    togglePrivacyBlur,
+    isAkiraDrawerOpen,
+    setIsAkiraDrawerOpen,
 
     workspaceMode,
     toggleWorkspaceMode,
@@ -455,9 +614,26 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     lang,
     toggleLang,
     theme,
+    setEngineTheme,
+    customThemeColor,
+    setCustomThemeColor,
     toggleTheme,
     isDark,
     t,
+    accountMode,
+    setAccountMode,
+    toggleAccountMode,
+    demoBalance,
+    focusedFrame,
+    visibleFrames,
+    toggleFrameVisibility,
+    resetFrameVisibility,
+    persona,
+    setPersona,
+    privacyBlurActive,
+    togglePrivacyBlur,
+    isAkiraDrawerOpen,
+    setIsAkiraDrawerOpen,
     workspaceMode,
     toggleWorkspaceMode,
     setWorkspaceModeDirect,

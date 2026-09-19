@@ -27,6 +27,7 @@ export type NavCategory = 'ALL' | 'MARKET' | 'ANALYSIS' | 'EXECUTION';
 
 export type SupportedExchange = 'BINANCE' | 'OKX' | 'BYBIT' | 'KUCOIN' | 'BITGET' | 'CRYPTO_COM' | 'BITUNIX';
 export type MarketType = 'SPOT' | 'FUTURES';
+export type TradingPersona = 'basic' | 'pro' | 'whales';
 
 export interface ExchangeOptionInfo {
   id: SupportedExchange;

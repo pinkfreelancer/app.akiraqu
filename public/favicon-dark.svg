@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
+  <!-- Dark Mode Squircle Favicon: Charcoal Background with Soft Pastel Pink Symbol -->
+  <rect width="256" height="256" rx="58" fill="#1F2127" />
+  <circle cx="128" cy="124" r="58" fill="none" stroke="#F89DB5" stroke-width="15" />
+  <path d="M 58 176 L 104 110 L 146 152 L 192 86" fill="none" stroke="#F89DB5" stroke-width="15" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="3" />
+  <polygon points="218,60 178,72 206,100" fill="#F89DB5" />
+</svg>

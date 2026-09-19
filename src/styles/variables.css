@@ -1,17 +1,246 @@
-/* Terminal CSS Variables and Color Token Definitions - Calm Technical Theme */
+/* ========================================================================= */
+/* AKIRA.QU TERMINAL ENGINE THEME VARIABLES & COLOR TOKENS                    */
+/* 1. Light (Slate 50) | 2. Dark (Deep Navy 950) | 3. Terminal | 4. Custom   */
+/* ========================================================================= */
+
 :root {
-  --terminal-bg-dark: #070b14;
-  --terminal-surface-dark: #0b1120;
-  --terminal-card-dark: #0f172a;
-  --terminal-border-dark: #1e293b;
-  --terminal-cyan-dark: #38bdf8;
-
-  --terminal-bg-light: #f8fafc;
-  --terminal-surface-light: #ffffff;
-  --terminal-card-light: #ffffff;
-  --terminal-border-light: #e2e8f0;
-  --terminal-cyan-light: #0284c7;
-
   --font-mono-numbers: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Default theme values (Deep Navy with Soft Pink Glow) */
+  --bg-color: #0B0F19;
+  --surface-color: #1E293B;
+  --card-color: #1E293B;
+  --border-color: #334155;
+  --accent-color: #EC4899;
+  --accent-rgb: 236, 72, 153;
+  --accent-hover: #f472b6;
+  --accent-subtle: rgba(236, 72, 153, 0.14);
+  --accent-border: rgba(236, 72, 153, 0.38);
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-accent: #EC4899;
 }
 
+/* ========================================================================= */
+/* 1. LIGHT THEME (#F8FAFC, #FFFFFF, #E2E8F0, #F472B6 Soft Pink)            */
+/* ========================================================================= */
+[data-theme="modern-pink-light"],
+[data-theme="theme-light"],
+[data-theme="light"],
+html.theme-modern-pink-light,
+html.theme-light {
+  --bg-color: #F8FAFC;
+  --surface-color: #FFFFFF;
+  --card-color: #FFFFFF;
+  --border-color: #E2E8F0;
+  --accent-color: #F472B6;
+  --accent-rgb: 244, 114, 182;
+  --accent-hover: #ec4899;
+  --accent-subtle: rgba(244, 114, 182, 0.12);
+  --accent-border: rgba(244, 114, 182, 0.35);
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+  --text-accent: #F472B6;
+  color-scheme: light;
+}
+
+[data-theme="modern-pink-light"] body,
+[data-theme="theme-light"] body,
+[data-theme="light"] body {
+  background-color: #F8FAFC;
+  color: #0F172A;
+}
+
+/* Accent Mapping for Light Theme */
+[data-theme="modern-pink-light"] .text-cyan-300,
+[data-theme="modern-pink-light"] .text-cyan-400,
+[data-theme="modern-pink-light"] .text-cyan-500,
+[data-theme="theme-light"] .text-cyan-300,
+[data-theme="theme-light"] .text-cyan-400,
+[data-theme="theme-light"] .text-cyan-500 {
+  color: #F472B6 !important;
+}
+
+[data-theme="modern-pink-light"] .border-cyan-400,
+[data-theme="modern-pink-light"] .border-cyan-500,
+[data-theme="modern-pink-light"] .border-cyan-500\/40,
+[data-theme="theme-light"] .border-cyan-400,
+[data-theme="theme-light"] .border-cyan-500 {
+  border-color: rgba(244, 114, 182, 0.35) !important;
+}
+
+[data-theme="modern-pink-light"] .bg-cyan-500,
+[data-theme="theme-light"] .bg-cyan-500 {
+  background-color: #F472B6 !important;
+  color: #FFFFFF !important;
+}
+
+/* ========================================================================= */
+/* 2. DARK THEME (#0B0F19 Deep Navy, #1E293B Glass Surface, #EC4899 Glow)   */
+/* ========================================================================= */
+[data-theme="cyber-pink-dark"],
+[data-theme="theme-dark"],
+[data-theme="dark"],
+html.theme-cyber-pink-dark,
+html.theme-dark {
+  --bg-color: #0B0F19;
+  --surface-color: #1E293B;
+  --card-color: #1E293B;
+  --border-color: #334155;
+  --accent-color: #EC4899;
+  --accent-rgb: 236, 72, 153;
+  --accent-hover: #f472b6;
+  --accent-subtle: rgba(236, 72, 153, 0.14);
+  --accent-border: rgba(236, 72, 153, 0.38);
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-accent: #EC4899;
+  color-scheme: dark;
+}
+
+[data-theme="cyber-pink-dark"] body,
+[data-theme="theme-dark"] body,
+[data-theme="dark"] body {
+  background-color: #0B0F19;
+  color: #F8FAFC;
+}
+
+/* Glassmorphism Surface effect in Dark mode */
+[data-theme="cyber-pink-dark"] .theme-card,
+[data-theme="theme-dark"] .theme-card {
+  background-color: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(51, 65, 85, 0.8);
+}
+
+/* Accent Mapping for Dark Theme */
+[data-theme="cyber-pink-dark"] .text-cyan-300,
+[data-theme="cyber-pink-dark"] .text-cyan-400,
+[data-theme="cyber-pink-dark"] .text-cyan-500,
+[data-theme="theme-dark"] .text-cyan-300,
+[data-theme="theme-dark"] .text-cyan-400,
+[data-theme="theme-dark"] .text-cyan-500 {
+  color: #F89DB5 !important;
+}
+
+[data-theme="cyber-pink-dark"] .border-cyan-400,
+[data-theme="cyber-pink-dark"] .border-cyan-500,
+[data-theme="theme-dark"] .border-cyan-400,
+[data-theme="theme-dark"] .border-cyan-500 {
+  border-color: rgba(248, 157, 181, 0.38) !important;
+}
+
+[data-theme="cyber-pink-dark"] .bg-cyan-500,
+[data-theme="theme-dark"] .bg-cyan-500 {
+  background-color: #EC4899 !important;
+  color: #FFFFFF !important;
+}
+
+/* ========================================================================= */
+/* 3. TERMINAL THEME (#030712 Pitch Black, #FF007A Cyber Pink, JetBrains)   */
+/* ========================================================================= */
+[data-theme="classic-terminal"],
+[data-theme="theme-terminal"],
+[data-theme="terminal"],
+html.theme-classic-terminal,
+html.theme-terminal {
+  --bg-color: #030712;
+  --surface-color: #0B0F19;
+  --card-color: #0B0F19;
+  --border-color: #1E293B;
+  --accent-color: #FF007A;
+  --accent-rgb: 255, 0, 122;
+  --accent-hover: #ff2a85;
+  --accent-subtle: rgba(255, 0, 122, 0.14);
+  --accent-border: rgba(255, 0, 122, 0.4);
+  --text-main: #F8FAFC;
+  --text-muted: #4ADE80;
+  --text-accent: #FF007A;
+  color-scheme: dark;
+}
+
+[data-theme="classic-terminal"] body,
+[data-theme="theme-terminal"] body,
+[data-theme="terminal"] body {
+  background-color: #030712;
+  color: #F8FAFC;
+  font-family: var(--font-mono-numbers);
+}
+
+/* Accent Mapping for Terminal Theme */
+[data-theme="classic-terminal"] .text-cyan-300,
+[data-theme="classic-terminal"] .text-cyan-400,
+[data-theme="classic-terminal"] .text-cyan-500,
+[data-theme="theme-terminal"] .text-cyan-300,
+[data-theme="theme-terminal"] .text-cyan-400,
+[data-theme="theme-terminal"] .text-cyan-500 {
+  color: #FF007A !important;
+}
+
+[data-theme="classic-terminal"] .border-cyan-400,
+[data-theme="classic-terminal"] .border-cyan-500,
+[data-theme="theme-terminal"] .border-cyan-400,
+[data-theme="theme-terminal"] .border-cyan-500 {
+  border-color: rgba(255, 0, 122, 0.4) !important;
+}
+
+[data-theme="classic-terminal"] .bg-cyan-500,
+[data-theme="theme-terminal"] .bg-cyan-500 {
+  background-color: #FF007A !important;
+  color: #FFFFFF !important;
+}
+
+/* ========================================================================= */
+/* 4. CUSTOM THEME (Dynamic user-controlled hue, saturation, and contrast)   */
+/* ========================================================================= */
+[data-theme="custom"],
+[data-theme="theme-custom"],
+html.theme-custom {
+  --bg-color: #0B0F19;
+  --surface-color: #1E293B;
+  --card-color: #1E293B;
+  --border-color: #334155;
+  --accent-color: var(--custom-accent-hex, #F89DB5);
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-accent: var(--custom-accent-hex, #F89DB5);
+  color-scheme: dark;
+}
+
+[data-theme="custom"] .text-cyan-300,
+[data-theme="custom"] .text-cyan-400,
+[data-theme="custom"] .text-cyan-500,
+[data-theme="theme-custom"] .text-cyan-300,
+[data-theme="theme-custom"] .text-cyan-400,
+[data-theme="theme-custom"] .text-cyan-500 {
+  color: var(--custom-accent-hex, #F89DB5) !important;
+}
+
+[data-theme="custom"] .border-cyan-400,
+[data-theme="custom"] .border-cyan-500,
+[data-theme="theme-custom"] .border-cyan-400,
+[data-theme="theme-custom"] .border-cyan-500 {
+  border-color: var(--custom-accent-border, rgba(248, 157, 181, 0.4)) !important;
+}
+
+[data-theme="custom"] .bg-cyan-500,
+[data-theme="theme-custom"] .bg-cyan-500 {
+  background-color: var(--custom-accent-hex, #F89DB5) !important;
+  color: var(--custom-accent-contrast, #ffffff) !important;
+}
+
+/* Smooth theme transitions */
+html, body, div, header, nav, main, aside, footer {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Privacy Blur Utility Class */
+.privacy-blur {
+  filter: blur(6px);
+  user-select: none;
+  pointer-events: none;
+  transition: filter 180ms ease-in-out;
+}

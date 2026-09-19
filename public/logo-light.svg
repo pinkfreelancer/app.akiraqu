@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="100%" height="100%">
+  <!-- AKIRAQU Light Mode Full Logo -->
+  <!-- Top Icon Mark -->
+  <g transform="translate(48, 16) scale(0.88)">
+    <circle cx="128" cy="124" r="58" fill="none" stroke="#21242B" stroke-width="15" />
+    <path d="M 58 176 L 104 110 L 146 152 L 192 86" fill="none" stroke="#21242B" stroke-width="15" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="3" />
+    <polygon points="218,60 178,72 206,100" fill="#21242B" />
+  </g>
+
+  <!-- Brand Typography -->
+  <text
+    x="160"
+    y="246"
+    text-anchor="middle"
+    fill="#21242B"
+    font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Plus Jakarta Sans', sans-serif"
+    font-size="34"
+    font-weight="800"
+    letter-spacing="2.5"
+  >AKIRAQU</text>
+
+  <text
+    x="160"
+    y="276"
+    text-anchor="middle"
+    fill="#4B5563"
+    font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    font-size="12.5"
+    font-weight="500"
+    letter-spacing="0.2"
+  >Analytic Quantitative Crypto Tools</text>
+</svg>

@@ -5,13 +5,17 @@ import { ExportModal } from './components/ExportModal';
 import { AssuranceModal } from './components/AssuranceModal';
 import { CommandBarModal } from './components/CommandBarModal';
 import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
-import { TerminalStatusBar } from './components/TerminalStatusBar';
+import { StatusBar } from './components/StatusBar';
+import { GridLayoutCustomizerModal } from './components/GridLayoutCustomizerModal';
 import { LaunchpadWorkspace } from './components/LaunchpadWorkspace';
 import { PendingAnalysisCard } from './components/PendingAnalysisCard';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, RefreshCw, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AkiraQuLogo } from './components/AkiraQuLogo';
 import { TerminalProvider, useTerminal } from './contexts/TerminalContext';
+import { BasicOverviewWorkspace } from './components/BasicOverviewWorkspace';
+import { WhalesIntelligenceWorkspace } from './components/WhalesIntelligenceWorkspace';
+import { AkiraAssistantDrawer } from './components/AkiraAssistantDrawer';
 
 // Modular Pages
 import { TickerPage } from './pages/TickerPage';
@@ -47,6 +51,9 @@ function TerminalApp() {
     lang,
     toggleLang,
     theme,
+    setEngineTheme,
+    customThemeColor,
+    setCustomThemeColor,
     toggleTheme,
     isDark,
     t,
@@ -89,6 +96,24 @@ function TerminalApp() {
     runCurrentAnalysis,
     healthStatus,
 
+    // Persona, Privacy Blur & Akira AI Assistant
+    persona,
+    setPersona,
+    privacyBlurActive,
+    togglePrivacyBlur,
+    isAkiraDrawerOpen,
+    setIsAkiraDrawerOpen,
+
+    // Account Mode, Focus Mode & Grid Layout Customization
+    accountMode,
+    toggleAccountMode,
+    demoBalance,
+    focusedFrame,
+    setFocusedFrame,
+    visibleFrames,
+    toggleFrameVisibility,
+    resetFrameVisibility,
+
     isCommandBarOpen,
     setIsCommandBarOpen,
     isShortcutsModalOpen,
@@ -98,6 +123,9 @@ function TerminalApp() {
     isAssuranceModalOpen,
     setIsAssuranceModalOpen,
   } = useTerminal();
+
+  // Grid Layout Customizer Modal State
+  const [isGridCustomizerOpen, setIsGridCustomizerOpen] = useState(false);
 
   // Sidebar Open/Collapse State
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() => {
@@ -132,12 +160,15 @@ function TerminalApp() {
     return () => window.removeEventListener('keydown', handleGlobalKey);
   }, []);
 
+  // Binary fallback theme ('light' | 'dark') for downstream components that only accept binary theme
+  const binaryTheme: 'light' | 'dark' = isDark ? 'dark' : 'light';
+
   // If in Landing Mode, render the Landing Page
   if (viewMode === 'landing') {
     return (
       <LandingPage
         lang={lang}
-        theme={theme}
+        theme={binaryTheme}
         onSetLang={toggleLang}
         onToggleTheme={toggleTheme}
         onNavigateToTerminal={navigateToTerminal}
@@ -151,7 +182,7 @@ function TerminalApp() {
     return (
       <LoginPage
         lang={lang}
-        theme={theme}
+        theme={binaryTheme}
         onNavigateToTerminal={() => navigateToTerminal()}
         onNavigateToLanding={navigateToLanding}
       />
@@ -160,7 +191,7 @@ function TerminalApp() {
 
   return (
     <div className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${
-      isDark ? 'bg-[#06090e] text-slate-100' : 'bg-slate-50 text-slate-900'
+      isDark ? 'bg-[#2d2d2d] text-slate-100' : 'bg-slate-50 text-slate-900'
     }`}>
       {/* Header */}
       <Header
@@ -186,6 +217,9 @@ function TerminalApp() {
         onToggleLang={toggleLang}
         theme={theme}
         onToggleTheme={toggleTheme}
+        onSelectTheme={setEngineTheme}
+        customThemeColor={customThemeColor}
+        onUpdateCustomColor={setCustomThemeColor}
         isFullscreen={isFullscreen}
         onToggleFullscreen={toggleFullscreen}
         isFullWidth={isFullWidth}
@@ -198,6 +232,17 @@ function TerminalApp() {
         onSelectStage={selectStage}
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={toggleSidebar}
+        persona={persona}
+        onSelectPersona={setPersona}
+        privacyBlurActive={privacyBlurActive}
+        onTogglePrivacyBlur={togglePrivacyBlur}
+        onOpenAkira={() => setIsAkiraDrawerOpen(true)}
+        accountMode={accountMode}
+        onToggleAccountMode={toggleAccountMode}
+        demoBalance={demoBalance}
+        marketType={selectedMarketType}
+        onSelectMarketType={handleMarketTypeChange}
+        onOpenGridCustomizer={() => setIsGridCustomizerOpen(true)}
       />
 
       {/* Main Terminal Workspace Layout with Sidebar */}
@@ -209,7 +254,7 @@ function TerminalApp() {
           isOpen={isSidebarOpen}
           onToggleOpen={toggleSidebar}
           lang={lang}
-          theme={theme}
+          theme={binaryTheme}
           confluenceScore={evaluation?.confluenceScore}
           marketBias={evaluation?.marketBias}
           wsStatus={wsStatus}
@@ -246,7 +291,7 @@ function TerminalApp() {
             onTriggerAnalyze={runCurrentAnalysis}
             isLoading={isLoading}
             lang={lang}
-            theme={theme}
+            theme={binaryTheme}
           />
         ) : (
           <div className="space-y-4">
@@ -279,7 +324,7 @@ function TerminalApp() {
               >
                 {isLoading && !evaluation && currentStage !== 'journal' && currentStage !== 'bot' && currentStage !== 'backtest' ? (
                   <div className={`p-16 rounded-xl border flex flex-col items-center justify-center space-y-4 font-mono ${
-                    isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-sm'
+                    isDark ? 'bg-[#323232] border-[#484848]' : 'bg-white border-slate-200 shadow-sm'
                   }`}>
                     <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
                     <span className="text-xs text-cyan-400 animate-pulse">
@@ -289,28 +334,71 @@ function TerminalApp() {
                 ) : (
                   <>
                     {currentStage === 'ticker' && (
-                      <TickerPage
-                        symbol={selectedSymbol}
-                        timeframe={selectedTimeframe}
-                        evaluation={evaluation}
-                        candles={candles}
-                        lang={lang}
-                        theme={theme}
-                        livePrice={activeDisplayPrice || undefined}
-                        priceDirection={priceDirection}
-                        wsStatus={wsStatus}
-                        latencyMs={latencyMs}
-                        syncMetrics={syncMetrics}
-                        recentLiveTrades={recentLiveTrades}
-                        orderBookBids={orderBookBids}
-                        orderBookAsks={orderBookAsks}
-                        bidTotal={bidTotal}
-                        askTotal={askTotal}
-                        selectedExchange={selectedExchange}
-                        selectedMarketType={selectedMarketType}
-                        onSelectExchange={handleExchangeChange}
-                        onSelectMarketType={handleMarketTypeChange}
-                      />
+                      persona === 'basic' ? (
+                        <BasicOverviewWorkspace
+                          symbol={selectedSymbol}
+                          timeframe={selectedTimeframe}
+                          evaluation={evaluation}
+                          candles={candles}
+                          livePrice={activeDisplayPrice || undefined}
+                          priceDirection={priceDirection}
+                          wsStatus={wsStatus}
+                          lang={lang}
+                          theme={theme}
+                          onSelectSymbol={handleSymbolChange}
+                          onSelectTimeframe={handleTimeframeChange}
+                          onTriggerAnalyze={runCurrentAnalysis}
+                          isLoading={isLoading}
+                          onSwitchPersona={setPersona}
+                          onOpenAkira={() => setIsAkiraDrawerOpen(true)}
+                        />
+                      ) : persona === 'whales' ? (
+                        <WhalesIntelligenceWorkspace
+                          symbol={selectedSymbol}
+                          timeframe={selectedTimeframe}
+                          evaluation={evaluation}
+                          candles={candles}
+                          livePrice={activeDisplayPrice || undefined}
+                          priceDirection={priceDirection}
+                          wsStatus={wsStatus}
+                          lang={lang}
+                          theme={theme}
+                          onSelectSymbol={handleSymbolChange}
+                          onSelectTimeframe={handleTimeframeChange}
+                          onTriggerAnalyze={runCurrentAnalysis}
+                          isLoading={isLoading}
+                          privacyBlurActive={privacyBlurActive}
+                          onOpenAkira={() => setIsAkiraDrawerOpen(true)}
+                        />
+                      ) : (
+                        <TickerPage
+                          symbol={selectedSymbol}
+                          timeframe={selectedTimeframe}
+                          evaluation={evaluation}
+                          candles={candles}
+                          lang={lang}
+                          theme={binaryTheme}
+                          livePrice={activeDisplayPrice || undefined}
+                          priceDirection={priceDirection}
+                          wsStatus={wsStatus}
+                          latencyMs={latencyMs}
+                          syncMetrics={syncMetrics}
+                          recentLiveTrades={recentLiveTrades}
+                          orderBookBids={orderBookBids}
+                          orderBookAsks={orderBookAsks}
+                          bidTotal={bidTotal}
+                          askTotal={askTotal}
+                          selectedExchange={selectedExchange}
+                          selectedMarketType={selectedMarketType}
+                          onSelectExchange={handleExchangeChange}
+                          onSelectMarketType={handleMarketTypeChange}
+                          visibleFrames={visibleFrames}
+                          focusedFrame={focusedFrame}
+                          onSetFocusedFrame={setFocusedFrame}
+                          accountMode={accountMode}
+                          demoBalance={demoBalance}
+                        />
+                      )
                     )}
                     {currentStage === 'signal' && (
                       <SignalPage
@@ -324,7 +412,7 @@ function TerminalApp() {
                           selectStage('manual_trading');
                         }}
                         selectedExchange={selectedExchange}
-                        theme={theme}
+                        theme={binaryTheme}
                         lang={lang}
                       />
                     )}
@@ -343,7 +431,7 @@ function TerminalApp() {
                           handleSymbolChange(sym);
                         }}
                         selectedExchange={selectedExchange}
-                        theme={theme}
+                        theme={binaryTheme}
                         lang={lang}
                       />
                     )}
@@ -359,7 +447,7 @@ function TerminalApp() {
                           selectStage('manual_trading');
                         }}
                         selectedExchange={selectedExchange}
-                        theme={theme}
+                        theme={binaryTheme}
                         lang={lang}
                       />
                     )}
@@ -372,7 +460,7 @@ function TerminalApp() {
                         selectedExchange={selectedExchange}
                         selectedMarketType={selectedMarketType}
                         lang={lang}
-                        theme={theme}
+                        theme={binaryTheme}
                       />
                     )}
                     {currentStage === 'orderflow' && (
@@ -384,7 +472,7 @@ function TerminalApp() {
                         selectedExchange={selectedExchange}
                         selectedMarketType={selectedMarketType}
                         lang={lang}
-                        theme={theme}
+                        theme={binaryTheme}
                       />
                     )}
                     {currentStage === 'indicators' && (
@@ -393,7 +481,7 @@ function TerminalApp() {
                           indicators={evaluation.indicators}
                           onOpenBacktest={openBacktest}
                           lang={lang}
-                          theme={theme}
+                          theme={binaryTheme}
                         />
                       ) : (
                         <PendingAnalysisCard
@@ -403,7 +491,7 @@ function TerminalApp() {
                           onGoToChart={() => selectStage('ticker')}
                           isLoading={isLoading}
                           lang={lang}
-                          theme={theme}
+                          theme={binaryTheme}
                         />
                       )
                     )}
@@ -417,7 +505,7 @@ function TerminalApp() {
                           neutralCount={evaluation.neutralCount}
                           indicators={evaluation.indicators}
                           lang={lang}
-                          theme={theme}
+                          theme={binaryTheme}
                         />
                       ) : (
                         <PendingAnalysisCard
@@ -427,7 +515,7 @@ function TerminalApp() {
                           onGoToChart={() => selectStage('ticker')}
                           isLoading={isLoading}
                           lang={lang}
-                          theme={theme}
+                          theme={binaryTheme}
                         />
                       )
                     )}
@@ -437,7 +525,7 @@ function TerminalApp() {
                           handleSymbolChange(sym);
                           selectStage('ticker');
                         }}
-                        theme={theme}
+                        theme={binaryTheme}
                       />
                     )}
                     {currentStage === 'risk' && (
@@ -448,7 +536,7 @@ function TerminalApp() {
                           indicators={evaluation.indicators}
                           currentPrice={activeDisplayPrice || evaluation.riskPlan?.currentPrice}
                           lang={lang}
-                          theme={theme}
+                          theme={binaryTheme}
                         />
                       ) : (
                         <PendingAnalysisCard
@@ -458,7 +546,7 @@ function TerminalApp() {
                           onGoToChart={() => selectStage('ticker')}
                           isLoading={isLoading}
                           lang={lang}
-                          theme={theme}
+                          theme={binaryTheme}
                         />
                       )
                     )}
@@ -477,7 +565,7 @@ function TerminalApp() {
                         currentStage={currentStage}
                         onSelectStage={selectStage}
                         onSelectSymbol={handleSymbolChange}
-                        theme={theme}
+                        theme={binaryTheme}
                         lang={lang}
                       />
                     )}
@@ -488,7 +576,7 @@ function TerminalApp() {
                         currentCandles={candles}
                         initialIndicator={backtestIndicator}
                         lang={lang}
-                        theme={theme}
+                        theme={binaryTheme}
                         isFullWidth={isFullWidth}
                         isFullscreen={isFullscreen}
                         onToggleFullscreen={toggleFullscreen}
@@ -507,7 +595,7 @@ function TerminalApp() {
                           currentPrice={activeDisplayPrice || evaluation.riskPlan?.currentPrice}
                           onNavigateToStage={selectStage}
                           lang={lang}
-                          theme={theme}
+                          theme={binaryTheme}
                         />
                       ) : (
                         <PendingAnalysisCard
@@ -517,7 +605,7 @@ function TerminalApp() {
                           onGoToChart={() => selectStage('ticker')}
                           isLoading={isLoading}
                           lang={lang}
-                          theme={theme}
+                          theme={binaryTheme}
                         />
                       )
                     )}
@@ -527,6 +615,9 @@ function TerminalApp() {
                         onToggleLang={toggleLang}
                         theme={theme}
                         onToggleTheme={toggleTheme}
+                        onSelectTheme={setEngineTheme}
+                        customThemeColor={customThemeColor}
+                        onUpdateCustomColor={setCustomThemeColor}
                         isFullscreen={isFullscreen}
                         onToggleFullscreen={toggleFullscreen}
                         isFullWidth={isFullWidth}
@@ -544,70 +635,39 @@ function TerminalApp() {
         )}
       </main>
 
-      {/* Real-Time Terminal Status Bar (Sticky Bottom) */}
-      <TerminalStatusBar
-        selectedSymbol={selectedSymbol}
-        selectedTimeframe={selectedTimeframe}
+      {/* Functional Interactive Status Bar with Realtime Feeds, Latency, Clocks, Mode Switcher */}
+      <StatusBar
+        accountMode={accountMode}
+        onToggleAccountMode={toggleAccountMode}
+        demoBalance={demoBalance}
+        marketType={selectedMarketType}
+        onSelectMarketType={handleMarketTypeChange}
         selectedExchange={selectedExchange}
-        selectedMarketType={selectedMarketType}
+        selectedSymbol={selectedSymbol}
         livePrice={activeDisplayPrice}
-        priceDirection={priceDirection}
         wsStatus={wsStatus}
         latencyMs={latencyMs}
-        syncMetrics={syncMetrics}
-        workspaceMode={workspaceMode}
-        onToggleWorkspaceMode={toggleWorkspaceMode}
-        onOpenCommandBar={() => setIsCommandBarOpen(true)}
+        evaluation={evaluation}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={toggleFullscreen}
         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+        onOpenGridCustomizer={() => setIsGridCustomizerOpen(true)}
         lang={lang}
-        theme={theme}
-        isFullWidth={isFullWidth}
+        theme={binaryTheme}
       />
-
-      {/* Footer with Standards & Specifications */}
-      <footer className={`w-full border-t py-3 text-xs font-mono transition-colors duration-200 ${
-        isDark ? 'border-[#1e293b] bg-[#0b0f19] text-slate-400' : 'border-slate-200 bg-slate-100 text-slate-700'
-      }`}>
-        <div className={`mx-auto px-3 sm:px-4 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 ${
-          isFullWidth ? 'w-full' : 'max-w-7xl'
-        }`}>
-          <div className="flex items-center gap-2.5">
-            <AkiraQuLogo size={20} showBackground={false} />
-            <span className={`font-bold tracking-tight ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>AKIRA<span className="text-cyan-400">.QU</span></span>
-            <span className={isDark ? 'text-slate-600' : 'text-slate-400'}>•</span>
-            <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>{t.footer.standards}</span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button
-              onClick={navigateToLanding}
-              className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
-            >
-              {lang === 'id' ? 'Halaman Depan (Landing)' : 'Landing Page'}
-            </button>
-            <button
-              onClick={navigateToLogin}
-              className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
-            >
-              {lang === 'id' ? 'Akun Gmail' : 'Gmail Account'}
-            </button>
-            <button
-              onClick={() => setIsAssuranceModalOpen(true)}
-              className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
-            >
-              {t.footer.assuranceLink}
-            </button>
-            <button
-              onClick={() => setIsExportModalOpen(true)}
-              className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
-            >
-              {t.footer.privacyLink}
-            </button>
-          </div>
-        </div>
-      </footer>
         </div>
       </div>
+
+      {/* Grid Layout Customizer Modal */}
+      <GridLayoutCustomizerModal
+        isOpen={isGridCustomizerOpen}
+        onClose={() => setIsGridCustomizerOpen(false)}
+        visibleFrames={visibleFrames}
+        onToggleFrame={toggleFrameVisibility}
+        onResetFrames={resetFrameVisibility}
+        lang={lang}
+        theme={binaryTheme}
+      />
 
       {/* Export & Privacy Modal */}
       <ExportModal
@@ -622,7 +682,7 @@ function TerminalApp() {
         isOpen={isAssuranceModalOpen}
         onClose={() => setIsAssuranceModalOpen(false)}
         lang={lang}
-        theme={theme}
+        theme={binaryTheme}
       />
 
       {/* Quick Search & Command Bar Modal */}
@@ -648,7 +708,7 @@ function TerminalApp() {
         onOpenAssuranceModal={() => setIsAssuranceModalOpen(true)}
         onOpenShortcutsModal={() => setIsShortcutsModalOpen(true)}
         lang={lang}
-        theme={theme}
+        theme={binaryTheme}
       />
 
       {/* Keyboard Shortcuts Cheat Sheet */}
@@ -656,7 +716,23 @@ function TerminalApp() {
         isOpen={isShortcutsModalOpen}
         onClose={() => setIsShortcutsModalOpen(false)}
         lang={lang}
+        theme={binaryTheme}
+      />
+
+      {/* Akira AI Cyborg Woman Assistant Drawer */}
+      <AkiraAssistantDrawer
+        isOpen={isAkiraDrawerOpen}
+        onClose={() => setIsAkiraDrawerOpen(false)}
+        symbol={selectedSymbol}
+        timeframe={selectedTimeframe}
+        evaluation={evaluation || undefined}
+        candles={candles}
+        livePrice={activeDisplayPrice || undefined}
+        persona={persona}
+        onSelectPersona={setPersona}
+        lang={lang}
         theme={theme}
+        accountMode={accountMode}
       />
     </div>
   );

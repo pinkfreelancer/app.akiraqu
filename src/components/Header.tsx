@@ -38,12 +38,17 @@ import {
   Activity,
   Zap,
   Sliders,
+  Terminal as TerminalIcon,
 } from 'lucide-react';
-import { CryptoSymbolInfo, Timeframe, WebSocketSyncMetrics, StageId } from '../types/crypto.types';
+import { CryptoSymbolInfo, Timeframe, WebSocketSyncMetrics, StageId, MarketType, TradingPersona } from '../types/crypto.types';
 import { Language, getTranslation } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
 import { SearchCoinModal } from './SearchCoinModal';
 import { AkiraQuLogo } from './AkiraQuLogo';
+import { ThemeDropdownMenu } from './ThemeDropdownMenu';
+import { PersonaSelector } from './PersonaSelector';
+import { AkiraAvatar } from './AkiraAvatar';
+import { EngineThemeId, normalizeEngineTheme } from '../types/theme.types';
 import { useAuth } from '../contexts/AuthContext';
 
 interface HeaderProps {
@@ -67,8 +72,11 @@ interface HeaderProps {
   syncMetrics?: WebSocketSyncMetrics;
   lang: Language;
   onToggleLang: (lang: Language) => void;
-  theme: 'light' | 'dark';
+  theme: EngineThemeId | 'light' | 'dark';
   onToggleTheme: () => void;
+  onSelectTheme?: (theme: EngineThemeId, customColor?: string) => void;
+  customThemeColor?: string;
+  onUpdateCustomColor?: (color: string) => void;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
   isFullWidth?: boolean;
@@ -81,6 +89,21 @@ interface HeaderProps {
   onSelectStage?: (stage: StageId) => void;
   isSidebarOpen?: boolean;
   onToggleSidebar?: () => void;
+
+  // Persona & Akira AI Assistant
+  persona?: TradingPersona;
+  onSelectPersona?: (persona: TradingPersona) => void;
+  privacyBlurActive?: boolean;
+  onTogglePrivacyBlur?: () => void;
+  onOpenAkira?: () => void;
+
+  // Global Account Switcher & Market Navigation
+  accountMode?: 'DEMO' | 'REAL';
+  onToggleAccountMode?: () => void;
+  demoBalance?: number;
+  marketType?: MarketType;
+  onSelectMarketType?: (marketType: MarketType) => void;
+  onOpenGridCustomizer?: () => void;
 }
 
 const formatPrice = (p: number) => {
@@ -110,6 +133,9 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleLang,
   theme,
   onToggleTheme,
+  onSelectTheme,
+  customThemeColor = '#06b6d4',
+  onUpdateCustomColor,
   isFullscreen = false,
   onToggleFullscreen,
   isFullWidth = true,
@@ -122,10 +148,22 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectStage,
   isSidebarOpen = true,
   onToggleSidebar,
+  persona = 'pro',
+  onSelectPersona,
+  privacyBlurActive = false,
+  onTogglePrivacyBlur,
+  onOpenAkira,
+  accountMode = 'DEMO',
+  onToggleAccountMode,
+  demoBalance = 100000,
+  marketType = 'SPOT',
+  onSelectMarketType,
+  onOpenGridCustomizer,
 }) => {
   const { user, isAuthenticated } = useAuth();
   const t = getTranslation(lang);
-  const isDark = theme === 'dark';
+  const normalizedTheme = normalizeEngineTheme(theme);
+  const isDark = normalizedTheme !== 'modern-pink-light';
   const isId = lang === 'id';
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -222,19 +260,27 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-3">
           <div
             onClick={onNavigateToLanding}
-            className="flex items-center gap-2 cursor-pointer group select-none"
-            title={isId ? 'AKIRA.QU - Beranda' : 'AKIRA.QU - Home'}
+            className="flex items-center gap-2.5 cursor-pointer group select-none"
+            title={isId ? 'AKIRAQU - Beranda' : 'AKIRAQU - Home'}
           >
-            <AkiraQuLogo size={26} className="shadow-xs rounded-lg shrink-0 group-hover:scale-105 transition-transform" />
-            <div className="flex items-center gap-1.5">
+            <AkiraQuLogo
+              size={28}
+              theme={isDark ? 'dark' : 'light'}
+              className="shrink-0 group-hover:scale-105 transition-transform"
+            />
+            <div className="flex items-center gap-2">
               <span
-                className={`text-xs sm:text-sm font-black tracking-tight font-display leading-tight flex items-center ${
-                  isDark ? 'text-white' : 'text-slate-900'
+                className={`text-xs sm:text-sm font-extrabold tracking-wider font-display leading-tight flex items-center transition-colors ${
+                  isDark ? 'text-[#F89DB5]' : 'text-[#21242B]'
                 }`}
               >
-                AKIRA<span className="text-cyan-400">.QU</span>
+                AKIRAQU
               </span>
-              <span className="hidden md:inline text-xs text-slate-400">| {t.header.brandSubtitle}</span>
+              <span className={`hidden lg:inline text-[11px] font-sans font-medium transition-colors ${
+                isDark ? 'text-slate-400' : 'text-slate-500'
+              }`}>
+                | Analytic Quantitative Crypto Tools
+              </span>
             </div>
           </div>
 
@@ -325,8 +371,77 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </div>
 
-        {/* Right Top Bar Controls: Landing, Auth, Settings, Mobile Toggle */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Right Top Bar Controls: Persona Selector, Akira AI Button, Global Account Switcher, Landing, Auth, Settings, Mobile Toggle */}
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          {/* Persona Selector (Basic / Pro / Whales) */}
+          {onSelectPersona && (
+            <div className="hidden sm:block">
+              <PersonaSelector
+                currentPersona={persona}
+                onSelectPersona={onSelectPersona}
+                privacyBlurActive={privacyBlurActive}
+                onTogglePrivacyBlur={onTogglePrivacyBlur}
+                lang={lang}
+                theme={theme}
+                showPrivacyToggle={false}
+              />
+            </div>
+          )}
+
+          {/* Akira Cybernetic AI Assistant Drawer Trigger */}
+          {onOpenAkira && (
+            <button
+              id="btn-header-akira-ai"
+              onClick={onOpenAkira}
+              className={`flex items-center gap-2 px-2.5 sm:px-3 py-1 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer shadow-xs group ${
+                isDark
+                  ? 'bg-gradient-to-r from-pink-950/40 via-[#1e293b] to-purple-950/30 border-pink-500/40 text-pink-300 hover:border-pink-400 hover:bg-pink-900/30'
+                  : 'bg-pink-50/90 border-pink-300 text-pink-700 hover:bg-pink-100'
+              }`}
+              title={isId ? 'Buka Asisten Siber Akira AI (Sinyal Likuiditas & Risiko)' : 'Open Akira Cybernetic AI Assistant'}
+            >
+              <AkiraAvatar size={20} isOnline={true} showGlow={true} />
+              <span className="font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-rose-300">
+                Akira AI
+              </span>
+              <span className="hidden xl:inline text-[9px] px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-400 border border-pink-500/30">
+                INTEL
+              </span>
+            </button>
+          )}
+
+          {/* Global Account Switcher Toggle */}
+          {onToggleAccountMode && (
+            <button
+              id="btn-account-mode-switcher"
+              onClick={onToggleAccountMode}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-mono font-bold transition-all cursor-pointer shadow-xs ${
+                accountMode === 'DEMO'
+                  ? isDark
+                    ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25 hover:border-amber-400'
+                    : 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100'
+                  : isDark
+                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/25 hover:border-emerald-400'
+                  : 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100'
+              }`}
+              title={
+                accountMode === 'DEMO'
+                  ? isId
+                    ? 'Mode DEMO (Simulasi $100K). Klik untuk beralih ke Akun Real'
+                    : 'DEMO Sandbox ($100K). Click to switch to Real Live Account'
+                  : isId
+                  ? 'Mode REAL (Akun Nyata API). Klik untuk beralih ke Demo'
+                  : 'REAL Live Account. Click to switch to Demo Sandbox'
+              }
+            >
+              <span className={`w-2 h-2 rounded-full ${accountMode === 'DEMO' ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
+              <span className="font-extrabold">{accountMode === 'DEMO' ? 'DEMO' : 'REAL'}</span>
+              <span className="hidden xl:inline text-[10px] font-normal opacity-90">
+                {accountMode === 'DEMO' ? `($${demoBalance.toLocaleString()})` : '(LIVE API)'}
+              </span>
+            </button>
+          )}
+
           {/* Landing Page Quick Navigation */}
           {onNavigateToLanding && (
             <button
@@ -399,6 +514,22 @@ export const Header: React.FC<HeaderProps> = ({
 
           <span className={`hidden sm:inline ${isDark ? 'text-[#1e293b]' : 'text-slate-200'}`}>|</span>
 
+          {/* Dedicated Engine Theme Dropdown Menu (Space-saving top bar) */}
+          <ThemeDropdownMenu
+            currentTheme={normalizedTheme}
+            customColor={customThemeColor}
+            onSelectTheme={(th, color) => {
+              if (onSelectTheme) {
+                onSelectTheme(th, color);
+              } else {
+                onToggleTheme();
+              }
+            }}
+            onUpdateCustomColor={(col) => onUpdateCustomColor?.(col)}
+            lang={lang}
+            isDark={isDark}
+          />
+
           {/* Combined Settings Dropdown (Theme, Language, Fullscreen) */}
           <div className="relative" ref={dropdownRef}>
             <button
@@ -426,31 +557,72 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="space-y-4">
                   {/* Theme Section */}
                   <div className="space-y-2">
-                    <span className="block text-[10px] font-bold font-mono text-slate-400 uppercase tracking-wider">
-                      {isId ? 'Tema Tampilan' : 'Display Theme'}
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className="block text-[10px] font-bold font-mono text-slate-400 uppercase tracking-wider">
+                        {isId ? 'Tema Engine' : 'Engine Theme'}
+                      </span>
+                      <span className="text-[10px] font-mono text-cyan-400">
+                        {normalizedTheme === 'modern-pink-light' && 'Pink Light'}
+                        {normalizedTheme === 'cyber-pink-dark' && 'Cyber Pink'}
+                        {normalizedTheme === 'classic-terminal' && 'Terminal'}
+                        {normalizedTheme === 'custom' && 'Custom'}
+                      </span>
+                    </div>
                     <div
-                      className={`flex p-0.5 rounded-lg border ${
+                      className={`grid grid-cols-2 gap-1 p-1 rounded-lg border ${
                         isDark ? 'bg-[#0b0f19] border-[#1e293b]' : 'bg-slate-100 border-slate-200'
                       }`}
                     >
                       <button
-                        onClick={() => theme !== 'light' && onToggleTheme()}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                          !isDark ? 'bg-white text-cyan-600 shadow-xs' : 'text-slate-400 hover:text-slate-200'
+                        onClick={() => onSelectTheme ? onSelectTheme('modern-pink-light') : onToggleTheme()}
+                        className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                          normalizedTheme === 'modern-pink-light'
+                            ? 'bg-white text-pink-600 shadow-xs border border-pink-200'
+                            : 'text-slate-400 hover:text-slate-200'
                         }`}
+                        title="Modern Pink Light"
                       >
-                        <Sun className="w-3.5 h-3.5" />
-                        <span>Light</span>
+                        <Sun className="w-3 h-3 text-pink-500" />
+                        <span>Pink Light</span>
                       </button>
+
                       <button
-                        onClick={() => isDark !== true && onToggleTheme()}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                          isDark ? 'bg-cyan-500/25 text-cyan-300 shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                        onClick={() => onSelectTheme ? onSelectTheme('cyber-pink-dark') : onToggleTheme()}
+                        className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                          normalizedTheme === 'cyber-pink-dark'
+                            ? 'bg-cyan-500/25 text-[#ff2a85] shadow-xs border border-cyan-500/40'
+                            : 'text-slate-400 hover:text-slate-200'
                         }`}
+                        title="Cyber Pink Dark"
                       >
-                        <Moon className="w-3.5 h-3.5" />
-                        <span>Dark</span>
+                        <Moon className="w-3 h-3 text-[#ff2a85]" />
+                        <span>Cyber Pink</span>
+                      </button>
+
+                      <button
+                        onClick={() => onSelectTheme ? onSelectTheme('classic-terminal') : onToggleTheme()}
+                        className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                          normalizedTheme === 'classic-terminal'
+                            ? 'bg-black text-emerald-400 shadow-xs border border-emerald-500/40'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                        title="Classic Terminal"
+                      >
+                        <TerminalIcon className="w-3 h-3 text-emerald-400" />
+                        <span>Terminal</span>
+                      </button>
+
+                      <button
+                        onClick={() => onSelectTheme ? onSelectTheme('custom', customThemeColor) : onToggleTheme()}
+                        className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                          normalizedTheme === 'custom'
+                            ? 'bg-cyan-950/60 text-cyan-300 shadow-xs border border-cyan-500/40'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                        title="Custom Dominant Color"
+                      >
+                        <Sparkles className="w-3 h-3 text-cyan-400" />
+                        <span>Custom</span>
                       </button>
                     </div>
                   </div>
@@ -602,7 +774,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Main Navigation Bar */}
       <div className="flex flex-wrap items-center justify-between gap-2.5 px-3 sm:px-4 lg:px-6 py-2">
-        {/* Left Side: Sidebar Toggle, Coin Selector, Quick Coins, Timeframe, & Run Analysis */}
+        {/* Left Side: Sidebar Toggle, Market Sub-tabs (Spot vs Futures), Coin Selector, Quick Coins, Timeframe, & Run Analysis */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Sidebar Toggle Button */}
           {onToggleSidebar && (
@@ -628,6 +800,53 @@ export const Header: React.FC<HeaderProps> = ({
                 <PanelLeftOpen className="w-4 h-4 text-cyan-400" />
               )}
             </button>
+          )}
+
+          {/* Market Navigation Sub-Tabs (Spot vs Futures/Derivatives) */}
+          {onSelectMarketType && (
+            <div className={`flex items-center p-0.5 rounded-lg border ${
+              isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-slate-100 border-slate-200'
+            }`}>
+              <button
+                type="button"
+                onClick={() => onSelectMarketType('SPOT')}
+                className={`px-2.5 py-1 text-xs font-mono font-bold rounded-md transition-all cursor-pointer min-h-[30px] flex items-center gap-1.5 ${
+                  marketType === 'SPOT'
+                    ? isDark
+                      ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 shadow-xs'
+                      : 'bg-white text-cyan-700 font-bold border border-cyan-200 shadow-xs'
+                    : isDark
+                    ? 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    : 'text-slate-500 hover:text-slate-900'
+                }`}
+                title={isId ? 'Pasar Spot - Perdagangan aset riil & vault' : 'Spot Market - Direct Asset Vault'}
+              >
+                <CandlestickChart className="w-3.5 h-3.5 text-cyan-400" />
+                <span>SPOT</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onSelectMarketType('FUTURES')}
+                className={`px-2.5 py-1 text-xs font-mono font-bold rounded-md transition-all cursor-pointer min-h-[30px] flex items-center gap-1.5 ${
+                  marketType === 'FUTURES'
+                    ? isDark
+                      ? 'bg-[#F89DB5]/25 text-[#F89DB5] border border-[#F89DB5]/40 shadow-xs'
+                      : 'bg-white text-pink-700 font-bold border border-pink-200 shadow-xs'
+                    : isDark
+                    ? 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    : 'text-slate-500 hover:text-slate-900'
+                }`}
+                title={isId ? 'Pasar Futures - Kontrak Perpetual 1x-125x Leverage' : 'Futures Market - Perpetual Contracts 1x-125x Leverage'}
+              >
+                <Flame className="w-3.5 h-3.5 text-[#F89DB5]" />
+                <span>FUTURES</span>
+                <span className={`text-[9px] px-1 py-0.2 rounded font-mono ${
+                  marketType === 'FUTURES' ? 'bg-[#F89DB5]/30 text-white' : 'bg-slate-700/50 text-slate-400'
+                }`}>
+                  125x
+                </span>
+              </button>
+            </div>
           )}
 
           {/* Unified Clean Asset Selector Button */}
@@ -842,6 +1061,23 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Command className={`w-3.5 h-3.5 ${isDark ? 'text-cyan-400' : 'text-cyan-600'}`} />
               <kbd className="text-[10px] hidden md:inline">⌘K</kbd>
+            </button>
+          )}
+
+          {/* Layout Customizer Button */}
+          {onOpenGridCustomizer && (
+            <button
+              id="btn-header-grid-customizer"
+              onClick={onOpenGridCustomizer}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 border rounded-lg text-xs font-mono font-bold transition-all cursor-pointer min-h-[38px] ${
+                isDark
+                  ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-[#F89DB5] hover:border-[#F89DB5]/40'
+                  : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600'
+              }`}
+              title={isId ? 'Kustomisasi Tampilan Grid Modul' : 'Customize Modular Grid'}
+            >
+              <Sliders className="w-3.5 h-3.5 text-[#F89DB5]" />
+              <span className="hidden xl:inline">{isId ? 'Layout' : 'Layout'}</span>
             </button>
           )}
 

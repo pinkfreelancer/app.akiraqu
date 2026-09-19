@@ -83,7 +83,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   return (
     <div className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${
-      isDark ? 'bg-[#070b14] text-slate-100' : 'bg-slate-50 text-slate-900'
+      isDark ? 'bg-[#2d2d2d] text-slate-100' : 'bg-slate-50 text-slate-900'
     }`}>
       {/* 1. TOP ANNOUNCEMENT BAR */}
       <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white text-xs py-1.5 px-4 text-center font-mono font-bold flex items-center justify-center gap-2">
@@ -100,7 +100,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* 2. LANDING NAVBAR */}
       <header className={`sticky top-0 z-50 border-b backdrop-blur-md transition-colors ${
-        isDark ? 'bg-[#070b14]/90 border-[#1e293b]' : 'bg-white/90 border-slate-200'
+        isDark ? 'bg-[#242424]/90 border-[#484848]' : 'bg-white/90 border-slate-200'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Brand Logo */}
@@ -108,18 +108,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             onClick={() => onNavigateToTerminal()}
             className="flex items-center gap-3 cursor-pointer group"
           >
-            <AkiraQuLogo size={36} showBackground={true} />
+            <AkiraQuLogo size={36} theme={isDark ? 'dark' : 'light'} variant="squircle" />
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-base tracking-tight font-display">
-                  AKIRA<span className="text-cyan-400">.QU</span>
+              <div className="flex items-center gap-2">
+                <span className={`font-extrabold text-base tracking-wider font-display transition-colors ${
+                  isDark ? 'text-[#F89DB5]' : 'text-[#21242B]'
+                }`}>
+                  AKIRAQU
                 </span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded font-mono font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+                <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-bold border ${
+                  isDark ? 'bg-[#F89DB5]/15 text-[#F89DB5] border-[#F89DB5]/30' : 'bg-slate-100 text-slate-700 border-slate-300'
+                }`}>
                   PRO
                 </span>
               </div>
-              <span className={`text-[10px] font-mono block -mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                Quantitative Crypto Intelligence Terminal
+              <span className={`text-[11px] font-sans block -mt-0.5 transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                Analytic Quantitative Crypto Tools
               </span>
             </div>
           </div>
@@ -668,8 +672,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             ? 'bg-gradient-to-b from-[#0f172a] to-[#070b14] border-cyan-500/30 shadow-cyan-950/30' 
             : 'bg-gradient-to-b from-cyan-50 to-white border-cyan-200 shadow-slate-200'
         }`}>
-          <div className="inline-flex p-3 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 mb-2">
-            <AkiraQuLogo size={44} showBackground={false} />
+          <div className="inline-flex p-3 rounded-2xl mb-2 transition-transform">
+            <AkiraQuLogo size={56} theme={isDark ? 'dark' : 'light'} variant="squircle" />
           </div>
 
           <h2 className="text-2xl sm:text-4xl font-black font-display tracking-tight">
@@ -715,13 +719,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* 8. FOOTER */}
       <footer className={`mt-auto py-8 px-4 sm:px-6 border-t font-mono text-xs ${
-        isDark ? 'bg-[#05080f] border-[#1e293b] text-slate-500' : 'bg-slate-100 border-slate-200 text-slate-600'
+        isDark ? 'bg-[#242424] border-[#484848] text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-600'
       }`}>
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <AkiraQuLogo size={24} showBackground={false} />
-            <span className={`font-bold ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>AKIRA.QU Quantitative Platform</span>
-            <span>© 2026. All rights reserved.</span>
+          <div className="flex items-center gap-2.5">
+            <AkiraQuLogo size={24} theme={isDark ? 'dark' : 'light'} variant="symbol" />
+            <span className={`font-bold tracking-wider ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>AKIRAQU</span>
+            <span className={isDark ? 'text-slate-600' : 'text-slate-400'}>•</span>
+            <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Analytic Quantitative Crypto Tools</span>
+            <span>© 2026</span>
           </div>
 
           <div className="flex items-center gap-6">

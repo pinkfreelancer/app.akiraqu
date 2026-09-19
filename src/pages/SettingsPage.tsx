@@ -42,6 +42,12 @@ import {
 } from 'lucide-react';
 import { Language, getTranslation } from '../i18n/translations';
 import {
+  EngineThemeId,
+  normalizeEngineTheme,
+  PRESET_CUSTOM_COLORS,
+  getContrastTextColor,
+} from '../types/theme.types';
+import {
   MasterUserSettings,
   DisplayThemeMode,
   AccentColor,
@@ -65,8 +71,11 @@ import { INITIAL_EXCHANGE_CREDENTIALS } from '../services/terminalExtensionServi
 interface SettingsPageProps {
   lang: Language;
   onToggleLang: (lang: Language) => void;
-  theme: 'light' | 'dark';
+  theme: EngineThemeId | 'light' | 'dark';
   onToggleTheme: () => void;
+  onSelectTheme?: (theme: EngineThemeId, customColor?: string) => void;
+  customThemeColor?: string;
+  onUpdateCustomColor?: (color: string) => void;
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
   isFullWidth: boolean;
@@ -85,6 +94,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   onToggleLang,
   theme,
   onToggleTheme,
+  onSelectTheme,
+  customThemeColor = '#06b6d4',
+  onUpdateCustomColor,
   isFullscreen,
   onToggleFullscreen,
   isFullWidth,
@@ -97,7 +109,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 }) => {
   const { user, isAuthenticated, logout } = useAuth();
   const t = getTranslation(lang);
-  const isDark = theme === 'dark';
+  const normalizedTheme = normalizeEngineTheme(theme);
+  const isDark = normalizedTheme !== 'modern-pink-light';
   const isId = lang === 'id';
 
   // Master Settings State
@@ -762,141 +775,302 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               <span>{isId ? 'Kustomisasi Tampilan & Tema Engine' : 'Display Customization & Engine Theme'}</span>
             </h3>
 
-            {/* Theme Engine Selection: Light, Dark, Classic, Custom */}
+            {/* Theme Engine Selection: 1. Modern Pink Light, 2. Cyber Pink Dark, 3. Classic Terminal, 4. Custom */}
             <div className="space-y-3 mb-6">
-              <label className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider block">
-                {isId ? 'Pilihan Tema Engine Visual' : 'Visual Engine Theme'}
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider block">
+                  {isId ? 'Pilihan Tema Engine Visual (4 Pilihan Engine)' : 'Visual Engine Theme (4 Engine Presets)'}
+                </label>
+                <span className="text-xs font-mono text-cyan-400">
+                  {normalizedTheme === 'modern-pink-light' && '☀️ Modern Pink Light (Aktif)'}
+                  {normalizedTheme === 'cyber-pink-dark' && '🌙 Cyber Pink Dark (Aktif)'}
+                  {normalizedTheme === 'classic-terminal' && '💻 Classic Terminal (Aktif)'}
+                  {normalizedTheme === 'custom' && '🎨 Custom Dominant Color (Aktif)'}
+                </span>
+              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {/* Dark Theme */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                {/* 1. Modern Pink Light */}
                 <button
                   onClick={() => {
-                    if (!isDark) onToggleTheme();
-                    handleUpdateSettings({ display: { ...settings.display, themeMode: 'dark' } });
-                  }}
-                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
-                    isDark && settings.display.themeMode === 'dark'
-                      ? 'bg-[#0b0f19] border-cyan-500 ring-2 ring-cyan-500/30 shadow-md'
-                      : 'bg-[#070b14] border-[#1e293b] hover:border-slate-700'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <Moon className="w-5 h-5 text-cyan-400" />
-                    {isDark && settings.display.themeMode === 'dark' && (
-                      <Check className="w-4 h-4 text-cyan-400" />
-                    )}
-                  </div>
-                  <span className="text-sm font-bold font-mono text-white block">Dark Mode</span>
-                  <span className="text-[11px] text-slate-400 block mt-1">
-                    Default Obsidian #090d16 dengan aksen cyan neon.
-                  </span>
-                </button>
-
-                {/* Light Theme */}
-                <button
-                  onClick={() => {
-                    if (isDark) onToggleTheme();
+                    if (onSelectTheme) onSelectTheme('modern-pink-light');
+                    else if (isDark) onToggleTheme();
                     handleUpdateSettings({ display: { ...settings.display, themeMode: 'light' } });
                   }}
-                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
-                    !isDark || settings.display.themeMode === 'light'
-                      ? 'bg-white border-cyan-500 ring-2 ring-cyan-500/30 shadow-md'
-                      : 'bg-[#070b14] border-[#1e293b] hover:border-slate-700'
+                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    normalizedTheme === 'modern-pink-light'
+                      ? 'bg-white border-pink-500 ring-2 ring-pink-500/30 shadow-md'
+                      : isDark
+                      ? 'bg-[#070b14] border-[#1e293b] hover:border-slate-700'
+                      : 'bg-white border-slate-200 hover:border-slate-300'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <Sun className="w-5 h-5 text-amber-500" />
-                    {(!isDark || settings.display.themeMode === 'light') && (
-                      <Check className="w-4 h-4 text-cyan-600" />
-                    )}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-[#fdf8fa] border border-pink-200 flex items-center justify-center">
+                          <Sun className="w-4 h-4 text-pink-600" />
+                        </div>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 font-mono">
+                          Light Mode
+                        </span>
+                      </div>
+                      {normalizedTheme === 'modern-pink-light' && (
+                        <Check className="w-4 h-4 text-pink-600" />
+                      )}
+                    </div>
+                    <span className="text-sm font-bold font-mono text-slate-900 block">Modern Pink Light</span>
+                    <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                      {isId
+                        ? 'Tampilan terang bersih profesional dengan aksen pink modern / magenta dan teks kontras tinggi.'
+                        : 'Clean off-white base with modern magenta/pink accents and high-contrast readable typography.'}
+                    </p>
                   </div>
-                  <span className="text-sm font-bold font-mono text-slate-900 block">Light Mode</span>
-                  <span className="text-[11px] text-slate-500 block mt-1">
-                    Bersih, terang & kontras tajam untuk trading siang hari.
-                  </span>
+                  <div className="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-slate-100">
+                    <span className="text-[10px] text-slate-400 font-mono">Palet:</span>
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#fdf8fa] border border-slate-300" title="#fdf8fa" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#db2777]" title="#db2777" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#0f172a]" title="#0f172a" />
+                  </div>
                 </button>
 
-                {/* Classic Terminal Theme */}
+                {/* 2. Cyber Pink Dark */}
                 <button
                   onClick={() => {
-                    if (!isDark) onToggleTheme();
-                    handleUpdateSettings({ display: { ...settings.display, themeMode: 'classic', accentColor: 'amber' } });
+                    if (onSelectTheme) onSelectTheme('cyber-pink-dark');
+                    else if (!isDark) onToggleTheme();
+                    handleUpdateSettings({ display: { ...settings.display, themeMode: 'dark' } });
                   }}
-                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
-                    settings.display.themeMode === 'classic'
-                      ? 'bg-black border-amber-500 ring-2 ring-amber-500/30 shadow-md'
+                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    normalizedTheme === 'cyber-pink-dark'
+                      ? 'bg-[#0b0f19] border-[#ff2a85] ring-2 ring-[#ff2a85]/30 shadow-md'
                       : 'bg-[#070b14] border-[#1e293b] hover:border-slate-700'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <TerminalIcon className="w-5 h-5 text-amber-400" />
-                    {settings.display.themeMode === 'classic' && (
-                      <Check className="w-4 h-4 text-amber-400" />
-                    )}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-[#080c14] border border-[#ff2a85]/30 flex items-center justify-center">
+                          <Moon className="w-4 h-4 text-[#ff2a85]" />
+                        </div>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#ff2a85]/15 text-[#ff60a8] font-mono">
+                          Dark Mode
+                        </span>
+                      </div>
+                      {normalizedTheme === 'cyber-pink-dark' && (
+                        <Check className="w-4 h-4 text-[#ff2a85]" />
+                      )}
+                    </div>
+                    <span className="text-sm font-bold font-mono text-white block">Cyber Pink Dark</span>
+                    <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                      {isId
+                        ? 'Mode gelap institusional hitam arang pekat dengan aksen neon pink menyala untuk kenyamanan mata.'
+                        : 'Institutional deep charcoal canvas paired with vibrant neon cyber-pink highlights.'}
+                    </p>
                   </div>
-                  <span className="text-sm font-bold font-mono text-amber-400 block">Classic Terminal</span>
-                  <span className="text-[11px] text-slate-400 block mt-1">
-                    Gaya Retro Bloomberg dengan aksen amber monospaced.
-                  </span>
+                  <div className="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-[#1e293b]">
+                    <span className="text-[10px] text-slate-400 font-mono">Palet:</span>
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#080c14] border border-slate-700" title="#080c14" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#ff2a85]" title="#ff2a85" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#f8fafc]" title="#f8fafc" />
+                  </div>
                 </button>
 
-                {/* Custom Palette Theme */}
+                {/* 3. Classic Terminal */}
                 <button
                   onClick={() => {
+                    if (onSelectTheme) onSelectTheme('classic-terminal');
+                    handleUpdateSettings({ display: { ...settings.display, themeMode: 'classic' } });
+                  }}
+                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    normalizedTheme === 'classic-terminal'
+                      ? 'bg-black border-emerald-500 ring-2 ring-emerald-500/30 shadow-md'
+                      : 'bg-[#070b14] border-[#1e293b] hover:border-slate-700'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-[#020503] border border-emerald-500/30 flex items-center justify-center">
+                          <TerminalIcon className="w-4 h-4 text-emerald-400" />
+                        </div>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 font-mono">
+                          Retro Quant
+                        </span>
+                      </div>
+                      {normalizedTheme === 'classic-terminal' && (
+                        <Check className="w-4 h-4 text-emerald-400" />
+                      )}
+                    </div>
+                    <span className="text-sm font-bold font-mono text-emerald-400 block">Classic Terminal</span>
+                    <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                      {isId
+                        ? 'Nuansa terminal klasik ala hacker era 90-an dengan latar hitam mutlak dan monokrom hijau terminal.'
+                        : '90s retro quant green-screen hacker terminal with pitch black and phosphor green.'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-[#1e293b]">
+                    <span className="text-[10px] text-slate-400 font-mono">Palet:</span>
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#020503] border border-slate-700" title="#020503" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#22c55e]" title="#22c55e" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#dcfce7]" title="#dcfce7" />
+                  </div>
+                </button>
+
+                {/* 4. Custom Dominant Color */}
+                <button
+                  onClick={() => {
+                    if (onSelectTheme) onSelectTheme('custom', customThemeColor);
                     handleUpdateSettings({ display: { ...settings.display, themeMode: 'custom' } });
                   }}
-                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
-                    settings.display.themeMode === 'custom'
-                      ? 'bg-[#0f172a] border-purple-500 ring-2 ring-purple-500/30 shadow-md'
+                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    normalizedTheme === 'custom'
+                      ? 'bg-[#0f172a] border-cyan-400 ring-2 ring-cyan-400/30 shadow-md'
                       : 'bg-[#070b14] border-[#1e293b] hover:border-slate-700'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <Sparkles className="w-5 h-5 text-purple-400" />
-                    {settings.display.themeMode === 'custom' && (
-                      <Check className="w-4 h-4 text-purple-400" />
-                    )}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-8 h-8 rounded-lg border flex items-center justify-center"
+                          style={{
+                            backgroundColor: `${customThemeColor}20`,
+                            borderColor: `${customThemeColor}60`,
+                          }}
+                        >
+                          <Sparkles className="w-4 h-4" style={{ color: customThemeColor }} />
+                        </div>
+                        <span
+                          className="text-[10px] font-bold px-2 py-0.5 rounded-full border font-mono"
+                          style={{
+                            color: customThemeColor,
+                            borderColor: `${customThemeColor}50`,
+                            backgroundColor: `${customThemeColor}15`,
+                          }}
+                        >
+                          Dynamic Hue
+                        </span>
+                      </div>
+                      {normalizedTheme === 'custom' && (
+                        <Check className="w-4 h-4" style={{ color: customThemeColor }} />
+                      )}
+                    </div>
+                    <span className="text-sm font-bold font-mono text-white block">Custom Color</span>
+                    <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                      {isId
+                        ? 'Kebebasan warna kustom dinamis dengan kalkulasi otomatis kontras teks standar WCAG AA.'
+                        : 'User-defined dominant accent hue with dynamic WCAG AA text contrast calculation.'}
+                    </p>
                   </div>
-                  <span className="text-sm font-bold font-mono text-white block">Custom Palette</span>
-                  <span className="text-[11px] text-slate-400 block mt-1">
-                    Pilih aksen warna kustom kesukaan Anda.
-                  </span>
+                  <div className="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-[#1e293b]">
+                    <span className="text-[10px] text-slate-400 font-mono">Kustom:</span>
+                    <span className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: customThemeColor }} />
+                    <span className="text-[10px] font-mono text-slate-300 uppercase">{customThemeColor}</span>
+                  </div>
                 </button>
               </div>
             </div>
 
-            {/* Custom Accent Palette Picker */}
-            {settings.display.themeMode === 'custom' && (
-              <div className={`p-4 rounded-xl border mb-6 animate-fade-in ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
-                <span className="text-xs font-mono font-bold text-slate-400 block mb-2">
-                  {isId ? 'Pilih Warna Aksen Utama:' : 'Select Accent Color:'}
-                </span>
-                <div className="flex items-center gap-2">
-                  {[
-                    { id: 'cyan', name: 'Cyan Neon', color: 'bg-cyan-500' },
-                    { id: 'emerald', name: 'Emerald Bull', color: 'bg-emerald-500' },
-                    { id: 'amber', name: 'Amber Classic', color: 'bg-amber-500' },
-                    { id: 'violet', name: 'Violet Quant', color: 'bg-purple-500' },
-                    { id: 'rose', name: 'Rose Bear', color: 'bg-rose-500' },
-                  ].map((c) => (
-                    <button
-                      key={c.id}
-                      onClick={() =>
-                        handleUpdateSettings({
-                          display: { ...settings.display, accentColor: c.id as AccentColor },
-                        })
-                      }
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold border transition cursor-pointer ${
-                        settings.display.accentColor === c.id
-                          ? 'border-white text-white bg-slate-800'
-                          : 'border-transparent text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      <span className={`w-3 h-3 rounded-full ${c.color}`} />
-                      <span>{c.name}</span>
-                    </button>
-                  ))}
+            {/* Custom Dominant Color Controls Panel */}
+            {normalizedTheme === 'custom' && (
+              <div className={`p-5 rounded-2xl border mb-6 ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[#1e293b]/70">
+                  <div>
+                    <h4 className="text-sm font-bold font-mono text-white flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-cyan-400" />
+                      <span>{isId ? 'Penyesuaian Warna Dominan Kustom' : 'Custom Dominant Accent Controls'}</span>
+                    </h4>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {isId
+                        ? 'Ubah kode hex atau pilih dari palet preset. Kontras teks disesuaikan otomatis.'
+                        : 'Choose custom hex or click presets. System guarantees WCAG AA readability automatically.'}
+                    </p>
+                  </div>
+                  {/* WCAG AA Compliance Badge */}
+                  <div
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl font-mono text-xs font-bold border shrink-0"
+                    style={{
+                      backgroundColor: customThemeColor,
+                      color: getContrastTextColor(customThemeColor),
+                      borderColor: customThemeColor,
+                    }}
+                  >
+                    <span>WCAG AA READABLE ✅</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* Left: Interactive Picker & Hex Input */}
+                  <div className="space-y-3">
+                    <label className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider block">
+                      {isId ? 'Pemilih Warna & Input HEX' : 'Color Picker & Hex Value'}
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="color"
+                        value={customThemeColor}
+                        onChange={(e) => {
+                          onUpdateCustomColor?.(e.target.value);
+                          onSelectTheme?.('custom', e.target.value);
+                        }}
+                        className="w-12 h-12 rounded-xl border border-[#1e293b] cursor-pointer bg-transparent"
+                        aria-label="Color Picker Input"
+                      />
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center rounded-xl border border-[#1e293b] bg-[#0b0f19] px-3 py-2 text-xs font-mono">
+                          <span className="text-slate-500 mr-2">HEX CODE:</span>
+                          <input
+                            type="text"
+                            value={customThemeColor}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              onUpdateCustomColor?.(val);
+                              if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                                onSelectTheme?.('custom', val);
+                              }
+                            }}
+                            placeholder="#ff2a85"
+                            maxLength={7}
+                            className="w-full bg-transparent font-bold text-white focus:outline-none uppercase"
+                          />
+                        </div>
+                        <span className="text-[10px] text-slate-400 block">
+                          Format: #RRGGBB (misal: #06B6D4, #FF2A85, #F59E0B)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: Popular Swatch Presets */}
+                  <div className="space-y-3">
+                    <label className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider block">
+                      {isId ? 'Preset Palet Populer' : 'Popular Palette Presets'}
+                    </label>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {PRESET_CUSTOM_COLORS.map((preset) => (
+                        <button
+                          key={preset.hex}
+                          type="button"
+                          onClick={() => {
+                            onUpdateCustomColor?.(preset.hex);
+                            onSelectTheme?.('custom', preset.hex);
+                          }}
+                          className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-mono transition-all cursor-pointer ${
+                            customThemeColor.toLowerCase() === preset.hex.toLowerCase()
+                              ? 'bg-slate-800 border-white text-white shadow-sm ring-1 ring-white/50'
+                              : 'bg-[#0b0f19] border-[#1e293b] text-slate-300 hover:border-slate-600'
+                          }`}
+                        >
+                          <span
+                            className="w-3 h-3 rounded-full border border-black/50"
+                            style={{ backgroundColor: preset.hex }}
+                          />
+                          <span>{preset.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -1421,7 +1595,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             <MyExchangesSettings
               credentials={localCredentials}
               onSaveCredentials={handleSaveCreds}
-              theme={theme}
+              theme={isDark ? 'dark' : 'light'}
             />
           </div>
         </div>
