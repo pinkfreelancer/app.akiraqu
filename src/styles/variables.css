@@ -1,246 +1,233 @@
 /* ========================================================================= */
 /* AKIRA.QU TERMINAL ENGINE THEME VARIABLES & COLOR TOKENS                    */
-/* 1. Light (Slate 50) | 2. Dark (Deep Navy 950) | 3. Terminal | 4. Custom   */
+/* 1. Modern Pink Light | 2. Cyber Pink Dark | 3. Classic Terminal | 4. Custom */
 /* ========================================================================= */
 
 :root {
   --font-mono-numbers: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* Default theme values (Deep Navy with Soft Pink Glow) */
-  --bg-color: #0B0F19;
-  --surface-color: #1E293B;
-  --card-color: #1E293B;
-  --border-color: #334155;
-  --accent-color: #EC4899;
-  --accent-rgb: 236, 72, 153;
-  --accent-hover: #f472b6;
-  --accent-subtle: rgba(236, 72, 153, 0.14);
-  --accent-border: rgba(236, 72, 153, 0.38);
-  --text-main: #F8FAFC;
-  --text-muted: #94A3B8;
-  --text-accent: #EC4899;
+  /* Default theme values (Cyber Pink Dark) */
+  --bg-color: #080c14;
+  --surface-color: #0b1120;
+  --card-color: #0f172a;
+  --border-color: #1e293b;
+  --accent-color: #ff2a85;
+  --accent-rgb: 255, 42, 133;
+  --accent-hover: #f43f5e;
+  --accent-subtle: rgba(255, 42, 133, 0.12);
+  --accent-border: rgba(255, 42, 133, 0.35);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-accent: #ff60a8;
 }
 
 /* ========================================================================= */
-/* 1. LIGHT THEME (#F8FAFC, #FFFFFF, #E2E8F0, #F472B6 Soft Pink)            */
+/* 1. MODERN PINK LIGHT (Clean off-white, modern pink/magenta accents, WCAG) */
 /* ========================================================================= */
 [data-theme="modern-pink-light"],
-[data-theme="theme-light"],
-[data-theme="light"],
-html.theme-modern-pink-light,
-html.theme-light {
-  --bg-color: #F8FAFC;
-  --surface-color: #FFFFFF;
-  --card-color: #FFFFFF;
-  --border-color: #E2E8F0;
-  --accent-color: #F472B6;
-  --accent-rgb: 244, 114, 182;
-  --accent-hover: #ec4899;
-  --accent-subtle: rgba(244, 114, 182, 0.12);
-  --accent-border: rgba(244, 114, 182, 0.35);
-  --text-main: #0F172A;
-  --text-muted: #64748B;
-  --text-accent: #F472B6;
+html.theme-modern-pink-light {
+  --bg-color: #fdf8fa;
+  --surface-color: #ffffff;
+  --card-color: #ffffff;
+  --border-color: #fce7f3;
+  --accent-color: #db2777;
+  --accent-rgb: 219, 39, 119;
+  --accent-hover: #be185d;
+  --accent-subtle: #fdf2f8;
+  --accent-border: #fbcfe8;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-accent: #db2777;
   color-scheme: light;
 }
 
-[data-theme="modern-pink-light"] body,
-[data-theme="theme-light"] body,
-[data-theme="light"] body {
-  background-color: #F8FAFC;
-  color: #0F172A;
+[data-theme="modern-pink-light"] body {
+  background-color: #fdf8fa;
+  color: #0f172a;
 }
 
-/* Accent Mapping for Light Theme */
+/* Accent Mapping for Modern Pink Light */
 [data-theme="modern-pink-light"] .text-cyan-300,
 [data-theme="modern-pink-light"] .text-cyan-400,
-[data-theme="modern-pink-light"] .text-cyan-500,
-[data-theme="theme-light"] .text-cyan-300,
-[data-theme="theme-light"] .text-cyan-400,
-[data-theme="theme-light"] .text-cyan-500 {
-  color: #F472B6 !important;
+[data-theme="modern-pink-light"] .text-cyan-500 {
+  color: #db2777 !important;
 }
 
 [data-theme="modern-pink-light"] .border-cyan-400,
 [data-theme="modern-pink-light"] .border-cyan-500,
 [data-theme="modern-pink-light"] .border-cyan-500\/40,
-[data-theme="theme-light"] .border-cyan-400,
-[data-theme="theme-light"] .border-cyan-500 {
-  border-color: rgba(244, 114, 182, 0.35) !important;
+[data-theme="modern-pink-light"] .border-cyan-500\/30,
+[data-theme="modern-pink-light"] .border-cyan-500\/20 {
+  border-color: rgba(219, 39, 119, 0.4) !important;
 }
 
 [data-theme="modern-pink-light"] .bg-cyan-500,
-[data-theme="theme-light"] .bg-cyan-500 {
-  background-color: #F472B6 !important;
-  color: #FFFFFF !important;
+[data-theme="modern-pink-light"] .bg-cyan-600 {
+  background-color: #db2777 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="modern-pink-light"] .bg-cyan-500\/10,
+[data-theme="modern-pink-light"] .bg-cyan-500\/15,
+[data-theme="modern-pink-light"] .bg-cyan-500\/20,
+[data-theme="modern-pink-light"] .bg-cyan-500\/25,
+[data-theme="modern-pink-light"] .bg-cyan-950\/40,
+[data-theme="modern-pink-light"] .bg-cyan-950\/20 {
+  background-color: rgba(219, 39, 119, 0.12) !important;
 }
 
 /* ========================================================================= */
-/* 2. DARK THEME (#0B0F19 Deep Navy, #1E293B Glass Surface, #EC4899 Glow)   */
+/* 2. CYBER PINK DARK (Institutional charcoal, neon cyber pink highlights)   */
 /* ========================================================================= */
 [data-theme="cyber-pink-dark"],
-[data-theme="theme-dark"],
-[data-theme="dark"],
-html.theme-cyber-pink-dark,
-html.theme-dark {
-  --bg-color: #0B0F19;
-  --surface-color: #1E293B;
-  --card-color: #1E293B;
-  --border-color: #334155;
-  --accent-color: #EC4899;
-  --accent-rgb: 236, 72, 153;
-  --accent-hover: #f472b6;
-  --accent-subtle: rgba(236, 72, 153, 0.14);
-  --accent-border: rgba(236, 72, 153, 0.38);
-  --text-main: #F8FAFC;
-  --text-muted: #94A3B8;
-  --text-accent: #EC4899;
+html.theme-cyber-pink-dark {
+  --bg-color: #080c14;
+  --surface-color: #0b1120;
+  --card-color: #0f172a;
+  --border-color: #1e293b;
+  --accent-color: #ff2a85;
+  --accent-rgb: 255, 42, 133;
+  --accent-hover: #f43f5e;
+  --accent-subtle: rgba(255, 42, 133, 0.12);
+  --accent-border: rgba(255, 42, 133, 0.35);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-accent: #ff60a8;
   color-scheme: dark;
 }
 
-[data-theme="cyber-pink-dark"] body,
-[data-theme="theme-dark"] body,
-[data-theme="dark"] body {
-  background-color: #0B0F19;
-  color: #F8FAFC;
+[data-theme="cyber-pink-dark"] body {
+  background-color: #080c14;
+  color: #f8fafc;
 }
 
-/* Glassmorphism Surface effect in Dark mode */
-[data-theme="cyber-pink-dark"] .theme-card,
-[data-theme="theme-dark"] .theme-card {
-  background-color: rgba(30, 41, 59, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-color: rgba(51, 65, 85, 0.8);
-}
-
-/* Accent Mapping for Dark Theme */
+/* Accent Mapping for Cyber Pink Dark */
 [data-theme="cyber-pink-dark"] .text-cyan-300,
 [data-theme="cyber-pink-dark"] .text-cyan-400,
-[data-theme="cyber-pink-dark"] .text-cyan-500,
-[data-theme="theme-dark"] .text-cyan-300,
-[data-theme="theme-dark"] .text-cyan-400,
-[data-theme="theme-dark"] .text-cyan-500 {
-  color: #F89DB5 !important;
+[data-theme="cyber-pink-dark"] .text-cyan-500 {
+  color: #ff3b93 !important;
 }
 
 [data-theme="cyber-pink-dark"] .border-cyan-400,
 [data-theme="cyber-pink-dark"] .border-cyan-500,
-[data-theme="theme-dark"] .border-cyan-400,
-[data-theme="theme-dark"] .border-cyan-500 {
-  border-color: rgba(248, 157, 181, 0.38) !important;
+[data-theme="cyber-pink-dark"] .border-cyan-500\/40,
+[data-theme="cyber-pink-dark"] .border-cyan-500\/30,
+[data-theme="cyber-pink-dark"] .border-cyan-500\/20 {
+  border-color: rgba(255, 42, 133, 0.38) !important;
 }
 
 [data-theme="cyber-pink-dark"] .bg-cyan-500,
-[data-theme="theme-dark"] .bg-cyan-500 {
-  background-color: #EC4899 !important;
-  color: #FFFFFF !important;
+[data-theme="cyber-pink-dark"] .bg-cyan-600 {
+  background-color: #ff2a85 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="cyber-pink-dark"] .bg-cyan-500\/10,
+[data-theme="cyber-pink-dark"] .bg-cyan-500\/15,
+[data-theme="cyber-pink-dark"] .bg-cyan-500\/20,
+[data-theme="cyber-pink-dark"] .bg-cyan-500\/25,
+[data-theme="cyber-pink-dark"] .bg-cyan-950\/40,
+[data-theme="cyber-pink-dark"] .bg-cyan-950\/20 {
+  background-color: rgba(255, 42, 133, 0.14) !important;
 }
 
 /* ========================================================================= */
-/* 3. TERMINAL THEME (#030712 Pitch Black, #FF007A Cyber Pink, JetBrains)   */
+/* 3. CLASSIC TERMINAL (Retro Quant 90s, pitch black, terminal green)        */
 /* ========================================================================= */
 [data-theme="classic-terminal"],
-[data-theme="theme-terminal"],
-[data-theme="terminal"],
-html.theme-classic-terminal,
-html.theme-terminal {
-  --bg-color: #030712;
-  --surface-color: #0B0F19;
-  --card-color: #0B0F19;
-  --border-color: #1E293B;
-  --accent-color: #FF007A;
-  --accent-rgb: 255, 0, 122;
-  --accent-hover: #ff2a85;
-  --accent-subtle: rgba(255, 0, 122, 0.14);
-  --accent-border: rgba(255, 0, 122, 0.4);
-  --text-main: #F8FAFC;
-  --text-muted: #4ADE80;
-  --text-accent: #FF007A;
+html.theme-classic-terminal {
+  --bg-color: #020503;
+  --surface-color: #050b06;
+  --card-color: #071209;
+  --border-color: #132b17;
+  --accent-color: #22c55e;
+  --accent-rgb: 34, 197, 94;
+  --accent-hover: #16a34a;
+  --accent-subtle: rgba(34, 197, 94, 0.12);
+  --accent-border: rgba(34, 197, 94, 0.35);
+  --text-main: #dcfce7;
+  --text-muted: #86efac;
+  --text-accent: #4ade80;
   color-scheme: dark;
 }
 
-[data-theme="classic-terminal"] body,
-[data-theme="theme-terminal"] body,
-[data-theme="terminal"] body {
-  background-color: #030712;
-  color: #F8FAFC;
+[data-theme="classic-terminal"] body {
+  background-color: #020503;
+  color: #dcfce7;
   font-family: var(--font-mono-numbers);
 }
 
-/* Accent Mapping for Terminal Theme */
+/* Retro Grid/Border Accent in Classic Terminal */
 [data-theme="classic-terminal"] .text-cyan-300,
 [data-theme="classic-terminal"] .text-cyan-400,
-[data-theme="classic-terminal"] .text-cyan-500,
-[data-theme="theme-terminal"] .text-cyan-300,
-[data-theme="theme-terminal"] .text-cyan-400,
-[data-theme="theme-terminal"] .text-cyan-500 {
-  color: #FF007A !important;
+[data-theme="classic-terminal"] .text-cyan-500 {
+  color: #4ade80 !important;
 }
 
 [data-theme="classic-terminal"] .border-cyan-400,
 [data-theme="classic-terminal"] .border-cyan-500,
-[data-theme="theme-terminal"] .border-cyan-400,
-[data-theme="theme-terminal"] .border-cyan-500 {
-  border-color: rgba(255, 0, 122, 0.4) !important;
+[data-theme="classic-terminal"] .border-cyan-500\/40,
+[data-theme="classic-terminal"] .border-cyan-500\/30,
+[data-theme="classic-terminal"] .border-cyan-500\/20 {
+  border-color: rgba(34, 197, 94, 0.4) !important;
 }
 
 [data-theme="classic-terminal"] .bg-cyan-500,
-[data-theme="theme-terminal"] .bg-cyan-500 {
-  background-color: #FF007A !important;
-  color: #FFFFFF !important;
+[data-theme="classic-terminal"] .bg-cyan-600 {
+  background-color: #16a34a !important;
+  color: #ffffff !important;
+}
+
+[data-theme="classic-terminal"] .bg-cyan-500\/10,
+[data-theme="classic-terminal"] .bg-cyan-500\/15,
+[data-theme="classic-terminal"] .bg-cyan-500\/20,
+[data-theme="classic-terminal"] .bg-cyan-500\/25,
+[data-theme="classic-terminal"] .bg-cyan-950\/40,
+[data-theme="classic-terminal"] .bg-cyan-950\/20 {
+  background-color: rgba(34, 197, 94, 0.15) !important;
 }
 
 /* ========================================================================= */
-/* 4. CUSTOM THEME (Dynamic user-controlled hue, saturation, and contrast)   */
+/* 4. CUSTOM DOMINANT COLOR (Dynamic hue, automated WCAG AA contrast)        */
 /* ========================================================================= */
 [data-theme="custom"],
-[data-theme="theme-custom"],
 html.theme-custom {
-  --bg-color: #0B0F19;
-  --surface-color: #1E293B;
-  --card-color: #1E293B;
-  --border-color: #334155;
-  --accent-color: var(--custom-accent-hex, #F89DB5);
-  --text-main: #F8FAFC;
-  --text-muted: #94A3B8;
-  --text-accent: var(--custom-accent-hex, #F89DB5);
+  --bg-color: #080c14;
+  --surface-color: #0b1120;
+  --card-color: #0f172a;
+  --border-color: #1e293b;
+  --accent-color: var(--custom-accent-hex, #06b6d4);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-accent: var(--custom-accent-hex, #06b6d4);
   color-scheme: dark;
 }
 
 [data-theme="custom"] .text-cyan-300,
 [data-theme="custom"] .text-cyan-400,
-[data-theme="custom"] .text-cyan-500,
-[data-theme="theme-custom"] .text-cyan-300,
-[data-theme="theme-custom"] .text-cyan-400,
-[data-theme="theme-custom"] .text-cyan-500 {
-  color: var(--custom-accent-hex, #F89DB5) !important;
+[data-theme="custom"] .text-cyan-500 {
+  color: var(--custom-accent-hex, #06b6d4) !important;
 }
 
 [data-theme="custom"] .border-cyan-400,
 [data-theme="custom"] .border-cyan-500,
-[data-theme="theme-custom"] .border-cyan-400,
-[data-theme="theme-custom"] .border-cyan-500 {
-  border-color: var(--custom-accent-border, rgba(248, 157, 181, 0.4)) !important;
+[data-theme="custom"] .border-cyan-500\/40,
+[data-theme="custom"] .border-cyan-500\/30,
+[data-theme="custom"] .border-cyan-500\/20 {
+  border-color: var(--custom-accent-border, rgba(6, 182, 212, 0.4)) !important;
 }
 
 [data-theme="custom"] .bg-cyan-500,
-[data-theme="theme-custom"] .bg-cyan-500 {
-  background-color: var(--custom-accent-hex, #F89DB5) !important;
+[data-theme="custom"] .bg-cyan-600 {
+  background-color: var(--custom-accent-hex, #06b6d4) !important;
   color: var(--custom-accent-contrast, #ffffff) !important;
 }
 
-/* Smooth theme transitions */
-html, body, div, header, nav, main, aside, footer {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-duration: 200ms;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Privacy Blur Utility Class */
-.privacy-blur {
-  filter: blur(6px);
-  user-select: none;
-  pointer-events: none;
-  transition: filter 180ms ease-in-out;
+[data-theme="custom"] .bg-cyan-500\/10,
+[data-theme="custom"] .bg-cyan-500\/15,
+[data-theme="custom"] .bg-cyan-500\/20,
+[data-theme="custom"] .bg-cyan-500\/25,
+[data-theme="custom"] .bg-cyan-950\/40,
+[data-theme="custom"] .bg-cyan-950\/20 {
+  background-color: var(--custom-accent-subtle, rgba(6, 182, 212, 0.15)) !important;
 }

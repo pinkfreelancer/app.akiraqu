@@ -2,11 +2,7 @@ export type EngineThemeId =
   | 'modern-pink-light'
   | 'cyber-pink-dark'
   | 'classic-terminal'
-  | 'custom'
-  | 'theme-light'
-  | 'theme-dark'
-  | 'theme-terminal'
-  | 'theme-custom';
+  | 'custom';
 
 export interface ThemeOption {
   id: EngineThemeId;
@@ -26,66 +22,65 @@ export interface ThemeOption {
 export const THEME_OPTIONS: ThemeOption[] = [
   {
     id: 'modern-pink-light',
-    name: 'Light (Soft Pink)',
-    nameId: 'Light (Soft Pink)',
+    name: 'Modern Pink Light',
+    nameId: 'Modern Pink Light',
     category: 'Light',
-    concept: 'Clean off-white base (#F8FAFC) with #FFFFFF cards and #F472B6 soft pink accents.',
-    conceptId: 'Latar Slate-50 (#F8FAFC) bersih dengan kartu putih (#FFFFFF) dan aksen soft pink (#F472B6).',
+    concept: 'Clean off-white base with modern magenta/pink accents and high-contrast typography.',
+    conceptId: 'Tampilan terang bersih profesional dengan aksen pink modern/magenta dan teks kontras tinggi.',
     isDark: false,
-    accentColor: '#F472B6',
-    bgColor: '#F8FAFC',
-    surfaceColor: '#FFFFFF',
-    textColor: '#0F172A',
-    badgeLabel: 'Slate Light',
+    accentColor: '#db2777',
+    bgColor: '#fdf8fa',
+    surfaceColor: '#ffffff',
+    textColor: '#0f172a',
+    badgeLabel: 'Light Mode',
   },
   {
     id: 'cyber-pink-dark',
-    name: 'Dark (Deep Navy & Pink)',
-    nameId: 'Dark (Deep Navy & Pink)',
+    name: 'Cyber Pink Dark',
+    nameId: 'Cyber Pink Dark',
     category: 'Dark',
-    concept: 'Institutional Deep Navy (#0B0F19) with glassmorphism Slate cards (#1E293B) and soft pink glow (#EC4899).',
-    conceptId: 'Latar institusional Deep Navy (#0B0F19) dengan kartu kaca (#1E293B) dan aksen soft pink glow (#EC4899).',
+    concept: 'Institutional deep charcoal canvas paired with vibrant neon cyber-pink highlights.',
+    conceptId: 'Mode gelap institusional hitam arang pekat dengan aksen neon pink menyala untuk kenyamanan mata.',
     isDark: true,
-    accentColor: '#EC4899',
-    bgColor: '#0B0F19',
-    surfaceColor: '#1E293B',
-    textColor: '#F8FAFC',
-    badgeLabel: 'Default Dark',
+    accentColor: '#ff2a85',
+    bgColor: '#080c14',
+    surfaceColor: '#0f172a',
+    textColor: '#f8fafc',
+    badgeLabel: 'Dark Mode',
   },
   {
     id: 'classic-terminal',
-    name: 'Terminal (Pitch Black)',
-    nameId: 'Terminal (Pitch Black)',
+    name: 'Classic Terminal',
+    nameId: 'Classic Terminal',
     category: 'Retro',
-    concept: 'Pitch black (#030712) with #0B0F19 surfaces, Cyber Pink (#FF007A) and JetBrains Mono monospace.',
-    conceptId: 'Nuansa pitch black (#030712), aksen Cyber Pink (#FF007A) monokrom, dan tipografi JetBrains Mono.',
+    concept: '90s retro quant green-screen hacker terminal with pitch black and phosphor green.',
+    conceptId: 'Nuansa retro quant hacker era 90-an dengan latar hitam mutlak dan monokrom hijau terminal.',
     isDark: true,
-    accentColor: '#FF007A',
-    bgColor: '#030712',
-    surfaceColor: '#0B0F19',
-    textColor: '#F8FAFC',
-    badgeLabel: 'Pitch Black',
+    accentColor: '#22c55e',
+    bgColor: '#020503',
+    surfaceColor: '#071008',
+    textColor: '#4ade80',
+    badgeLabel: 'Retro Quant',
   },
   {
     id: 'custom',
-    name: 'Custom Saturation & Hue',
-    nameId: 'Kustom Saturasi & Warna',
+    name: 'Custom Dominant Color',
+    nameId: 'Custom Dominant Color',
     category: 'Custom',
-    concept: 'User-defined Soft Pink saturation level and contrast with automated WCAG AA legibility calculation.',
-    conceptId: 'Pengaturan saturasi Soft Pink kustom dan kontras latar dengan kalkulasi otomatis WCAG AA.',
+    concept: 'User-defined dominant accent hue with dynamic WCAG AA text contrast calculation.',
+    conceptId: 'Kebebasan warna kustom dinamis dengan kalkulasi otomatis kontras teks standar WCAG AA.',
     isDark: true,
-    accentColor: '#F89DB5',
-    bgColor: '#0B0F19',
-    surfaceColor: '#1E293B',
-    textColor: '#F8FAFC',
-    badgeLabel: 'Custom',
+    accentColor: '#06b6d4',
+    bgColor: '#080c14',
+    surfaceColor: '#0f172a',
+    textColor: '#f8fafc',
+    badgeLabel: 'Dynamic Hue',
   },
 ];
 
 export const PRESET_CUSTOM_COLORS = [
-  { name: 'Soft Pink (Logo)', hex: '#F89DB5' },
+  { name: 'Neon Cyber Pink', hex: '#ff2a85' },
   { name: 'Electric Cyan', hex: '#06b6d4' },
-  { name: 'Neon Pink', hex: '#ff2a85' },
   { name: 'Phosphor Green', hex: '#22c55e' },
   { name: 'Quantum Purple', hex: '#a855f7' },
   { name: 'Solar Amber', hex: '#f59e0b' },
@@ -139,10 +134,10 @@ export function getContrastTextColor(hexColor: string): string {
  */
 export function normalizeEngineTheme(theme: string | null | undefined): EngineThemeId {
   if (!theme) return 'cyber-pink-dark';
-  if (theme === 'modern-pink-light' || theme === 'theme-light' || theme === 'light') return 'modern-pink-light';
-  if (theme === 'classic-terminal' || theme === 'theme-terminal' || theme === 'classic' || theme === 'terminal') return 'classic-terminal';
-  if (theme === 'custom' || theme === 'theme-custom') return 'custom';
-  if (theme === 'cyber-pink-dark' || theme === 'theme-dark' || theme === 'dark') return 'cyber-pink-dark';
+  if (theme === 'modern-pink-light' || theme === 'light') return 'modern-pink-light';
+  if (theme === 'classic-terminal' || theme === 'classic') return 'classic-terminal';
+  if (theme === 'custom') return 'custom';
+  if (theme === 'cyber-pink-dark' || theme === 'dark') return 'cyber-pink-dark';
   return 'cyber-pink-dark';
 }
 
@@ -150,13 +145,13 @@ export function normalizeEngineTheme(theme: string | null | undefined): EngineTh
  * Checks if a given theme ID is dark
  */
 export function isDarkEngineTheme(theme: EngineThemeId): boolean {
-  return theme !== 'modern-pink-light' && theme !== 'theme-light';
+  return theme !== 'modern-pink-light';
 }
 
 /**
  * Applies CSS custom properties and classes to document root for the chosen theme
  */
-export function applyThemeToDocument(theme: EngineThemeId, customHex = '#F89DB5'): void {
+export function applyThemeToDocument(theme: EngineThemeId, customHex = '#06b6d4'): void {
   if (typeof window === 'undefined') return;
 
   const root = document.documentElement;
@@ -186,7 +181,7 @@ export function applyThemeToDocument(theme: EngineThemeId, customHex = '#F89DB5'
 
   // Handle custom color variables
   if (theme === 'custom') {
-    const rgb = hexToRgb(customHex) || { r: 248, g: 157, b: 181 };
+    const rgb = hexToRgb(customHex) || { r: 6, g: 182, b: 212 };
     const contrastText = getContrastTextColor(customHex);
 
     root.style.setProperty('--custom-accent-hex', customHex);

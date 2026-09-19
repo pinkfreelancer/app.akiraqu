@@ -1,33 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { AkiraQuLogo } from '../components/AkiraQuLogo';
 import { 
-  BarChart3, 
-  TrendingUp, 
-  ShieldCheck, 
-  Zap, 
-  Layers, 
-  Flame, 
-  Activity, 
-  BookOpen, 
-  Sliders, 
-  Radio, 
   ArrowRight, 
-  ChevronRight, 
-  CheckCircle2, 
-  Sparkles, 
-  Globe, 
+  ShieldCheck, 
   Cpu, 
+  Activity, 
+  Zap, 
+  Compass, 
+  Sliders, 
+  Layers, 
+  CheckCircle2, 
+  Terminal as TerminalIcon, 
+  Sun, 
+  Moon, 
+  Sparkles, 
+  TrendingUp, 
+  BarChart3, 
   Lock, 
   Database, 
-  Bot, 
-  Newspaper,
-  Sun,
-  Moon,
-  ExternalLink
+  Globe, 
+  Flame, 
+  Eye, 
+  ChevronRight,
+  ExternalLink,
+  Bot
 } from 'lucide-react';
-import { Language, getTranslation } from '../i18n/translations';
-import { formatCryptoPrice } from '../utils/formatters';
+import { Language } from '../i18n/translations';
+import { THEME_OPTIONS, EngineThemeId } from '../types/theme.types';
 
 interface LandingPageProps {
   lang: Language;
@@ -48,702 +48,727 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 }) => {
   const { user, isAuthenticated, logout } = useAuth();
   const isDark = theme === 'dark';
+  const isId = lang === 'id';
 
-  // Interactive Live Teaser State
-  const [selectedDemoPair, setSelectedDemoPair] = useState<'BTC' | 'ETH' | 'SOL'>('BTC');
-  const [demoPrice, setDemoPrice] = useState<number>(68450);
-  const [priceFlash, setPriceFlash] = useState<'up' | 'down' | null>(null);
+  // Active persona tab preview in Bento Grid
+  const [activePersona, setActivePersona] = useState<'basic' | 'pro' | 'whales'>('basic');
+  // Selected theme preview in Theme Showcase
+  const [selectedThemePreview, setSelectedThemePreview] = useState<EngineThemeId>('cyber-pink-dark');
 
-  // Live price simulation pulse on landing page
-  useEffect(() => {
-    const basePrices = { BTC: 68450, ETH: 3520, SOL: 154 };
-    setDemoPrice(basePrices[selectedDemoPair]);
+  const trustMetrics = [
+    {
+      label: isId ? 'Sinkronisasi Data Real-time' : 'Real-time Data Sync',
+      value: '< 85ms',
+      sub: isId ? 'WebSocket Binance & CCXT' : 'Binance WS & CCXT Pipeline',
+      icon: Activity,
+    },
+    {
+      label: isId ? 'Trader Aktif Terbantu' : 'Active Traders Guided',
+      value: '14,200+',
+      sub: isId ? 'Komunitas Kuantitatif Global' : 'Global Quantitative Community',
+      icon: Zap,
+    },
+    {
+      label: isId ? 'Volume Paus Terlacak' : 'Whale Volumes Tracked',
+      value: '$2.8B+',
+      sub: isId ? 'Deteksi Likuiditas On-Chain' : 'On-Chain Liquidity Footprints',
+      icon: ShieldCheck,
+    },
+    {
+      label: isId ? 'Konfluensi Indikator' : 'Confluence Engine',
+      value: '12 Matriks',
+      sub: isId ? 'SMC, Order Flow & Sentimen' : 'SMC, Order Flow & Sentiment',
+      icon: Layers,
+    },
+  ];
 
-    const interval = setInterval(() => {
-      setDemoPrice(prev => {
-        const delta = (Math.random() - 0.48) * (selectedDemoPair === 'BTC' ? 45 : selectedDemoPair === 'ETH' ? 4 : 0.8);
-        const nextPrice = +(prev + delta).toFixed(2);
-        setPriceFlash(delta >= 0 ? 'up' : 'down');
-        setTimeout(() => setPriceFlash(null), 300);
-        return nextPrice;
-      });
-    }, 1500);
-
-    return () => clearInterval(interval);
-  }, [selectedDemoPair]);
-
-  const liveTickers = [
-    { symbol: 'BTC/USDT', price: 68450, change: 3.42, high: 69200, low: 66100 },
-    { symbol: 'ETH/USDT', price: 3520.4, change: 2.18, high: 3590, low: 3410 },
-    { symbol: 'SOL/USDT', price: 154.85, change: 6.84, high: 158.2, low: 142.5 },
-    { symbol: 'BNB/USDT', price: 594.1, change: -0.45, high: 602, low: 588 },
-    { symbol: 'XRP/USDT', price: 0.584, change: 1.12, high: 0.601, low: 0.572 },
-    { symbol: 'DOGE/USDT', price: 0.142, change: 4.55, high: 0.148, low: 0.133 },
+  const personas = [
+    {
+      id: 'basic' as const,
+      title: isId ? 'Persona Basic' : 'Basic Persona',
+      subtitle: isId ? 'Pemula & Investor Santai' : 'Beginners & Casual Investors',
+      badge: isId ? 'Ketenangan & Disiplin' : 'Calm & Disciplined',
+      badgeColor: 'from-pink-500/20 to-rose-500/20 text-pink-400 border-pink-500/30',
+      description: isId
+        ? 'Dirancang khusus untuk menghapus FOMO dan kepanikan pasar. Kartu indikator intuitif, skor konfluensi ringkas, dan kalkulator manajemen risiko otomatis tanpa kerumitan visual.'
+        : 'Engineered to eliminate FOMO and market anxiety. Clean cards, simplified confluence scores, and automated risk management guidance for calm, confident execution.',
+      features: isId
+        ? ['Skor Bias Konfluensi Bullish / Bearish instan', 'Kalkulator Ukuran Posisi & Stop-Loss otomatis', 'Panduan AI ramah tanpa jargon teknis berlebihan']
+        : ['Instant Confluence Bias Score (Bullish / Bearish)', 'Automated Position Size & Stop Loss calculator', 'Friendly AI narrative without confusing jargon'],
+      icon: Activity,
+      accentGlow: 'rgba(244, 114, 182, 0.25)',
+      previewHighlight: isId ? 'Sinyal Terverifikasi • Rasio RR 1:2.8' : 'Verified Signal • 1:2.8 RR Ratio',
+    },
+    {
+      id: 'pro' as const,
+      title: isId ? 'Persona Pro' : 'Pro Persona',
+      subtitle: isId ? 'Day Trader & Scalper Teknikal' : 'Technical Day Traders & Scalpers',
+      badge: isId ? 'Kecepatan & Presisi' : 'Speed & High Precision',
+      badgeColor: 'from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-500/30',
+      description: isId
+        ? 'Workspace multi-panel bento grid mutakhir dengan grafik interaktif TradingView, depth order book live, 12 indikator kuantitatif lengkap (RSI, MACD, Bollinger, ATR), serta modul backtest Monte Carlo.'
+        : 'Advanced multi-panel modular workspace featuring interactive charts, real-time depth order books, complete 12 quantitative indicators, and statistical Monte Carlo backtesting.',
+      features: isId
+        ? ['Grafik Multi-Timeframe (1m s/d 1W) & WebSocket live feed', 'Analisis CVD (Cumulative Volume Delta) & Delta Imbalance', 'Lab Backtest Strategi Kuantitatif historis 500+ candle']
+        : ['Multi-Timeframe charts (1m to 1W) & live WebSocket', 'CVD (Cumulative Volume Delta) & Delta Imbalance tracking', 'Quantitative Backtest Lab across 500+ historical candles'],
+      icon: Zap,
+      accentGlow: 'rgba(168, 85, 247, 0.25)',
+      previewHighlight: isId ? 'Delta Positif +420 BTC • Konfirmasi RSI 64.2' : 'Positive Delta +420 BTC • RSI 64.2 Confirmed',
+    },
+    {
+      id: 'whales' as const,
+      title: isId ? 'Persona Whales' : 'Whales Persona',
+      subtitle: isId ? 'Institusional & Pengelola Dana' : 'Institutions & High-Net-Worth',
+      badge: isId ? 'Intelijen Makro On-Chain' : 'Macro On-Chain Intelligence',
+      badgeColor: 'from-blue-500/20 to-pink-500/20 text-blue-300 border-blue-500/30',
+      description: isId
+        ? 'Dashboard intelijen eksekutif untuk melacak pergerakan dompet besar (Whale Tracker), peta panas likuidasi multi-exchange, serta paparan risiko institusional dengan keamanan GDPR True Erasure.'
+        : 'Executive intelligence dashboard tracking institutional wallet movements, multi-exchange liquidation heatmaps, and macro market-maker exposures with enterprise-grade privacy.',
+      features: isId
+        ? ['Peta Panas Likuidasi (Liquidation Heatmap) beresolusi tinggi', 'Deteksi Spoofing & Taktik Market Maker (MM Playbook)', 'Kepatuhan Privasi GDPR Article 17 True Erasure 1-klik']
+        : ['High-resolution Liquidation Heatmap cluster tracking', 'Spoofing detection & Market Maker Playbook breakdown', '1-Click GDPR Article 17 True Data Erasure compliance'],
+      icon: ShieldCheck,
+      accentGlow: 'rgba(59, 130, 246, 0.25)',
+      previewHighlight: isId ? 'Kluster Likuidasi $14.2M di Level $66,800' : '$14.2M Liquidation Cluster at $66,800',
+    },
   ];
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${
-      isDark ? 'bg-[#2d2d2d] text-slate-100' : 'bg-slate-50 text-slate-900'
+    <div className={`min-h-screen font-sans selection:bg-pink-500 selection:text-white transition-colors duration-200 ${
+      isDark ? 'bg-[#0B0F19] text-slate-100' : 'bg-slate-50 text-slate-900'
     }`}>
-      {/* 1. TOP ANNOUNCEMENT BAR */}
-      <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white text-xs py-1.5 px-4 text-center font-mono font-bold flex items-center justify-center gap-2">
-        <span className="flex h-2 w-2 relative">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-        </span>
-        <span>
-          {lang === 'id' 
-            ? 'IMASBTC v2.4 Live • Matriks Konfluensi Multi-Indikator & Realtime WebSocket Scanner' 
-            : 'IMASBTC v2.4 Live • Multi-Indicator Confluence Matrix & Realtime WebSocket Scanner'}
-        </span>
-      </div>
-
-      {/* 2. LANDING NAVBAR */}
-      <header className={`sticky top-0 z-50 border-b backdrop-blur-md transition-colors ${
-        isDark ? 'bg-[#242424]/90 border-[#484848]' : 'bg-white/90 border-slate-200'
+      
+      {/* 1. NAVBAR */}
+      <header className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b transition-colors ${
+        isDark ? 'bg-[#0B0F19]/85 border-slate-800/80 text-white' : 'bg-white/90 border-slate-200 text-slate-900'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          {/* Brand Logo */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          {/* Logo dengan sentuhan Cyborg Soft Pink Glow */}
           <div 
             onClick={() => onNavigateToTerminal()}
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center space-x-3 cursor-pointer group select-none"
           >
-            <AkiraQuLogo size={36} theme={isDark ? 'dark' : 'light'} variant="squircle" />
-            <div>
+            <div className="relative">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500/20 via-purple-600/10 to-pink-500/30 border border-pink-500/40 flex items-center justify-center shadow-[0_0_18px_rgba(244,114,182,0.25)] group-hover:shadow-[0_0_24px_rgba(244,114,182,0.45)] transition-all">
+                <AkiraQuLogo size={26} theme={isDark ? 'dark' : 'light'} variant="symbol" />
+              </div>
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-400 rounded-full animate-ping opacity-75 pointer-events-none" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-500 rounded-full pointer-events-none" />
+            </div>
+
+            <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <span className={`font-extrabold text-base tracking-wider font-display transition-colors ${
-                  isDark ? 'text-[#F89DB5]' : 'text-[#21242B]'
-                }`}>
+                <span className="text-xl font-black tracking-wider bg-gradient-to-r from-white via-slate-100 to-pink-300 bg-clip-text text-transparent font-display">
                   AKIRAQU
                 </span>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-bold border ${
-                  isDark ? 'bg-[#F89DB5]/15 text-[#F89DB5] border-[#F89DB5]/30' : 'bg-slate-100 text-slate-700 border-slate-300'
-                }`}>
-                  PRO
+                <span className="text-[10px] px-1.5 py-0.5 rounded font-mono font-bold bg-pink-500/15 text-pink-400 border border-pink-500/30">
+                  CYBORG INTELLIGENCE
                 </span>
               </div>
-              <span className={`text-[11px] font-sans block -mt-0.5 transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              <span className={`text-[11px] font-sans -mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                 Analytic Quantitative Crypto Tools
               </span>
             </div>
           </div>
 
-          {/* Quick Nav Links */}
-          <nav className="hidden md:flex items-center gap-6 font-mono text-xs font-semibold">
-            <button 
-              onClick={() => onNavigateToTerminal('ticker')} 
-              className={`transition-colors cursor-pointer ${isDark ? 'text-slate-300 hover:text-cyan-400' : 'text-slate-600 hover:text-cyan-600'}`}
-            >
-              {lang === 'id' ? 'Live Ticker' : 'Live Ticker'}
-            </button>
-            <button 
-              onClick={() => onNavigateToTerminal('scanner')} 
-              className={`transition-colors cursor-pointer ${isDark ? 'text-slate-300 hover:text-cyan-400' : 'text-slate-600 hover:text-cyan-600'}`}
-            >
-              Scanner
-            </button>
-            <button 
-              onClick={() => onNavigateToTerminal('confluence')} 
-              className={`transition-colors cursor-pointer ${isDark ? 'text-slate-300 hover:text-cyan-400' : 'text-slate-600 hover:text-cyan-600'}`}
-            >
-              {lang === 'id' ? 'Konfluensi' : 'Confluence'}
-            </button>
-            <button 
-              onClick={() => onNavigateToTerminal('risk')} 
-              className={`transition-colors cursor-pointer ${isDark ? 'text-slate-300 hover:text-cyan-400' : 'text-slate-600 hover:text-cyan-600'}`}
-            >
-              {lang === 'id' ? 'Kalkulator Risiko' : 'Risk Engine'}
-            </button>
-            <button 
-              onClick={() => onNavigateToTerminal('journal')} 
-              className={`transition-colors cursor-pointer ${isDark ? 'text-slate-300 hover:text-cyan-400' : 'text-slate-600 hover:text-cyan-600'}`}
-            >
-              {lang === 'id' ? 'Jurnal Trading' : 'Trading Journal'}
-            </button>
+          {/* Nav Links */}
+          <nav className="hidden md:flex items-center space-x-7 text-xs font-mono font-semibold">
+            <a href="#features" className={`transition-colors ${isDark ? 'text-slate-400 hover:text-pink-400' : 'text-slate-600 hover:text-pink-600'}`}>
+              {isId ? 'Fitur' : 'Features'}
+            </a>
+            <a href="#personas" className={`transition-colors ${isDark ? 'text-slate-400 hover:text-pink-400' : 'text-slate-600 hover:text-pink-600'}`}>
+              {isId ? 'Persona' : 'Personas'}
+            </a>
+            <a href="#ai-core" className={`transition-colors ${isDark ? 'text-slate-400 hover:text-pink-400' : 'text-slate-600 hover:text-pink-600'}`}>
+              Akira AI
+            </a>
+            <a href="#themes" className={`transition-colors ${isDark ? 'text-slate-400 hover:text-pink-400' : 'text-slate-600 hover:text-pink-600'}`}>
+              {isId ? '4 Tema' : 'Themes'}
+            </a>
           </nav>
 
-          {/* Right Action Tools & Auth Button */}
-          <div className="flex items-center gap-3">
-            {/* Language Switcher */}
+          {/* Top Actions: Theme, Lang & Launch App CTA */}
+          <div className="flex items-center space-x-3">
+            {/* Language Toggle */}
             <button
-              onClick={() => onSetLang(lang === 'id' ? 'en' : 'id')}
-              className={`px-2 py-1 rounded-lg border text-xs font-mono font-bold transition-colors cursor-pointer ${
-                isDark ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-white' : 'bg-slate-100 border-slate-200 text-slate-700'
+              onClick={() => onSetLang(isId ? 'en' : 'id')}
+              className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono font-bold transition-colors cursor-pointer ${
+                isDark ? 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-pink-400' : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600'
               }`}
-              title="Ganti Bahasa / Switch Language"
+              title={isId ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
             >
               {lang.toUpperCase()}
             </button>
 
-            {/* Theme Switcher */}
+            {/* Dark / Light Toggle */}
             <button
               onClick={onToggleTheme}
-              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-                isDark ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-white' : 'bg-slate-100 border-slate-200 text-slate-700'
+              className={`p-2 rounded-lg border transition-colors cursor-pointer ${
+                isDark ? 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-pink-400' : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600'
               }`}
-              title="Ganti Tema / Toggle Theme"
+              title={isDark ? 'Mode Terang' : 'Dark Mode'}
             >
-              {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
+              {isDark ? <Sun className="w-4 h-4 text-pink-300" /> : <Moon className="w-4 h-4 text-slate-700" />}
             </button>
 
-            {/* User Account / Google Sign In CTA */}
-            {isAuthenticated && user ? (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={onNavigateToLogin}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer ${
-                    isDark ? 'bg-[#0b101f] border-emerald-500/30 text-emerald-400' : 'bg-emerald-50 border-emerald-300 text-emerald-800'
-                  }`}
-                >
-                  {user.photoURL ? (
-                    <img src={user.photoURL} alt={user.displayName || 'U'} className="w-5 h-5 rounded-full object-cover" referrerPolicy="no-referrer" />
-                  ) : (
-                    <div className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 text-[10px] flex items-center justify-center font-bold">
-                      {user.displayName?.charAt(0).toUpperCase() || 'U'}
-                    </div>
-                  )}
-                  <span className="hidden sm:inline max-w-[100px] truncate">{user.displayName?.split(' ')[0]}</span>
-                </button>
-
-                <button
-                  onClick={() => onNavigateToTerminal()}
-                  className="px-3.5 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-xl font-mono font-bold text-xs flex items-center gap-1.5 shadow-md shadow-cyan-500/20 cursor-pointer transition-all"
-                >
-                  <span>Terminal</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={onNavigateToLogin}
-                  className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                    isDark ? 'bg-[#0f172a] border-[#1e293b] text-slate-200 hover:border-slate-600' : 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50'
-                  }`}
-                >
-                  {/* Google mini icon */}
-                  <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-                  </svg>
-                  <span className="hidden sm:inline">{lang === 'id' ? 'Masuk Gmail' : 'Sign In'}</span>
-                </button>
-
-                <button
-                  onClick={() => onNavigateToTerminal()}
-                  className="px-3.5 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-xl font-mono font-bold text-xs flex items-center gap-1.5 shadow-md shadow-cyan-500/20 cursor-pointer transition-all active:scale-[0.98]"
-                >
-                  <span>{lang === 'id' ? 'Buka Terminal' : 'Launch Terminal'}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
+            {/* Launch App CTA */}
+            <button
+              onClick={() => onNavigateToTerminal()}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-white font-mono font-bold text-xs sm:text-sm shadow-[0_0_20px_rgba(236,72,153,0.35)] hover:shadow-[0_0_28px_rgba(236,72,153,0.55)] transition-all duration-300 flex items-center space-x-2 cursor-pointer active:scale-95"
+            >
+              <span>{isId ? 'Buka Terminal' : 'Launch Terminal'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </header>
 
-      {/* 3. REALTIME MARQUEE TICKER TAPE */}
-      <div className={`py-2 px-4 border-b overflow-x-auto scrollbar-none font-mono text-xs ${
-        isDark ? 'bg-[#090d16] border-[#1e293b]' : 'bg-slate-100 border-slate-200'
-      }`}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-6 whitespace-nowrap">
-          <div className="flex items-center gap-1.5 text-cyan-400 font-bold shrink-0">
-            <Radio className="w-3.5 h-3.5 animate-pulse text-emerald-400" />
-            <span>STREAM LIVE 24H:</span>
+      {/* 2. HERO SECTION */}
+      <section className="relative pt-36 pb-20 sm:pt-44 sm:pb-28 overflow-hidden">
+        {/* Background Ambient Glow Soft Pink */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] h-[360px] bg-pink-500/12 blur-[140px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/3 left-1/4 w-[380px] h-[260px] bg-purple-600/10 blur-[130px] rounded-full pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          {/* Cybernetic Intelligence Pill Badge */}
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-300 text-xs font-mono font-semibold mb-6 shadow-[0_0_15px_rgba(244,114,182,0.15)]">
+            <Zap className="w-3.5 h-3.5 text-pink-400" />
+            <span>Precision Crypto Analytics, Guided by Cybernetic Intelligence.</span>
           </div>
-          <div className="flex items-center gap-8 overflow-x-auto scrollbar-none">
-            {liveTickers.map((tick) => (
-              <div 
-                key={tick.symbol} 
-                onClick={() => onNavigateToTerminal('ticker')}
-                className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-              >
-                <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{tick.symbol}</span>
-                <span className="tabular-nums font-semibold">${formatCryptoPrice(tick.price)}</span>
-                <span className={`tabular-nums font-bold ${tick.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                  {tick.change >= 0 ? '+' : ''}{tick.change}%
+
+          {/* Main Hero Headline */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight max-w-5xl mx-auto leading-[1.12] font-display">
+            {isId ? (
+              <>
+                Menghubungkan Intuisi & Teknologi untuk{' '}
+                <span className="bg-gradient-to-r from-pink-400 via-rose-300 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(244,114,182,0.3)]">
+                  Kesuksesan Finansial
                 </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+              </>
+            ) : (
+              <>
+                Bridging Intuition & Technology for{' '}
+                <span className="bg-gradient-to-r from-pink-400 via-rose-300 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(244,114,182,0.3)]">
+                  Crypto Success
+                </span>
+              </>
+            )}
+          </h1>
 
-      {/* 4. HERO SECTION */}
-      <section className="relative pt-12 pb-16 px-4 sm:px-6 overflow-hidden">
-        {/* Futuristic Grid & Glow Background */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[450px] bg-gradient-to-b from-cyan-500/10 via-blue-500/5 to-transparent blur-3xl pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            {/* Left Hero Copy */}
-            <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-mono font-bold bg-cyan-500/10 border-cyan-500/30 text-cyan-400">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{lang === 'id' ? 'Terminal Kripto Kuantitatif & Matriks Konfluensi' : 'Quantitative Crypto Confluence Terminal'}</span>
-              </div>
-
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black font-display tracking-tight leading-[1.15]">
-                {lang === 'id' ? (
-                  <>
-                    Presisi Analitik Kripto dengan <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500">Matriks Konfluensi</span> & Order Flow.
-                  </>
-                ) : (
-                  <>
-                    Precision Crypto Analytics with <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500">Confluence Matrix</span> & Order Flow.
-                  </>
-                )}
-              </h1>
-
-              <p className={`text-base sm:text-lg font-mono leading-relaxed max-w-2xl ${
-                isDark ? 'text-slate-300' : 'text-slate-700'
-              }`}>
-                {lang === 'id'
-                  ? 'Singkirkan tebak-tebakan dalam trading. IMASBTC menggabungkan 10 indikator kuantitatif, heatmap likuiditas mendalam, scanner multi-exchange (Binance, Bybit, OKX), serta manajemen risiko institusional dalam satu antarmuka berkinerja tinggi.'
-                  : 'Eliminate guesswork in your trading. IMASBTC integrates 10 quantitative indicators, deep liquidity orderflow heatmaps, multi-exchange scanners, and institutional risk engines into a unified high-performance terminal.'}
-              </p>
-
-              {/* Action Button Row */}
-              <div className="flex flex-wrap items-center gap-4 pt-2">
-                <button
-                  onClick={() => onNavigateToTerminal()}
-                  className="px-6 py-3.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono font-extrabold text-sm rounded-xl flex items-center gap-2 shadow-xl shadow-cyan-500/25 cursor-pointer transition-all active:scale-[0.98]"
-                >
-                  <span>{lang === 'id' ? 'Buka Terminal Trading' : 'Launch Trading Terminal'}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={onNavigateToLogin}
-                  className={`px-5 py-3.5 rounded-xl border text-sm font-mono font-bold flex items-center gap-2.5 transition-all cursor-pointer ${
-                    isDark
-                      ? 'bg-[#0f172a] hover:bg-[#131b2e] border-slate-700 text-slate-200'
-                      : 'bg-white hover:bg-slate-50 border-slate-300 text-slate-800 shadow-sm'
-                  }`}
-                >
-                  {/* Google 'G' Icon */}
-                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-                  </svg>
-                  <span>{lang === 'id' ? 'Masuk dengan Akun Gmail' : 'Sign in with Google'}</span>
-                </button>
-              </div>
-
-              {/* Trust Metric Chips */}
-              <div className="flex flex-wrap items-center gap-6 pt-4 text-xs font-mono">
-                <div className="flex items-center gap-1.5 text-emerald-400">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>100% Non-Custodial</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-cyan-400">
-                  <Activity className="w-4 h-4" />
-                  <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>Sub-100ms WebSocket Feeds</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-amber-400">
-                  <Database className="w-4 h-4" />
-                  <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>Cloud Sync Firebase Firestore</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Interactive Teaser Widget */}
-            <div className="lg:col-span-5">
-              <div className={`p-5 rounded-2xl border shadow-2xl backdrop-blur-md relative overflow-hidden ${
-                isDark ? 'bg-[#0b101f]/90 border-[#1e293b] shadow-cyan-950/20' : 'bg-white/95 border-slate-200 shadow-slate-200/60'
-              }`}>
-                {/* Teaser Header Bar */}
-                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                    <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">
-                      Interactive Live Preview
-                    </span>
-                  </div>
-                  {/* Pair selector */}
-                  <div className={`flex items-center p-0.5 rounded-lg border text-xs font-mono ${
-                    isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-100 border-slate-200'
-                  }`}>
-                    {(['BTC', 'ETH', 'SOL'] as const).map(p => (
-                      <button
-                        key={p}
-                        onClick={() => setSelectedDemoPair(p)}
-                        className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-colors ${
-                          selectedDemoPair === p 
-                            ? 'bg-cyan-500 text-slate-950' 
-                            : isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Price Display */}
-                <div className="py-4">
-                  <span className={`text-[10px] font-mono uppercase font-bold tracking-wider block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                    Realtime {selectedDemoPair}/USDT Price
-                  </span>
-                  <div className="flex items-baseline justify-between mt-0.5">
-                    <span className={`text-2xl sm:text-3xl font-black font-mono tabular-nums transition-colors duration-200 ${
-                      priceFlash === 'up' ? 'text-emerald-400' : priceFlash === 'down' ? 'text-rose-400' : (isDark ? 'text-white' : 'text-slate-900')
-                    }`}>
-                      ${formatCryptoPrice(demoPrice)}
-                    </span>
-                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                      CONFLUENCE: 88/100 (STRONG BUY)
-                    </span>
-                  </div>
-                </div>
-
-                {/* 4 Quantitative Snapshot Tiles */}
-                <div className="grid grid-cols-2 gap-2.5 font-mono text-xs">
-                  <div className={`p-2.5 rounded-xl border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
-                    <span className={`text-[10px] uppercase font-bold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>RSI Multi-TF (14)</span>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="font-bold text-cyan-400">58.4 (Bullish)</span>
-                      <span className="text-[10px] text-emerald-400">▲ Zone</span>
-                    </div>
-                  </div>
-
-                  <div className={`p-2.5 rounded-xl border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
-                    <span className={`text-[10px] uppercase font-bold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>CVD Delta Volume</span>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="font-bold text-emerald-400">+$14.2M Inflow</span>
-                      <span className="text-[10px] text-cyan-400">Buyers</span>
-                    </div>
-                  </div>
-
-                  <div className={`p-2.5 rounded-xl border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
-                    <span className={`text-[10px] uppercase font-bold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Orderbook Depth</span>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="font-bold text-emerald-400">Bids 64% / Asks 36%</span>
-                    </div>
-                  </div>
-
-                  <div className={`p-2.5 rounded-xl border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
-                    <span className={`text-[10px] uppercase font-bold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Funding Rate (8h)</span>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="font-bold text-amber-400">+0.0100% (Healthy)</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Instant CTA to jump to terminal */}
-                <button
-                  onClick={() => onNavigateToTerminal('confluence')}
-                  className="w-full mt-4 py-2.5 px-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
-                >
-                  <span>{lang === 'id' ? 'Buka Analisis Lengkap Pasangan Ini →' : 'Explore Full Analysis in Terminal →'}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. 6 CORE PILLARS & CAPABILITIES BENTO GRID */}
-      <section className={`py-16 px-4 sm:px-6 border-t ${isDark ? 'bg-[#090d16] border-[#1e293b]' : 'bg-white border-slate-200'}`}>
-        <div className="max-w-7xl mx-auto space-y-12">
-          {/* Section Heading */}
-          <div className="text-center max-w-3xl mx-auto space-y-3">
-            <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider">
-              {lang === 'id' ? 'Arsitektur & Fitur Unggulan' : 'Core Architecture & Features'}
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-black font-display tracking-tight">
-              {lang === 'id' 
-                ? 'Semua Tools Kuantitatif Kripto dalam Satu Layar' 
-                : 'All Quantitative Crypto Tools in a Single Screen'}
-            </h2>
-            <p className={`text-xs sm:text-sm font-mono leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-              {lang === 'id'
-                ? 'Didesain untuk trader profesional yang membutuhkan kecepatan, validasi sinyal matematis, dan proteksi modal terstruktur.'
-                : 'Engineered for professional traders requiring speed, mathematical signal validation, and structured capital preservation.'}
-            </p>
-          </div>
-
-          {/* Bento Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {/* Card 1: 10 Quantitative Indicators */}
-            <div 
-              onClick={() => onNavigateToTerminal('indicators')}
-              className={`p-6 rounded-2xl border transition-all cursor-pointer group ${
-                isDark ? 'bg-[#0b101f] border-[#1e293b] hover:border-cyan-500/50 hover:shadow-lg' : 'bg-slate-50 border-slate-200 hover:border-cyan-500 hover:shadow-md'
-              }`}
-            >
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center mb-4 border border-cyan-500/30 group-hover:scale-105 transition-transform">
-                <BarChart3 className="w-5 h-5" />
-              </div>
-              <h3 className={`text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                10 Indikator Kuantitatif Terkalibrasi
-              </h3>
-              <p className={`text-xs font-mono leading-relaxed mt-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                RSI Multi-TF, MACD Histogram, Order Flow CVD, Heatmap Likuiditas, EMA Confluence, Funding Rate, dan Bollinger Bands dengan kalkulasi bobot otomatis.
-              </p>
-              <div className="mt-4 flex items-center gap-1 text-xs font-mono font-bold text-cyan-400">
-                <span>Pelajari Indikator</span>
-                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-
-            {/* Card 2: Realtime Multi-Exchange Scanner */}
-            <div 
-              onClick={() => onNavigateToTerminal('scanner')}
-              className={`p-6 rounded-2xl border transition-all cursor-pointer group ${
-                isDark ? 'bg-[#0b101f] border-[#1e293b] hover:border-cyan-500/50 hover:shadow-lg' : 'bg-slate-50 border-slate-200 hover:border-cyan-500 hover:shadow-md'
-              }`}
-            >
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center mb-4 border border-emerald-500/30 group-hover:scale-105 transition-transform">
-                <Radio className="w-5 h-5" />
-              </div>
-              <h3 className={`text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                Scanner Realtime Multi-Exchange
-              </h3>
-              <p className={`text-xs font-mono leading-relaxed mt-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                Scanning puluhan aset kripto secara paralel di Binance, Bybit, OKX, dan Tokocrypto untuk menemukan setup 9/9 kriteria konfluensi tertinggi.
-              </p>
-              <div className="mt-4 flex items-center gap-1 text-xs font-mono font-bold text-emerald-400">
-                <span>Buka Scanner Pasar</span>
-                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-
-            {/* Card 3: Precision Risk & DCA Ladder */}
-            <div 
-              onClick={() => onNavigateToTerminal('risk')}
-              className={`p-6 rounded-2xl border transition-all cursor-pointer group ${
-                isDark ? 'bg-[#0b101f] border-[#1e293b] hover:border-cyan-500/50 hover:shadow-lg' : 'bg-slate-50 border-slate-200 hover:border-cyan-500 hover:shadow-md'
-              }`}
-            >
-              <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center mb-4 border border-amber-500/30 group-hover:scale-105 transition-transform">
-                <Sliders className="w-5 h-5" />
-              </div>
-              <h3 className={`text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                Kalkulator Risiko & DCA Institusional
-              </h3>
-              <p className={`text-xs font-mono leading-relaxed mt-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                Kalkulasi ukuran posisi (Lot sizing), harga likuidasi aman, rasio Risk-Reward (RRR), dan pembagian 3 limit ladder order otomatis.
-              </p>
-              <div className="mt-4 flex items-center gap-1 text-xs font-mono font-bold text-amber-400">
-                <span>Hitung Risiko Trade</span>
-                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-
-            {/* Card 4: Cloud Trading Journal */}
-            <div 
-              onClick={() => onNavigateToTerminal('journal')}
-              className={`p-6 rounded-2xl border transition-all cursor-pointer group ${
-                isDark ? 'bg-[#0b101f] border-[#1e293b] hover:border-cyan-500/50 hover:shadow-lg' : 'bg-slate-50 border-slate-200 hover:border-cyan-500 hover:shadow-md'
-              }`}
-            >
-              <div className="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center mb-4 border border-blue-500/30 group-hover:scale-105 transition-transform">
-                <BookOpen className="w-5 h-5" />
-              </div>
-              <h3 className={`text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                Jurnal Trading & Firebase Cloud Sync
-              </h3>
-              <p className={`text-xs font-mono leading-relaxed mt-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                Pencatatan eksekusi posisi otomatis terhubung ke akun Gmail via Firebase Firestore. Analisis win-rate, PnL curve, dan evaluasi psikologi trading.
-              </p>
-              <div className="mt-4 flex items-center gap-1 text-xs font-mono font-bold text-blue-400">
-                <span>Akses Jurnal Cloud</span>
-                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-
-            {/* Card 5: Automated Bot Hub & Webhooks */}
-            <div 
-              onClick={() => onNavigateToTerminal('bot')}
-              className={`p-6 rounded-2xl border transition-all cursor-pointer group ${
-                isDark ? 'bg-[#0b101f] border-[#1e293b] hover:border-cyan-500/50 hover:shadow-lg' : 'bg-slate-50 border-slate-200 hover:border-cyan-500 hover:shadow-md'
-              }`}
-            >
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center mb-4 border border-indigo-500/30 group-hover:scale-105 transition-transform">
-                <Bot className="w-5 h-5" />
-              </div>
-              <h3 className={`text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                Automated Bot Trading Hub
-              </h3>
-              <p className={`text-xs font-mono leading-relaxed mt-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                Integrasi sinyal terkonfirmasi ke webhook Telegram, TradingView Alerts, atau bot eksekusi kuantitatif dengan payload JSON terstandardisasi.
-              </p>
-              <div className="mt-4 flex items-center gap-1 text-xs font-mono font-bold text-indigo-400">
-                <span>Konfigurasi Bot Hub</span>
-                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-
-            {/* Card 6: News & Market Sentiment */}
-            <div 
-              onClick={() => onNavigateToTerminal('sentiment')}
-              className={`p-6 rounded-2xl border transition-all cursor-pointer group ${
-                isDark ? 'bg-[#0b101f] border-[#1e293b] hover:border-cyan-500/50 hover:shadow-lg' : 'bg-slate-50 border-slate-200 hover:border-cyan-500 hover:shadow-md'
-              }`}
-            >
-              <div className="w-10 h-10 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center mb-4 border border-rose-500/30 group-hover:scale-105 transition-transform">
-                <Newspaper className="w-5 h-5" />
-              </div>
-              <h3 className={`text-base font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                Sentimen On-Chain & Agregasi Berita
-              </h3>
-              <p className={`text-xs font-mono leading-relaxed mt-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                Fear & Greed Index realtime, pergerakan whale on-chain, likuidasi futures, dan agregasi berita penggerak pasar kripto global.
-              </p>
-              <div className="mt-4 flex items-center gap-1 text-xs font-mono font-bold text-rose-400">
-                <span>Cek Sentimen Pasar</span>
-                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. HOW IT WORKS 3-STEP FLOW */}
-      <section className="py-16 px-4 sm:px-6 relative">
-        <div className="max-w-7xl mx-auto space-y-12">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider">
-              {lang === 'id' ? 'Alur Kerja Eksekusi Kuantitatif' : 'Execution Workflow'}
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black font-display tracking-tight">
-              {lang === 'id' ? '3 Langkah Mengambil Setup Probabilitas Tinggi' : '3 Steps to High-Probability Execution'}
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono">
-            {/* Step 1 */}
-            <div className={`p-6 rounded-2xl border relative ${
-              isDark ? 'bg-[#0b101f] border-[#1e293b]' : 'bg-white border-slate-200'
-            }`}>
-              <div className="text-3xl font-black text-cyan-500/30 mb-2">01</div>
-              <h3 className={`text-base font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                {lang === 'id' ? 'Scan & Filter Peluang' : 'Scan & Filter Setups'}
-              </h3>
-              <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                {lang === 'id'
-                  ? 'Gunakan Scanner Realtime untuk memfilter koin dengan momentum volume tertinggi dan kriteria breakout 9/9.'
-                  : 'Use the Realtime Scanner to filter high volume momentum coins matching our 9/9 breakout criteria.'}
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className={`p-6 rounded-2xl border relative ${
-              isDark ? 'bg-[#0b101f] border-[#1e293b]' : 'bg-white border-slate-200'
-            }`}>
-              <div className="text-3xl font-black text-emerald-500/30 mb-2">02</div>
-              <h3 className={`text-base font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                {lang === 'id' ? 'Validasi Matriks Konfluensi' : 'Validate Confluence'}
-              </h3>
-              <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                {lang === 'id'
-                  ? 'Periksa skor konfluensi (0-100), delta CVD, dan heatmap likuiditas untuk memastikan tidak melawan bandar/institusi.'
-                  : 'Inspect the confluence score (0-100), CVD delta, and liquidity heatmap to align with institutional order flow.'}
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className={`p-6 rounded-2xl border relative ${
-              isDark ? 'bg-[#0b101f] border-[#1e293b]' : 'bg-white border-slate-200'
-            }`}>
-              <div className="text-3xl font-black text-amber-500/30 mb-2">03</div>
-              <h3 className={`text-base font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                {lang === 'id' ? 'Kalkulasi Risiko & Catat' : 'Calculate Risk & Log'}
-              </h3>
-              <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                {lang === 'id'
-                  ? 'Tentukan lot kontrak di Kalkulator Risiko, pasang stop loss invalidasi, lalu simpan ke Jurnal Cloud Firebase.'
-                  : 'Size your position in the Risk Engine, define invalidation stop, and sync execution to your Cloud Journal.'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. FINAL CALL TO ACTION (CTA) */}
-      <section className="py-16 px-4 sm:px-6">
-        <div className={`max-w-5xl mx-auto p-8 sm:p-12 rounded-3xl border shadow-2xl relative overflow-hidden text-center space-y-6 ${
-          isDark 
-            ? 'bg-gradient-to-b from-[#0f172a] to-[#070b14] border-cyan-500/30 shadow-cyan-950/30' 
-            : 'bg-gradient-to-b from-cyan-50 to-white border-cyan-200 shadow-slate-200'
-        }`}>
-          <div className="inline-flex p-3 rounded-2xl mb-2 transition-transform">
-            <AkiraQuLogo size={56} theme={isDark ? 'dark' : 'light'} variant="squircle" />
-          </div>
-
-          <h2 className="text-2xl sm:text-4xl font-black font-display tracking-tight">
-            {lang === 'id' ? 'Siap Meningkatkan Edge Trading Anda?' : 'Ready to Elevate Your Trading Edge?'}
-          </h2>
-
-          <p className={`text-xs sm:text-sm font-mono max-w-xl mx-auto leading-relaxed ${
+          {/* Subtext: Cyborg Woman Hand Philosophy */}
+          <p className={`mt-6 text-base sm:text-lg md:text-xl max-w-3xl mx-auto font-normal leading-relaxed ${
             isDark ? 'text-slate-300' : 'text-slate-700'
           }`}>
-            {lang === 'id'
-              ? 'Masuk dengan akun Google Anda untuk mengaktifkan sinkronisasi jurnal cloud, atau langsung buka terminal trading instan.'
-              : 'Sign in with your Google account to enable cloud journal syncing, or launch the terminal instantly.'}
+            {isId
+              ? 'Terinspirasi oleh filosofi wanita setengah robot (Cyborg Woman) yang mengulurkan tangan hangat nan presisi untuk menuntun trader menembus badai pasar kripto menuju kesuksesan finansial tanpa beban kognitif berlebih.'
+              : 'Inspired by the philosophy of a cybernetic guide reaching out with human warmth and robotic precision to lead traders through volatile crypto markets toward financial triumph without cognitive overload.'}
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-            <button
-              onClick={() => onNavigateToTerminal()}
-              className="px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono font-extrabold text-sm rounded-xl flex items-center gap-2 shadow-xl shadow-cyan-500/30 cursor-pointer transition-all active:scale-[0.98]"
+          {/* Primary & Secondary Action CTAs */}
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5">
+            <button 
+              onClick={() => onNavigateToTerminal()} 
+              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-mono font-bold text-sm shadow-[0_0_30px_rgba(236,72,153,0.45)] hover:shadow-[0_0_40px_rgba(236,72,153,0.65)] transition-all flex items-center justify-center space-x-3 cursor-pointer active:scale-98"
             >
-              <span>{lang === 'id' ? 'Buka Terminal Trading' : 'Launch Trading Terminal'}</span>
+              <span>{isId ? 'Jelajahi Akiraqu' : 'Explore Akiraqu'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
-            <button
-              onClick={onNavigateToLogin}
-              className={`px-6 py-4 rounded-xl border text-sm font-mono font-bold flex items-center gap-2.5 transition-all cursor-pointer ${
-                isDark
-                  ? 'bg-white hover:bg-slate-100 text-slate-900 border-slate-200'
-                  : 'bg-white hover:bg-slate-50 text-slate-900 border-slate-300 shadow-md'
+            <button 
+              onClick={() => onNavigateToTerminal('ticker')} 
+              className={`w-full sm:w-auto px-8 py-4 rounded-xl border font-mono font-bold text-sm transition-all flex items-center justify-center space-x-2.5 cursor-pointer active:scale-98 ${
+                isDark 
+                  ? 'bg-slate-900/90 hover:bg-slate-800/90 text-slate-200 border-slate-800 hover:border-pink-500/40 shadow-lg shadow-black/40' 
+                  : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-md'
               }`}
             >
-              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-              </svg>
-              <span>{lang === 'id' ? 'Masuk dengan Gmail' : 'Sign in with Gmail'}</span>
+              <Activity className="w-4 h-4 text-pink-400" />
+              <span>{isId ? 'Lihat Analitik Live' : 'View Live Analytics'}</span>
+            </button>
+          </div>
+
+          {/* Hero Graphic: Visual Abstract / Glow Soft Pink Cyborg Hand Interface */}
+          <div className="mt-14 relative max-w-4xl mx-auto">
+            <div className={`p-4 sm:p-6 rounded-3xl border transition-all relative overflow-hidden backdrop-blur-xl shadow-2xl ${
+              isDark 
+                ? 'bg-[#0D1322]/90 border-pink-500/30 shadow-[0_0_60px_rgba(244,114,182,0.18)]' 
+                : 'bg-white/95 border-pink-200 shadow-slate-300/60'
+            }`}>
+              {/* Soft Pink decorative top accent line */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 via-rose-400 to-purple-500" />
+
+              {/* Mock Terminal Card Header */}
+              <div className="flex items-center justify-between pb-4 border-b border-slate-800/40 text-xs font-mono">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-rose-500/80" />
+                  <span className="w-3 h-3 rounded-full bg-amber-500/80" />
+                  <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
+                  <span className={`ml-2 font-bold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                    AKIRA.QU // CYBERNETIC PROTOCOL V2.4
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-pink-400 font-bold">
+                  <Cpu className="w-3.5 h-3.5" />
+                  <span>SYNAPSE ACTIVE</span>
+                </div>
+              </div>
+
+              {/* Graphic Body: Interactive Data Teaser */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 text-left">
+                <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-900/80 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
+                    <span>ASSET BIAS</span>
+                    <span className="text-emerald-400 font-bold">BULLISH 84%</span>
+                  </div>
+                  <div className="text-lg font-bold font-mono text-pink-400">BTC/USDT $68,450.00</div>
+                  <div className="text-[11px] font-mono text-slate-400 mt-1 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                    <span>Confluence Matrix Verified</span>
+                  </div>
+                </div>
+
+                <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-900/80 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
+                    <span>CYBORG GUIDANCE</span>
+                    <span className="text-pink-400 font-bold">OPTIMAL EDGE</span>
+                  </div>
+                  <div className="text-sm font-semibold text-slate-200">
+                    {isId ? 'Akumulasi Whales di Support $67,200' : 'Whale Accumulation at $67,200 Support'}
+                  </div>
+                  <div className="text-[11px] font-mono text-slate-400 mt-1">
+                    {isId ? 'Rekomendasi Risk/Reward 1:3.2' : 'Recommended Risk/Reward 1:3.2'}
+                  </div>
+                </div>
+
+                <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-900/80 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
+                    <span>EXECUTION ENGINE</span>
+                    <span className="text-cyan-400 font-bold">READY</span>
+                  </div>
+                  <div className="text-xs font-mono text-slate-300">
+                    {isId ? '12 Indikator • 0 Latensi Eksternal' : '12 Indicators • 0 External Lag'}
+                  </div>
+                  <button 
+                    onClick={() => onNavigateToTerminal('ticker')}
+                    className="mt-2 w-full py-1.5 rounded-lg bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 border border-pink-500/40 text-[11px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <span>{isId ? 'Akses Layar Utama' : 'Open Main Screen'}</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. TRUST METRICS BAR */}
+      <section className={`py-8 border-y transition-colors ${
+        isDark ? 'bg-[#080C16] border-slate-800/80' : 'bg-slate-100/90 border-slate-200'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+            {trustMetrics.map((metric, idx) => {
+              const IconComp = metric.icon;
+              return (
+                <div key={idx} className="flex items-center space-x-3.5 group">
+                  <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/25 flex items-center justify-center text-pink-400 shrink-0 group-hover:scale-105 transition-transform">
+                    <IconComp className="w-5 h-5" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xl sm:text-2xl font-black font-mono tracking-tight text-pink-400">
+                      {metric.value}
+                    </span>
+                    <span className={`text-xs font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
+                      {metric.label}
+                    </span>
+                    <span className="text-[11px] font-mono text-slate-500 truncate">
+                      {metric.sub}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. BENTO GRID FEATURES: PERSONA-BASED (Basic, Pro, Whales) */}
+      <section id="personas" className={`py-24 border-b transition-colors ${
+        isDark ? 'bg-[#070A12] border-slate-800/80' : 'bg-white border-slate-200'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-mono font-bold mb-3">
+              <Compass className="w-3.5 h-3.5" />
+              <span>{isId ? 'Sistem 3 Persona Kuantitatif' : '3 Persona Architecture'}</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-display">
+              {isId ? 'Dirancang Khusus untuk Setiap Trader' : 'Engineered for Every Trader Persona'}
+            </h2>
+            <p className={`mt-4 text-sm sm:text-base leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              {isId
+                ? 'Arsitektur antarmuka fleksibel yang bertransisi dinamis dari bimbingan emosional yang ramah hingga kedalaman data kuantitatif institusional.'
+                : 'A tailored UI/UX layout switching seamlessly from casual emotional guidance to institutional execution depth.'}
+            </p>
+
+            {/* Interactive Persona Tab Selectors */}
+            <div className="flex items-center justify-center gap-2 mt-8">
+              {personas.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setActivePersona(p.id)}
+                  className={`px-4 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer ${
+                    activePersona === p.id
+                      ? 'bg-pink-500 text-white border-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.35)]'
+                      : isDark
+                      ? 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                      : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  {p.title}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Persona Bento Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            {personas.map((persona) => {
+              const Icon = persona.icon;
+              const isSelected = activePersona === persona.id;
+              return (
+                <div
+                  key={persona.id}
+                  onClick={() => setActivePersona(persona.id)}
+                  className={`p-6 sm:p-8 rounded-2xl border transition-all duration-300 relative flex flex-col justify-between group cursor-pointer ${
+                    isSelected
+                      ? isDark
+                        ? 'bg-slate-900/90 border-pink-500/60 shadow-[0_0_30px_rgba(244,114,182,0.2)]'
+                        : 'bg-white border-pink-500 shadow-xl shadow-pink-500/10'
+                      : isDark
+                      ? 'bg-slate-900/50 border-slate-800/80 hover:border-pink-500/30'
+                      : 'bg-slate-50 border-slate-200 hover:border-pink-300'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-6">
+                      <div 
+                        className="w-12 h-12 rounded-xl border flex items-center justify-center transition-transform group-hover:scale-110"
+                        style={{ backgroundColor: `${persona.accentGlow}`, borderColor: 'rgba(244,114,182,0.3)' }}
+                      >
+                        <Icon className="w-6 h-6 text-pink-400" />
+                      </div>
+                      <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-full border bg-gradient-to-r ${persona.badgeColor}`}>
+                        {persona.badge}
+                      </span>
+                    </div>
+
+                    <h3 className="text-xl font-bold font-display tracking-tight text-white mb-1">
+                      {persona.title}
+                    </h3>
+                    <div className="text-xs font-mono text-pink-400 mb-4">
+                      {persona.subtitle}
+                    </div>
+
+                    <p className={`text-xs sm:text-sm leading-relaxed mb-6 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                      {persona.description}
+                    </p>
+
+                    <div className="space-y-2 mb-6">
+                      {persona.features.map((f, fIdx) => (
+                        <div key={fIdx} className="flex items-start gap-2 text-xs font-mono">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-pink-400 shrink-0 mt-0.5" />
+                          <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>{f}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Card Bottom: Live Metric Highlight */}
+                  <div className={`pt-4 border-t ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+                    <div className="text-[11px] font-mono text-pink-300 flex items-center justify-between">
+                      <span className="truncate">{persona.previewHighlight}</span>
+                      <ChevronRight className="w-4 h-4 shrink-0 text-pink-400 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. AI ASSISTANT SHOWCASE: "Akira" AI Preview */}
+      <section id="ai-core" className={`py-24 border-b transition-colors relative overflow-hidden ${
+        isDark ? 'bg-[#0A0E1A] border-slate-800/80' : 'bg-slate-50 border-slate-200'
+      }`}>
+        <div className="absolute top-1/2 left-0 w-96 h-96 bg-pink-500/10 blur-[150px] rounded-full pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left Column: Philosophical & Narrative Explanation */}
+            <div className="lg:col-span-6 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-mono font-bold">
+                <Bot className="w-4 h-4" />
+                <span>AKIRA AI // INTELLIGENT COMPANION</span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-display">
+                {isId ? (
+                  <>
+                    Menerjemahkan Kerumitan Pasar Menjadi{' '}
+                    <span className="bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
+                      Wawasan Pasti
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Translating Market Chaos Into{' '}
+                    <span className="bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
+                      Actionable Clarity
+                    </span>
+                  </>
+                )}
+              </h2>
+
+              <p className={`text-sm sm:text-base leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                {isId
+                  ? 'Pasar kripto penuh dengan sinyal palsu, sentimen media yang menyesatkan, dan pergerakan agresif para pembuat pasar. Akira AI bekerja sebagai asisten kuantitatif 24/7 yang menyaring ribuan data tick, order book, dan berita dalam hitungan milidetik.'
+                  : 'Crypto markets are flooded with false breakouts, deceptive social sentiment, and aggressive market-maker traps. Akira AI operates as your 24/7 quantitative companion, distilling thousands of ticks, order books, and news events into high-confidence execution plans.'}
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-200'}`}>
+                  <div className="w-8 h-8 rounded-lg bg-pink-500/15 text-pink-400 flex items-center justify-center mb-2">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <h4 className="text-xs font-mono font-bold text-white mb-1">
+                    {isId ? 'Narasi Bebas Halusinasi' : 'Grounded AI Output'}
+                  </h4>
+                  <p className="text-xs text-slate-400">
+                    {isId ? 'Setiap rekomendasi berbasis fakta data on-chain dan indikator numerik terverifikasi.' : 'Every recommendation is strictly anchored to mathematical indicators and on-chain facts.'}
+                  </p>
+                </div>
+
+                <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-200'}`}>
+                  <div className="w-8 h-8 rounded-lg bg-purple-500/15 text-purple-400 flex items-center justify-center mb-2">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <h4 className="text-xs font-mono font-bold text-white mb-1">
+                    {isId ? 'Kerahasiaan Portofolio' : 'Zero-Data Leakage'}
+                  </h4>
+                  <p className="text-xs text-slate-400">
+                    {isId ? 'Strategi dan saldo pribadi Anda tidak pernah dibagikan atau dijadikan bahan latih model.' : 'Your strategies and balance stay strictly client-side with 1-click GDPR memory wipes.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  onClick={() => onNavigateToTerminal('output')}
+                  className="px-6 py-3 rounded-xl bg-pink-500/15 hover:bg-pink-500/25 text-pink-300 border border-pink-500/40 text-xs font-mono font-bold flex items-center gap-2 cursor-pointer transition-colors"
+                >
+                  <span>{isId ? 'Coba AI Analysis di Terminal' : 'Try AI Analysis in Terminal'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column: AI Terminal Chat Preview */}
+            <div className="lg:col-span-6">
+              <div className={`rounded-2xl border p-5 sm:p-6 shadow-2xl relative overflow-hidden backdrop-blur-xl ${
+                isDark 
+                  ? 'bg-[#0E1424] border-pink-500/30 shadow-[0_0_50px_rgba(244,114,182,0.15)]' 
+                  : 'bg-white border-pink-200 shadow-slate-300'
+              }`}>
+                {/* AI Header */}
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800/80 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-pink-500/30">
+                      <Cpu className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold font-display text-white">AKIRA QUANT AGENT</div>
+                      <div className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>Online • Multimodal Model Connected</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-pink-500/15 text-pink-300 border border-pink-500/30 font-bold">
+                    BTC ANALYSIS
+                  </span>
+                </div>
+
+                {/* Simulated Conversation */}
+                <div className="space-y-3.5 text-xs font-mono">
+                  {/* User query */}
+                  <div className={`p-3 rounded-xl border text-left ${
+                    isDark ? 'bg-slate-900/90 border-slate-800 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-800'
+                  }`}>
+                    <span className="text-pink-400 font-bold mr-1">Trader:</span>
+                    {isId ? '"Bagaimana struktur likuiditas BTC/USDT saat ini untuk swing 4 jam?"' : '"What is the current BTC/USDT liquidity structure for a 4-hour swing?"'}
+                  </div>
+
+                  {/* AI response */}
+                  <div className={`p-4 rounded-xl border text-left space-y-2 ${
+                    isDark ? 'bg-pink-950/20 border-pink-500/30 text-slate-200' : 'bg-pink-50/70 border-pink-200 text-slate-900'
+                  }`}>
+                    <div className="flex items-center gap-1.5 text-pink-400 font-bold text-[11px]">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>AKIRA CYBORG SYNAPSE // INSIGHT</span>
+                    </div>
+                    <p className="leading-relaxed">
+                      {isId
+                        ? 'Terdeteksi akumulasi CVD positif (+318 BTC) di range $67,800 - $68,200. Indikator Confluence memberi skor 8.2/10 (Strong Bullish). Likuidasi short berada di $69,450.'
+                        : 'Detected strong positive CVD accumulation (+318 BTC) in the $67,800 - $68,200 range. Confluence matrix scores 8.2/10 (Strong Bullish). Immediate short liquidation pool rests at $69,450.'}
+                    </p>
+                    <div className="pt-2 flex flex-wrap items-center gap-2 text-[10px] font-bold">
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        Stop-Loss: $67,400
+                      </span>
+                      <span className="px-2 py-0.5 rounded bg-pink-500/20 text-pink-400 border border-pink-500/30">
+                        Target 1: $69,400
+                      </span>
+                      <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                        R:R 1:3.4
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. THEME SELECTOR PREVIEW (4-Engine Themes: Light, Dark, Terminal, Custom) */}
+      <section id="themes" className={`py-24 border-b transition-colors ${
+        isDark ? 'bg-[#080C16] border-slate-800/80' : 'bg-white border-slate-200'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="max-w-3xl mx-auto mb-14">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-mono font-bold mb-3">
+              <Sliders className="w-3.5 h-3.5" />
+              <span>{isId ? 'Arsitektur 4 Mesin Tema' : '4-Engine Visual Themes'}</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-display">
+              {isId ? 'Dirancang untuk Kenyamanan Mata Ekstrem' : 'Engineered for Optical Comfort'}
+            </h2>
+            <p className={`mt-4 text-sm sm:text-base leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              {isId
+                ? 'Pilih estetika visual Anda dari palet Modern Pink Light yang terang elegan, Cyber Pink Dark yang pekat, Classic Terminal retro, hingga kustomisasi warna aksen pribadi.'
+                : 'Choose your visual rhythm across Modern Pink Light, Cyber Pink Dark, Classic Terminal retro green, or bespoke custom brand accents.'}
+            </p>
+          </div>
+
+          {/* Theme Option Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {THEME_OPTIONS.map((th) => {
+              const isSelected = selectedThemePreview === th.id;
+              return (
+                <div
+                  key={th.id}
+                  onClick={() => setSelectedThemePreview(th.id)}
+                  className={`p-5 rounded-2xl border text-left transition-all duration-200 cursor-pointer relative flex flex-col justify-between ${
+                    isSelected
+                      ? 'border-pink-500 shadow-[0_0_25px_rgba(244,114,182,0.25)] scale-[1.02]'
+                      : isDark
+                      ? 'bg-slate-900/60 border-slate-800 hover:border-pink-500/30'
+                      : 'bg-slate-50 border-slate-200 hover:border-pink-300'
+                  }`}
+                  style={{
+                    backgroundColor: isDark ? undefined : th.surfaceColor,
+                  }}
+                >
+                  <div>
+                    {/* Color Swatch Circle Preview */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <span 
+                          className="w-5 h-5 rounded-full border border-black/20 shadow-xs"
+                          style={{ backgroundColor: th.accentColor }} 
+                        />
+                        <span 
+                          className="w-5 h-5 rounded-full border border-black/20 shadow-xs"
+                          style={{ backgroundColor: th.bgColor }} 
+                        />
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded font-bold bg-pink-500/10 text-pink-400 border border-pink-500/30">
+                        {th.badgeLabel}
+                      </span>
+                    </div>
+
+                    <h3 className={`text-base font-bold font-display mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      {isId ? th.nameId : th.name}
+                    </h3>
+                    <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                      {isId ? th.conceptId : th.concept}
+                    </p>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-800/40 flex items-center justify-between text-[11px] font-mono text-pink-400 font-bold">
+                    <span>{isSelected ? (isId ? 'Tema Aktif' : 'Active Theme') : (isId ? 'Pilih Tema' : 'Select Theme')}</span>
+                    <CheckCircle2 className={`w-4 h-4 ${isSelected ? 'opacity-100' : 'opacity-40'}`} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-12">
+            <button
+              onClick={() => onNavigateToTerminal()}
+              className="px-8 py-4 rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-white font-mono font-bold text-sm shadow-[0_0_25px_rgba(236,72,153,0.4)] hover:shadow-[0_0_35px_rgba(236,72,153,0.6)] transition-all cursor-pointer inline-flex items-center gap-2"
+            >
+              <span>{isId ? 'Terapkan Tema & Buka Terminal' : 'Apply Theme & Open Terminal'}</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
       </section>
 
-      {/* 8. FOOTER */}
-      <footer className={`mt-auto py-8 px-4 sm:px-6 border-t font-mono text-xs ${
-        isDark ? 'bg-[#242424] border-[#484848] text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-600'
+      {/* 7. FOOTER */}
+      <footer className={`py-12 border-t font-mono text-xs transition-colors ${
+        isDark ? 'bg-[#05080F] border-slate-800/80 text-slate-500' : 'bg-slate-100 border-slate-200 text-slate-600'
       }`}>
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <AkiraQuLogo size={24} theme={isDark ? 'dark' : 'light'} variant="symbol" />
-            <span className={`font-bold tracking-wider ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>AKIRAQU</span>
-            <span className={isDark ? 'text-slate-600' : 'text-slate-400'}>•</span>
-            <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Analytic Quantitative Crypto Tools</span>
-            <span>© 2026</span>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+            {/* Brand with Cyborg Soft Pink Logo */}
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-pink-500/15 border border-pink-500/30 flex items-center justify-center text-pink-400">
+                <AkiraQuLogo size={20} theme={isDark ? 'dark' : 'light'} variant="symbol" />
+              </div>
+              <div className="flex flex-col">
+                <span className={`font-bold tracking-wider text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  AKIRAQU
+                </span>
+                <span className="text-[11px] text-slate-500">
+                  Analytic Quantitative Crypto Tools
+                </span>
+              </div>
+            </div>
 
-          <div className="flex items-center gap-6">
-            <button onClick={() => onNavigateToTerminal('ticker')} className="hover:text-cyan-400 transition-colors cursor-pointer">
-              Terminal
-            </button>
-            <button onClick={onNavigateToLogin} className="hover:text-cyan-400 transition-colors cursor-pointer">
-              {lang === 'id' ? 'Akun Google' : 'Google Auth'}
-            </button>
-            <span className="text-emerald-500 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              System Operational
-            </span>
+            {/* Middle Nav Links */}
+            <div className="flex flex-wrap items-center justify-center gap-6 text-xs font-semibold">
+              <a href="#features" className="hover:text-pink-400 transition-colors">Features</a>
+              <a href="#personas" className="hover:text-pink-400 transition-colors">Personas</a>
+              <a href="#ai-core" className="hover:text-pink-400 transition-colors">Akira AI</a>
+              <a href="#themes" className="hover:text-pink-400 transition-colors">Themes</a>
+              <button onClick={() => onNavigateToTerminal()} className="hover:text-pink-400 transition-colors cursor-pointer">Terminal</button>
+              <button onClick={onNavigateToLogin} className="hover:text-pink-400 transition-colors cursor-pointer">Login</button>
+            </div>
+
+            {/* Copyright & Cyborg Tagline */}
+            <div className="text-[11px] text-slate-500">
+              <p>© {new Date().getFullYear()} Akiraqu Analytics. All rights reserved.</p>
+              <p className="text-pink-400/80 mt-0.5">Guided by Cybernetic Intelligence.</p>
+            </div>
           </div>
         </div>
       </footer>
+
     </div>
   );
 };

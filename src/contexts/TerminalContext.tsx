@@ -11,7 +11,6 @@ import {
   LiveTradeTick,
   LiveOrderBookLevel,
   StageId,
-  TradingPersona,
 } from '../types/crypto.types';
 import { Language, getTranslation, Translations } from '../i18n/translations';
 import { EngineThemeId, normalizeEngineTheme, isDarkEngineTheme, applyThemeToDocument } from '../types/theme.types';
@@ -33,20 +32,6 @@ export interface TerminalContextValue {
   selectStage: (stage: StageId) => void;
   openBacktest: (indicatorKey?: IndicatorKey) => void;
 
-  // Account & Execution Environment Domain (Global Account Switcher)
-  accountMode: 'DEMO' | 'REAL';
-  setAccountMode: (mode: 'DEMO' | 'REAL') => void;
-  toggleAccountMode: () => void;
-  demoBalance: number;
-  setDemoBalance: React.Dispatch<React.SetStateAction<number>>;
-
-  // Focus Mode & Grid Customization Domain
-  focusedFrame: string | null;
-  setFocusedFrame: (frameId: string | null) => void;
-  visibleFrames: Record<string, boolean>;
-  toggleFrameVisibility: (frameKey: string) => void;
-  resetFrameVisibility: () => void;
-
   // Localization & Theming Domain
   lang: Language;
   toggleLang: (newLang: Language) => void;
@@ -59,12 +44,6 @@ export interface TerminalContextValue {
   t: Translations;
 
   // Display & Ergonomics Domain
-  persona: TradingPersona;
-  setPersona: (p: TradingPersona) => void;
-  privacyBlurActive: boolean;
-  togglePrivacyBlur: () => void;
-  isAkiraDrawerOpen: boolean;
-  setIsAkiraDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
   workspaceMode: 'classic' | 'launchpad';
   toggleWorkspaceMode: () => void;
   setWorkspaceModeDirect: (mode: 'classic' | 'launchpad') => void;
@@ -158,95 +137,6 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return saved === 'launchpad' ? 'launchpad' : 'classic';
   });
 
-  // Global Account Switcher State (Demo Sandbox vs Real Live Account)
-  const [accountMode, setAccountModeState] = useState<'DEMO' | 'REAL'>(() => {
-    const saved = localStorage.getItem('akira_account_mode') as 'DEMO' | 'REAL' | null;
-    return saved === 'REAL' ? 'REAL' : 'DEMO';
-  });
-
-  const [demoBalance, setDemoBalance] = useState<number>(() => {
-    const saved = localStorage.getItem('akira_demo_balance');
-    return saved ? parseFloat(saved) : 100000.0;
-  });
-
-  const setAccountMode = useCallback((mode: 'DEMO' | 'REAL') => {
-    setAccountModeState(mode);
-    localStorage.setItem('akira_account_mode', mode);
-  }, []);
-
-  const toggleAccountMode = useCallback(() => {
-    setAccountModeState((prev) => {
-      const next = prev === 'DEMO' ? 'REAL' : 'DEMO';
-      localStorage.setItem('akira_account_mode', next);
-      return next;
-    });
-  }, []);
-
-  // Trading Persona State ('basic' | 'pro' | 'whales')
-  const [persona, setPersonaState] = useState<TradingPersona>(() => {
-    const saved = localStorage.getItem('akira_trading_persona') as TradingPersona | null;
-    return saved === 'basic' || saved === 'pro' || saved === 'whales' ? saved : 'pro';
-  });
-
-  const setPersona = useCallback((p: TradingPersona) => {
-    setPersonaState(p);
-    localStorage.setItem('akira_trading_persona', p);
-  }, []);
-
-  // Privacy Blur State (hides/blurs sensitive financial balances)
-  const [privacyBlurActive, setPrivacyBlurActive] = useState<boolean>(() => {
-    return localStorage.getItem('akira_privacy_blur') === 'true';
-  });
-
-  const togglePrivacyBlur = useCallback(() => {
-    setPrivacyBlurActive((prev) => {
-      const next = !prev;
-      localStorage.setItem('akira_privacy_blur', String(next));
-      return next;
-    });
-  }, []);
-
-  // Akira AI Insights Drawer State
-  const [isAkiraDrawerOpen, setIsAkiraDrawerOpen] = useState(false);
-
-  // Focus Mode & Grid Customization State
-  const [focusedFrame, setFocusedFrame] = useState<string | null>(null);
-  const [visibleFrames, setVisibleFrames] = useState<Record<string, boolean>>(() => {
-    try {
-      const saved = localStorage.getItem('akira_visible_frames');
-      if (saved) return JSON.parse(saved);
-    } catch {
-      // ignore
-    }
-    return {
-      chart: true,
-      orderbook: true,
-      mmbot: true,
-      playbook: true,
-      liquidation: true,
-    };
-  });
-
-  const toggleFrameVisibility = useCallback((frameKey: string) => {
-    setVisibleFrames((prev) => {
-      const next = { ...prev, [frameKey]: !prev[frameKey] };
-      localStorage.setItem('akira_visible_frames', JSON.stringify(next));
-      return next;
-    });
-  }, []);
-
-  const resetFrameVisibility = useCallback(() => {
-    const defaultFrames = {
-      chart: true,
-      orderbook: true,
-      mmbot: true,
-      playbook: true,
-      liquidation: true,
-    };
-    setVisibleFrames(defaultFrames);
-    localStorage.setItem('akira_visible_frames', JSON.stringify(defaultFrames));
-  }, []);
-
   // Trading parameters
   const [selectedSymbol, setSelectedSymbol] = useState<string>('BTC/USDT');
   const [selectedTimeframe, setSelectedTimeframe] = useState<Timeframe>('1H');
@@ -272,7 +162,7 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
 
   const [customThemeColor, setCustomThemeColorState] = useState<string>(() => {
-    return localStorage.getItem('akira_custom_theme_color') || '#F89DB5';
+    return localStorage.getItem('akira_custom_theme_color') || '#06b6d4';
   });
 
   const isDark = isDarkEngineTheme(theme);
@@ -533,27 +423,6 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     isDark,
     t,
 
-    // Account & Execution Environment Domain
-    accountMode,
-    setAccountMode,
-    toggleAccountMode,
-    demoBalance,
-    setDemoBalance,
-
-    // Focus Mode & Grid Customization Domain
-    focusedFrame,
-    setFocusedFrame,
-    visibleFrames,
-    toggleFrameVisibility,
-    resetFrameVisibility,
-
-    persona,
-    setPersona,
-    privacyBlurActive,
-    togglePrivacyBlur,
-    isAkiraDrawerOpen,
-    setIsAkiraDrawerOpen,
-
     workspaceMode,
     toggleWorkspaceMode,
     setWorkspaceModeDirect,
@@ -620,20 +489,6 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     toggleTheme,
     isDark,
     t,
-    accountMode,
-    setAccountMode,
-    toggleAccountMode,
-    demoBalance,
-    focusedFrame,
-    visibleFrames,
-    toggleFrameVisibility,
-    resetFrameVisibility,
-    persona,
-    setPersona,
-    privacyBlurActive,
-    togglePrivacyBlur,
-    isAkiraDrawerOpen,
-    setIsAkiraDrawerOpen,
     workspaceMode,
     toggleWorkspaceMode,
     setWorkspaceModeDirect,

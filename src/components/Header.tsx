@@ -40,14 +40,12 @@ import {
   Sliders,
   Terminal as TerminalIcon,
 } from 'lucide-react';
-import { CryptoSymbolInfo, Timeframe, WebSocketSyncMetrics, StageId, MarketType, TradingPersona } from '../types/crypto.types';
+import { CryptoSymbolInfo, Timeframe, WebSocketSyncMetrics, StageId } from '../types/crypto.types';
 import { Language, getTranslation } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
 import { SearchCoinModal } from './SearchCoinModal';
 import { AkiraQuLogo } from './AkiraQuLogo';
 import { ThemeDropdownMenu } from './ThemeDropdownMenu';
-import { PersonaSelector } from './PersonaSelector';
-import { AkiraAvatar } from './AkiraAvatar';
 import { EngineThemeId, normalizeEngineTheme } from '../types/theme.types';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -89,21 +87,6 @@ interface HeaderProps {
   onSelectStage?: (stage: StageId) => void;
   isSidebarOpen?: boolean;
   onToggleSidebar?: () => void;
-
-  // Persona & Akira AI Assistant
-  persona?: TradingPersona;
-  onSelectPersona?: (persona: TradingPersona) => void;
-  privacyBlurActive?: boolean;
-  onTogglePrivacyBlur?: () => void;
-  onOpenAkira?: () => void;
-
-  // Global Account Switcher & Market Navigation
-  accountMode?: 'DEMO' | 'REAL';
-  onToggleAccountMode?: () => void;
-  demoBalance?: number;
-  marketType?: MarketType;
-  onSelectMarketType?: (marketType: MarketType) => void;
-  onOpenGridCustomizer?: () => void;
 }
 
 const formatPrice = (p: number) => {
@@ -148,17 +131,6 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectStage,
   isSidebarOpen = true,
   onToggleSidebar,
-  persona = 'pro',
-  onSelectPersona,
-  privacyBlurActive = false,
-  onTogglePrivacyBlur,
-  onOpenAkira,
-  accountMode = 'DEMO',
-  onToggleAccountMode,
-  demoBalance = 100000,
-  marketType = 'SPOT',
-  onSelectMarketType,
-  onOpenGridCustomizer,
 }) => {
   const { user, isAuthenticated } = useAuth();
   const t = getTranslation(lang);
@@ -168,11 +140,9 @@ export const Header: React.FC<HeaderProps> = ({
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isPageMenuOpen, setIsPageMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const pageMenuRef = useRef<HTMLDivElement>(null);
 
   const currentCoin = symbols.find((s) => s.symbol === selectedSymbol);
   const displayPrice = livePrice && livePrice > 0 ? livePrice : currentCoin?.basePrice || 0;
@@ -202,9 +172,6 @@ export const Header: React.FC<HeaderProps> = ({
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsSettingsOpen(false);
-      }
-      if (pageMenuRef.current && !pageMenuRef.current.contains(e.target as Node)) {
-        setIsPageMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -283,165 +250,10 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </div>
           </div>
-
-          {/* Quick Page Menu Dropdown in Top Bar */}
-          {onSelectStage && (
-            <div className="relative hidden sm:block" ref={pageMenuRef}>
-              <button
-                onClick={() => setIsPageMenuOpen((prev) => !prev)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-medium transition-colors cursor-pointer border ${
-                  isPageMenuOpen
-                    ? isDark
-                      ? 'bg-slate-800 text-white border-slate-700'
-                      : 'bg-slate-100 text-slate-900 border-slate-300'
-                    : isDark
-                    ? 'bg-[#0f172a] hover:bg-slate-800 border-[#1e293b] text-slate-300'
-                    : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-700'
-                }`}
-              >
-                <LayoutGrid className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{isId ? 'Menu Halaman' : 'Pages'}</span>
-                <ChevronDown className="w-3 h-3 text-slate-400" />
-              </button>
-
-              {/* Page Navigator Grid Dropdown */}
-              {isPageMenuOpen && (
-                <div
-                  className={`absolute left-0 mt-2 w-[420px] rounded-2xl border p-4 shadow-2xl z-50 transition-all ${
-                    isDark
-                      ? 'bg-[#0f172a] border-[#1e293b] text-white shadow-black/80'
-                      : 'bg-white border-slate-200 text-slate-800 shadow-slate-300/50'
-                  }`}
-                >
-                  <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-700/30">
-                    <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                      <LayoutGrid className="w-3.5 h-3.5 text-cyan-400" />
-                      {isId ? 'Navigasi Modul Terminal' : 'Terminal Module Navigation'}
-                    </span>
-                    <span className="text-xs text-slate-400">11 Halaman</span>
-                  </div>
-
-                  <div className="space-y-3">
-                    {stagesList.map((grp, gIdx) => {
-                      const GrpIcon = grp.icon;
-                      return (
-                        <div key={gIdx} className="space-y-1">
-                          <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-                            <GrpIcon className="w-3 h-3 text-slate-400" />
-                            {grp.group}
-                          </span>
-                          <div className="grid grid-cols-2 gap-1.5">
-                            {grp.items.map((item) => {
-                              const ItemIcon = item.icon;
-                              const isCur = currentStage === item.id;
-                              return (
-                                <button
-                                  key={item.id}
-                                  onClick={() => {
-                                    onSelectStage(item.id);
-                                    setIsPageMenuOpen(false);
-                                  }}
-                                  className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs transition-colors cursor-pointer border ${
-                                    isCur
-                                      ? isDark
-                                        ? 'bg-slate-800 text-white font-semibold border-slate-600 shadow-xs'
-                                        : 'bg-slate-200 text-slate-900 font-semibold border-slate-400 shadow-xs'
-                                      : item.highlight
-                                      ? isDark
-                                        ? 'bg-cyan-950/30 border-cyan-500/30 text-cyan-300 hover:bg-cyan-900/40'
-                                        : 'bg-cyan-50 border-cyan-200 text-cyan-800 hover:bg-cyan-100'
-                                      : isDark
-                                      ? 'bg-[#070b14] border-[#1e293b] text-slate-300 hover:bg-slate-800'
-                                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                                  }`}
-                                >
-                                  <ItemIcon className="w-3.5 h-3.5 shrink-0" />
-                                  <span className="truncate">{item.name}</span>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
-        {/* Right Top Bar Controls: Persona Selector, Akira AI Button, Global Account Switcher, Landing, Auth, Settings, Mobile Toggle */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
-          {/* Persona Selector (Basic / Pro / Whales) */}
-          {onSelectPersona && (
-            <div className="hidden sm:block">
-              <PersonaSelector
-                currentPersona={persona}
-                onSelectPersona={onSelectPersona}
-                privacyBlurActive={privacyBlurActive}
-                onTogglePrivacyBlur={onTogglePrivacyBlur}
-                lang={lang}
-                theme={theme}
-                showPrivacyToggle={false}
-              />
-            </div>
-          )}
-
-          {/* Akira Cybernetic AI Assistant Drawer Trigger */}
-          {onOpenAkira && (
-            <button
-              id="btn-header-akira-ai"
-              onClick={onOpenAkira}
-              className={`flex items-center gap-2 px-2.5 sm:px-3 py-1 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer shadow-xs group ${
-                isDark
-                  ? 'bg-gradient-to-r from-pink-950/40 via-[#1e293b] to-purple-950/30 border-pink-500/40 text-pink-300 hover:border-pink-400 hover:bg-pink-900/30'
-                  : 'bg-pink-50/90 border-pink-300 text-pink-700 hover:bg-pink-100'
-              }`}
-              title={isId ? 'Buka Asisten Siber Akira AI (Sinyal Likuiditas & Risiko)' : 'Open Akira Cybernetic AI Assistant'}
-            >
-              <AkiraAvatar size={20} isOnline={true} showGlow={true} />
-              <span className="font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-rose-300">
-                Akira AI
-              </span>
-              <span className="hidden xl:inline text-[9px] px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-400 border border-pink-500/30">
-                INTEL
-              </span>
-            </button>
-          )}
-
-          {/* Global Account Switcher Toggle */}
-          {onToggleAccountMode && (
-            <button
-              id="btn-account-mode-switcher"
-              onClick={onToggleAccountMode}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-mono font-bold transition-all cursor-pointer shadow-xs ${
-                accountMode === 'DEMO'
-                  ? isDark
-                    ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25 hover:border-amber-400'
-                    : 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100'
-                  : isDark
-                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/25 hover:border-emerald-400'
-                  : 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100'
-              }`}
-              title={
-                accountMode === 'DEMO'
-                  ? isId
-                    ? 'Mode DEMO (Simulasi $100K). Klik untuk beralih ke Akun Real'
-                    : 'DEMO Sandbox ($100K). Click to switch to Real Live Account'
-                  : isId
-                  ? 'Mode REAL (Akun Nyata API). Klik untuk beralih ke Demo'
-                  : 'REAL Live Account. Click to switch to Demo Sandbox'
-              }
-            >
-              <span className={`w-2 h-2 rounded-full ${accountMode === 'DEMO' ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
-              <span className="font-extrabold">{accountMode === 'DEMO' ? 'DEMO' : 'REAL'}</span>
-              <span className="hidden xl:inline text-[10px] font-normal opacity-90">
-                {accountMode === 'DEMO' ? `($${demoBalance.toLocaleString()})` : '(LIVE API)'}
-              </span>
-            </button>
-          )}
-
+        {/* Right Top Bar Controls: Landing, Auth, Settings, Mobile Toggle */}
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Landing Page Quick Navigation */}
           {onNavigateToLanding && (
             <button
@@ -774,149 +586,50 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Main Navigation Bar */}
       <div className="flex flex-wrap items-center justify-between gap-2.5 px-3 sm:px-4 lg:px-6 py-2">
-        {/* Left Side: Sidebar Toggle, Market Sub-tabs (Spot vs Futures), Coin Selector, Quick Coins, Timeframe, & Run Analysis */}
+        {/* Left Side: Coin Selector, Timeframe, & Run Analysis */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Sidebar Toggle Button */}
-          {onToggleSidebar && (
-            <button
-              id="btn-toggle-sidebar"
-              type="button"
-              onClick={onToggleSidebar}
-              className={`flex items-center justify-center p-2 rounded-lg border text-xs font-mono transition-all cursor-pointer min-h-[38px] min-w-[38px] ${
-                isSidebarOpen
-                  ? isDark
-                    ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/25'
-                    : 'bg-cyan-50 border-cyan-300 text-cyan-800 hover:bg-cyan-100'
-                  : isDark
-                  ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-white hover:bg-slate-800'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-              }`}
-              title={isSidebarOpen ? (isId ? 'Sembunyikan Menu Sidebar' : 'Collapse Sidebar') : (isId ? 'Tampilkan Menu Sidebar' : 'Expand Sidebar')}
-              aria-label="Toggle Sidebar Navigation"
-            >
-              {isSidebarOpen ? (
-                <PanelLeftClose className="w-4 h-4 text-cyan-400" />
-              ) : (
-                <PanelLeftOpen className="w-4 h-4 text-cyan-400" />
-              )}
-            </button>
-          )}
-
-          {/* Market Navigation Sub-Tabs (Spot vs Futures/Derivatives) */}
-          {onSelectMarketType && (
-            <div className={`flex items-center p-0.5 rounded-lg border ${
-              isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-slate-100 border-slate-200'
-            }`}>
-              <button
-                type="button"
-                onClick={() => onSelectMarketType('SPOT')}
-                className={`px-2.5 py-1 text-xs font-mono font-bold rounded-md transition-all cursor-pointer min-h-[30px] flex items-center gap-1.5 ${
-                  marketType === 'SPOT'
-                    ? isDark
-                      ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 shadow-xs'
-                      : 'bg-white text-cyan-700 font-bold border border-cyan-200 shadow-xs'
-                    : isDark
-                    ? 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-                    : 'text-slate-500 hover:text-slate-900'
-                }`}
-                title={isId ? 'Pasar Spot - Perdagangan aset riil & vault' : 'Spot Market - Direct Asset Vault'}
-              >
-                <CandlestickChart className="w-3.5 h-3.5 text-cyan-400" />
-                <span>SPOT</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onSelectMarketType('FUTURES')}
-                className={`px-2.5 py-1 text-xs font-mono font-bold rounded-md transition-all cursor-pointer min-h-[30px] flex items-center gap-1.5 ${
-                  marketType === 'FUTURES'
-                    ? isDark
-                      ? 'bg-[#F89DB5]/25 text-[#F89DB5] border border-[#F89DB5]/40 shadow-xs'
-                      : 'bg-white text-pink-700 font-bold border border-pink-200 shadow-xs'
-                    : isDark
-                    ? 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-                    : 'text-slate-500 hover:text-slate-900'
-                }`}
-                title={isId ? 'Pasar Futures - Kontrak Perpetual 1x-125x Leverage' : 'Futures Market - Perpetual Contracts 1x-125x Leverage'}
-              >
-                <Flame className="w-3.5 h-3.5 text-[#F89DB5]" />
-                <span>FUTURES</span>
-                <span className={`text-[9px] px-1 py-0.2 rounded font-mono ${
-                  marketType === 'FUTURES' ? 'bg-[#F89DB5]/30 text-white' : 'bg-slate-700/50 text-slate-400'
-                }`}>
-                  125x
-                </span>
-              </button>
-            </div>
-          )}
-
-          {/* Unified Clean Asset Selector Button */}
+          {/* Unified Clean Asset Selector Button (Widened) */}
           <button
             id="btn-open-pair-search"
             type="button"
             onClick={() => setIsSearchOpen(true)}
-            className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg text-xs font-mono transition-all cursor-pointer shadow-xs group min-h-[38px] ${
+            className={`flex items-center justify-between gap-2 px-3.5 py-1.5 border rounded-lg text-xs font-mono transition-all cursor-pointer shadow-xs group min-h-[38px] w-56 sm:w-64 md:w-72 lg:w-80 ${
               isDark
                 ? 'bg-[#0f172a] border-[#1e293b] text-slate-200 hover:border-cyan-500/50 hover:bg-slate-800/80'
                 : 'bg-white border-slate-200 text-slate-800 hover:border-cyan-400 hover:bg-slate-50'
             }`}
             title={`${t.header.searchModalTitle} (Shortcut: Ctrl+K atau /)`}
           >
-            <Search
-              className={`w-3.5 h-3.5 group-hover:scale-110 transition-transform ${
-                isDark ? 'text-cyan-400' : 'text-cyan-600'
-              }`}
-            />
-            <span className={`font-bold text-xs sm:text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              {selectedSymbol}
-            </span>
-            <span className={`text-xs font-semibold ${isDark ? 'text-cyan-300' : 'text-cyan-700'}`}>
-              ${formatPrice(displayPrice)}
-            </span>
-
-            {currentCoin && (
-              <span
-                className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                  currentCoin.change24h >= 0
-                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                    : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+            <div className="flex items-center gap-2 min-w-0">
+              <Search
+                className={`w-3.5 h-3.5 shrink-0 group-hover:scale-110 transition-transform ${
+                  isDark ? 'text-cyan-400' : 'text-cyan-600'
                 }`}
-              >
-                {currentCoin.change24h >= 0 ? '+' : ''}
-                {currentCoin.change24h}%
+              />
+              <span className={`font-bold text-xs sm:text-sm truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                {selectedSymbol}
               </span>
-            )}
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-400" />
-          </button>
+              <span className={`text-xs font-semibold shrink-0 ${isDark ? 'text-cyan-300' : 'text-cyan-700'}`}>
+                ${formatPrice(displayPrice)}
+              </span>
+            </div>
 
-          {/* Quick 1-Click Popular Tickers (Clean and minimal) */}
-          <div
-            className={`hidden 2xl:flex items-center gap-1 p-0.5 rounded-lg border ${
-              isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-slate-100 border-slate-200'
-            }`}
-          >
-            {['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'PEPE/USDT'].map((sym) => {
-              const isSelected = sym === selectedSymbol;
-              const short = sym.split('/')[0];
-              return (
-                <button
-                  key={sym}
-                  onClick={() => onSelectSymbol(sym)}
-                  className={`px-2 py-1 rounded text-xs font-mono transition cursor-pointer ${
-                    isSelected
-                      ? isDark
-                        ? 'bg-slate-800 text-white font-semibold shadow-xs'
-                        : 'bg-white text-slate-900 font-semibold shadow-xs'
-                      : isDark
-                      ? 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white'
+            <div className="flex items-center gap-1.5 shrink-0">
+              {currentCoin && (
+                <span
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                    currentCoin.change24h >= 0
+                      ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                      : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
                   }`}
-                  title={`Pindah cepat ke ${sym}`}
                 >
-                  {short}
-                </button>
-              );
-            })}
-          </div>
+                  {currentCoin.change24h >= 0 ? '+' : ''}
+                  {currentCoin.change24h}%
+                </span>
+              )}
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-400" />
+            </div>
+          </button>
 
           {/* Segmented Timeframe Buttons */}
           <div
@@ -971,7 +684,7 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
-        {/* Right Side: Simple Alert Icon, Backtest, Workspace Switch, Search, Export */}
+        {/* Right Side: Simple Alert Icon & Workspace Switch */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Simple Alert / Breaking News Notification Icon */}
           {onSelectStage && (
@@ -993,25 +706,6 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
               </div>
               <span className="hidden sm:inline">Alert</span>
-            </button>
-          )}
-
-          {/* Quantitative Backtest Button (Simple & Compact) */}
-          {onOpenBacktest && (
-            <button
-              id="btn-header-backtest"
-              onClick={() => onOpenBacktest()}
-              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg transition-all cursor-pointer text-xs min-h-[38px] ${
-                currentStage === 'backtest'
-                  ? 'bg-blue-500 text-white font-bold border-blue-400 shadow-xs'
-                  : isDark
-                  ? 'bg-[#0f172a] hover:bg-blue-950/40 border-[#1e293b] hover:border-blue-500/40 text-blue-300'
-                  : 'bg-white hover:bg-blue-50 border-slate-200 text-blue-700'
-              }`}
-              title={isId ? 'Backtest Lab Kuantitatif' : 'Quantitative Backtest Lab'}
-            >
-              <FlaskConical className="w-3.5 h-3.5 text-blue-400" />
-              <span className="font-semibold">Backtest</span>
             </button>
           )}
 
@@ -1046,54 +740,6 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
           )}
-
-          {/* Quick Search & Command Bar Launcher (⌘K) */}
-          {onOpenCommandBar && (
-            <button
-              id="btn-header-omnibar"
-              onClick={onOpenCommandBar}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 border rounded-lg text-xs font-mono font-bold transition-all cursor-pointer min-h-[38px] ${
-                isDark
-                  ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-white hover:border-cyan-500/40'
-                  : 'bg-white border-slate-200 text-slate-700 hover:text-slate-950 hover:border-slate-400'
-              }`}
-              title={isId ? 'Pencarian Cepat (⌘K atau /)' : 'Quick Search (⌘K or /)'}
-            >
-              <Command className={`w-3.5 h-3.5 ${isDark ? 'text-cyan-400' : 'text-cyan-600'}`} />
-              <kbd className="text-[10px] hidden md:inline">⌘K</kbd>
-            </button>
-          )}
-
-          {/* Layout Customizer Button */}
-          {onOpenGridCustomizer && (
-            <button
-              id="btn-header-grid-customizer"
-              onClick={onOpenGridCustomizer}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 border rounded-lg text-xs font-mono font-bold transition-all cursor-pointer min-h-[38px] ${
-                isDark
-                  ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-[#F89DB5] hover:border-[#F89DB5]/40'
-                  : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600'
-              }`}
-              title={isId ? 'Kustomisasi Tampilan Grid Modul' : 'Customize Modular Grid'}
-            >
-              <Sliders className="w-3.5 h-3.5 text-[#F89DB5]" />
-              <span className="hidden xl:inline">{isId ? 'Layout' : 'Layout'}</span>
-            </button>
-          )}
-
-          {/* Export Action Button */}
-          <button
-            onClick={onOpenExportModal}
-            className={`hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 border text-xs rounded-lg transition-colors cursor-pointer min-h-[38px] ${
-              isDark
-                ? 'bg-[#0f172a] hover:bg-slate-800 border-[#1e293b] hover:border-slate-700 text-slate-200'
-                : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
-            }`}
-            title={t.header.exportArtifacts}
-          >
-            <Download className="w-3.5 h-3.5 text-cyan-500" />
-            <span className="hidden xl:inline">{isId ? 'Ekspor' : 'Export'}</span>
-          </button>
         </div>
       </div>
 

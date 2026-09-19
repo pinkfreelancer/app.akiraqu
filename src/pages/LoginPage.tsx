@@ -70,11 +70,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
   return (
     <div className={`min-h-[calc(100vh-60px)] flex flex-col justify-center items-center px-4 py-8 relative overflow-hidden ${
-      isDark ? 'bg-[#2d2d2d] text-slate-100' : 'bg-slate-50 text-slate-900'
+      isDark ? 'bg-[#070b14] text-slate-100' : 'bg-slate-50 text-slate-900'
     }`}>
       {/* Ambient background glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-[#F89DB5]/10 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-[350px] h-[250px] bg-pink-600/10 blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-[350px] h-[250px] bg-blue-600/10 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="w-full max-w-xl relative z-10">
         {/* Navigation Breadcrumb / Back button */}
@@ -82,13 +82,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           <button
             onClick={onNavigateToLanding}
             className={`flex items-center gap-1.5 transition-colors cursor-pointer ${
-              isDark ? 'text-slate-400 hover:text-[#F89DB5]' : 'text-slate-600 hover:text-pink-600'
+              isDark ? 'text-slate-400 hover:text-cyan-400' : 'text-slate-600 hover:text-cyan-600'
             }`}
           >
             ← {lang === 'id' ? 'Kembali ke Landing Page' : 'Back to Landing Page'}
           </button>
           <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${
-            isDark ? 'bg-[#F89DB5]/15 border-[#F89DB5]/30 text-[#F89DB5]' : 'bg-pink-50 border-pink-200 text-pink-800'
+            isDark ? 'bg-cyan-950/40 border-cyan-500/30 text-cyan-300' : 'bg-cyan-50 border-cyan-200 text-cyan-800'
           }`}>
             Firebase Auth Cloud Sync
           </span>
@@ -97,7 +97,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         {/* Main Card */}
         <div className={`p-6 sm:p-8 rounded-2xl border shadow-xl backdrop-blur-md ${
           isDark 
-            ? 'bg-[#323232] border-[#484848] shadow-black/40' 
+            ? 'bg-[#0b101f]/90 border-[#1e293b] shadow-black/40' 
             : 'bg-white/95 border-slate-200 shadow-slate-200/50'
         }`}>
           {/* Header & Logo */}
@@ -223,9 +223,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </button>
 
               <div className="relative flex items-center justify-center my-4">
-                <div className={`w-full border-t ${isDark ? 'border-[#484848]' : 'border-slate-200'}`} />
+                <div className={`w-full border-t ${isDark ? 'border-slate-800' : 'border-slate-200'}`} />
                 <span className={`absolute px-3 text-[10px] font-mono uppercase tracking-wider ${
-                  isDark ? 'bg-[#323232] text-slate-400' : 'bg-white text-slate-400'
+                  isDark ? 'bg-[#0b101f] text-slate-500' : 'bg-white text-slate-400'
                 }`}>
                   {lang === 'id' ? 'atau akses instan' : 'or instant access'}
                 </span>
@@ -241,8 +241,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     }}
                     className={`w-full py-2.5 px-4 rounded-xl text-xs font-mono font-bold flex items-center justify-center gap-2 border transition-colors cursor-pointer ${
                       isDark
-                        ? 'bg-[#242424] hover:bg-[#2c2c2c] border-[#484848] text-[#F89DB5]'
-                        : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-pink-700'
+                        ? 'bg-slate-800/80 hover:bg-slate-800 border-[#1e293b] text-cyan-400'
+                        : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-cyan-700'
                     }`}
                   >
                     <Zap className="w-3.5 h-3.5 text-amber-400" />
@@ -252,7 +252,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   <button
                     onClick={() => setShowDemoForm(true)}
                     className={`w-full text-center text-[11px] font-mono transition-colors cursor-pointer ${
-                      isDark ? 'text-slate-400 hover:text-[#F89DB5]' : 'text-slate-500 hover:text-slate-700'
+                      isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'
                     }`}
                   >
                     {lang === 'id' ? 'Ketik alamat Gmail khusus →' : 'Enter custom Gmail address →'}
@@ -270,8 +270,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                       placeholder="contoh: nama.trader@gmail.com"
                       value={demoEmailInput}
                       onChange={(e) => setDemoEmailInput(e.target.value)}
-                      className={`w-full px-3 py-2 rounded-lg text-xs font-mono border outline-none focus:ring-1 focus:ring-[#F89DB5] ${
-                        isDark ? 'bg-[#242424] border-[#484848] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                      className={`w-full px-3 py-2 rounded-lg text-xs font-mono border outline-none focus:ring-1 focus:ring-cyan-500 ${
+                        isDark ? 'bg-[#090d16] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                       }`}
                     />
                   </div>
