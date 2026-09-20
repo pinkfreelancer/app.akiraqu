@@ -36,9 +36,11 @@ export interface TerminalContextValue {
   lang: Language;
   toggleLang: (newLang: Language) => void;
   theme: EngineThemeId;
-  setEngineTheme: (theme: EngineThemeId, customColor?: string) => void;
+  setEngineTheme: (theme: EngineThemeId, customColor?: string, customBg?: string) => void;
   customThemeColor: string;
   setCustomThemeColor: (color: string) => void;
+  customThemeBg: string;
+  setCustomThemeBg: (bg: string) => void;
   toggleTheme: () => void;
   isDark: boolean;
   t: Translations;
@@ -155,19 +157,23 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isAssuranceModalOpen, setIsAssuranceModalOpen] = useState(false);
 
-  // Theme state supporting 4 visual engines
+  // Theme state supporting 4 visual engines with Soft Pink accents
   const [theme, setThemeState] = useState<EngineThemeId>(() => {
     const saved = localStorage.getItem('akira_theme_engine') || localStorage.getItem('nexus_theme');
     return normalizeEngineTheme(saved);
   });
 
   const [customThemeColor, setCustomThemeColorState] = useState<string>(() => {
-    return localStorage.getItem('akira_custom_theme_color') || '#06b6d4';
+    return localStorage.getItem('akira_custom_theme_color') || '#EC4899';
+  });
+
+  const [customThemeBg, setCustomThemeBgState] = useState<string>(() => {
+    return localStorage.getItem('akira_custom_theme_bg') || '#0B0F19';
   });
 
   const isDark = isDarkEngineTheme(theme);
 
-  const setEngineTheme = useCallback((newTheme: EngineThemeId, customColor?: string) => {
+  const setEngineTheme = useCallback((newTheme: EngineThemeId, customColor?: string, customBg?: string) => {
     const normalized = normalizeEngineTheme(newTheme);
     setThemeState(normalized);
     localStorage.setItem('akira_theme_engine', normalized);
@@ -177,22 +183,32 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setCustomThemeColorState(customColor);
       localStorage.setItem('akira_custom_theme_color', customColor);
     }
+    if (customBg) {
+      setCustomThemeBgState(customBg);
+      localStorage.setItem('akira_custom_theme_bg', customBg);
+    }
   }, []);
 
   const setCustomThemeColor = useCallback((color: string) => {
     setCustomThemeColorState(color);
     localStorage.setItem('akira_custom_theme_color', color);
-    applyThemeToDocument('custom', color);
-  }, []);
+    applyThemeToDocument('theme-custom', color, customThemeBg);
+  }, [customThemeBg]);
+
+  const setCustomThemeBg = useCallback((bg: string) => {
+    setCustomThemeBgState(bg);
+    localStorage.setItem('akira_custom_theme_bg', bg);
+    applyThemeToDocument('theme-custom', customThemeColor, bg);
+  }, [customThemeColor]);
 
   const toggleTheme = useCallback(() => {
-    setEngineTheme(isDark ? 'modern-pink-light' : 'cyber-pink-dark');
+    setEngineTheme(isDark ? 'theme-light' : 'theme-dark');
   }, [isDark, setEngineTheme]);
 
   // Sync theme to DOM & localStorage
   useEffect(() => {
-    applyThemeToDocument(theme, customThemeColor);
-  }, [theme, customThemeColor]);
+    applyThemeToDocument(theme, customThemeColor, customThemeBg);
+  }, [theme, customThemeColor, customThemeBg]);
 
   const toggleWorkspaceMode = useCallback(() => {
     setWorkspaceMode((prev) => {
@@ -419,6 +435,8 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setEngineTheme,
     customThemeColor,
     setCustomThemeColor,
+    customThemeBg,
+    setCustomThemeBg,
     toggleTheme,
     isDark,
     t,
@@ -486,6 +504,8 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setEngineTheme,
     customThemeColor,
     setCustomThemeColor,
+    customThemeBg,
+    setCustomThemeBg,
     toggleTheme,
     isDark,
     t,

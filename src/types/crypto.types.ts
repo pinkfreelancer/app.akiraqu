@@ -11,3 +11,4 @@ export * from './news.types';
 export * from './trading.types';
 export * from './settings.types';
 export * from './signal.types';
+export * from './alert.types';

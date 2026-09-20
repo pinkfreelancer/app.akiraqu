@@ -232,7 +232,7 @@ export const BacktestModal: React.FC<BacktestModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base sm:text-lg font-bold tracking-tight text-white">
-                  {lang === 'id' ? 'Mesin Backtest 10 Indikator Kuantitatif' : '10 Quantitative Indicators Backtest Engine'}
+                  {lang === 'id' ? 'Mesin Backtest 12 Indikator Kuantitatif' : '12 Quantitative Indicators Backtest Engine'}
                 </h2>
                 <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   <ShieldCheck className="w-3.5 h-3.5" />

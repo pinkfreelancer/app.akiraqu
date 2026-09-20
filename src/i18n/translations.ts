@@ -7,7 +7,7 @@ export const translations = {
       brandSubtitle: 'Market Crypto Tools',
       searchPlaceholder: 'Cari aset kripto (32 pasangan)...',
       searchModalTitle: 'Pilih Pasangan Kripto',
-      searchInstruction: 'Pilih koin untuk melihat grafik dan menghitung 10 indikator',
+      searchInstruction: 'Pilih koin untuk melihat grafik dan menghitung 12 indikator',
       allCategories: 'Semua Kategori',
       runAnalysis: 'Jalankan Analisis',
       analyzing: 'Menganalisis...',
@@ -208,7 +208,7 @@ export const translations = {
       stages: {
         s1: '01. Konfigurasi Input',
         s2: '02. Umpan Data Pasar',
-        s3: '03. Mesin 10 Indikator',
+        s3: '03. Mesin 12 Indikator',
         s4: '04. Penilaian Konfluensi',
         s5: '05. Manajemen Risiko',
         s6: '06. Ekspor Data',
@@ -249,7 +249,7 @@ export const translations = {
       status: 'Status',
     },
     backtest: {
-      title: 'Mesin Backtest 10 Indikator Kuantitatif',
+      title: 'Mesin Backtest 12 Indikator Kuantitatif',
       verifiedBadge: 'Parameter Terverifikasi',
       runBtn: 'Jalankan Backtest',
       simulating: 'Menghitung...',
@@ -279,7 +279,7 @@ export const translations = {
       brandSubtitle: 'Market Crypto Tools',
       searchPlaceholder: 'Search crypto pairs (32 pairs)...',
       searchModalTitle: 'Select Crypto Pair',
-      searchInstruction: 'Select a coin to view chart and calculate 10 indicators',
+      searchInstruction: 'Select a coin to view chart and calculate 12 indicators',
       allCategories: 'All Categories',
       runAnalysis: 'Run Analysis',
       analyzing: 'Analyzing...',
@@ -480,7 +480,7 @@ export const translations = {
       stages: {
         s1: '01. Input Config',
         s2: '02. Market Feed',
-        s3: '03. 10-Indicator Engine',
+        s3: '03. 12-Indicator Engine',
         s4: '04. Confluence Scoring',
         s5: '05. Risk Planner',
         s6: '06. Export & Data',
@@ -521,7 +521,7 @@ export const translations = {
       status: 'Status',
     },
     backtest: {
-      title: '10 Quantitative Indicators Backtest Engine',
+      title: '12 Quantitative Indicators Backtest Engine',
       verifiedBadge: 'Verified Parameters',
       runBtn: 'Run Backtest',
       simulating: 'Simulating...',

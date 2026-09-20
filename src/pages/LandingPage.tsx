@@ -24,7 +24,9 @@ import {
   Eye, 
   ChevronRight,
   ExternalLink,
-  Bot
+  Bot,
+  Menu,
+  X
 } from 'lucide-react';
 import { Language } from '../i18n/translations';
 import { THEME_OPTIONS, EngineThemeId } from '../types/theme.types';
@@ -53,7 +55,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   // Active persona tab preview in Bento Grid
   const [activePersona, setActivePersona] = useState<'basic' | 'pro' | 'whales'>('basic');
   // Selected theme preview in Theme Showcase
-  const [selectedThemePreview, setSelectedThemePreview] = useState<EngineThemeId>('cyber-pink-dark');
+  const [selectedThemePreview, setSelectedThemePreview] = useState<EngineThemeId>('theme-dark');
+  // Mobile navigation drawer toggle
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const trustMetrics = [
     {
@@ -187,12 +191,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </a>
           </nav>
 
-          {/* Top Actions: Theme, Lang & Launch App CTA */}
-          <div className="flex items-center space-x-3">
+          {/* Top Actions: Theme, Lang, Mobile Menu & Launch App CTA */}
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {/* Language Toggle */}
             <button
               onClick={() => onSetLang(isId ? 'en' : 'id')}
-              className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono font-bold transition-colors cursor-pointer ${
+              className={`px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs font-mono font-bold transition-colors cursor-pointer ${
                 isDark ? 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-pink-400' : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600'
               }`}
               title={isId ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
@@ -203,7 +207,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Dark / Light Toggle */}
             <button
               onClick={onToggleTheme}
-              className={`p-2 rounded-lg border transition-colors cursor-pointer ${
+              className={`p-1.5 sm:p-2 rounded-lg border transition-colors cursor-pointer ${
                 isDark ? 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-pink-400' : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600'
               }`}
               title={isDark ? 'Mode Terang' : 'Dark Mode'}
@@ -214,13 +218,63 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Launch App CTA */}
             <button
               onClick={() => onNavigateToTerminal()}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-white font-mono font-bold text-xs sm:text-sm shadow-[0_0_20px_rgba(236,72,153,0.35)] hover:shadow-[0_0_28px_rgba(236,72,153,0.55)] transition-all duration-300 flex items-center space-x-2 cursor-pointer active:scale-95"
+              className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-white font-mono font-bold text-xs sm:text-sm shadow-[0_0_20px_rgba(236,72,153,0.35)] hover:shadow-[0_0_28px_rgba(236,72,153,0.55)] transition-all duration-300 flex items-center space-x-1.5 sm:space-x-2 cursor-pointer active:scale-95"
             >
-              <span>{isId ? 'Buka Terminal' : 'Launch Terminal'}</span>
-              <ArrowRight className="w-4 h-4" />
+              <span className="hidden xs:inline sm:inline">{isId ? 'Buka Terminal' : 'Launch Terminal'}</span>
+              <span className="xs:hidden sm:hidden font-mono text-xs font-bold">App</span>
+              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </button>
+
+            {/* Mobile Hamburger Menu Toggle */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className={`md:hidden p-2 rounded-lg border transition-colors cursor-pointer ${
+                isDark ? 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-pink-400' : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600'
+              }`}
+              aria-label="Toggle navigation menu"
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5 text-pink-400" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Drawer */}
+        {isMobileMenuOpen && (
+          <div className={`md:hidden border-b px-4 py-4 space-y-3 transition-colors ${
+            isDark ? 'bg-[#0B0F19]/95 border-slate-800 text-white' : 'bg-white/95 border-slate-200 text-slate-900'
+          } backdrop-blur-md`}>
+            <div className="flex flex-col space-y-2 text-sm font-mono font-semibold">
+              <a
+                href="#features"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`py-2 px-3 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-800/60 text-slate-300' : 'hover:bg-slate-100 text-slate-700'}`}
+              >
+                {isId ? 'Fitur & Analisis' : 'Features & Analysis'}
+              </a>
+              <a
+                href="#personas"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`py-2 px-3 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-800/60 text-slate-300' : 'hover:bg-slate-100 text-slate-700'}`}
+              >
+                {isId ? 'Persona Trading' : 'Trading Personas'}
+              </a>
+              <a
+                href="#ai-core"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`py-2 px-3 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-800/60 text-slate-300' : 'hover:bg-slate-100 text-slate-700'}`}
+              >
+                Akira AI Cybernetic
+              </a>
+              <a
+                href="#themes"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`py-2 px-3 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-800/60 text-slate-300' : 'hover:bg-slate-100 text-slate-700'}`}
+              >
+                {isId ? '4 Tema Engine' : '4 Engine Themes'}
+              </a>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* 2. HERO SECTION */}
@@ -658,8 +712,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </h2>
             <p className={`mt-4 text-sm sm:text-base leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
               {isId
-                ? 'Pilih estetika visual Anda dari palet Modern Pink Light yang terang elegan, Cyber Pink Dark yang pekat, Classic Terminal retro, hingga kustomisasi warna aksen pribadi.'
-                : 'Choose your visual rhythm across Modern Pink Light, Cyber Pink Dark, Classic Terminal retro green, or bespoke custom brand accents.'}
+                ? 'Pilih estetika visual Anda dari Light Theme (#F8FAFC + aksen Soft Pink #F472B6), Dark Theme (#0B0F19 + aksen #EC4899), Terminal Theme pitch black (#030712 + #FF007A), hingga kustomisasi Color Picker kustom.'
+                : 'Choose your visual rhythm across Light Theme (Slate 50 + Soft Pink), Dark Theme (Slate 950 + Glow Pink), Terminal Theme (Pitch Black + Monospace), or bespoke Custom Theme with color picker.'}
             </p>
           </div>
 

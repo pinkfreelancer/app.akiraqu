@@ -74,9 +74,7 @@ export const TerminalStatusBar: React.FC<TerminalStatusBarProps> = ({
       } backdrop-blur-md`}
     >
       <div
-        className={`mx-auto px-3 sm:px-4 py-1.5 flex flex-wrap items-center justify-between gap-2 ${
-          isFullWidth ? 'w-full' : 'max-w-7xl'
-        }`}
+        className="w-full mx-auto px-3 sm:px-4 py-1.5 flex flex-wrap items-center justify-between gap-2"
       >
         {/* Left: Feed Provenance & Exchange Latency */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">

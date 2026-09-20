@@ -3,6 +3,8 @@ import {
   AIModelConfig,
   NotificationChannel,
 } from '../types/settings.types';
+import { loadExchangeCredentials, CREDENTIALS_STORAGE_KEY } from './credentialStorageService';
+import { loadJournalTrades, loadJournalNotes, JOURNAL_TRADES_STORAGE_KEY, JOURNAL_NOTES_STORAGE_KEY } from './journalStorageService';
 
 export const DEFAULT_AI_MODELS: AIModelConfig[] = [
   {
@@ -163,6 +165,9 @@ export const loadMasterUserSettings = (email?: string, displayName?: string): Ma
 export const saveMasterUserSettings = (settings: MasterUserSettings): void => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('imasbtc_settings_updated', { detail: settings }));
+    }
   } catch (err) {
     console.error('Failed to save master user settings:', err);
   }
@@ -172,20 +177,33 @@ export const exportAllAppDataAsJson = (): string => {
   const exportData = {
     exportedAt: new Date().toISOString(),
     version: '2.5.0',
-    terminal: 'IMASBTC Institutional Quantitative Terminal',
+    terminal: 'AKIRAQU Institutional Quantitative Terminal',
     settings: loadMasterUserSettings(),
-    journal: JSON.parse(localStorage.getItem('nexus_trading_journal') || '[]'),
+    exchangeCredentials: loadExchangeCredentials(),
+    journalTrades: loadJournalTrades(),
+    journalNotes: loadJournalNotes(),
     backtests: JSON.parse(localStorage.getItem('nexus_backtest_runs') || '[]'),
-    paperTrades: JSON.parse(localStorage.getItem('nexus_paper_positions') || '[]'),
+    paperTrades: JSON.parse(localStorage.getItem('imasbtc_manual_positions') || localStorage.getItem('nexus_paper_positions') || '[]'),
+    tradingBots: JSON.parse(localStorage.getItem('nexus_trading_bots') || '[]'),
   };
   return JSON.stringify(exportData, null, 2);
 };
 
 export const clearAllAppData = (): void => {
   try {
+    localStorage.removeItem(JOURNAL_TRADES_STORAGE_KEY);
+    localStorage.removeItem(JOURNAL_NOTES_STORAGE_KEY);
+    localStorage.removeItem('nexus_journal_trades');
     localStorage.removeItem('nexus_trading_journal');
+    localStorage.removeItem(CREDENTIALS_STORAGE_KEY);
+    localStorage.removeItem('imasbtc_exchange_credentials');
+    localStorage.removeItem('nexus_exchange_credentials');
     localStorage.removeItem('nexus_backtest_runs');
     localStorage.removeItem('nexus_paper_positions');
+    localStorage.removeItem('imasbtc_manual_positions');
+    localStorage.removeItem('imasbtc_manual_orders');
+    localStorage.removeItem('nexus_trading_bots');
+    localStorage.removeItem('nexus_bot_trades');
     localStorage.removeItem(STORAGE_KEY);
   } catch (e) {
     console.error('Clear app data error', e);

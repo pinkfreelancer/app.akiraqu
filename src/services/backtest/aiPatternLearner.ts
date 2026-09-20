@@ -210,7 +210,7 @@ export function extractStatisticalPatterns(
         ? `Rekomendasi institusional: Naikkan RRR ke ${recommendedRRR}:1 dan atur buffer SL ke ${recommendedSL}% untuk mencegah whipsaw noise sekaligus memaksimalkan rasio imbalan saat tren berlanjut.`
         : `Recommended settings: Adjust RRR to ${recommendedRRR}:1 and SL buffer to ${recommendedSL}% to avoid premature stop-outs during expansion volatility.`,
     },
-    aiEngine: 'Nexus Quant Statistical Pattern Learner v3.2',
+    aiEngine: 'AKIRAQU Quant Statistical Pattern Learner v3.2',
     generatedAt: new Date().toISOString(),
   };
 }

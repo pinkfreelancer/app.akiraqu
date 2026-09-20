@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { JournalTradeEntry, SupportedExchange } from '../types/crypto.types';
-import { INITIAL_JOURNAL_TRADES } from '../services/terminalExtensionService';
+import { useJournalTrades } from '../services/journalStorageService';
 import { BookOpen, Plus, TrendingUp, TrendingDown, CheckCircle2, XCircle, Clock, Trash2, Download, Filter, Cloud } from 'lucide-react';
 import { formatCryptoPrice } from '../utils/formatters';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,10 +21,7 @@ export const TradingJournalPage: React.FC<TradingJournalPageProps> = ({
   theme = 'dark',
 }) => {
   const { user, isAuthenticated } = useAuth();
-  const [trades, setTrades] = useState<JournalTradeEntry[]>(() => {
-    const saved = localStorage.getItem('nexus_journal_trades');
-    return saved ? JSON.parse(saved) : INITIAL_JOURNAL_TRADES;
-  });
+  const [trades, setTrades] = useJournalTrades();
 
   const [isAddingTrade, setIsAddingTrade] = useState(false);
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'OPEN' | 'CLOSED_WIN' | 'CLOSED_LOSS'>('ALL');
@@ -42,7 +39,6 @@ export const TradingJournalPage: React.FC<TradingJournalPageProps> = ({
 
   const saveTrades = (newTrades: JournalTradeEntry[]) => {
     setTrades(newTrades);
-    localStorage.setItem('nexus_journal_trades', JSON.stringify(newTrades));
   };
 
   const handleCreateTrade = (e: React.FormEvent) => {
@@ -61,7 +57,7 @@ export const TradingJournalPage: React.FC<TradingJournalPageProps> = ({
       setupRationale: rationale,
       confluenceScoreAtEntry: currentScore,
       exchange: selectedExchange,
-      notes: 'Logged via Nexus Journal',
+      notes: 'Logged via AKIRAQU Journal',
     };
 
     saveTrades([newEntry, ...trades]);

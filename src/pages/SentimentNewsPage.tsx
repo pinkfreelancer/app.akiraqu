@@ -36,7 +36,10 @@ import {
   Layers,
   HelpCircle,
   Share2,
+  Bell,
+  BellRing,
 } from 'lucide-react';
+import { useAlerts } from '../contexts/AlertContext';
 
 interface SentimentNewsPageProps {
   onSelectCoin: (symbol: string) => void;
@@ -70,6 +73,37 @@ export const SentimentNewsPage: React.FC<SentimentNewsPageProps> = ({
   });
   const [showSavedOnly, setShowSavedOnly] = useState<boolean>(false);
   const [autoRefreshSec, setAutoRefreshSec] = useState<number>(60);
+  const [alertToastItem, setAlertToastItem] = useState<string | null>(null);
+
+  const { addAlert, openAlertCenter, unreadCountByCategory, triggerSimulatedUpdate } = useAlerts();
+
+  const handleCreateNewsAlert = (item: ComprehensiveNewsItem) => {
+    const primaryCoin = item.relevantSymbols && item.relevantSymbols[0] ? item.relevantSymbols[0] : 'MARKET';
+    const isBull = item.sentiment === 'VERY_BULLISH' || item.sentiment === 'BULLISH';
+    const isBear = item.sentiment === 'VERY_BEARISH' || item.sentiment === 'BEARISH';
+    const severity = isBull ? 'SUCCESS' : isBear ? 'CRITICAL' : 'INFO';
+    const mappedSentiment = isBull ? 'BULLISH' : isBear ? 'BEARISH' : 'NEUTRAL';
+
+    addAlert({
+      category: 'SENTIMENT',
+      title: item.title,
+      subtitle: `${item.sourceName} • ${item.impactLevel} IMPACT`,
+      message: item.summary,
+      symbol: primaryCoin,
+      timestamp: isId ? 'Baru saja' : 'Just now',
+      severity,
+      actionStage: 'sentiment',
+      data: {
+        newsSource: item.sourceName,
+        sentimentImpact: mappedSentiment,
+        sentimentScore: item.sentimentScore,
+        newsCategory: item.category,
+        url: item.url,
+      },
+    });
+    setAlertToastItem(item.title);
+    setTimeout(() => setAlertToastItem(null), 2500);
+  };
 
   // Load news and sentiment data
   const loadData = async () => {
@@ -274,6 +308,31 @@ export const SentimentNewsPage: React.FC<SentimentNewsPageProps> = ({
             </div>
 
             <button
+              onClick={() => openAlertCenter('SENTIMENT')}
+              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 hover:bg-amber-500/25 font-mono text-xs font-semibold transition cursor-pointer min-h-[36px]"
+              title={isId ? 'Buka Pusat Alert Sentimen' : 'Open Sentiment Alerts'}
+            >
+              <Bell className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">{isId ? 'Alert Sentimen' : 'News Alerts'}</span>
+              {unreadCountByCategory.SENTIMENT > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white font-bold">
+                  {unreadCountByCategory.SENTIMENT}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => triggerSimulatedUpdate('SENTIMENT')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-mono text-xs transition-all cursor-pointer min-h-[36px] ${
+                isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
+              }`}
+              title={isId ? 'Simulasikan pembaruan breaking news' : 'Simulate breaking news alert'}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden md:inline">{isId ? 'Simulasi Berita' : 'Simulate News'}</span>
+            </button>
+
+            <button
               onClick={loadData}
               disabled={isLoading}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-mono text-xs font-semibold transition-all cursor-pointer shadow-xs min-h-[36px] ${
@@ -287,6 +346,13 @@ export const SentimentNewsPage: React.FC<SentimentNewsPageProps> = ({
             </button>
           </div>
         </div>
+
+        {alertToastItem && (
+          <div className="mt-4 p-3 bg-amber-950/80 border border-amber-500/50 rounded-xl text-amber-300 font-mono text-xs flex items-center gap-2 animate-in fade-in">
+            <BellRing className="w-4 h-4 text-amber-400 shrink-0" />
+            <span className="truncate">Alert Sentimen dibuat untuk: <strong>{alertToastItem}</strong></span>
+          </div>
+        )}
 
         {/* Macro Sentiment Overview Gauges */}
         {metrics && (
@@ -717,6 +783,19 @@ export const SentimentNewsPage: React.FC<SentimentNewsPageProps> = ({
                     >
                       {item.impactLevel} IMPACT
                     </span>
+
+                    {/* Alert Action */}
+                    <button
+                      onClick={() => handleCreateNewsAlert(item)}
+                      className={`p-1 rounded-lg border transition-colors cursor-pointer ${
+                        isDark
+                          ? 'bg-[#070b14] border-[#1e293b] text-slate-400 hover:text-amber-400 hover:border-amber-500/40'
+                          : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-amber-600'
+                      }`}
+                      title={isId ? 'Buat Alert untuk Berita Ini' : 'Create Alert for this News'}
+                    >
+                      <Bell className="w-4 h-4" />
+                    </button>
 
                     {/* Bookmark Action */}
                     <button

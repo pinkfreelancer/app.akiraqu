@@ -1,4 +1,9 @@
 export type EngineThemeId =
+  | 'theme-light'
+  | 'theme-dark'
+  | 'theme-terminal'
+  | 'theme-custom'
+  // Legacy aliases for backward compatibility:
   | 'modern-pink-light'
   | 'cyber-pink-dark'
   | 'classic-terminal'
@@ -8,7 +13,7 @@ export interface ThemeOption {
   id: EngineThemeId;
   name: string;
   nameId: string;
-  category: 'Light' | 'Dark' | 'Retro' | 'Custom';
+  category: 'Light' | 'Dark' | 'Terminal' | 'Custom';
   concept: string;
   conceptId: string;
   isDark: boolean;
@@ -21,71 +26,90 @@ export interface ThemeOption {
 
 export const THEME_OPTIONS: ThemeOption[] = [
   {
-    id: 'modern-pink-light',
-    name: 'Modern Pink Light',
-    nameId: 'Modern Pink Light',
+    id: 'theme-light',
+    name: 'Light Theme',
+    nameId: 'Light Theme',
     category: 'Light',
-    concept: 'Clean off-white base with modern magenta/pink accents and high-contrast typography.',
-    conceptId: 'Tampilan terang bersih profesional dengan aksen pink modern/magenta dan teks kontras tinggi.',
+    concept: 'Slate 50 background (#F8FAFC) with pure white cards (#FFFFFF), subtle borders (#E2E8F0), and Soft Pink accent (#F472B6).',
+    conceptId: 'Background Slate 50 (#F8FAFC), Surface/Card #FFFFFF berborder halus (#E2E8F0), dan aksen Soft Pink #F472B6 (Pink 400).',
     isDark: false,
-    accentColor: '#db2777',
-    bgColor: '#fdf8fa',
-    surfaceColor: '#ffffff',
-    textColor: '#0f172a',
-    badgeLabel: 'Light Mode',
+    accentColor: '#F472B6',
+    bgColor: '#F8FAFC',
+    surfaceColor: '#FFFFFF',
+    textColor: '#0F172A',
+    badgeLabel: 'Soft Pink 400',
   },
   {
-    id: 'cyber-pink-dark',
-    name: 'Cyber Pink Dark',
-    nameId: 'Cyber Pink Dark',
+    id: 'theme-dark',
+    name: 'Dark Theme (Default)',
+    nameId: 'Dark Theme (Default)',
     category: 'Dark',
-    concept: 'Institutional deep charcoal canvas paired with vibrant neon cyber-pink highlights.',
-    conceptId: 'Mode gelap institusional hitam arang pekat dengan aksen neon pink menyala untuk kenyamanan mata.',
+    concept: 'Deep Navy background (#0B0F19) with Slate 800 cards (#1E293B, backdrop-blur-md) and glowing Soft Pink accent (#EC4899).',
+    conceptId: 'Background Deep Navy (#0B0F19), Surface/Card #1E293B berfitur glassmorphism tipis, dan aksen Soft Pink glow #EC4899 (Pink 500).',
     isDark: true,
-    accentColor: '#ff2a85',
-    bgColor: '#080c14',
-    surfaceColor: '#0f172a',
-    textColor: '#f8fafc',
-    badgeLabel: 'Dark Mode',
+    accentColor: '#EC4899',
+    bgColor: '#0B0F19',
+    surfaceColor: '#1E293B',
+    textColor: '#F8FAFC',
+    badgeLabel: 'Default Dark',
   },
   {
-    id: 'classic-terminal',
-    name: 'Classic Terminal',
-    nameId: 'Classic Terminal',
-    category: 'Retro',
-    concept: '90s retro quant green-screen hacker terminal with pitch black and phosphor green.',
-    conceptId: 'Nuansa retro quant hacker era 90-an dengan latar hitam mutlak dan monokrom hijau terminal.',
+    id: 'theme-terminal',
+    name: 'Terminal Theme',
+    nameId: 'Terminal Theme',
+    category: 'Terminal',
+    concept: 'Pitch black background (#030712), surface card (#0B0F19) with monochromatic green-pink border, Cyber Pink (#FF007A) & JetBrains Mono.',
+    conceptId: 'Background Pitch Black (#030712), Card #0B0F19 berborder hijau-pink monokromatik, Cyber Pink (#FF007A) & JetBrains Mono.',
     isDark: true,
-    accentColor: '#22c55e',
-    bgColor: '#020503',
-    surfaceColor: '#071008',
-    textColor: '#4ade80',
-    badgeLabel: 'Retro Quant',
+    accentColor: '#FF007A',
+    bgColor: '#030712',
+    surfaceColor: '#0B0F19',
+    textColor: '#F8FAFC',
+    badgeLabel: 'JetBrains Mono',
   },
   {
-    id: 'custom',
-    name: 'Custom Dominant Color',
-    nameId: 'Custom Dominant Color',
+    id: 'theme-custom',
+    name: 'Custom Theme',
+    nameId: 'Custom Theme',
     category: 'Custom',
-    concept: 'User-defined dominant accent hue with dynamic WCAG AA text contrast calculation.',
-    conceptId: 'Kebebasan warna kustom dinamis dengan kalkulasi otomatis kontras teks standar WCAG AA.',
+    concept: 'Personalized mini color picker to adjust Soft Pink saturation and background contrast for custom eye ergonomics.',
+    conceptId: 'Color Picker mini untuk mengatur sendiri tingkat saturasi Soft Pink dan kontras background sesuai kenyamanan mata.',
     isDark: true,
-    accentColor: '#06b6d4',
-    bgColor: '#080c14',
-    surfaceColor: '#0f172a',
-    textColor: '#f8fafc',
-    badgeLabel: 'Dynamic Hue',
+    accentColor: '#EC4899',
+    bgColor: '#0B0F19',
+    surfaceColor: '#1E293B',
+    textColor: '#F8FAFC',
+    badgeLabel: 'Mini Picker',
   },
 ];
 
+export const PRESET_SOFT_PINK_COLORS = [
+  { name: 'Soft Pink 400', hex: '#F472B6', desc: 'Light & Fresh' },
+  { name: 'Soft Pink 500', hex: '#EC4899', desc: 'Vibrant Glow' },
+  { name: 'Deep Magenta', hex: '#DB2777', desc: 'Rich Contrast' },
+  { name: 'Cyber Pink', hex: '#FF007A', desc: 'Neon Quant' },
+  { name: 'Pastel Blush', hex: '#F9A8D4', desc: 'Gentle Tone' },
+  { name: 'Rose Quartz', hex: '#FB7185', desc: 'Warm Rose' },
+];
+
+export const SOFT_PINK_SHADES = PRESET_SOFT_PINK_COLORS;
+
+export const PRESET_BACKGROUND_CONTRASTS = [
+  { name: 'Pitch Black', hex: '#030712', surfaceHex: '#0B0F19', desc: 'Ultra Dark (Terminal)' },
+  { name: 'Deep Navy (Default)', hex: '#0B0F19', surfaceHex: '#1E293B', desc: 'Slate 950 Eye-Comfort' },
+  { name: 'Slate Night', hex: '#0F172A', surfaceHex: '#1E293B', desc: 'Muted Dark' },
+  { name: 'Charcoal Dark', hex: '#18181B', surfaceHex: '#27272A', desc: 'Neutral Balance' },
+  { name: 'Slate Light', hex: '#F8FAFC', surfaceHex: '#FFFFFF', desc: 'Clean Off-White' },
+];
+
 export const PRESET_CUSTOM_COLORS = [
-  { name: 'Neon Cyber Pink', hex: '#ff2a85' },
-  { name: 'Electric Cyan', hex: '#06b6d4' },
-  { name: 'Phosphor Green', hex: '#22c55e' },
-  { name: 'Quantum Purple', hex: '#a855f7' },
-  { name: 'Solar Amber', hex: '#f59e0b' },
-  { name: 'Hyper Blue', hex: '#3b82f6' },
-  { name: 'Crimson Pulse', hex: '#f43f5e' },
+  { name: 'Soft Pink 400', hex: '#F472B6' },
+  { name: 'Soft Pink 500', hex: '#EC4899' },
+  { name: 'Cyber Pink', hex: '#FF007A' },
+  { name: 'Electric Cyan', hex: '#06B6D4' },
+  { name: 'Phosphor Green', hex: '#22C55E' },
+  { name: 'Quantum Purple', hex: '#A855F7' },
+  { name: 'Solar Amber', hex: '#F59E0B' },
 ];
 
 /**
@@ -130,35 +154,76 @@ export function getContrastTextColor(hexColor: string): string {
 }
 
 /**
- * Normalizes legacy theme strings to the 4 Engine Theme IDs
+ * Normalizes theme strings to the 4 canonical Engine Theme IDs:
+ * theme-light | theme-dark (default) | theme-terminal | theme-custom
  */
 export function normalizeEngineTheme(theme: string | null | undefined): EngineThemeId {
-  if (!theme) return 'cyber-pink-dark';
-  if (theme === 'modern-pink-light' || theme === 'light') return 'modern-pink-light';
-  if (theme === 'classic-terminal' || theme === 'classic') return 'classic-terminal';
-  if (theme === 'custom') return 'custom';
-  if (theme === 'cyber-pink-dark' || theme === 'dark') return 'cyber-pink-dark';
-  return 'cyber-pink-dark';
+  if (!theme) return 'theme-dark';
+  if (theme === 'theme-light' || theme === 'modern-pink-light' || theme === 'light') return 'theme-light';
+  if (theme === 'theme-terminal' || theme === 'classic-terminal' || theme === 'classic' || theme === 'terminal') return 'theme-terminal';
+  if (theme === 'theme-custom' || theme === 'custom') return 'theme-custom';
+  if (theme === 'theme-dark' || theme === 'cyber-pink-dark' || theme === 'dark') return 'theme-dark';
+  return 'theme-dark';
 }
 
 /**
  * Checks if a given theme ID is dark
  */
 export function isDarkEngineTheme(theme: EngineThemeId): boolean {
-  return theme !== 'modern-pink-light';
+  const norm = normalizeEngineTheme(theme);
+  if (norm === 'theme-light') return false;
+  if (norm === 'theme-custom' && typeof window !== 'undefined') {
+    const customBg = document.documentElement.style.getPropertyValue('--custom-bg-hex');
+    if (customBg) {
+      const rgb = hexToRgb(customBg);
+      if (rgb) {
+        return getRelativeLuminance(rgb.r, rgb.g, rgb.b) <= 0.45;
+      }
+    }
+  }
+  return true;
 }
 
 /**
  * Applies CSS custom properties and classes to document root for the chosen theme
  */
-export function applyThemeToDocument(theme: EngineThemeId, customHex = '#06b6d4'): void {
+export function applyThemeToDocument(
+  theme: EngineThemeId,
+  customHex = '#EC4899',
+  customBg = '#0B0F19'
+): void {
   if (typeof window === 'undefined') return;
 
   const root = document.documentElement;
-  const isDark = isDarkEngineTheme(theme);
+  const norm = normalizeEngineTheme(theme);
+  const isDark = isDarkEngineTheme(norm);
 
-  // Set data-theme attribute
-  root.setAttribute('data-theme', theme);
+  // Set canonical data-theme attribute
+  root.setAttribute('data-theme', norm);
+
+  // Clear previous theme classes to prevent style clashes
+  const allThemeClasses = [
+    'theme-light',
+    'theme-dark',
+    'theme-terminal',
+    'theme-custom',
+    'theme-modern-pink-light',
+    'theme-cyber-pink-dark',
+    'theme-classic-terminal',
+    'modern-pink-light',
+    'cyber-pink-dark',
+    'classic-terminal',
+    'custom',
+  ];
+  root.classList.remove(...allThemeClasses);
+
+  // Add active theme class
+  root.classList.add(norm);
+  // Add legacy class alias for any CSS selectors expecting legacy class names
+  if (norm === 'theme-light') root.classList.add('theme-modern-pink-light');
+  if (norm === 'theme-dark') root.classList.add('theme-cyber-pink-dark');
+  if (norm === 'theme-terminal') root.classList.add('theme-classic-terminal');
+  if (norm === 'theme-custom') root.classList.add('theme-custom');
 
   // Set dark / light class for standard Tailwind utility compatibility
   if (isDark) {
@@ -179,21 +244,44 @@ export function applyThemeToDocument(theme: EngineThemeId, customHex = '#06b6d4'
     appleTouchLink.href = isDark ? '/favicon-dark.svg' : '/favicon-light.svg';
   }
 
-  // Handle custom color variables
-  if (theme === 'custom') {
-    const rgb = hexToRgb(customHex) || { r: 6, g: 182, b: 212 };
+  // Handle custom color variables for theme-custom
+  if (norm === 'theme-custom') {
+    const accentRgb = hexToRgb(customHex) || { r: 236, g: 72, b: 153 };
+    const bgRgb = hexToRgb(customBg) || { r: 11, g: 15, b: 25 };
     const contrastText = getContrastTextColor(customHex);
+    const bgLuminance = getRelativeLuminance(bgRgb.r, bgRgb.g, bgRgb.b);
+    const isCustomBgDark = bgLuminance <= 0.45;
+
+    // Calculate harmonious surface and border colors based on bg contrast
+    const surfaceHex = isCustomBgDark
+      ? bgLuminance < 0.05
+        ? '#0B0F19'
+        : '#1E293B'
+      : '#FFFFFF';
+    const borderHex = isCustomBgDark ? 'rgba(51, 65, 85, 0.7)' : '#E2E8F0';
+    const textMainHex = isCustomBgDark ? '#F8FAFC' : '#0F172A';
 
     root.style.setProperty('--custom-accent-hex', customHex);
-    root.style.setProperty('--custom-accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+    root.style.setProperty('--custom-accent-rgb', `${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}`);
     root.style.setProperty('--custom-accent-contrast', contrastText);
-    root.style.setProperty('--custom-accent-subtle', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`);
-    root.style.setProperty('--custom-accent-border', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`);
+    root.style.setProperty('--custom-accent-subtle', `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, 0.15)`);
+    root.style.setProperty('--custom-accent-border', `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, 0.45)`);
+    root.style.setProperty('--custom-accent-glow', `0 0 14px rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, 0.4)`);
+
+    root.style.setProperty('--custom-bg-hex', customBg);
+    root.style.setProperty('--custom-surface-hex', surfaceHex);
+    root.style.setProperty('--custom-border-hex', borderHex);
+    root.style.setProperty('--custom-text-main', textMainHex);
   } else {
     root.style.removeProperty('--custom-accent-hex');
     root.style.removeProperty('--custom-accent-rgb');
     root.style.removeProperty('--custom-accent-contrast');
     root.style.removeProperty('--custom-accent-subtle');
     root.style.removeProperty('--custom-accent-border');
+    root.style.removeProperty('--custom-accent-glow');
+    root.style.removeProperty('--custom-bg-hex');
+    root.style.removeProperty('--custom-surface-hex');
+    root.style.removeProperty('--custom-border-hex');
+    root.style.removeProperty('--custom-text-main');
   }
 }

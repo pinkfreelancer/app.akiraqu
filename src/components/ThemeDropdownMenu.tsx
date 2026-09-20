@@ -13,6 +13,8 @@ import {
   EngineThemeId,
   THEME_OPTIONS,
   PRESET_CUSTOM_COLORS,
+  SOFT_PINK_SHADES,
+  PRESET_BACKGROUND_CONTRASTS,
   getContrastTextColor,
 } from '../types/theme.types';
 import { Language } from '../i18n/translations';
@@ -20,8 +22,10 @@ import { Language } from '../i18n/translations';
 interface ThemeDropdownMenuProps {
   currentTheme: EngineThemeId;
   customColor: string;
-  onSelectTheme: (theme: EngineThemeId, customColor?: string) => void;
+  customBg?: string;
+  onSelectTheme: (theme: EngineThemeId, customColor?: string, customBg?: string) => void;
   onUpdateCustomColor: (color: string) => void;
+  onUpdateCustomBg?: (bg: string) => void;
   lang?: Language;
   isDark?: boolean;
 }
@@ -29,13 +33,16 @@ interface ThemeDropdownMenuProps {
 export const ThemeDropdownMenu: React.FC<ThemeDropdownMenuProps> = ({
   currentTheme,
   customColor,
+  customBg = '#0B0F19',
   onSelectTheme,
   onUpdateCustomColor,
+  onUpdateCustomBg,
   lang = 'id',
   isDark = true,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [hexInput, setHexInput] = useState(customColor);
+  const [bgHexInput, setBgHexInput] = useState(customBg);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isId = lang === 'id';
 
@@ -43,6 +50,10 @@ export const ThemeDropdownMenu: React.FC<ThemeDropdownMenuProps> = ({
   useEffect(() => {
     setHexInput(customColor);
   }, [customColor]);
+
+  useEffect(() => {
+    setBgHexInput(customBg);
+  }, [customBg]);
 
   // Click outside to close
   useEffect(() => {
@@ -59,7 +70,7 @@ export const ThemeDropdownMenu: React.FC<ThemeDropdownMenuProps> = ({
 
   // Active theme indicator dot color
   const activeDotColor =
-    currentTheme === 'custom'
+    currentTheme === 'theme-custom'
       ? customColor
       : activeOption.accentColor;
 
@@ -67,8 +78,18 @@ export const ThemeDropdownMenu: React.FC<ThemeDropdownMenuProps> = ({
     setHexInput(val);
     if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
       onUpdateCustomColor(val);
-      if (currentTheme !== 'custom') {
-        onSelectTheme('custom', val);
+      if (currentTheme !== 'theme-custom') {
+        onSelectTheme('theme-custom', val, customBg);
+      }
+    }
+  };
+
+  const handleBgHexChange = (val: string) => {
+    setBgHexInput(val);
+    if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+      onUpdateCustomBg?.(val);
+      if (currentTheme !== 'theme-custom') {
+        onSelectTheme('theme-custom', customColor, val);
       }
     }
   };
@@ -149,20 +170,21 @@ export const ThemeDropdownMenu: React.FC<ThemeDropdownMenuProps> = ({
           <div className="space-y-2 mb-3.5">
             {THEME_OPTIONS.map((theme) => {
               const isSelected = currentTheme === theme.id;
-              const previewAccent = theme.id === 'custom' ? customColor : theme.accentColor;
+              const previewAccent = theme.id === 'theme-custom' ? customColor : theme.accentColor;
+              const previewBg = theme.id === 'theme-custom' ? customBg : theme.bgColor;
 
               return (
                 <button
                   key={theme.id}
                   type="button"
                   onClick={() => {
-                    onSelectTheme(theme.id, theme.id === 'custom' ? customColor : undefined);
+                    onSelectTheme(theme.id, theme.id === 'theme-custom' ? customColor : undefined, theme.id === 'theme-custom' ? customBg : undefined);
                   }}
                   className={`w-full p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-start justify-between gap-3 ${
                     isSelected
                       ? isDark
-                        ? 'bg-[#0f172a] border-cyan-400/80 shadow-md ring-1 ring-cyan-400/40'
-                        : 'bg-slate-50 border-cyan-500 shadow-sm ring-1 ring-cyan-500/30'
+                        ? 'bg-[#0f172a] border-pink-400/80 shadow-md ring-1 ring-pink-400/40'
+                        : 'bg-slate-50 border-pink-400 shadow-sm ring-1 ring-pink-400/30'
                       : isDark
                       ? 'bg-[#080c14] border-[#1e293b]/70 hover:border-slate-600'
                       : 'bg-white border-slate-200 hover:border-slate-300'
@@ -173,20 +195,20 @@ export const ThemeDropdownMenu: React.FC<ThemeDropdownMenuProps> = ({
                     <div
                       className="w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 mt-0.5"
                       style={{
-                        backgroundColor: theme.bgColor,
+                        backgroundColor: previewBg,
                         borderColor: theme.surfaceColor,
                       }}
                     >
-                      {theme.id === 'modern-pink-light' && (
-                        <Sun className="w-4 h-4 text-pink-600" />
+                      {theme.id === 'theme-light' && (
+                        <Sun className="w-4 h-4 text-[#F472B6]" />
                       )}
-                      {theme.id === 'cyber-pink-dark' && (
-                        <Moon className="w-4 h-4 text-[#ff2a85]" />
+                      {theme.id === 'theme-dark' && (
+                        <Moon className="w-4 h-4 text-[#EC4899]" />
                       )}
-                      {theme.id === 'classic-terminal' && (
-                        <TerminalIcon className="w-4 h-4 text-emerald-400" />
+                      {theme.id === 'theme-terminal' && (
+                        <TerminalIcon className="w-4 h-4 text-[#FF007A]" />
                       )}
-                      {theme.id === 'custom' && (
+                      {theme.id === 'theme-custom' && (
                         <Sparkles
                           className="w-4 h-4"
                           style={{ color: previewAccent }}
@@ -226,7 +248,7 @@ export const ThemeDropdownMenu: React.FC<ThemeDropdownMenuProps> = ({
                     <div className="flex items-center -space-x-1">
                       <span
                         className="w-3.5 h-3.5 rounded-full border border-black/40 shadow-xs"
-                        style={{ backgroundColor: theme.bgColor }}
+                        style={{ backgroundColor: previewBg }}
                         title="Canvas Background"
                       />
                       <span
@@ -252,12 +274,12 @@ export const ThemeDropdownMenu: React.FC<ThemeDropdownMenuProps> = ({
             })}
           </div>
 
-          {/* Custom Color Controls (Rendered when Custom is Selected or directly customizable) */}
-          {currentTheme === 'custom' && (
+          {/* Custom Theme Controls */}
+          {currentTheme === 'theme-custom' && (
             <div className="p-3 rounded-xl bg-[#060910] border border-[#1e293b] space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-slate-300 uppercase">
-                  {isId ? 'Penyesuaian Warna Kustom' : 'Custom Color Controls'}
+                  {isId ? 'Color Picker Mini' : 'Mini Color Picker'}
                 </span>
                 <div
                   className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold"
@@ -271,47 +293,46 @@ export const ThemeDropdownMenu: React.FC<ThemeDropdownMenuProps> = ({
                 </div>
               </div>
 
-              {/* Color Picker and Hex Input */}
-              <div className="flex items-center gap-2.5">
-                <input
-                  type="color"
-                  value={customColor}
-                  onChange={(e) => {
-                    onUpdateCustomColor(e.target.value);
-                    setHexInput(e.target.value);
-                  }}
-                  className="w-9 h-9 rounded-lg border border-[#1e293b] cursor-pointer bg-transparent"
-                  aria-label="Color Picker"
-                />
-                <div className="flex-1 flex items-center rounded-lg border border-[#1e293b] bg-[#0b0f19] px-2.5 py-1.5 text-xs">
-                  <span className="text-slate-500 mr-1">HEX:</span>
-                  <input
-                    type="text"
-                    value={hexInput}
-                    onChange={(e) => handleHexChange(e.target.value)}
-                    placeholder="#ff2a85"
-                    maxLength={7}
-                    className="w-full bg-transparent font-mono text-xs text-white focus:outline-none uppercase"
-                  />
-                </div>
-              </div>
-
-              {/* Quick Preset Palette Swatches */}
-              <div className="space-y-1">
-                <span className="text-[10px] text-slate-400 block">
-                  {isId ? 'Preset Palet Populer:' : 'Popular Palette Swatches:'}
+              {/* 1. Soft Pink Accent Picker */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] text-pink-300 font-mono block">
+                  {isId ? '1. Aksen Soft Pink:' : '1. Soft Pink Accent:'}
                 </span>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {PRESET_CUSTOM_COLORS.map((preset) => (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={customColor}
+                    onChange={(e) => {
+                      onUpdateCustomColor(e.target.value);
+                      setHexInput(e.target.value);
+                    }}
+                    className="w-8 h-8 rounded-lg border border-[#1e293b] cursor-pointer bg-transparent shrink-0"
+                    aria-label="Accent Color Picker"
+                  />
+                  <div className="flex-1 flex items-center rounded-lg border border-[#1e293b] bg-[#0b0f19] px-2 py-1 text-xs">
+                    <span className="text-slate-500 mr-1 font-mono text-[10px]">HEX:</span>
+                    <input
+                      type="text"
+                      value={hexInput}
+                      onChange={(e) => handleHexChange(e.target.value)}
+                      placeholder="#EC4899"
+                      maxLength={7}
+                      className="w-full bg-transparent font-mono text-xs text-white focus:outline-none uppercase"
+                    />
+                  </div>
+                </div>
+                {/* Soft pink chips */}
+                <div className="flex flex-wrap items-center gap-1 pt-0.5">
+                  {SOFT_PINK_SHADES.slice(0, 5).map((preset) => (
                     <button
                       key={preset.hex}
                       type="button"
                       onClick={() => {
                         onUpdateCustomColor(preset.hex);
                         setHexInput(preset.hex);
-                        onSelectTheme('custom', preset.hex);
+                        onSelectTheme('theme-custom', preset.hex, customBg);
                       }}
-                      className={`w-6 h-6 rounded-full border transition-transform cursor-pointer hover:scale-110 flex items-center justify-center ${
+                      className={`w-5 h-5 rounded-full border transition-transform cursor-pointer hover:scale-110 flex items-center justify-center ${
                         customColor.toLowerCase() === preset.hex.toLowerCase()
                           ? 'ring-2 ring-white border-white scale-105'
                           : 'border-black/50'
@@ -320,7 +341,62 @@ export const ThemeDropdownMenu: React.FC<ThemeDropdownMenuProps> = ({
                       title={preset.name}
                     >
                       {customColor.toLowerCase() === preset.hex.toLowerCase() && (
-                        <Check className="w-3 h-3 text-white" />
+                        <Check className="w-2.5 h-2.5 text-white" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 2. Background Contrast Picker */}
+              <div className="space-y-1.5 pt-1 border-t border-[#1e293b]/60">
+                <span className="text-[10px] text-cyan-300 font-mono block">
+                  {isId ? '2. Kontras Background:' : '2. Background Contrast:'}
+                </span>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={customBg}
+                    onChange={(e) => {
+                      onUpdateCustomBg?.(e.target.value);
+                      setBgHexInput(e.target.value);
+                    }}
+                    className="w-8 h-8 rounded-lg border border-[#1e293b] cursor-pointer bg-transparent shrink-0"
+                    aria-label="Background Color Picker"
+                  />
+                  <div className="flex-1 flex items-center rounded-lg border border-[#1e293b] bg-[#0b0f19] px-2 py-1 text-xs">
+                    <span className="text-slate-500 mr-1 font-mono text-[10px]">BG:</span>
+                    <input
+                      type="text"
+                      value={bgHexInput}
+                      onChange={(e) => handleBgHexChange(e.target.value)}
+                      placeholder="#0B0F19"
+                      maxLength={7}
+                      className="w-full bg-transparent font-mono text-xs text-white focus:outline-none uppercase"
+                    />
+                  </div>
+                </div>
+                {/* Background contrast chips */}
+                <div className="flex flex-wrap items-center gap-1 pt-0.5">
+                  {PRESET_BACKGROUND_CONTRASTS.map((bgPreset) => (
+                    <button
+                      key={bgPreset.hex}
+                      type="button"
+                      onClick={() => {
+                        onUpdateCustomBg?.(bgPreset.hex);
+                        setBgHexInput(bgPreset.hex);
+                        onSelectTheme('theme-custom', customColor, bgPreset.hex);
+                      }}
+                      className={`w-5 h-5 rounded-full border transition-transform cursor-pointer hover:scale-110 flex items-center justify-center ${
+                        customBg.toLowerCase() === bgPreset.hex.toLowerCase()
+                          ? 'ring-2 ring-cyan-400 border-white scale-105'
+                          : 'border-slate-700'
+                      }`}
+                      style={{ backgroundColor: bgPreset.hex }}
+                      title={bgPreset.name}
+                    >
+                      {customBg.toLowerCase() === bgPreset.hex.toLowerCase() && (
+                        <Check className="w-2.5 h-2.5 text-white" />
                       )}
                     </button>
                   ))}

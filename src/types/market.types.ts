@@ -3,24 +3,45 @@
 export type Timeframe = '1m' | '5m' | '15m' | '1H' | '4H' | '1D' | '1W';
 
 export type StageId =
+  // 1. PASAR & SCREENING
   | 'ticker'
-  | 'scanner'
-  | 'screening'
   | 'signal'
+  | 'market_heatmap'
+  | 'gainers_losers'
+  | 'screening'
+  | 'scanner'
   | 'watchlist'
-  | 'orderflow'
+  // 2. DATA MAKRO & KONTEKS
+  | 'btc_dominance'
+  | 'onchain_data'
+  | 'economic_calendar'
   | 'sentiment'
+  // 3. INDIKATOR & SCREENING TEKNIKAL
   | 'indicators'
   | 'confluence'
-  | 'backtest'
-  | 'output'
+  | 'mtf_screener'
+  | 'orderflow'
+  | 'volatility_scanner'
+  | 'correlation_beta'
+  // 4. RISET & STRATEGI
   | 'risk'
-  | 'trading'
+  | 'backtest'
+  | 'return_distribution'
+  | 'output'
+  // 5. EKSEKUSI AKTIF
+  | 'active_orders'
   | 'manual_trading'
+  | 'trading'
   | 'bot'
-  | 'journal'
+  | 'position_sizing'
+  // 6. KONEKSI & ALERT
+  | 'multi_exchange'
+  | 'alerts'
   | 'portfolio'
+  // 7. EVALUASI & RIWAYAT
+  | 'journal'
   | 'reports'
+  // 8. SISTEM
   | 'settings';
 
 export type NavCategory = 'ALL' | 'MARKET' | 'ANALYSIS' | 'EXECUTION';

@@ -20,7 +20,6 @@ import {
   Menu,
   X,
   Sparkles,
-  Home,
   Newspaper,
   Bell,
   BellRing,
@@ -45,9 +44,9 @@ import { Language, getTranslation } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
 import { SearchCoinModal } from './SearchCoinModal';
 import { AkiraQuLogo } from './AkiraQuLogo';
-import { ThemeDropdownMenu } from './ThemeDropdownMenu';
 import { EngineThemeId, normalizeEngineTheme } from '../types/theme.types';
 import { useAuth } from '../contexts/AuthContext';
+import { useAlerts } from '../contexts/AlertContext';
 
 interface HeaderProps {
   symbols: CryptoSymbolInfo[];
@@ -72,9 +71,11 @@ interface HeaderProps {
   onToggleLang: (lang: Language) => void;
   theme: EngineThemeId | 'light' | 'dark';
   onToggleTheme: () => void;
-  onSelectTheme?: (theme: EngineThemeId, customColor?: string) => void;
+  onSelectTheme?: (theme: EngineThemeId, customColor?: string, customBg?: string) => void;
   customThemeColor?: string;
   onUpdateCustomColor?: (color: string) => void;
+  customThemeBg?: string;
+  onUpdateCustomBg?: (bg: string) => void;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
   isFullWidth?: boolean;
@@ -117,8 +118,10 @@ export const Header: React.FC<HeaderProps> = ({
   theme,
   onToggleTheme,
   onSelectTheme,
-  customThemeColor = '#06b6d4',
+  customThemeColor = '#EC4899',
   onUpdateCustomColor,
+  customThemeBg = '#0B0F19',
+  onUpdateCustomBg,
   isFullscreen = false,
   onToggleFullscreen,
   isFullWidth = true,
@@ -133,9 +136,10 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleSidebar,
 }) => {
   const { user, isAuthenticated } = useAuth();
+  const { unreadCount, openAlertCenter } = useAlerts();
   const t = getTranslation(lang);
   const normalizedTheme = normalizeEngineTheme(theme);
-  const isDark = normalizedTheme !== 'modern-pink-light';
+  const isDark = normalizedTheme !== 'theme-light';
   const isId = lang === 'id';
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -252,96 +256,8 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Right Top Bar Controls: Landing, Auth, Settings, Mobile Toggle */}
+        {/* Right Top Bar Controls: Settings & Mobile Toggle */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Landing Page Quick Navigation */}
-          {onNavigateToLanding && (
-            <button
-              onClick={onNavigateToLanding}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-bold transition-colors cursor-pointer border ${
-                isDark
-                  ? 'bg-cyan-950/40 border-cyan-500/30 text-cyan-300 hover:bg-cyan-900/40'
-                  : 'bg-cyan-50 border-cyan-200 text-cyan-800 hover:bg-cyan-100'
-              }`}
-              title={isId ? 'Kembali ke Halaman Landing' : 'Go to Landing Page'}
-            >
-              <Home className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="hidden sm:inline">{isId ? 'Beranda' : 'Landing'}</span>
-            </button>
-          )}
-
-          {/* User Gmail Auth Button */}
-          {onNavigateToLogin && (
-            <button
-              onClick={onNavigateToLogin}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-bold transition-colors cursor-pointer border ${
-                isAuthenticated && user
-                  ? isDark
-                    ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300'
-                    : 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                  : isDark
-                  ? 'bg-slate-800/80 border-slate-700 text-slate-300 hover:text-white'
-                  : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900'
-              }`}
-              title={isAuthenticated && user ? `Akun: ${user.displayName || user.email}` : 'Masuk dengan Akun Google (Gmail)'}
-            >
-              {isAuthenticated && user ? (
-                user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt={user.displayName || 'U'}
-                    className="w-4 h-4 rounded-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <div className="w-4 h-4 rounded-full bg-emerald-500 text-slate-950 text-[9px] flex items-center justify-center font-bold">
-                    {user.displayName?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                )
-              ) : (
-                <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                  />
-                </svg>
-              )}
-              <span className="hidden sm:inline max-w-[90px] truncate">
-                {isAuthenticated && user ? user.displayName?.split(' ')[0] : 'Gmail'}
-              </span>
-            </button>
-          )}
-
-          <span className={`hidden sm:inline ${isDark ? 'text-[#1e293b]' : 'text-slate-200'}`}>|</span>
-
-          {/* Dedicated Engine Theme Dropdown Menu (Space-saving top bar) */}
-          <ThemeDropdownMenu
-            currentTheme={normalizedTheme}
-            customColor={customThemeColor}
-            onSelectTheme={(th, color) => {
-              if (onSelectTheme) {
-                onSelectTheme(th, color);
-              } else {
-                onToggleTheme();
-              }
-            }}
-            onUpdateCustomColor={(col) => onUpdateCustomColor?.(col)}
-            lang={lang}
-            isDark={isDark}
-          />
-
           {/* Combined Settings Dropdown (Theme, Language, Fullscreen) */}
           <div className="relative" ref={dropdownRef}>
             <button
@@ -373,11 +289,11 @@ export const Header: React.FC<HeaderProps> = ({
                       <span className="block text-[10px] font-bold font-mono text-slate-400 uppercase tracking-wider">
                         {isId ? 'Tema Engine' : 'Engine Theme'}
                       </span>
-                      <span className="text-[10px] font-mono text-cyan-400">
-                        {normalizedTheme === 'modern-pink-light' && 'Pink Light'}
-                        {normalizedTheme === 'cyber-pink-dark' && 'Cyber Pink'}
-                        {normalizedTheme === 'classic-terminal' && 'Terminal'}
-                        {normalizedTheme === 'custom' && 'Custom'}
+                      <span className="text-[10px] font-mono text-pink-400 font-semibold">
+                        {normalizedTheme === 'theme-light' && 'Light'}
+                        {normalizedTheme === 'theme-dark' && 'Dark'}
+                        {normalizedTheme === 'theme-terminal' && 'Terminal'}
+                        {normalizedTheme === 'theme-custom' && 'Custom'}
                       </span>
                     </div>
                     <div
@@ -386,99 +302,62 @@ export const Header: React.FC<HeaderProps> = ({
                       }`}
                     >
                       <button
-                        onClick={() => onSelectTheme ? onSelectTheme('modern-pink-light') : onToggleTheme()}
+                        type="button"
+                        onClick={() => onSelectTheme ? onSelectTheme('theme-light') : onToggleTheme()}
                         className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
-                          normalizedTheme === 'modern-pink-light'
+                          normalizedTheme === 'theme-light'
                             ? 'bg-white text-pink-600 shadow-xs border border-pink-200'
                             : 'text-slate-400 hover:text-slate-200'
                         }`}
-                        title="Modern Pink Light"
+                        title="Light Theme"
                       >
-                        <Sun className="w-3 h-3 text-pink-500" />
-                        <span>Pink Light</span>
+                        <Sun className="w-3 h-3 text-[#F472B6]" />
+                        <span>Light</span>
                       </button>
 
                       <button
-                        onClick={() => onSelectTheme ? onSelectTheme('cyber-pink-dark') : onToggleTheme()}
+                        type="button"
+                        onClick={() => onSelectTheme ? onSelectTheme('theme-dark') : onToggleTheme()}
                         className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
-                          normalizedTheme === 'cyber-pink-dark'
-                            ? 'bg-cyan-500/25 text-[#ff2a85] shadow-xs border border-cyan-500/40'
+                          normalizedTheme === 'theme-dark'
+                            ? 'bg-pink-500/20 text-pink-300 shadow-xs border border-pink-500/40'
                             : 'text-slate-400 hover:text-slate-200'
                         }`}
-                        title="Cyber Pink Dark"
+                        title="Dark Theme"
                       >
-                        <Moon className="w-3 h-3 text-[#ff2a85]" />
-                        <span>Cyber Pink</span>
+                        <Moon className="w-3 h-3 text-[#EC4899]" />
+                        <span>Dark</span>
                       </button>
 
                       <button
-                        onClick={() => onSelectTheme ? onSelectTheme('classic-terminal') : onToggleTheme()}
+                        type="button"
+                        onClick={() => onSelectTheme ? onSelectTheme('theme-terminal') : onToggleTheme()}
                         className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
-                          normalizedTheme === 'classic-terminal'
-                            ? 'bg-black text-emerald-400 shadow-xs border border-emerald-500/40'
+                          normalizedTheme === 'theme-terminal'
+                            ? 'bg-[#030712] text-[#FF007A] shadow-xs border border-emerald-500/40'
                             : 'text-slate-400 hover:text-slate-200'
                         }`}
-                        title="Classic Terminal"
+                        title="Terminal Theme"
                       >
-                        <TerminalIcon className="w-3 h-3 text-emerald-400" />
+                        <TerminalIcon className="w-3 h-3 text-[#FF007A]" />
                         <span>Terminal</span>
                       </button>
 
                       <button
-                        onClick={() => onSelectTheme ? onSelectTheme('custom', customThemeColor) : onToggleTheme()}
+                        type="button"
+                        onClick={() => onSelectTheme ? onSelectTheme('theme-custom', customThemeColor, customThemeBg) : onToggleTheme()}
                         className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
-                          normalizedTheme === 'custom'
-                            ? 'bg-cyan-950/60 text-cyan-300 shadow-xs border border-cyan-500/40'
+                          normalizedTheme === 'theme-custom'
+                            ? 'bg-pink-950/60 text-pink-300 shadow-xs border border-pink-500/40'
                             : 'text-slate-400 hover:text-slate-200'
                         }`}
-                        title="Custom Dominant Color"
+                        title="Custom Theme"
                       >
-                        <Sparkles className="w-3 h-3 text-cyan-400" />
+                        <Sparkles className="w-3 h-3 text-pink-400" />
                         <span>Custom</span>
                       </button>
                     </div>
                   </div>
-
-                  {/* Layout Width Section */}
-                  {onToggleFullWidth && (
-                    <div className="space-y-2">
-                      <span className="block text-[10px] font-bold font-mono text-slate-400 uppercase tracking-wider">
-                        {t.header.layoutMode}
-                      </span>
-                      <div
-                        className={`flex p-0.5 rounded-lg border ${
-                          isDark ? 'bg-[#0b0f19] border-[#1e293b]' : 'bg-slate-100 border-slate-200'
-                        }`}
-                      >
-                        <button
-                          onClick={() => !isFullWidth && onToggleFullWidth()}
-                          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                            isFullWidth
-                              ? isDark
-                                ? 'bg-cyan-500/25 text-cyan-300 shadow-xs'
-                                : 'bg-white text-cyan-600 shadow-xs'
-                              : 'text-slate-400 hover:text-slate-200'
-                          }`}
-                        >
-                          <StretchHorizontal className="w-3.5 h-3.5" />
-                          <span>Full Width</span>
-                        </button>
-                        <button
-                          onClick={() => isFullWidth && onToggleFullWidth()}
-                          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                            !isFullWidth
-                              ? isDark
-                                ? 'bg-cyan-500/25 text-cyan-300 shadow-xs'
-                                : 'bg-white text-cyan-600 shadow-xs'
-                              : 'text-slate-400 hover:text-slate-200'
-                          }`}
-                        >
-                          <LayoutGrid className="w-3.5 h-3.5" />
-                          <span>Centered</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
 
                   {/* Language Section */}
                   <div className="space-y-2">
@@ -587,7 +466,8 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Main Navigation Bar */}
       <div className="flex flex-wrap items-center justify-between gap-2.5 px-3 sm:px-4 lg:px-6 py-2">
         {/* Left Side: Coin Selector, Timeframe, & Run Analysis */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">          
+
           {/* Unified Clean Asset Selector Button (Widened) */}
           <button
             id="btn-open-pair-search"
@@ -686,28 +566,37 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right Side: Simple Alert Icon & Workspace Switch */}
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Simple Alert / Breaking News Notification Icon */}
-          {onSelectStage && (
-            <button
-              onClick={() => onSelectStage('sentiment')}
-              className={`relative flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-colors cursor-pointer min-h-[38px] border ${
-                currentStage === 'sentiment'
-                  ? 'bg-amber-600 text-white border-amber-500 shadow-xs font-semibold'
-                  : isDark
-                  ? 'bg-[#0f172a] hover:bg-amber-950/40 border-[#1e293b] hover:border-amber-500/40 text-amber-400'
-                  : 'bg-white hover:bg-amber-50 border-slate-200 hover:border-amber-300 text-amber-700'
-              }`}
-              title={isId ? 'Alert Berita Terkini & Sentimen Pasar' : 'Breaking News & Sentiment Alerts'}
-            >
-              <div className="relative">
+          {/* Unified Alert Center: Sinyal Trading, Penyaring Koin, & Berita Sentimen */}
+          <button
+            id="btn-header-alert-center"
+            onClick={() => openAlertCenter()}
+            className={`relative flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer min-h-[38px] border ${
+              unreadCount > 0
+                ? 'bg-amber-600/20 hover:bg-amber-600/30 border-amber-500/60 text-amber-400 font-semibold shadow-xs'
+                : isDark
+                ? 'bg-[#0f172a] hover:bg-amber-950/40 border-[#1e293b] hover:border-amber-500/40 text-slate-300 hover:text-amber-400'
+                : 'bg-white hover:bg-amber-50 border-slate-200 hover:border-amber-300 text-slate-700 hover:text-amber-700'
+            }`}
+            title={
+              isId
+                ? `Pusat Alert: ${unreadCount} pembaruan terbaru (Sinyal Trading, Penyaring Koin, Berita Sentimen)`
+                : `Alert Center: ${unreadCount} new updates (Trading Signals, Screener, Sentiment News)`
+            }
+          >
+            <div className="relative">
+              {unreadCount > 0 ? (
+                <BellRing className="w-4 h-4 text-amber-400 animate-pulse" />
+              ) : (
                 <Bell className="w-4 h-4" />
-                <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+              )}
+              {unreadCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 px-1 rounded-full bg-amber-500 text-white text-[9px] font-bold font-mono items-center justify-center">
+                  {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
-              </div>
-              <span className="hidden sm:inline">Alert</span>
-            </button>
-          )}
+              )}
+            </div>
+            <span className="hidden sm:inline font-bold">Alert</span>
+          </button>
 
           {/* Workspace Mode Switcher (Compact) */}
           {onToggleWorkspaceMode && (
@@ -819,6 +708,25 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Quick Action Buttons on Mobile */}
           <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-700/40">
+            {onToggleSidebar && (
+              <button
+                onClick={() => {
+                  onToggleSidebar();
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`col-span-2 flex items-center justify-center gap-2 p-2.5 rounded-lg text-xs font-semibold border transition cursor-pointer min-h-[44px] ${
+                  isSidebarOpen
+                    ? 'bg-pink-500/15 border-pink-500/30 text-pink-200'
+                    : isDark
+                    ? 'bg-[#0f172a] border-[#1e293b] text-slate-200'
+                    : 'bg-white border-slate-200 text-slate-700'
+                }`}
+              >
+                <PanelLeft className={`w-4 h-4 ${isSidebarOpen ? 'text-pink-400' : 'text-slate-400'}`} />
+                <span>{isId ? 'Navigasi Sidebar Terminal (17 Alat)' : 'Terminal Sidebar (17 Tools)'}</span>
+              </button>
+            )}
+
             <button
               onClick={() => {
                 onOpenExportModal();

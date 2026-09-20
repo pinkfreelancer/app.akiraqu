@@ -46,7 +46,7 @@ export const ContextChainInspector: React.FC<ContextChainInspectorProps> = ({ ev
     },
     {
       id: 2,
-      title: lang === 'id' ? '03. Mesin 10 Indikator (On-Demand)' : '03. 10-Indicator Engine (On-Demand)',
+      title: lang === 'id' ? '03. Mesin 12 Indikator (On-Demand)' : '03. 12-Indicator Engine (On-Demand)',
       stage: 'US-002',
       status: lang === 'id' ? 'Lazy Loaded (1 Koin Aktif)' : 'Lazy Loaded (1 Active Coin)',
       latency: '6ms',

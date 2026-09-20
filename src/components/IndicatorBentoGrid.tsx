@@ -256,10 +256,10 @@ export const IndicatorBentoGrid: React.FC<IndicatorBentoGridProps> = React.memo(
                   ? 'bg-blue-950/60 hover:bg-blue-900/70 border-blue-500/40 text-blue-300 hover:text-white'
                   : 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700'
               }`}
-              title={lang === 'id' ? 'Uji Backtest 10 Indikator Kuantitatif' : 'Backtest 10 Quantitative Indicators'}
+              title={lang === 'id' ? 'Uji Backtest 12 Indikator Kuantitatif' : 'Backtest 12 Quantitative Indicators'}
             >
               <BarChart3 className="w-3.5 h-3.5 text-blue-500" />
-              <span>{lang === 'id' ? 'Backtest 10 Indikator' : 'Backtest 10 Indicators'}</span>
+              <span>{lang === 'id' ? 'Backtest 12 Indikator' : 'Backtest 12 Indicators'}</span>
             </button>
           )}
 

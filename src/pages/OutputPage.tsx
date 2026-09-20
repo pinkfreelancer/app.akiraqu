@@ -7,6 +7,7 @@ import {
 import { Language, getTranslation } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
 import { DualOutputViewer } from '../components/DualOutputViewer';
+import { useJournalNotes, AnalysisJournalNote } from '../services/journalStorageService';
 import {
   FileText,
   Layers,
@@ -76,7 +77,7 @@ export const OutputPage: React.FC<OutputPageProps> = React.memo(({
   const [activeTab, setActiveTab] = useState<'SUMMARY' | 'INDICATORS' | 'ORDERFLOW_SENTIMENT' | 'RISK_PLAN' | 'RAW_OUTPUT'>('SUMMARY');
   const [copiedSignal, setCopiedSignal] = useState<boolean>(false);
   const [journalNotes, setJournalNotes] = useState<string>('');
-  const [journalList, setJournalList] = useState<JournalEntry[]>([]);
+  const [journalList, setJournalList] = useJournalNotes();
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
 
   const narrative = evaluation?.executiveNarrative || markdownNarrative || '';
@@ -87,22 +88,10 @@ export const OutputPage: React.FC<OutputPageProps> = React.memo(({
   const indicators = evaluation?.indicators;
   const risk = evaluation?.riskPlan;
 
-  // Load from LocalStorage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('nexus_trading_journal');
-      if (saved) {
-        setJournalList(JSON.parse(saved));
-      }
-    } catch (e) {
-      console.error('Failed to load trading journal entries', e);
-    }
-  }, []);
-
   // Format Signal Copy Text for Telegram/Discord
   const handleCopyFormattedSignal = () => {
     const isBull = String(evalBias).toLowerCase().includes('bull');
-    const text = `📊 **IMASBTC QUANTITATIVE SIGNAL REPORT**
+    const text = `📊 **AKIRAQU QUANTITATIVE SIGNAL REPORT**
 ━━━━━━━━━━━━━━━━━━━━
 🎯 **Pair**: #${symbol.replace('/', '')} (${timeframe})
 ⚡ **Arah / Bias**: ${evalBias} ${isBull ? '🚀 [LONG/BUY]' : '🔻 [SHORT/SELL]'}
@@ -116,7 +105,7 @@ export const OutputPage: React.FC<OutputPageProps> = React.memo(({
 ⚖️ **Risk / Reward**: 1:${(risk?.riskRewardRatio || 2.5).toFixed(2)}
 ━━━━━━━━━━━━━━━━━━━━
 🛡️ **Posisi Disarankan**: $${risk?.suggestedPositionUsd?.toLocaleString() || '1,000'} (Max Leverage: ${risk?.recommendedLeverage || 5}x)
-⚠️ *DYOR & Disiplin Money Management! Dihasilkan otomatis oleh IMASBTC Engine.*`;
+⚠️ *DYOR & Disiplin Money Management! Dihasilkan otomatis oleh AKIRAQU Quantitative Engine.*`;
 
     navigator.clipboard.writeText(text);
     setCopiedSignal(true);
@@ -126,18 +115,22 @@ export const OutputPage: React.FC<OutputPageProps> = React.memo(({
   const handleSaveJournalEntry = () => {
     if (!journalNotes.trim()) return;
 
-    const newEntry: JournalEntry = {
+    const newEntry: AnalysisJournalNote = {
       id: crypto.randomUUID(),
       timestamp: new Date().toLocaleString(),
       symbol,
       timeframe,
       userNotes: journalNotes,
       aiEngine,
+      confluenceScore: evalScore,
+      marketBias: evalBias,
+      entryPrice: risk?.entryPrice || price,
+      stopLoss: risk?.stopLoss,
+      takeProfit: risk?.takeProfit1,
     };
 
     const updated = [newEntry, ...journalList];
     setJournalList(updated);
-    localStorage.setItem('nexus_trading_journal', JSON.stringify(updated));
     setJournalNotes('');
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 2000);

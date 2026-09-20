@@ -6,6 +6,28 @@ export type SignalDirection = 'LONG' | 'SHORT';
 export type SignalGrade = 'STRONG_BUY' | 'BUY' | 'NEUTRAL' | 'SELL' | 'STRONG_SELL';
 export type SignalStatus = 'ACTIVE' | 'TP1_HIT' | 'TP2_HIT' | 'TP3_HIT' | 'SL_HIT' | 'EXPIRED';
 
+export type SignalPipelineStage =
+  | 'INGEST'
+  | 'INSTITUTIONAL_LOGIC'
+  | 'RISK_FILTER'
+  | 'PUBLISHED'
+  | 'TRACKING';
+
+export type SignalTriggerType =
+  | 'VOLUME_ANOMALY'
+  | 'BREAKOUT'
+  | 'MSS'
+  | 'ORDER_BLOCK_RETEST'
+  | 'FVG_SWEEP'
+  | 'PATTERN_COMPLETION';
+
+export interface AuditTrailItem {
+  timestamp: string;
+  event: string;
+  price: number;
+  pnlPct: number;
+}
+
 export interface CryptoTradingSignal {
   id: string;
   symbol: string;
@@ -20,6 +42,7 @@ export interface CryptoTradingSignal {
   confluenceScore: number;
   winRateProbability: number;
   entryPrice: number;
+  currentPrice: number;
   targetPrice1: number;
   targetPrice2: number;
   targetPrice3: number;
@@ -32,6 +55,24 @@ export interface CryptoTradingSignal {
   expiresAt: string;
   indicatorsSummary: string[];
   notes: string;
+  // Workflow Pipeline & MarketOwl Spec
+  pipelineStage?: SignalPipelineStage;
+  triggerType?: SignalTriggerType;
+  triggerDetails?: string;
+  fundingRate?: number;
+  fundingBias?: FundingRateBias;
+  liquidationDeltaUsd?: number;
+  hasStopLoss?: boolean;
+  isRiskRewardValid?: boolean;
+  riskStatus?: 'PASSED' | 'WARNING' | 'REJECTED';
+  riskWarningMessage?: string;
+  officialTimestamp?: string;
+  verificationHash?: string;
+  highestPnlReached?: number;
+  auditTrail?: AuditTrailItem[];
+  closedAt?: string;
+  exitPrice?: number;
+  realizedPnlPct?: number;
 }
 
 export type MacdStatus = 'BULLISH_CROSS' | 'BEARISH_CROSS' | 'BULLISH' | 'BEARISH' | 'NEUTRAL';

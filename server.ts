@@ -40,11 +40,17 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-  // Rate Limiting (100 requests / 60 seconds)
-  const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+  // Apply rate limiting strictly to /api routes (exclude static assets, vite bundles, and health checks)
+  if (!req.path.startsWith('/api') || req.path === '/api/v1/health') {
+    return next();
+  }
+
+  // Rate Limiting (increased threshold for real-time crypto dashboards: 600 requests / 60 seconds)
+  const forwarded = req.headers['x-forwarded-for'];
+  const clientIp = (typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : '') || req.socket.remoteAddress || '127.0.0.1';
   const now = Date.now();
   const windowMs = 60 * 1000;
-  const maxRequests = 100;
+  const maxRequests = 600;
 
   const currentRate = rateLimitMap.get(clientIp);
   if (!currentRate || now > currentRate.resetTime) {
@@ -54,7 +60,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     if (currentRate.count > maxRequests) {
       res.status(429).json({
         error: 'Too Many Requests',
-        message: 'Rate limit exceeded: 100 requests per minute',
+        message: 'Rate limit exceeded: 600 requests per minute',
         retryAfter: Math.ceil((currentRate.resetTime - now) / 1000),
       });
       return;
@@ -534,7 +540,7 @@ ${isId ? 'PENTING: Tulis seluruh narasi dalam Bahasa Indonesia trading institusi
     res.json({
       status: 'success',
       data: baseInsight,
-      meta: { latencyMs: Date.now() - startTime, engine: 'Nexus Quant Pattern Learner v3.2' },
+      meta: { latencyMs: Date.now() - startTime, engine: 'AKIRAQU Quant Pattern Learner v3.2' },
     });
   } catch (err: any) {
     res.status(500).json({
@@ -662,10 +668,10 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[NexusTrade AI] Server running on port ${PORT}`);
+    console.log(`[AKIRAQU Quantitative AI] Server running on port ${PORT}`);
   });
 }
 
 startServer().catch((err) => {
-  console.error('[NexusTrade AI] Startup failure:', err);
+  console.error('[AKIRAQU Quantitative AI] Startup failure:', err);
 });

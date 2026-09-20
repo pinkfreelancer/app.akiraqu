@@ -24,9 +24,12 @@ import {
   RefreshCw,
   ChevronRight,
   ShieldAlert,
+  Bell,
+  BellRing,
 } from 'lucide-react';
 import { formatCryptoPrice } from '../utils/formatters';
 import { Language } from '../i18n/translations';
+import { useAlerts } from '../contexts/AlertContext';
 
 interface ScreeningPageProps {
   currentSymbol?: string;
@@ -338,6 +341,31 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [downloadNotification, setDownloadNotification] = useState<boolean>(false);
   const [addedWatchlistCoin, setAddedWatchlistCoin] = useState<string | null>(null);
+  const [addedAlertCoin, setAddedAlertCoin] = useState<string | null>(null);
+
+  const { addAlert, openAlertCenter, unreadCountByCategory, triggerSimulatedUpdate } = useAlerts();
+
+  const handleCreateCoinAlert = (coin: CryptoScreenerCoin) => {
+    addAlert({
+      category: 'SCREENER',
+      title: `Penyaring Koin: ${coin.symbol} (${coin.signalGrade})`,
+      subtitle: `RSI ${coin.rsi14} • Supertrend ${coin.supertrend} • Konfluensi ${coin.confluenceScore}/100`,
+      message: `Alert koin terpasang: ${coin.name} (${coin.symbol}) berada pada harga $${formatCryptoPrice(coin.price)} dengan pergerakan 24H ${coin.change24h >= 0 ? '+' : ''}${coin.change24h}% dan status MACD ${coin.macdStatus}.`,
+      symbol: coin.symbol,
+      timestamp: isId ? 'Baru saja' : 'Just now',
+      severity: 'WARNING',
+      actionStage: 'screening',
+      data: {
+        screenerTrigger: coin.rsi14 < 45 ? 'RSI_OVERSOLD' : coin.confluenceScore > 90 ? 'HIGH_CONFLUENCE' : 'VOLUME_SURGE',
+        price: coin.price,
+        change24h: coin.change24h,
+        rsi14: coin.rsi14,
+        screenerMetricText: `Konfluensi ${coin.confluenceScore}/100 | RSI ${coin.rsi14}`,
+      },
+    });
+    setAddedAlertCoin(coin.symbol);
+    setTimeout(() => setAddedAlertCoin(null), 2500);
+  };
 
   // Apply preset
   const handlePresetSelect = (presetId: string) => {
@@ -474,6 +502,29 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
           </div>
 
           <button
+            onClick={() => openAlertCenter('SCREENER')}
+            className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 hover:bg-amber-500/25 font-mono text-xs font-semibold transition cursor-pointer"
+            title={isId ? 'Buka Pusat Alert Penyaring' : 'Open Screener Alerts'}
+          >
+            <Bell className="w-3.5 h-3.5 text-amber-400" />
+            <span>{isId ? 'Alert Screener' : 'Screener Alerts'}</span>
+            {unreadCountByCategory.SCREENER > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white font-bold">
+                {unreadCountByCategory.SCREENER}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => triggerSimulatedUpdate('SCREENER')}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-mono text-xs transition cursor-pointer"
+            title={isId ? 'Simulasi deteksi anomali screener baru' : 'Simulate screener anomaly'}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">{isId ? 'Scan Anomali' : 'Scan Anomaly'}</span>
+          </button>
+
+          <button
             onClick={handleExportCsv}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono font-bold text-xs transition cursor-pointer shadow-xs"
           >
@@ -494,6 +545,13 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
         <div className="p-3 bg-amber-950/80 border border-amber-500/50 rounded-xl text-amber-300 font-mono text-xs flex items-center gap-2 animate-in fade-in">
           <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
           <span><strong>{addedWatchlistCoin}</strong> berhasil ditambahkan ke daftar Watchlist Anda!</span>
+        </div>
+      )}
+
+      {addedAlertCoin && (
+        <div className="p-3 bg-amber-950/80 border border-amber-500/50 rounded-xl text-amber-300 font-mono text-xs flex items-center gap-2 animate-in fade-in">
+          <BellRing className="w-4 h-4 text-amber-400" />
+          <span>Alert Penyaring berhasil diaktifkan untuk <strong>{addedAlertCoin}</strong>! Masuk ke Pusat Alert Terpadu.</span>
         </div>
       )}
 
@@ -805,6 +863,14 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
                       {/* Action buttons */}
                       <td className="py-3 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => handleCreateCoinAlert(coin)}
+                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-amber-500/20 text-slate-300 hover:text-amber-400 transition cursor-pointer"
+                            title={isId ? 'Pasang Alert untuk Koin Ini' : 'Set Alert for Coin'}
+                          >
+                            <Bell className="w-3.5 h-3.5" />
+                          </button>
+
                           <button
                             onClick={() => handleAddWatchlist(coin)}
                             className="p-1.5 rounded-lg bg-slate-800 hover:bg-amber-500/20 text-slate-300 hover:text-amber-300 transition cursor-pointer"

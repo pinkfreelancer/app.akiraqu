@@ -12,6 +12,9 @@ import { AlertCircle, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AkiraQuLogo } from './components/AkiraQuLogo';
 import { TerminalProvider, useTerminal } from './contexts/TerminalContext';
+import { AlertProvider, useAlerts } from './contexts/AlertContext';
+import { AlertCenterModal } from './components/alerts/AlertCenterModal';
+import { AlertToastContainer } from './components/alerts/AlertToastContainer';
 
 // Modular Pages
 import { TickerPage } from './pages/TickerPage';
@@ -33,6 +36,22 @@ import { SettingsPage } from './pages/SettingsPage';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 
+// Newly structured Terminal Views
+import { MarketHeatmapView } from './components/market/MarketHeatmapView';
+import { GainersLosersView } from './components/market/GainersLosersView';
+import { MacroDominanceView } from './components/macro/MacroDominanceView';
+import { OnChainDataView } from './components/macro/OnChainDataView';
+import { EconomicCalendarView } from './components/macro/EconomicCalendarView';
+import { MtfScreenerView } from './components/technical/MtfScreenerView';
+import { VolatilityScannerView } from './components/technical/VolatilityScannerView';
+import { CorrelationBetaView } from './components/technical/CorrelationBetaView';
+import { ReturnDistributionView } from './components/research/ReturnDistributionView';
+import { ActiveOrdersView } from './components/execution/ActiveOrdersView';
+import { PositionSizingView } from './components/execution/PositionSizingView';
+import { MultiExchangeManagerView } from './components/connection/MultiExchangeManagerView';
+import { AlertBuilderView } from './components/connection/AlertBuilderView';
+import { TraderWorkflowBar, TraderPersona } from './components/TraderWorkflowBar';
+
 function TerminalApp() {
   const {
     viewMode,
@@ -50,6 +69,8 @@ function TerminalApp() {
     setEngineTheme,
     customThemeColor,
     setCustomThemeColor,
+    customThemeBg,
+    setCustomThemeBg,
     toggleTheme,
     isDark,
     t,
@@ -102,13 +123,28 @@ function TerminalApp() {
     setIsAssuranceModalOpen,
   } = useTerminal();
 
-  // Sidebar Open/Collapse State
+  const { setNavigateCallback } = useAlerts();
+
+  // Register navigation callback for alert direct links
+  useEffect(() => {
+    setNavigateCallback((stage, symbol) => {
+      selectStage(stage);
+      if (symbol) {
+        handleSymbolChange(symbol);
+      }
+    });
+  }, [setNavigateCallback, selectStage, handleSymbolChange]);
+
+  // Sidebar Open/Collapse State: On mobile (<768px) default to closed for full chart focus
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      return false;
+    }
     try {
       const saved = localStorage.getItem('imasbtc_sidebar_open');
       if (saved !== null) return JSON.parse(saved);
     } catch {}
-    return true; // Default open
+    return true; // Default open on desktop
   });
 
   const toggleSidebar = () => {
@@ -134,6 +170,22 @@ function TerminalApp() {
     window.addEventListener('keydown', handleGlobalKey);
     return () => window.removeEventListener('keydown', handleGlobalKey);
   }, []);
+
+  // Trader Persona state for personalizing workflow stages
+  const [traderPersona, setTraderPersona] = useState<TraderPersona>(() => {
+    try {
+      const saved = localStorage.getItem('akiraqu_trader_persona');
+      if (saved) return saved as TraderPersona;
+    } catch {}
+    return 'full_cycle';
+  });
+
+  const handlePersonaChange = (newPersona: TraderPersona) => {
+    setTraderPersona(newPersona);
+    try {
+      localStorage.setItem('akiraqu_trader_persona', newPersona);
+    } catch {}
+  };
 
   // Binary fallback theme ('light' | 'dark') for downstream components that only accept binary theme
   const binaryTheme: 'light' | 'dark' = isDark ? 'dark' : 'light';
@@ -195,6 +247,8 @@ function TerminalApp() {
         onSelectTheme={setEngineTheme}
         customThemeColor={customThemeColor}
         onUpdateCustomColor={setCustomThemeColor}
+        customThemeBg={customThemeBg}
+        onUpdateCustomBg={setCustomThemeBg}
         isFullscreen={isFullscreen}
         onToggleFullscreen={toggleFullscreen}
         isFullWidth={isFullWidth}
@@ -227,37 +281,49 @@ function TerminalApp() {
 
         {/* Scrollable Stage Workspace Content */}
         <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-          <main className={`flex-1 w-full mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 transition-all duration-200 ${
-            isFullWidth ? 'max-w-none' : 'max-w-7xl'
-          }`}>
-        {/* Workspace Mode: Launchpad Quad-Grid or Classic Stage Stepper */}
-        {workspaceMode === 'launchpad' ? (
-          <LaunchpadWorkspace
-            candles={candles}
-            symbol={selectedSymbol}
-            timeframe={selectedTimeframe}
-            evaluation={evaluation}
-            livePrice={activeDisplayPrice || undefined}
-            priceDirection={priceDirection}
-            wsStatus={wsStatus}
-            latencyMs={latencyMs}
-            syncMetrics={syncMetrics}
-            recentLiveTrades={recentLiveTrades}
-            orderBookBids={orderBookBids}
-            orderBookAsks={orderBookAsks}
-            bidTotal={bidTotal}
-            askTotal={askTotal}
-            selectedExchange={selectedExchange}
-            selectedMarketType={selectedMarketType}
-            onSelectExchange={handleExchangeChange}
-            onSelectMarketType={handleMarketTypeChange}
-            onSelectTimeframe={handleTimeframeChange}
-            onTriggerAnalyze={runCurrentAnalysis}
-            isLoading={isLoading}
-            lang={lang}
-            theme={binaryTheme}
-          />
-        ) : (
+          <main className="flex-1 w-full mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 transition-all duration-200 max-w-none">
+            {/* Meja Kerja Trader Workflow Bar (Siklus Harian & Personalisasi) */}
+            <TraderWorkflowBar
+              currentStage={currentStage}
+              onSelectStage={selectStage}
+              lang={lang}
+              theme={binaryTheme}
+              activePersona={traderPersona}
+              onPersonaChange={handlePersonaChange}
+            />
+
+            {/* Workspace Mode: Launchpad Quad-Grid or Classic Stage Stepper */}
+            {workspaceMode === 'launchpad' ? (
+              <LaunchpadWorkspace
+                candles={candles}
+                symbol={selectedSymbol}
+                timeframe={selectedTimeframe}
+                evaluation={evaluation}
+                livePrice={activeDisplayPrice || undefined}
+                priceDirection={priceDirection}
+                wsStatus={wsStatus}
+                latencyMs={latencyMs}
+                syncMetrics={syncMetrics}
+                recentLiveTrades={recentLiveTrades}
+                orderBookBids={orderBookBids}
+                orderBookAsks={orderBookAsks}
+                bidTotal={bidTotal}
+                askTotal={askTotal}
+                selectedExchange={selectedExchange}
+                selectedMarketType={selectedMarketType}
+                onSelectExchange={handleExchangeChange}
+                onSelectMarketType={handleMarketTypeChange}
+                onSelectTimeframe={handleTimeframeChange}
+                onTriggerAnalyze={runCurrentAnalysis}
+                onNavigateStage={(stage) => {
+                  setWorkspaceModeDirect('classic');
+                  selectStage(stage);
+                }}
+                isLoading={isLoading}
+                lang={lang}
+                theme={binaryTheme}
+              />
+            ) : (
           <div className="space-y-4">
             {/* Error Notification Banner */}
             {errorNotice && (
@@ -337,6 +403,34 @@ function TerminalApp() {
                         lang={lang}
                       />
                     )}
+                    {currentStage === 'market_heatmap' && (
+                      <MarketHeatmapView
+                        onSelectCoin={(sym) => {
+                          handleSymbolChange(sym);
+                          selectStage('ticker');
+                        }}
+                        onNavigateToTrade={(sym) => {
+                          handleSymbolChange(sym);
+                          selectStage('manual_trading');
+                        }}
+                        theme={binaryTheme}
+                        lang={lang}
+                      />
+                    )}
+                    {currentStage === 'gainers_losers' && (
+                      <GainersLosersView
+                        onSelectCoin={(sym) => {
+                          handleSymbolChange(sym);
+                          selectStage('ticker');
+                        }}
+                        onNavigateToTrade={(sym) => {
+                          handleSymbolChange(sym);
+                          selectStage('manual_trading');
+                        }}
+                        theme={binaryTheme}
+                        lang={lang}
+                      />
+                    )}
                     {currentStage === 'screening' && (
                       <ScreeningPage
                         currentSymbol={selectedSymbol}
@@ -372,6 +466,24 @@ function TerminalApp() {
                         lang={lang}
                       />
                     )}
+                    {currentStage === 'btc_dominance' && (
+                      <MacroDominanceView
+                        theme={binaryTheme}
+                        lang={lang}
+                      />
+                    )}
+                    {currentStage === 'onchain_data' && (
+                      <OnChainDataView
+                        theme={binaryTheme}
+                        lang={lang}
+                      />
+                    )}
+                    {currentStage === 'economic_calendar' && (
+                      <EconomicCalendarView
+                        theme={binaryTheme}
+                        lang={lang}
+                      />
+                    )}
                     {currentStage === 'scanner' && (
                       <ScannerPage
                         onSelectCoin={(sym) => {
@@ -384,6 +496,20 @@ function TerminalApp() {
                         theme={binaryTheme}
                       />
                     )}
+                    {currentStage === 'mtf_screener' && (
+                      <MtfScreenerView
+                        onSelectCoin={(sym) => {
+                          handleSymbolChange(sym);
+                          selectStage('ticker');
+                        }}
+                        onNavigateToTrade={(sym) => {
+                          handleSymbolChange(sym);
+                          selectStage('manual_trading');
+                        }}
+                        theme={binaryTheme}
+                        lang={lang}
+                      />
+                    )}
                     {currentStage === 'orderflow' && (
                       <OrderflowHeatmapPage
                         symbol={selectedSymbol}
@@ -394,6 +520,63 @@ function TerminalApp() {
                         selectedMarketType={selectedMarketType}
                         lang={lang}
                         theme={binaryTheme}
+                      />
+                    )}
+                    {currentStage === 'volatility_scanner' && (
+                      <VolatilityScannerView
+                        onSelectCoin={(sym) => {
+                          handleSymbolChange(sym);
+                          selectStage('ticker');
+                        }}
+                        theme={binaryTheme}
+                        lang={lang}
+                      />
+                    )}
+                    {currentStage === 'correlation_beta' && (
+                      <CorrelationBetaView
+                        theme={binaryTheme}
+                        lang={lang}
+                      />
+                    )}
+                    {currentStage === 'return_distribution' && (
+                      <ReturnDistributionView
+                        theme={binaryTheme}
+                        lang={lang}
+                      />
+                    )}
+                    {currentStage === 'active_orders' && (
+                      <ActiveOrdersView
+                        onNavigateToTrade={(sym) => {
+                          handleSymbolChange(sym);
+                          selectStage('manual_trading');
+                        }}
+                        theme={binaryTheme}
+                        lang={lang}
+                      />
+                    )}
+                    {currentStage === 'position_sizing' && (
+                      <PositionSizingView
+                        currentSymbol={selectedSymbol}
+                        currentPrice={activeDisplayPrice || 88500}
+                        onNavigateToTrade={(sym) => {
+                          handleSymbolChange(sym);
+                          selectStage('manual_trading');
+                        }}
+                        theme={binaryTheme}
+                        lang={lang}
+                      />
+                    )}
+                    {currentStage === 'multi_exchange' && (
+                      <MultiExchangeManagerView
+                        theme={binaryTheme}
+                        lang={lang}
+                      />
+                    )}
+                    {currentStage === 'alerts' && (
+                      <AlertBuilderView
+                        currentSymbol={selectedSymbol}
+                        theme={binaryTheme}
+                        lang={lang}
                       />
                     )}
                     {currentStage === 'indicators' && (
@@ -539,6 +722,8 @@ function TerminalApp() {
                         onSelectTheme={setEngineTheme}
                         customThemeColor={customThemeColor}
                         onUpdateCustomColor={setCustomThemeColor}
+                        customThemeBg={customThemeBg}
+                        onUpdateCustomBg={setCustomThemeBg}
                         isFullscreen={isFullscreen}
                         onToggleFullscreen={toggleFullscreen}
                         isFullWidth={isFullWidth}
@@ -580,9 +765,7 @@ function TerminalApp() {
       <footer className={`w-full border-t py-3 text-xs font-mono transition-colors duration-200 ${
         isDark ? 'border-[#1e293b] bg-[#0b0f19] text-slate-400' : 'border-slate-200 bg-slate-100 text-slate-700'
       }`}>
-        <div className={`mx-auto px-3 sm:px-4 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 ${
-          isFullWidth ? 'w-full' : 'max-w-7xl'
-        }`}>
+        <div className="w-full mx-auto px-3 sm:px-4 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <AkiraQuLogo size={20} theme={binaryTheme} variant="symbol" />
             <span className={`font-bold tracking-wider ${isDark ? 'text-[#F89DB5]' : 'text-[#21242B]'}`}>
@@ -672,6 +855,18 @@ function TerminalApp() {
         lang={lang}
         theme={binaryTheme}
       />
+
+      {/* Unified Alert Center Modal: Sinyal Trading, Penyaring Koin, & Berita Sentimen */}
+      <AlertCenterModal
+        lang={lang}
+        theme={binaryTheme}
+      />
+
+      {/* Floating Real-Time Alert HUD Toast */}
+      <AlertToastContainer
+        lang={lang}
+        theme={binaryTheme}
+      />
     </div>
   );
 }
@@ -679,7 +874,9 @@ function TerminalApp() {
 export default function App() {
   return (
     <TerminalProvider>
-      <TerminalApp />
+      <AlertProvider>
+        <TerminalApp />
+      </AlertProvider>
     </TerminalProvider>
   );
 }

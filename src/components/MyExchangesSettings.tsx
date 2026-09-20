@@ -1064,7 +1064,7 @@ export const MyExchangesSettings: React.FC<MyExchangesSettingsProps> = ({
               <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-500/40 text-rose-300 text-xs flex items-start gap-2 font-medium">
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
                 <div>
-                  <strong className="text-rose-200">Peringatan Keamanan:</strong> Jangan pernah mencentang izin <em>"Enable Withdrawals"</em> pada akun real. Nexus Terminal hanya membutuhkan izin membaca pasar dan menempatkan order.
+                  <strong className="text-rose-200">Peringatan Keamanan:</strong> Jangan pernah mencentang izin <em>"Enable Withdrawals"</em> pada akun real. AKIRAQU Terminal hanya membutuhkan izin membaca pasar dan menempatkan order simulasi/eksekusi.
                 </div>
               </div>
 

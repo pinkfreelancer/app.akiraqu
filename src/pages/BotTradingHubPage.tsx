@@ -13,6 +13,7 @@ import {
   INITIAL_EXCHANGE_CREDENTIALS,
   INITIAL_BOT_TRADES,
 } from '../services/terminalExtensionService';
+import { useExchangeCredentials } from '../services/credentialStorageService';
 import {
   Bot,
   Play,
@@ -128,10 +129,7 @@ export const BotTradingHubPage: React.FC<BotTradingHubPageProps> = ({
     return saved ? JSON.parse(saved) : INITIAL_BOT_CONFIGS;
   });
 
-  const [credentials, setCredentials] = useState<ExchangeApiCredential[]>(() => {
-    const saved = localStorage.getItem('nexus_exchange_credentials');
-    return saved ? JSON.parse(saved) : INITIAL_EXCHANGE_CREDENTIALS;
-  });
+  const [credentials, setCredentials] = useExchangeCredentials();
 
   const [botTrades, setBotTrades] = useState<BotTradeRecord[]>(() => {
     const saved = localStorage.getItem('nexus_bot_trades');
@@ -185,7 +183,6 @@ export const BotTradingHubPage: React.FC<BotTradingHubPageProps> = ({
 
   const saveCredentials = (newCreds: ExchangeApiCredential[]) => {
     setCredentials(newCreds);
-    localStorage.setItem('nexus_exchange_credentials', JSON.stringify(newCreds));
   };
 
   const saveBotTrades = (newTrades: BotTradeRecord[]) => {

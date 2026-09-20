@@ -436,9 +436,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       <div className={`border-b px-3 sm:px-4 lg:px-8 py-4 sm:py-5 transition-colors ${
         isDark ? 'bg-[#0d1222]/80 border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'
       }`}>
-        <div className={`mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-          isFullWidth ? 'w-full' : 'max-w-7xl'
-        }`}>
+        <div className="w-full mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/20 shrink-0">
@@ -516,22 +514,6 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               <RotateCcw className="w-4 h-4" />
             </button>
 
-            {/* Layout Width Toggle in Backtest */}
-            {onToggleFullWidth && (
-              <button
-                onClick={onToggleFullWidth}
-                title={isFullWidth ? (isId ? 'Mode Kontainer Terpusat' : 'Centered Container') : (isId ? 'Mode Layar Penuh 100%' : 'Full Width 100%')}
-                className={`hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-mono font-bold transition cursor-pointer min-h-[38px] ${
-                  isFullWidth
-                    ? (isDark ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300' : 'bg-cyan-50 border-cyan-300 text-cyan-700')
-                    : (isDark ? 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800' : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200')
-                }`}
-              >
-                {isFullWidth ? <StretchHorizontal className="w-3.5 h-3.5" /> : <LayoutGrid className="w-3.5 h-3.5" />}
-                <span className="hidden xl:inline">{isFullWidth ? 'Full Width' : 'Centered'}</span>
-              </button>
-            )}
-
             {/* Native Fullscreen Toggle in Backtest */}
             {onToggleFullscreen && (
               <button
@@ -553,7 +535,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
       {/* Notification Toast if AI Params Applied */}
       {appliedNotification && (
-        <div className={`mx-auto px-3 sm:px-4 lg:px-8 mt-3 ${isFullWidth ? 'w-full' : 'max-w-7xl'}`}>
+        <div className="w-full mx-auto px-3 sm:px-4 lg:px-8 mt-3">
           <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium animate-fadeIn">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{appliedNotification}</span>
@@ -562,9 +544,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       )}
 
       {/* Main Workspace Layout */}
-      <div className={`mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 space-y-6 ${
-        isFullWidth ? 'w-full' : 'max-w-7xl'
-      }`}>
+      <div className="w-full mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 space-y-6">
         {/* Section 1: Data Source Selector */}
         <div className={`p-5 rounded-2xl border transition-all ${
           isDark ? 'bg-[#0f1528]/90 border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'

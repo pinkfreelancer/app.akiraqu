@@ -45,6 +45,8 @@ import {
   EngineThemeId,
   normalizeEngineTheme,
   PRESET_CUSTOM_COLORS,
+  SOFT_PINK_SHADES,
+  PRESET_BACKGROUND_CONTRASTS,
   getContrastTextColor,
 } from '../types/theme.types';
 import {
@@ -67,15 +69,23 @@ import { useAuth } from '../contexts/AuthContext';
 import { MyExchangesSettings } from '../components/MyExchangesSettings';
 import { ExchangeApiCredential, SupportedExchange, MarketType } from '../types/crypto.types';
 import { INITIAL_EXCHANGE_CREDENTIALS } from '../services/terminalExtensionService';
+import { loadExchangeCredentials, saveExchangeCredentials } from '../services/credentialStorageService';
+import {
+  formatCryptoPrice,
+  formatCurrency,
+  formatNumberWithSeparators,
+} from '../utils/formatters';
 
 interface SettingsPageProps {
   lang: Language;
   onToggleLang: (lang: Language) => void;
   theme: EngineThemeId | 'light' | 'dark';
   onToggleTheme: () => void;
-  onSelectTheme?: (theme: EngineThemeId, customColor?: string) => void;
+  onSelectTheme?: (theme: EngineThemeId, customColor?: string, customBg?: string) => void;
   customThemeColor?: string;
   onUpdateCustomColor?: (color: string) => void;
+  customThemeBg?: string;
+  onUpdateCustomBg?: (bg: string) => void;
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
   isFullWidth: boolean;
@@ -95,8 +105,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   theme,
   onToggleTheme,
   onSelectTheme,
-  customThemeColor = '#06b6d4',
+  customThemeColor = '#EC4899',
   onUpdateCustomColor,
+  customThemeBg = '#0B0F19',
+  onUpdateCustomBg,
   isFullscreen,
   onToggleFullscreen,
   isFullWidth,
@@ -110,7 +122,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const { user, isAuthenticated, logout } = useAuth();
   const t = getTranslation(lang);
   const normalizedTheme = normalizeEngineTheme(theme);
-  const isDark = normalizedTheme !== 'modern-pink-light';
+  const isDark = normalizedTheme !== 'theme-light';
   const isId = lang === 'id';
 
   // Master Settings State
@@ -124,25 +136,19 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const [isTestingAlert, setIsTestingAlert] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
-  // Local Exchange Credentials State
+  // Local Exchange Credentials State (Unified across Settings and Bot Hub)
   const [localCredentials, setLocalCredentials] = useState<ExchangeApiCredential[]>(() => {
     if (exchangeCredentials && exchangeCredentials.length > 0) return exchangeCredentials;
-    try {
-      const saved = localStorage.getItem('imasbtc_exchange_credentials');
-      if (saved) return JSON.parse(saved);
-    } catch {}
-    return INITIAL_EXCHANGE_CREDENTIALS;
+    return loadExchangeCredentials();
   });
 
   const handleSaveCreds = (newCreds: ExchangeApiCredential[]) => {
     setLocalCredentials(newCreds);
-    try {
-      localStorage.setItem('imasbtc_exchange_credentials', JSON.stringify(newCreds));
-    } catch {}
+    saveExchangeCredentials(newCreds);
     if (onSaveExchangeCredentials) {
       onSaveExchangeCredentials(newCreds);
     }
-    setSaveSuccessNotice(isId ? 'Kunci API bursa berhasil diperbarui!' : 'Exchange API credentials updated!');
+    setSaveSuccessNotice(isId ? 'Kunci API bursa berhasil diperbarui & disinkronkan!' : 'Exchange API credentials updated & synchronized!');
     setTimeout(() => setSaveSuccessNotice(null), 2500);
   };
 
@@ -222,17 +228,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
   // Sample Price & Date Demo Formatter
   const getSamplePrice = () => {
-    const p = 87450.25;
-    if (settings.regional.numberFormat === 'ID') return '87.450,25';
-    if (settings.regional.numberFormat === 'EU') return '87 450,25';
-    return '87,450.25';
+    return formatCryptoPrice(87450.25, { numberFormat: settings.regional.numberFormat });
   };
 
   const getCurrencyPrefix = () => {
     switch (settings.regional.currencySymbol) {
       case 'IDR': return 'Rp ';
-      case 'EUR': return '€ ';
-      case 'USDT': return '₮ ';
+      case 'EUR': return '€';
+      case 'USDT': return '₮';
       default: return '$';
     }
   };
@@ -637,9 +640,18 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
               {/* Number Format Selection */}
               <div className="space-y-2">
-                <label className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider block">
-                  {isId ? 'Format Pemisah Desimal & Ribuan' : 'Number & Decimal Format'}
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider block">
+                    {isId ? 'Format Pemisah Desimal & Ribuan' : 'Number & Decimal Format'}
+                  </label>
+                  <span className="text-[11px] font-mono text-cyan-400 font-semibold">
+                    {settings.regional.numberFormat === 'ID'
+                      ? 'Format ID: 1.234.567,89'
+                      : settings.regional.numberFormat === 'EU'
+                      ? 'Format EU: 1 234 567,89'
+                      : 'Format US: 1,234,567.89'}
+                  </span>
+                </div>
                 <select
                   value={settings.regional.numberFormat}
                   onChange={(e) =>
@@ -651,10 +663,15 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     isDark ? 'bg-[#070b14] border-[#1e293b] text-white focus:border-cyan-500' : 'bg-slate-50 border-slate-200 text-slate-800'
                   }`}
                 >
-                  <option value="US">Format Internasional: 1,234.56</option>
-                  <option value="ID">Format Indonesia: 1.234,56</option>
-                  <option value="EU">Format Eropa: 1 234,56</option>
+                  <option value="ID">Format Indonesia (ID): 1.234.567,89 (Ribuan: Titik [.] | Desimal: Koma [,])</option>
+                  <option value="US">Format Internasional / US: 1,234,567.89 (Ribuan: Koma [,] | Desimal: Titik [.])</option>
+                  <option value="EU">Format Eropa / EU: 1 234 567,89 (Ribuan: Spasi [ ] | Desimal: Koma [,])</option>
                 </select>
+                <p className="text-[11px] text-slate-400 font-mono">
+                  {isId
+                    ? 'Pemisah ini diterapkan ke seluruh chart, buku order, riwayat transaksi, tabel screening, dan kalkulator risiko.'
+                    : 'This separator standard applies across charts, order books, trade logs, screener tables, and risk calculators.'}
+                </p>
               </div>
 
               {/* Currency Symbol */}
@@ -742,22 +759,175 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
             {/* Live Format Preview Strip */}
             <div className={`mt-6 p-4 rounded-xl border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
-              <span className="text-[11px] font-mono font-bold text-cyan-400 uppercase block mb-2">
-                {isId ? 'Pratinjau Format Langsung (Live Preview)' : 'Live Format Preview'}
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
-                <div>
-                  <span className="text-slate-400 block text-[10px]">Harga Contoh:</span>
-                  <span className="text-white font-bold">{getCurrencyPrefix()}{getSamplePrice()}</span>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[11px] font-mono font-bold text-cyan-400 uppercase flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5" />
+                  {isId ? 'Pratinjau Format Langsung (Live Preview)' : 'Live Format Preview'}
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30">
+                  {settings.regional.numberFormat === 'ID' ? 'Format Aktif: Indonesia (ID)' : settings.regional.numberFormat === 'EU' ? 'Format Aktif: Eropa (EU)' : 'Format Aktif: Internasional (US)'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                <div className={`p-2.5 rounded-lg border ${isDark ? 'bg-[#0b1329] border-[#1e293b]' : 'bg-white border-slate-200'}`}>
+                  <span className="text-slate-400 block text-[10px] mb-0.5">Harga BTC / USDT:</span>
+                  <span className="text-white font-bold block">{getCurrencyPrefix()}{formatCryptoPrice(87450.25, { numberFormat: settings.regional.numberFormat })}</span>
+                  <span className="text-[9px] text-slate-500 block">Ribuan & 2 Desimal</span>
                 </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px]">Waktu Pasar ({settings.regional.timezone}):</span>
-                  <span className="text-cyan-300 font-bold">17/09/2026, 15:45:20 WIB</span>
+                <div className={`p-2.5 rounded-lg border ${isDark ? 'bg-[#0b1329] border-[#1e293b]' : 'bg-white border-slate-200'}`}>
+                  <span className="text-slate-400 block text-[10px] mb-0.5">Microcap (PEPE):</span>
+                  <span className="text-cyan-300 font-bold block">{getCurrencyPrefix()}{formatCryptoPrice(0.00000331, { numberFormat: settings.regional.numberFormat })}</span>
+                  <span className="text-[9px] text-slate-500 block">Presisi 8 Desimal</span>
                 </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px]">Volume 24 Jam:</span>
-                  <span className="text-emerald-400 font-bold">{getCurrencyPrefix()}1.42B</span>
+                <div className={`p-2.5 rounded-lg border ${isDark ? 'bg-[#0b1329] border-[#1e293b]' : 'bg-white border-slate-200'}`}>
+                  <span className="text-slate-400 block text-[10px] mb-0.5">Saldo Portofolio:</span>
+                  <span className="text-emerald-400 font-bold block">
+                    {formatCurrency(settings.regional.currencySymbol === 'IDR' ? 1425890000 : 87450.25, {
+                      numberFormat: settings.regional.numberFormat,
+                      currency: settings.regional.currencySymbol,
+                    })}
+                  </span>
+                  <span className="text-[9px] text-slate-500 block">Mata Uang {settings.regional.currencySymbol}</span>
                 </div>
+                <div className={`p-2.5 rounded-lg border ${isDark ? 'bg-[#0b1329] border-[#1e293b]' : 'bg-white border-slate-200'}`}>
+                  <span className="text-slate-400 block text-[10px] mb-0.5">PnL 24 Jam:</span>
+                  <span className="text-emerald-400 font-bold block">
+                    {formatCurrency(settings.regional.currencySymbol === 'IDR' ? 45200000 : 2840.50, {
+                      isPnl: true,
+                      numberFormat: settings.regional.numberFormat,
+                      currency: settings.regional.currencySymbol,
+                    })}
+                  </span>
+                  <span className="text-[9px] text-emerald-500 block">+3.25% Hari Ini</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Matrix Perbandingan Format Pemisah Desimal & Ribuan */}
+            <div className={`mt-5 p-4 rounded-xl border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[11px] font-mono font-bold text-amber-400 uppercase flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5" />
+                  {isId ? 'Matriks Perbandingan Format Pemisah Desimal & Ribuan' : 'Decimal & Thousands Separator Comparison Matrix'}
+                </span>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  {isId ? 'Klik "Pilih" untuk mengaktifkan format' : 'Click "Select" to activate'}
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left font-mono text-xs border-collapse">
+                  <thead>
+                    <tr className={`border-b ${isDark ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-600'}`}>
+                      <th className="py-2 px-2.5 font-bold">Standard / Locale</th>
+                      <th className="py-2 px-2.5 font-bold">Pemisah Ribuan</th>
+                      <th className="py-2 px-2.5 font-bold">Pemisah Desimal</th>
+                      <th className="py-2 px-2.5 font-bold">Contoh BTC ($)</th>
+                      <th className="py-2 px-2.5 font-bold">Contoh Microcap</th>
+                      <th className="py-2 px-2.5 font-bold">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/40">
+                    {/* ID Format */}
+                    <tr
+                      className={`transition-colors ${
+                        settings.regional.numberFormat === 'ID'
+                          ? isDark ? 'bg-cyan-950/20' : 'bg-cyan-50'
+                          : isDark ? 'hover:bg-slate-900/40' : 'hover:bg-slate-100'
+                      }`}
+                    >
+                      <td className="py-2.5 px-2.5 font-bold text-white flex items-center gap-1.5">
+                        <span>🇮🇩 Format Indonesia (ID)</span>
+                      </td>
+                      <td className="py-2.5 px-2.5 text-cyan-400 font-bold">Titik [ . ]</td>
+                      <td className="py-2.5 px-2.5 text-amber-400 font-bold">Koma [ , ]</td>
+                      <td className="py-2.5 px-2.5 text-white tabular-nums">$87.450,25</td>
+                      <td className="py-2.5 px-2.5 text-slate-300 tabular-nums">$0,000116</td>
+                      <td className="py-2.5 px-2.5">
+                        {settings.regional.numberFormat === 'ID' ? (
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">
+                            AKTIF
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() =>
+                              handleUpdateSettings({ regional: { ...settings.regional, numberFormat: 'ID' } })
+                            }
+                            className="px-2 py-0.5 rounded border border-slate-700 hover:border-cyan-500 text-slate-400 hover:text-cyan-300 text-[10px] cursor-pointer"
+                          >
+                            Pilih
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+
+                    {/* US Format */}
+                    <tr
+                      className={`transition-colors ${
+                        settings.regional.numberFormat === 'US'
+                          ? isDark ? 'bg-cyan-950/20' : 'bg-cyan-50'
+                          : isDark ? 'hover:bg-slate-900/40' : 'hover:bg-slate-100'
+                      }`}
+                    >
+                      <td className="py-2.5 px-2.5 font-bold text-white flex items-center gap-1.5">
+                        <span>🇺🇸 Format Internasional (US)</span>
+                      </td>
+                      <td className="py-2.5 px-2.5 text-cyan-400 font-bold">Koma [ , ]</td>
+                      <td className="py-2.5 px-2.5 text-amber-400 font-bold">Titik [ . ]</td>
+                      <td className="py-2.5 px-2.5 text-white tabular-nums">$87,450.25</td>
+                      <td className="py-2.5 px-2.5 text-slate-300 tabular-nums">$0.000116</td>
+                      <td className="py-2.5 px-2.5">
+                        {settings.regional.numberFormat === 'US' ? (
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">
+                            AKTIF
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() =>
+                              handleUpdateSettings({ regional: { ...settings.regional, numberFormat: 'US' } })
+                            }
+                            className="px-2 py-0.5 rounded border border-slate-700 hover:border-cyan-500 text-slate-400 hover:text-cyan-300 text-[10px] cursor-pointer"
+                          >
+                            Pilih
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+
+                    {/* EU Format */}
+                    <tr
+                      className={`transition-colors ${
+                        settings.regional.numberFormat === 'EU'
+                          ? isDark ? 'bg-cyan-950/20' : 'bg-cyan-50'
+                          : isDark ? 'hover:bg-slate-900/40' : 'hover:bg-slate-100'
+                      }`}
+                    >
+                      <td className="py-2.5 px-2.5 font-bold text-white flex items-center gap-1.5">
+                        <span>🇪🇺 Format Eropa (EU)</span>
+                      </td>
+                      <td className="py-2.5 px-2.5 text-cyan-400 font-bold">Spasi [ &nbsp; ]</td>
+                      <td className="py-2.5 px-2.5 text-amber-400 font-bold">Koma [ , ]</td>
+                      <td className="py-2.5 px-2.5 text-white tabular-nums">$87 450,25</td>
+                      <td className="py-2.5 px-2.5 text-slate-300 tabular-nums">$0,000116</td>
+                      <td className="py-2.5 px-2.5">
+                        {settings.regional.numberFormat === 'EU' ? (
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">
+                            AKTIF
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() =>
+                              handleUpdateSettings({ regional: { ...settings.regional, numberFormat: 'EU' } })
+                            }
+                            className="px-2 py-0.5 rounded border border-slate-700 hover:border-cyan-500 text-slate-400 hover:text-cyan-300 text-[10px] cursor-pointer"
+                          >
+                            Pilih
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -775,157 +945,161 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               <span>{isId ? 'Kustomisasi Tampilan & Tema Engine' : 'Display Customization & Engine Theme'}</span>
             </h3>
 
-            {/* Theme Engine Selection: 1. Modern Pink Light, 2. Cyber Pink Dark, 3. Classic Terminal, 4. Custom */}
+            {/* Theme Engine Selection: 1. theme-light, 2. theme-dark (Default), 3. theme-terminal, 4. theme-custom */}
             <div className="space-y-3 mb-6">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider block">
                   {isId ? 'Pilihan Tema Engine Visual (4 Pilihan Engine)' : 'Visual Engine Theme (4 Engine Presets)'}
                 </label>
-                <span className="text-xs font-mono text-cyan-400">
-                  {normalizedTheme === 'modern-pink-light' && '☀️ Modern Pink Light (Aktif)'}
-                  {normalizedTheme === 'cyber-pink-dark' && '🌙 Cyber Pink Dark (Aktif)'}
-                  {normalizedTheme === 'classic-terminal' && '💻 Classic Terminal (Aktif)'}
-                  {normalizedTheme === 'custom' && '🎨 Custom Dominant Color (Aktif)'}
+                <span className="text-xs font-mono text-pink-400 font-semibold">
+                  {normalizedTheme === 'theme-light' && '☀️ Light Theme (Aktif)'}
+                  {normalizedTheme === 'theme-dark' && '🌙 Dark Theme - Default (Aktif)'}
+                  {normalizedTheme === 'theme-terminal' && '💻 Terminal Theme (Aktif)'}
+                  {normalizedTheme === 'theme-custom' && '🎨 Custom Theme (Aktif)'}
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-                {/* 1. Modern Pink Light */}
+                {/* 1. Light Theme (theme-light) */}
                 <button
+                  type="button"
                   onClick={() => {
-                    if (onSelectTheme) onSelectTheme('modern-pink-light');
+                    if (onSelectTheme) onSelectTheme('theme-light');
                     else if (isDark) onToggleTheme();
                     handleUpdateSettings({ display: { ...settings.display, themeMode: 'light' } });
                   }}
                   className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                    normalizedTheme === 'modern-pink-light'
-                      ? 'bg-white border-pink-500 ring-2 ring-pink-500/30 shadow-md'
+                    normalizedTheme === 'theme-light'
+                      ? 'bg-white border-[#F472B6] ring-2 ring-[#F472B6]/30 shadow-md'
                       : isDark
-                      ? 'bg-[#070b14] border-[#1e293b] hover:border-slate-700'
+                      ? 'bg-[#0B0F19] border-[#1e293b] hover:border-slate-700'
                       : 'bg-white border-slate-200 hover:border-slate-300'
                   }`}
                 >
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-[#fdf8fa] border border-pink-200 flex items-center justify-center">
-                          <Sun className="w-4 h-4 text-pink-600" />
+                        <div className="w-8 h-8 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-center">
+                          <Sun className="w-4 h-4 text-[#F472B6]" />
                         </div>
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 font-mono">
                           Light Mode
                         </span>
                       </div>
-                      {normalizedTheme === 'modern-pink-light' && (
-                        <Check className="w-4 h-4 text-pink-600" />
+                      {normalizedTheme === 'theme-light' && (
+                        <Check className="w-4 h-4 text-[#F472B6]" />
                       )}
                     </div>
-                    <span className="text-sm font-bold font-mono text-slate-900 block">Modern Pink Light</span>
+                    <span className="text-sm font-bold font-mono text-slate-900 block">Light Theme</span>
                     <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
                       {isId
-                        ? 'Tampilan terang bersih profesional dengan aksen pink modern / magenta dan teks kontras tinggi.'
-                        : 'Clean off-white base with modern magenta/pink accents and high-contrast readable typography.'}
+                        ? 'Background Slate 50 (#F8FAFC), Card putih bersih dengan subtle border (#E2E8F0) & aksen Soft Pink (#F472B6).'
+                        : 'Slate 50 background (#F8FAFC), crisp white surface with subtle border (#E2E8F0) & Soft Pink accent (#F472B6).'}
                     </p>
                   </div>
                   <div className="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-slate-100">
                     <span className="text-[10px] text-slate-400 font-mono">Palet:</span>
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#fdf8fa] border border-slate-300" title="#fdf8fa" />
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#db2777]" title="#db2777" />
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#0f172a]" title="#0f172a" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#F8FAFC] border border-slate-300" title="#F8FAFC" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#FFFFFF] border border-[#E2E8F0]" title="#FFFFFF" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#F472B6]" title="#F472B6" />
                   </div>
                 </button>
 
-                {/* 2. Cyber Pink Dark */}
+                {/* 2. Dark Theme (theme-dark - Default) */}
                 <button
+                  type="button"
                   onClick={() => {
-                    if (onSelectTheme) onSelectTheme('cyber-pink-dark');
+                    if (onSelectTheme) onSelectTheme('theme-dark');
                     else if (!isDark) onToggleTheme();
                     handleUpdateSettings({ display: { ...settings.display, themeMode: 'dark' } });
                   }}
                   className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                    normalizedTheme === 'cyber-pink-dark'
-                      ? 'bg-[#0b0f19] border-[#ff2a85] ring-2 ring-[#ff2a85]/30 shadow-md'
-                      : 'bg-[#070b14] border-[#1e293b] hover:border-slate-700'
+                    normalizedTheme === 'theme-dark'
+                      ? 'bg-[#1E293B]/80 backdrop-blur-md border-[#EC4899] ring-2 ring-[#EC4899]/30 shadow-lg'
+                      : 'bg-[#0B0F19] border-[#1e293b] hover:border-slate-700'
                   }`}
                 >
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-[#080c14] border border-[#ff2a85]/30 flex items-center justify-center">
-                          <Moon className="w-4 h-4 text-[#ff2a85]" />
+                        <div className="w-8 h-8 rounded-lg bg-[#0B0F19] border border-[#EC4899]/40 flex items-center justify-center">
+                          <Moon className="w-4 h-4 text-[#EC4899]" />
                         </div>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#ff2a85]/15 text-[#ff60a8] font-mono">
-                          Dark Mode
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30 font-mono">
+                          Default Dark
                         </span>
                       </div>
-                      {normalizedTheme === 'cyber-pink-dark' && (
-                        <Check className="w-4 h-4 text-[#ff2a85]" />
+                      {normalizedTheme === 'theme-dark' && (
+                        <Check className="w-4 h-4 text-[#EC4899]" />
                       )}
                     </div>
-                    <span className="text-sm font-bold font-mono text-white block">Cyber Pink Dark</span>
-                    <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                    <span className="text-sm font-bold font-mono text-white block">Dark Theme</span>
+                    <p className="text-[11px] text-slate-300 mt-1.5 leading-relaxed">
                       {isId
-                        ? 'Mode gelap institusional hitam arang pekat dengan aksen neon pink menyala untuk kenyamanan mata.'
-                        : 'Institutional deep charcoal canvas paired with vibrant neon cyber-pink highlights.'}
+                        ? 'Background Deep Navy (#0B0F19), Card Slate 800 (#1E293B) glassmorphism tipis, & aksen Soft Pink (#EC4899) glow halus.'
+                        : 'Deep Navy base (#0B0F19), Slate 800 cards with backdrop blur, & Soft Pink (#EC4899) subtle glow.'}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-[#1e293b]">
+                  <div className="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-[#334155]/60">
                     <span className="text-[10px] text-slate-400 font-mono">Palet:</span>
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#080c14] border border-slate-700" title="#080c14" />
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#ff2a85]" title="#ff2a85" />
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#f8fafc]" title="#f8fafc" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#0B0F19] border border-slate-700" title="#0B0F19" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#1E293B] border border-slate-600" title="#1E293B" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#EC4899] shadow-xs" title="#EC4899" />
                   </div>
                 </button>
 
-                {/* 3. Classic Terminal */}
+                {/* 3. Terminal Theme (theme-terminal) */}
                 <button
+                  type="button"
                   onClick={() => {
-                    if (onSelectTheme) onSelectTheme('classic-terminal');
+                    if (onSelectTheme) onSelectTheme('theme-terminal');
                     handleUpdateSettings({ display: { ...settings.display, themeMode: 'classic' } });
                   }}
                   className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                    normalizedTheme === 'classic-terminal'
-                      ? 'bg-black border-emerald-500 ring-2 ring-emerald-500/30 shadow-md'
-                      : 'bg-[#070b14] border-[#1e293b] hover:border-slate-700'
+                    normalizedTheme === 'theme-terminal'
+                      ? 'bg-[#0B0F19] border-[#FF007A] ring-2 ring-[#FF007A]/30 shadow-md'
+                      : 'bg-[#030712] border-emerald-500/20 hover:border-emerald-500/40'
                   }`}
                 >
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-[#020503] border border-emerald-500/30 flex items-center justify-center">
-                          <TerminalIcon className="w-4 h-4 text-emerald-400" />
+                        <div className="w-8 h-8 rounded-lg bg-[#030712] border border-emerald-500/30 flex items-center justify-center">
+                          <TerminalIcon className="w-4 h-4 text-[#FF007A]" />
                         </div>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 font-mono">
-                          Retro Quant
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#0B0F19] text-[#FF007A] border border-emerald-500/30 font-mono">
+                          Cyber Quant
                         </span>
                       </div>
-                      {normalizedTheme === 'classic-terminal' && (
-                        <Check className="w-4 h-4 text-emerald-400" />
+                      {normalizedTheme === 'theme-terminal' && (
+                        <Check className="w-4 h-4 text-[#FF007A]" />
                       )}
                     </div>
-                    <span className="text-sm font-bold font-mono text-emerald-400 block">Classic Terminal</span>
-                    <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                    <span className="text-sm font-bold font-mono text-white block">Terminal Theme</span>
+                    <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed font-mono">
                       {isId
-                        ? 'Nuansa terminal klasik ala hacker era 90-an dengan latar hitam mutlak dan monokrom hijau terminal.'
-                        : '90s retro quant green-screen hacker terminal with pitch black and phosphor green.'}
+                        ? 'Pitch Black (#030712), card #0B0F19 bergaris tipis hijau-pink monokromatik, font JetBrains Mono & Cyber Pink (#FF007A).'
+                        : 'Pitch Black (#030712), card #0B0F19 monochromatic green-pink border, JetBrains Mono & Cyber Pink (#FF007A).'}
                     </p>
                   </div>
                   <div className="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-[#1e293b]">
                     <span className="text-[10px] text-slate-400 font-mono">Palet:</span>
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#020503] border border-slate-700" title="#020503" />
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#22c55e]" title="#22c55e" />
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#dcfce7]" title="#dcfce7" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#030712] border border-slate-700" title="#030712" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#0B0F19] border border-emerald-500/30" title="#0B0F19" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#FF007A]" title="#FF007A" />
                   </div>
                 </button>
 
-                {/* 4. Custom Dominant Color */}
+                {/* 4. Custom Theme (theme-custom) */}
                 <button
+                  type="button"
                   onClick={() => {
-                    if (onSelectTheme) onSelectTheme('custom', customThemeColor);
+                    if (onSelectTheme) onSelectTheme('theme-custom', customThemeColor, customThemeBg);
                     handleUpdateSettings({ display: { ...settings.display, themeMode: 'custom' } });
                   }}
                   className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                    normalizedTheme === 'custom'
-                      ? 'bg-[#0f172a] border-cyan-400 ring-2 ring-cyan-400/30 shadow-md'
+                    normalizedTheme === 'theme-custom'
+                      ? 'bg-[#0f172a] border-pink-400 ring-2 ring-pink-400/30 shadow-md'
                       : 'bg-[#070b14] border-[#1e293b] hover:border-slate-700'
                   }`}
                 >
@@ -949,42 +1123,43 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                             backgroundColor: `${customThemeColor}15`,
                           }}
                         >
-                          Dynamic Hue
+                          Customizer
                         </span>
                       </div>
-                      {normalizedTheme === 'custom' && (
+                      {normalizedTheme === 'theme-custom' && (
                         <Check className="w-4 h-4" style={{ color: customThemeColor }} />
                       )}
                     </div>
-                    <span className="text-sm font-bold font-mono text-white block">Custom Color</span>
+                    <span className="text-sm font-bold font-mono text-white block">Custom Theme</span>
                     <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
                       {isId
-                        ? 'Kebebasan warna kustom dinamis dengan kalkulasi otomatis kontras teks standar WCAG AA.'
-                        : 'User-defined dominant accent hue with dynamic WCAG AA text contrast calculation.'}
+                        ? 'Color Picker mini untuk atur saturasi Soft Pink dan tingkat kontras background sesuai kenyamanan mata.'
+                        : 'Mini Color Picker to fine-tune Soft Pink saturation and background contrast for eye comfort.'}
                     </p>
                   </div>
                   <div className="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-[#1e293b]">
                     <span className="text-[10px] text-slate-400 font-mono">Kustom:</span>
-                    <span className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: customThemeColor }} />
+                    <span className="w-3.5 h-3.5 rounded-full border border-slate-600" style={{ backgroundColor: customThemeBg }} />
+                    <span className="w-3.5 h-3.5 rounded-full shadow-xs" style={{ backgroundColor: customThemeColor }} />
                     <span className="text-[10px] font-mono text-slate-300 uppercase">{customThemeColor}</span>
                   </div>
                 </button>
               </div>
             </div>
 
-            {/* Custom Dominant Color Controls Panel */}
-            {normalizedTheme === 'custom' && (
+            {/* Custom Theme Mini Color Picker & Contrast Controls */}
+            {normalizedTheme === 'theme-custom' && (
               <div className={`p-5 rounded-2xl border mb-6 ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[#1e293b]/70">
                   <div>
                     <h4 className="text-sm font-bold font-mono text-white flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-cyan-400" />
-                      <span>{isId ? 'Penyesuaian Warna Dominan Kustom' : 'Custom Dominant Accent Controls'}</span>
+                      <Sparkles className="w-4 h-4 text-pink-400" />
+                      <span>{isId ? 'Color Picker Mini: Saturasi Soft Pink & Kontras Background' : 'Mini Color Picker: Soft Pink Saturation & Background Contrast'}</span>
                     </h4>
                     <p className="text-xs text-slate-400 mt-0.5">
                       {isId
-                        ? 'Ubah kode hex atau pilih dari palet preset. Kontras teks disesuaikan otomatis.'
-                        : 'Choose custom hex or click presets. System guarantees WCAG AA readability automatically.'}
+                        ? 'Atur saturasi warna aksen Soft Pink dan tingkat kegelapan/kontras latar belakang agar mata tetap nyaman saat trading maraton.'
+                        : 'Customize Soft Pink accent saturation and background contrast level for comfortable trading sessions.'}
                     </p>
                   </div>
                   {/* WCAG AA Compliance Badge */}
@@ -996,30 +1171,37 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       borderColor: customThemeColor,
                     }}
                   >
-                    <span>WCAG AA READABLE ✅</span>
+                    <span>WCAG AA COMPLIANT ✅</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {/* Left: Interactive Picker & Hex Input */}
-                  <div className="space-y-3">
-                    <label className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider block">
-                      {isId ? 'Pemilih Warna & Input HEX' : 'Color Picker & Hex Value'}
-                    </label>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Left Column: Soft Pink Saturation & Accent Hue */}
+                  <div className="space-y-4 p-4 rounded-xl bg-[#0B0F19] border border-[#1e293b]">
+                    <div>
+                      <label className="text-xs font-mono font-bold text-pink-300 uppercase tracking-wider block mb-1">
+                        {isId ? '1. Saturasi & Pilihan Aksen Soft Pink' : '1. Soft Pink Saturation & Accent'}
+                      </label>
+                      <p className="text-[11px] text-slate-400">
+                        {isId ? 'Pilih tingkat kelembutan atau gunakan color picker kustom.' : 'Pick a Soft Pink tone or use the native color picker.'}
+                      </p>
+                    </div>
+
                     <div className="flex items-center gap-3">
                       <input
                         type="color"
                         value={customThemeColor}
                         onChange={(e) => {
-                          onUpdateCustomColor?.(e.target.value);
-                          onSelectTheme?.('custom', e.target.value);
+                          const val = e.target.value;
+                          onUpdateCustomColor?.(val);
+                          onSelectTheme?.('theme-custom', val, customThemeBg);
                         }}
-                        className="w-12 h-12 rounded-xl border border-[#1e293b] cursor-pointer bg-transparent"
-                        aria-label="Color Picker Input"
+                        className="w-12 h-12 rounded-xl border border-[#334155] cursor-pointer bg-transparent shrink-0"
+                        aria-label="Soft Pink Accent Color Picker"
                       />
                       <div className="flex-1 space-y-1">
-                        <div className="flex items-center rounded-xl border border-[#1e293b] bg-[#0b0f19] px-3 py-2 text-xs font-mono">
-                          <span className="text-slate-500 mr-2">HEX CODE:</span>
+                        <div className="flex items-center rounded-xl border border-[#334155] bg-[#070b14] px-3 py-2 text-xs font-mono">
+                          <span className="text-slate-500 mr-2">ACCENT HEX:</span>
                           <input
                             type="text"
                             value={customThemeColor}
@@ -1027,48 +1209,126 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                               const val = e.target.value;
                               onUpdateCustomColor?.(val);
                               if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-                                onSelectTheme?.('custom', val);
+                                onSelectTheme?.('theme-custom', val, customThemeBg);
                               }
                             }}
-                            placeholder="#ff2a85"
+                            placeholder="#EC4899"
                             maxLength={7}
                             className="w-full bg-transparent font-bold text-white focus:outline-none uppercase"
                           />
                         </div>
                         <span className="text-[10px] text-slate-400 block">
-                          Format: #RRGGBB (misal: #06B6D4, #FF2A85, #F59E0B)
+                          Format: #RRGGBB (misal: #F472B6, #EC4899, #FF007A)
                         </span>
+                      </div>
+                    </div>
+
+                    {/* Preset Soft Pink Saturation Chips */}
+                    <div className="space-y-1.5 pt-1">
+                      <span className="text-[11px] font-mono text-slate-400 block">
+                        {isId ? 'Pilihan Cepat Soft Pink:' : 'Quick Soft Pink Presets:'}
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {SOFT_PINK_SHADES.map((preset) => (
+                          <button
+                            key={preset.hex}
+                            type="button"
+                            onClick={() => {
+                              onUpdateCustomColor?.(preset.hex);
+                              onSelectTheme?.('theme-custom', preset.hex, customThemeBg);
+                            }}
+                            className={`flex items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-mono transition-all cursor-pointer ${
+                              customThemeColor.toLowerCase() === preset.hex.toLowerCase()
+                                ? 'bg-pink-950/60 border-pink-400 text-pink-200 ring-1 ring-pink-400/40'
+                                : 'bg-[#070b14] border-[#1e293b] text-slate-300 hover:border-slate-600'
+                            }`}
+                          >
+                            <span
+                              className="w-3 h-3 rounded-full border border-black/40 shrink-0"
+                              style={{ backgroundColor: preset.hex }}
+                            />
+                            <span>{preset.name}</span>
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </div>
 
-                  {/* Right: Popular Swatch Presets */}
-                  <div className="space-y-3">
-                    <label className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider block">
-                      {isId ? 'Preset Palet Populer' : 'Popular Palette Presets'}
-                    </label>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {PRESET_CUSTOM_COLORS.map((preset) => (
-                        <button
-                          key={preset.hex}
-                          type="button"
-                          onClick={() => {
-                            onUpdateCustomColor?.(preset.hex);
-                            onSelectTheme?.('custom', preset.hex);
-                          }}
-                          className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-mono transition-all cursor-pointer ${
-                            customThemeColor.toLowerCase() === preset.hex.toLowerCase()
-                              ? 'bg-slate-800 border-white text-white shadow-sm ring-1 ring-white/50'
-                              : 'bg-[#0b0f19] border-[#1e293b] text-slate-300 hover:border-slate-600'
-                          }`}
-                        >
-                          <span
-                            className="w-3 h-3 rounded-full border border-black/50"
-                            style={{ backgroundColor: preset.hex }}
+                  {/* Right Column: Background Contrast Control */}
+                  <div className="space-y-4 p-4 rounded-xl bg-[#0B0F19] border border-[#1e293b]">
+                    <div>
+                      <label className="text-xs font-mono font-bold text-cyan-300 uppercase tracking-wider block mb-1">
+                        {isId ? '2. Kontras Background & Surface' : '2. Background & Surface Contrast'}
+                      </label>
+                      <p className="text-[11px] text-slate-400">
+                        {isId ? 'Atur kegelapan canvas untuk ergonomi pandangan mata Anda.' : 'Calibrate canvas dark level for optimal viewing comfort.'}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="color"
+                        value={customThemeBg}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          onUpdateCustomBg?.(val);
+                          onSelectTheme?.('theme-custom', customThemeColor, val);
+                        }}
+                        className="w-12 h-12 rounded-xl border border-[#334155] cursor-pointer bg-transparent shrink-0"
+                        aria-label="Background Contrast Color Picker"
+                      />
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center rounded-xl border border-[#334155] bg-[#070b14] px-3 py-2 text-xs font-mono">
+                          <span className="text-slate-500 mr-2">BG HEX:</span>
+                          <input
+                            type="text"
+                            value={customThemeBg}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              onUpdateCustomBg?.(val);
+                              if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                                onSelectTheme?.('theme-custom', customThemeColor, val);
+                              }
+                            }}
+                            placeholder="#0B0F19"
+                            maxLength={7}
+                            className="w-full bg-transparent font-bold text-white focus:outline-none uppercase"
                           />
-                          <span>{preset.name}</span>
-                        </button>
-                      ))}
+                        </div>
+                        <span className="text-[10px] text-slate-400 block">
+                          Format: #0B0F19 (Navy) / #030712 (Black) / #F8FAFC (Light)
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Preset Background Contras Chips */}
+                    <div className="space-y-1.5 pt-1">
+                      <span className="text-[11px] font-mono text-slate-400 block">
+                        {isId ? 'Pilihan Kontras Background Populer:' : 'Popular Background Presets:'}
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {PRESET_BACKGROUND_CONTRASTS.map((bgPreset) => (
+                          <button
+                            key={bgPreset.hex}
+                            type="button"
+                            onClick={() => {
+                              onUpdateCustomBg?.(bgPreset.hex);
+                              onSelectTheme?.('theme-custom', customThemeColor, bgPreset.hex);
+                            }}
+                            className={`flex items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-mono transition-all cursor-pointer ${
+                              customThemeBg.toLowerCase() === bgPreset.hex.toLowerCase()
+                                ? 'bg-slate-800 border-cyan-400 text-cyan-200 ring-1 ring-cyan-400/40'
+                                : 'bg-[#070b14] border-[#1e293b] text-slate-300 hover:border-slate-600'
+                            }`}
+                          >
+                            <span
+                              className="w-3 h-3 rounded-full border border-slate-600 shrink-0"
+                              style={{ backgroundColor: bgPreset.hex }}
+                            />
+                            <span>{bgPreset.name}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1097,29 +1357,23 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 </button>
               </div>
 
-              {/* Full Width Layout */}
+              {/* Full Width Layout - Permanently Active & Responsive */}
               <div className={`p-4 rounded-xl border flex flex-col justify-between ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="space-y-1 mb-3">
                   <span className="text-sm font-bold font-mono text-white flex items-center gap-2">
                     <StretchHorizontal className="w-4 h-4 text-cyan-400" />
-                    {isId ? 'Lebar Layar Ultra-Wide' : 'Full-Width Layout'}
+                    {isId ? 'Tata Letak Penuh (Full-Width)' : 'Full-Width Responsive Layout'}
                   </span>
                   <p className="text-xs text-slate-400">
-                    {isId ? 'Menyesuaikan grid grafik ke monitor ultra-wide tanpa batas tepi.' : 'Fit trading cards across ultra-wide monitors.'}
+                    {isId ? 'Tampilan 100% Full-Width responsif di seluruh perangkat (Mobile, Tablet, Desktop, Ultra-Wide).' : '100% full-width responsive across all devices (Mobile, Tablet, Desktop, Ultra-Wide).'}
                   </p>
                 </div>
-                <button
-                  onClick={onToggleFullWidth}
-                  className={`w-full py-2 rounded-lg text-xs font-mono font-bold border transition cursor-pointer ${
-                    isFullWidth
-                      ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
-                      : isDark
-                      ? 'bg-slate-800 text-slate-300 border-slate-700'
-                      : 'bg-white text-slate-700 border-slate-300'
-                  }`}
-                >
-                  {isFullWidth ? (isId ? 'Mode: Full-Width Aktif' : 'Mode: Full-Width Active') : (isId ? 'Mode: Centered Grid' : 'Mode: Centered Grid')}
-                </button>
+                <div className="w-full py-2 px-3 rounded-lg text-xs font-mono font-bold border border-cyan-500/40 bg-cyan-500/15 text-cyan-300 flex items-center justify-between">
+                  <span>{isId ? 'Status: 100% Full Width Aktif' : 'Status: 100% Full Width Active'}</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-400/20 text-cyan-200 font-semibold uppercase tracking-wider">
+                    {isId ? 'Permanen' : 'Default'}
+                  </span>
+                </div>
               </div>
 
               {/* Workspace Layout Switcher */}
