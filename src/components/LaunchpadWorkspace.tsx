@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   OHLCVCandle,
   Timeframe,
@@ -9,6 +9,8 @@ import {
   LiveTradeTick,
   LiveOrderBookLevel,
   StageId,
+  CryptoSymbolInfo,
+  OpenPosition,
 } from '../types/crypto.types';
 import { Language } from '../i18n/translations';
 import { InteractiveChart } from './InteractiveChart';
@@ -16,7 +18,17 @@ import { LiquidationHeatmapCard } from './LiquidationHeatmapCard';
 import { RiskCalculatorCard } from './RiskCalculatorCard';
 import { GaugeChart } from './GaugeChart';
 import {
-  LayoutGrid,
+  LaunchpadToolbar,
+  LaunchpadLayoutPreset,
+} from './launchpad/LaunchpadToolbar';
+import { LaunchpadOrderBookTape } from './launchpad/LaunchpadOrderBookTape';
+import { LaunchpadQuickTrade } from './launchpad/LaunchpadQuickTrade';
+import { LaunchpadPositionsBar } from './launchpad/LaunchpadPositionsBar';
+import {
+  LaunchpadCustomizerModal,
+  GridPanelVisibilityConfig,
+} from './launchpad/LaunchpadCustomizerModal';
+import {
   Maximize2,
   Minimize2,
   CandlestickChart,
@@ -24,24 +36,24 @@ import {
   Flame,
   ShieldCheck,
   Zap,
-  ChevronRight,
-  Info,
   ExternalLink,
-  ArrowRight,
   Layers,
   Sparkles,
-  HelpCircle,
   X,
+  Copy,
+  Check,
+  Activity,
+  Filter,
+  BarChart2,
+  TrendingUp,
+  TrendingDown,
 } from 'lucide-react';
 import { formatCryptoPrice } from '../utils/formatters';
-
-export type LaunchpadLayoutPreset = 'quad' | 'chart_focus' | 'execution_focus' | 'dual_chart_confluence';
-
-const TIMEFRAME_OPTIONS: Timeframe[] = ['1m', '5m', '15m', '1H', '4H', '1D'];
 
 interface LaunchpadWorkspaceProps {
   candles: OHLCVCandle[];
   symbol: string;
+  symbols?: CryptoSymbolInfo[];
   timeframe: Timeframe;
   evaluation: ConfluenceEvaluation | null;
   livePrice?: number;
@@ -56,6 +68,7 @@ interface LaunchpadWorkspaceProps {
   askTotal?: number;
   selectedExchange?: SupportedExchange;
   selectedMarketType?: MarketType;
+  onSelectSymbol?: (symbol: string) => void;
   onSelectExchange?: (ex: SupportedExchange) => void;
   onSelectMarketType?: (mt: MarketType) => void;
   onSelectTimeframe?: (tf: Timeframe) => void;
@@ -69,6 +82,7 @@ interface LaunchpadWorkspaceProps {
 export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
   candles,
   symbol,
+  symbols = [],
   timeframe,
   evaluation,
   livePrice,
@@ -83,6 +97,7 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
   askTotal,
   selectedExchange = 'BINANCE',
   selectedMarketType = 'SPOT',
+  onSelectSymbol,
   onSelectExchange,
   onSelectMarketType,
   onSelectTimeframe,
@@ -95,14 +110,61 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
   const isDark = theme === 'dark';
   const isId = lang === 'id';
 
+  // Layout & Maximize State
   const [layoutPreset, setLayoutPreset] = useState<LaunchpadLayoutPreset>(() => {
     return (localStorage.getItem('imasbtc_launchpad_layout') as LaunchpadLayoutPreset) || 'quad';
   });
   const [maximizedPanel, setMaximizedPanel] = useState<'chart' | 'confluence' | 'heatmap' | 'risk' | null>(null);
+
+  // Workflow Guide Banner State
   const [showWorkflowGuide, setShowWorkflowGuide] = useState<boolean>(() => {
     return localStorage.getItem('imasbtc_grid_guide_dismissed') !== 'true';
   });
 
+  // Sound Alerts state
+  const [soundAlerts, setSoundAlerts] = useState<boolean>(() => {
+    return localStorage.getItem('imasbtc_grid_sound') !== 'false';
+  });
+
+  // Customizer Modal state
+  const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
+  const [panelConfig, setPanelConfig] = useState<GridPanelVisibilityConfig>(() => {
+    try {
+      const saved = localStorage.getItem('imasbtc_grid_panels');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      showChart: true,
+      showConfluence: true,
+      showLiquidity: true,
+      showRisk: true,
+      showPositionsBar: true,
+    };
+  });
+
+  // Panel 1 View Mode: 'chart' (Candlestick) | 'orderbook' (L2 Depth & Tape)
+  const [panel1View, setPanel1View] = useState<'chart' | 'orderbook'>('chart');
+
+  // Panel 2 Indicator Category Filter: 'all' | 'bullish' | 'bearish' | 'smc' | 'momentum'
+  const [indicatorFilter, setIndicatorFilter] = useState<'all' | 'bullish' | 'bearish' | 'smc' | 'momentum'>('all');
+
+  // Panel 4 Mode: 'calculator' (Full Sizing Calculator) | 'quick_trade' (Paper Trading Desk)
+  const [panel4View, setPanel4View] = useState<'calculator' | 'quick_trade'>('calculator');
+
+  // Active Simulated Positions in Grid
+  const [gridPositions, setGridPositions] = useState<OpenPosition[]>(() => {
+    try {
+      const saved = localStorage.getItem('imasbtc_grid_sim_positions');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [];
+  });
+
+  const [copiedConfluence, setCopiedConfluence] = useState(false);
+
+  const activeDisplayPrice = livePrice || (candles.length > 0 ? candles[candles.length - 1].close : 0);
+
+  // Save changes to localStorage
   const handleSelectLayout = (preset: LaunchpadLayoutPreset) => {
     setLayoutPreset(preset);
     localStorage.setItem('imasbtc_launchpad_layout', preset);
@@ -118,9 +180,126 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
     localStorage.setItem('imasbtc_grid_guide_dismissed', next ? 'false' : 'true');
   };
 
-  const activeDisplayPrice = livePrice || (candles.length > 0 ? candles[candles.length - 1].close : 0);
+  const toggleSound = () => {
+    const next = !soundAlerts;
+    setSoundAlerts(next);
+    localStorage.setItem('imasbtc_grid_sound', next ? 'true' : 'false');
+  };
 
-  // Panel Header Bar Helper with explicit step tags and quick-jump button
+  const handleUpdatePanelConfig = (newConfig: GridPanelVisibilityConfig) => {
+    setPanelConfig(newConfig);
+    localStorage.setItem('imasbtc_grid_panels', JSON.stringify(newConfig));
+  };
+
+  // Audio Chime Player Helper
+  const playAudioChime = useCallback((freq = 880) => {
+    if (!soundAlerts) return;
+    try {
+      const audioCtx = new (window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.5, audioCtx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.32);
+    } catch {}
+  }, [soundAlerts]);
+
+  // Trigger audio on confluence completion
+  useEffect(() => {
+    if (evaluation && evaluation.confluenceScore >= 75) {
+      playAudioChime(950);
+    }
+  }, [evaluation, playAudioChime]);
+
+  // Simulated Trades Handling
+  const handleExecuteSimTrade = (pos: OpenPosition) => {
+    const updated = [pos, ...gridPositions];
+    setGridPositions(updated);
+    localStorage.setItem('imasbtc_grid_sim_positions', JSON.stringify(updated));
+    playAudioChime(1100);
+  };
+
+  const handleClosePosition = (id: string) => {
+    const updated = gridPositions.filter((p) => p.id !== id);
+    setGridPositions(updated);
+    localStorage.setItem('imasbtc_grid_sim_positions', JSON.stringify(updated));
+  };
+
+  const handleClearAllPositions = () => {
+    setGridPositions([]);
+    localStorage.removeItem('imasbtc_grid_sim_positions');
+  };
+
+  // Filtered 12 Indicators
+  const filteredIndicators = useMemo(() => {
+    if (!evaluation?.indicators) return [];
+    const entries = Object.entries(evaluation.indicators);
+
+    if (indicatorFilter === 'bullish') {
+      return entries.filter(([_, ind]: [string, any]) => ind?.signal === 'BULLISH');
+    }
+    if (indicatorFilter === 'bearish') {
+      return entries.filter(([_, ind]: [string, any]) => ind?.signal === 'BEARISH');
+    }
+    if (indicatorFilter === 'smc') {
+      return entries.filter(([k]) => ['smc', 'ict', 'orderFlow', 'optionFlow'].includes(k));
+    }
+    if (indicatorFilter === 'momentum') {
+      return entries.filter(([k]) => ['rsi', 'macd', 'vwap', 'fibonacci', 'ichimoku'].includes(k));
+    }
+    return entries;
+  }, [evaluation, indicatorFilter]);
+
+  // Copy Confluence
+  const handleCopyConfluence = () => {
+    if (!evaluation) return;
+    const text = `📊 [AKIRAQU CONFLUENCE RADAR - ${symbol} (${timeframe})]
+Skor Konfluensi: ${evaluation.confluenceScore}/100 | Bias: ${evaluation.marketBias}
+Konsensus: ${evaluation.bullishCount} Bullish • ${evaluation.bearishCount} Bearish • ${evaluation.neutralCount} Netral
+Harga Acuan: $${formatCryptoPrice(activeDisplayPrice)}
+Catatan: ${evaluation.executiveNarrative || 'Kalkulasi 12-Indikator kuantitatif valid.'}`;
+
+    navigator.clipboard.writeText(text);
+    setCopiedConfluence(true);
+    setTimeout(() => setCopiedConfluence(false), 2000);
+  };
+
+  // Keyboard Shortcuts listener in Grid
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+        return;
+      }
+
+      if (e.key.toLowerCase() === 'r' && onTriggerAnalyze && !isLoading) {
+        e.preventDefault();
+        onTriggerAnalyze();
+      } else if (e.key === '1') {
+        toggleMaximize('chart');
+      } else if (e.key === '2') {
+        toggleMaximize('confluence');
+      } else if (e.key === '3') {
+        toggleMaximize('heatmap');
+      } else if (e.key === '4') {
+        toggleMaximize('risk');
+      } else if (e.key === 'Escape' && maximizedPanel) {
+        setMaximizedPanel(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onTriggerAnalyze, isLoading, maximizedPanel]);
+
+  // Panel Header Bar Helper
   const renderPanelHeader = (
     stepTag: string,
     title: string,
@@ -128,7 +307,8 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
     Icon: React.ElementType,
     panelKey: 'chart' | 'confluence' | 'heatmap' | 'risk',
     targetStage?: StageId,
-    targetStageLabel?: string
+    targetStageLabel?: string,
+    extraControls?: React.ReactNode
   ) => {
     const isMax = maximizedPanel === panelKey;
     return (
@@ -161,6 +341,8 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
+          {extraControls}
+
           {targetStage && onNavigateStage && (
             <button
               onClick={() => onNavigateStage(targetStage)}
@@ -181,7 +363,7 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
             className={`p-1 rounded transition-colors cursor-pointer ${
               isDark ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-slate-200 text-slate-600 hover:text-slate-950'
             }`}
-            title={isMax ? (isId ? 'Kecilkan Panel' : 'Minimize Panel') : (isId ? 'Perbesar Panel Penuh' : 'Maximize Panel')}
+            title={isMax ? (isId ? 'Kecilkan Panel [Esc]' : 'Minimize Panel [Esc]') : (isId ? 'Perbesar Panel Penuh [1-4]' : 'Maximize Panel [1-4]')}
           >
             {isMax ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
           </button>
@@ -192,179 +374,60 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
 
   return (
     <div className="w-full space-y-3 font-mono">
-      {/* 🧭 Launchpad Workspace Toolbar & Control Ribbon */}
-      <div
-        className={`flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5 px-4 py-3 rounded-xl border transition-colors ${
-          isDark ? 'bg-[#0b0f19] border-[#1e293b] text-slate-300' : 'bg-white border-slate-200 text-slate-800 shadow-xs'
-        }`}
-      >
-        {/* Left: Title & Quick Layout Presets */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold text-xs">
-            <LayoutGrid className="w-3.5 h-3.5" />
-            <span>{isId ? 'MEJA KERJA TRADING GRID' : 'TRADING GRID WORKSPACE'}</span>
-          </div>
+      {/* 🧭 1. Advanced Launchpad Workspace Toolbar */}
+      <LaunchpadToolbar
+        symbol={symbol}
+        symbols={symbols}
+        timeframe={timeframe}
+        selectedExchange={selectedExchange}
+        selectedMarketType={selectedMarketType}
+        layoutPreset={layoutPreset}
+        livePrice={activeDisplayPrice}
+        priceDirection={priceDirection}
+        evaluation={evaluation}
+        wsStatus={wsStatus}
+        latencyMs={latencyMs}
+        syncMetrics={syncMetrics}
+        soundAlerts={soundAlerts}
+        showWorkflowGuide={showWorkflowGuide}
+        isLoading={isLoading}
+        isDark={isDark}
+        lang={lang}
+        onSelectSymbol={onSelectSymbol}
+        onSelectTimeframe={onSelectTimeframe}
+        onSelectExchange={onSelectExchange}
+        onSelectMarketType={onSelectMarketType}
+        onSelectLayout={handleSelectLayout}
+        onToggleSoundAlerts={toggleSound}
+        onToggleGuide={toggleGuide}
+        onOpenCustomizer={() => setIsCustomizerOpen(true)}
+        onTriggerAnalyze={onTriggerAnalyze}
+      />
 
-          {/* Layout Presets Buttons */}
-          <div className="flex items-center gap-1 p-0.5 rounded-lg border text-xs font-mono overflow-x-auto scrollbar-none">
-            <button
-              onClick={() => handleSelectLayout('quad')}
-              className={`px-2 py-1 rounded text-[11px] font-bold transition-colors cursor-pointer shrink-0 ${
-                layoutPreset === 'quad'
-                  ? isDark
-                    ? 'bg-cyan-500 text-slate-950 shadow-xs'
-                    : 'bg-cyan-600 text-white shadow-xs'
-                  : isDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-950'
-              }`}
-              title={isId ? 'Tampilan 4 Panel Standar (Grafik, Konfluensi, Likuidasi, Risiko)' : 'Standard 4-Panel Grid'}
-            >
-              {isId ? '4 Panel' : '4 Panels'}
-            </button>
-            <button
-              onClick={() => handleSelectLayout('chart_focus')}
-              className={`px-2 py-1 rounded text-[11px] font-bold transition-colors cursor-pointer shrink-0 ${
-                layoutPreset === 'chart_focus'
-                  ? isDark
-                    ? 'bg-cyan-500 text-slate-950 shadow-xs'
-                    : 'bg-cyan-600 text-white shadow-xs'
-                  : isDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-950'
-              }`}
-              title={isId ? 'Fokus Grafik Lebih Lebar + Konfluensi & Risiko' : 'Wide Chart Focus'}
-            >
-              {isId ? 'Fokus Grafik' : 'Chart Focus'}
-            </button>
-            <button
-              onClick={() => handleSelectLayout('execution_focus')}
-              className={`px-2 py-1 rounded text-[11px] font-bold transition-colors cursor-pointer shrink-0 ${
-                layoutPreset === 'execution_focus'
-                  ? isDark
-                    ? 'bg-cyan-500 text-slate-950 shadow-xs'
-                    : 'bg-cyan-600 text-white shadow-xs'
-                  : isDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-950'
-              }`}
-              title={isId ? 'Fokus Analisis Eksekusi & Manajemen Risiko' : 'Execution & Risk Focus'}
-            >
-              {isId ? 'Fokus Eksekusi' : 'Exec Focus'}
-            </button>
-            <button
-              onClick={() => handleSelectLayout('dual_chart_confluence')}
-              className={`px-2 py-1 rounded text-[11px] font-bold transition-colors cursor-pointer shrink-0 ${
-                layoutPreset === 'dual_chart_confluence'
-                  ? isDark
-                    ? 'bg-cyan-500 text-slate-950 shadow-xs'
-                    : 'bg-cyan-600 text-white shadow-xs'
-                  : isDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-950'
-              }`}
-              title={isId ? '2 Panel Kritis: Grafik Candlestick & Skor Konfluensi' : 'Dual Critical Panels'}
-            >
-              {isId ? '2 Panel' : 'Dual'}
-            </button>
-          </div>
-        </div>
-
-        {/* Right: Quick Timeframe Selector, Price Badge, & Workflow Guide Toggle */}
-        <div className="flex flex-wrap items-center justify-between lg:justify-end gap-2.5 text-xs">
-          {/* Quick Timeframe Buttons */}
-          {onSelectTimeframe && (
-            <div className={`flex items-center gap-0.5 p-0.5 rounded-lg border ${
-              isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-100 border-slate-200'
-            }`}>
-              {TIMEFRAME_OPTIONS.map((tf) => (
-                <button
-                  key={tf}
-                  onClick={() => onSelectTimeframe(tf)}
-                  className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono transition-colors cursor-pointer ${
-                    timeframe === tf
-                      ? isDark
-                        ? 'bg-cyan-500 text-slate-950 shadow-xs'
-                        : 'bg-cyan-600 text-white shadow-xs'
-                      : isDark
-                      ? 'text-slate-400 hover:text-white'
-                      : 'text-slate-600 hover:text-slate-950'
-                  }`}
-                >
-                  {tf}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Real-time Ticker Badge */}
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-cyan-400">{symbol}</span>
-            <span
-              className={`font-bold tabular-nums text-sm ${
-                priceDirection === 'up'
-                  ? 'text-emerald-400'
-                  : priceDirection === 'down'
-                  ? 'text-rose-400'
-                  : isDark
-                  ? 'text-white'
-                  : 'text-slate-900'
-              }`}
-            >
-              ${formatCryptoPrice(activeDisplayPrice)}
-            </span>
-            <span
-              className={`hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
-                evaluation?.marketBias?.includes('Bullish')
-                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                  : evaluation?.marketBias?.includes('Bearish')
-                  ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                  : 'bg-slate-800 text-slate-300'
-              }`}
-            >
-              {evaluation?.marketBias || (isLoading ? 'CALCULATING...' : 'READY')}
-            </span>
-          </div>
-
-          {/* Guide Help Toggle */}
-          <button
-            onClick={toggleGuide}
-            className={`p-1.5 rounded-lg border transition-colors cursor-pointer flex items-center gap-1 text-[11px] font-semibold ${
-              showWorkflowGuide
-                ? isDark
-                  ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
-                  : 'bg-cyan-100 text-cyan-900 border-cyan-300'
-                : isDark
-                ? 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
-                : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900'
-            }`}
-            title={isId ? 'Tampilkan / Sembunyikan Panduan Alur Trading Grid' : 'Toggle Grid Workflow Guide'}
-          >
-            <HelpCircle className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{isId ? 'Panduan Alur' : 'Workflow Guide'}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 💡 Workflow Guide Banner (Explaining 4 Tiles to Remove Confusion) */}
+      {/* 💡 2. Workflow Guide Banner */}
       {showWorkflowGuide && (
         <div
-          className={`p-3.5 rounded-xl border transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-3 ${
-            isDark ? 'bg-gradient-to-r from-cyan-950/40 via-slate-900/60 to-slate-900 border-cyan-500/30' : 'bg-cyan-50/70 border-cyan-200 text-slate-800'
+          className={`p-3.5 rounded-2xl border transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-3 ${
+            isDark
+              ? 'bg-gradient-to-r from-cyan-950/40 via-slate-900/60 to-slate-900 border-cyan-500/30'
+              : 'bg-cyan-50/80 border-cyan-200 text-slate-800'
           }`}
         >
           <div className="flex items-start gap-3">
-            <div className={`p-2 rounded-lg shrink-0 mt-0.5 ${isDark ? 'bg-cyan-500/20 text-cyan-300' : 'bg-cyan-100 text-cyan-800'}`}>
+            <div className={`p-2 rounded-xl shrink-0 mt-0.5 ${isDark ? 'bg-cyan-500/20 text-cyan-300' : 'bg-cyan-100 text-cyan-800'}`}>
               <Sparkles className="w-4 h-4" />
             </div>
             <div className="space-y-1 text-xs">
               <div className="font-bold flex items-center gap-2 text-cyan-400">
-                <span>{isId ? 'Cara Membaca Meja Kerja Trading Grid (4 Panel)' : 'How to Read the Trading Grid (4 Panels)'}</span>
+                <span>{isId ? 'Panduan Meja Kerja Trading Grid (4 Panel Terpadu)' : 'Unified 4-Panel Grid Trading Desk'}</span>
+                <span className="text-[10px] font-normal text-slate-400">
+                  {isId ? '• Shortcut: [R] Pindai, [1-4] Perbesar, [W] Layout' : '• Shortcut: [R] Scan, [1-4] Maximize, [W] Layout'}
+                </span>
               </div>
               <p className={`text-[11px] leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                 {isId
-                  ? 'Meja kerja ini menggabungkan 4 tahap analisa penting dalam 1 layar: (1) Grafik Candlestick untuk struktur harga, (2) Skor Konfluensi untuk validasi multi-algoritma, (3) Order Flow untuk pantauan likuidasi whale, dan (4) Kalkulator Risiko untuk menghitung lot & target sebelum order.'
-                  : 'This workspace unifies 4 key workflow stages on 1 screen: (1) Candlestick Chart for price structure, (2) Confluence Score for multi-algo validation, (3) Order Flow for whale liquidation levels, and (4) Risk Calculator for sizing & R:R target planning.'}
+                  ? 'Meja kerja profesional ini mengintegrasikan seluruh alur trading: (1) Grafik & Buku Order L2 untuk struktur harga, (2) Radar Konfluensi 12 Algoritma untuk validasi statistik, (3) Heatmap Likuidasi untuk deteksi jebakan whale, dan (4) Protokol Risiko & Eksekusi Cepat untuk penempatan order instan.'
+                  : 'This desk unifies the entire quant workflow: (1) Candlestick Chart & L2 Depth for price action, (2) 12-Indicator Confluence Radar for statistical edge, (3) Liquidation Heatmap for whale traps, and (4) Risk Protocol & Quick Trade for instant execution.'}
               </p>
             </div>
           </div>
@@ -381,11 +444,11 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
         </div>
       )}
 
-      {/* 🚀 Main Multi-Window Grid */}
+      {/* 🚀 3. Main Multi-Window Grid */}
       {maximizedPanel ? (
-        // Maximized Single Tile View
+        // Single Maximized Panel View
         <div
-          className={`w-full rounded-xl border overflow-hidden transition-colors ${
+          className={`w-full rounded-2xl border overflow-hidden transition-colors ${
             isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200'
           }`}
         >
@@ -398,23 +461,57 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
                 CandlestickChart,
                 'chart',
                 'ticker',
-                isId ? 'Buka Modul Grafik' : 'Full Chart View'
+                isId ? 'Buka Modul Grafik' : 'Full Chart View',
+                <div className="flex items-center gap-1 mr-2">
+                  <button
+                    onClick={() => setPanel1View('chart')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      panel1View === 'chart' ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-slate-400'
+                    }`}
+                  >
+                    Chart
+                  </button>
+                  <button
+                    onClick={() => setPanel1View('orderbook')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      panel1View === 'orderbook' ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-slate-400'
+                    }`}
+                  >
+                    L2 Depth / Tape
+                  </button>
+                </div>
               )}
               <div className="p-4">
-                <InteractiveChart
-                  candles={candles}
-                  symbol={symbol}
-                  timeframe={timeframe}
-                  indicators={evaluation?.indicators}
-                  lang={lang}
-                  selectedExchange={selectedExchange}
-                  selectedMarketType={selectedMarketType}
-                  onSelectExchange={onSelectExchange}
-                  onSelectMarketType={onSelectMarketType}
-                  latencyMs={latencyMs}
-                  wsStatus={wsStatus}
-                  theme={theme}
-                />
+                {panel1View === 'chart' ? (
+                  <InteractiveChart
+                    candles={candles}
+                    symbol={symbol}
+                    timeframe={timeframe}
+                    indicators={evaluation?.indicators}
+                    lang={lang}
+                    selectedExchange={selectedExchange}
+                    selectedMarketType={selectedMarketType}
+                    onSelectExchange={onSelectExchange}
+                    onSelectMarketType={onSelectMarketType}
+                    latencyMs={latencyMs}
+                    wsStatus={wsStatus}
+                    theme={theme}
+                  />
+                ) : (
+                  <LaunchpadOrderBookTape
+                    symbol={symbol}
+                    currentPrice={activeDisplayPrice}
+                    recentLiveTrades={recentLiveTrades}
+                    orderBookBids={orderBookBids}
+                    orderBookAsks={orderBookAsks}
+                    bidTotal={bidTotal}
+                    askTotal={askTotal}
+                    selectedExchange={selectedExchange}
+                    selectedMarketType={selectedMarketType}
+                    isDark={isDark}
+                    lang={lang}
+                  />
+                )}
               </div>
             </>
           )}
@@ -428,10 +525,17 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
                 Gauge,
                 'confluence',
                 'indicators',
-                isId ? 'Buka 12 Indikator Lengkap' : '12 Indicators Detail'
+                isId ? 'Buka 12 Indikator Lengkap' : '12 Indicators Detail',
+                <button
+                  onClick={handleCopyConfluence}
+                  className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold flex items-center gap-1 cursor-pointer mr-2"
+                >
+                  {copiedConfluence ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedConfluence ? 'Tersalin' : 'Salin'}</span>
+                </button>
               )}
-              <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col items-center justify-center p-6 rounded-xl bg-slate-900/40 border border-slate-800">
+              <div className="p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+                <div className="lg:col-span-4 flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-900/50 border border-slate-800">
                   <GaugeChart
                     score={evaluation.confluenceScore}
                     bias={evaluation.marketBias}
@@ -443,7 +547,7 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
                   />
                   <div className="mt-4 text-center">
                     <span className={`text-xs uppercase tracking-widest ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                      {isId ? 'Bias Konsensus Pasar' : 'Market Consensus Bias'}
+                      {isId ? 'Bias Konsensus Kuantitatif' : 'Quant Consensus Bias'}
                     </span>
                     <h4 className={`text-xl font-bold mt-1 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`}>{evaluation.marketBias}</h4>
                     <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
@@ -452,37 +556,39 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
                   </div>
                 </div>
 
-                <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-                  {Object.entries(evaluation.indicators).map(([key, ind]: [string, any]) => (
-                    <div
-                      key={key}
-                      className={`p-3 rounded-lg border text-xs flex items-center justify-between ${
-                        isDark ? 'bg-[#090d16] border-[#1e293b]' : 'bg-slate-50 border-slate-200'
-                      }`}
-                    >
-                      <div>
-                        <span className={`font-semibold uppercase tracking-wider ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{key}</span>
-                        <p className={`text-[11px] mt-0.5 line-clamp-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{ind?.summary}</p>
-                      </div>
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          ind?.signal === 'BULLISH'
-                            ? isDark
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                              : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                            : ind?.signal === 'BEARISH'
-                            ? isDark
-                              ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
-                              : 'bg-rose-100 text-rose-800 border border-rose-300'
-                            : isDark
-                            ? 'bg-slate-800 text-slate-300'
-                            : 'bg-slate-200 text-slate-800'
+                <div className="lg:col-span-8 space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[500px] overflow-y-auto pr-1">
+                    {filteredIndicators.map(([key, ind]: [string, any]) => (
+                      <div
+                        key={key}
+                        className={`p-3 rounded-xl border text-xs flex items-center justify-between ${
+                          isDark ? 'bg-[#090d16] border-[#1e293b]' : 'bg-slate-50 border-slate-200'
                         }`}
                       >
-                        {ind?.signal}
-                      </span>
-                    </div>
-                  ))}
+                        <div className="min-w-0 pr-2">
+                          <span className={`font-semibold uppercase tracking-wider block truncate ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{key}</span>
+                          <p className={`text-[11px] mt-0.5 line-clamp-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{ind?.summary}</p>
+                        </div>
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${
+                            ind?.signal === 'BULLISH'
+                              ? isDark
+                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                                : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                              : ind?.signal === 'BEARISH'
+                              ? isDark
+                                ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                                : 'bg-rose-100 text-rose-800 border border-rose-300'
+                              : isDark
+                              ? 'bg-slate-800 text-slate-300'
+                              : 'bg-slate-200 text-slate-800'
+                          }`}
+                        >
+                          {ind?.signal}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </>
@@ -516,22 +622,53 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
             <>
               {renderPanelHeader(
                 isId ? 'Langkah 4: Hitung Risiko' : 'Step 4: Risk Protocol',
-                isId ? 'Kalkulator Risiko & Perencana Eksekusi' : 'Risk Management & Sizing Planner',
+                isId ? 'Kalkulator Risiko & Simulasi Eksekusi' : 'Risk Management & Sizing Planner',
                 'RISK PROTOCOL',
                 ShieldCheck,
                 'risk',
                 'manual_trading',
-                isId ? 'Kirim ke Trading Manual ⚡' : 'Go to Manual Trading ⚡'
+                isId ? 'Kirim ke Trading Manual ⚡' : 'Go to Manual Trading ⚡',
+                <div className="flex items-center gap-1 mr-2">
+                  <button
+                    onClick={() => setPanel4View('calculator')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      panel4View === 'calculator' ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-slate-400'
+                    }`}
+                  >
+                    Kalkulator
+                  </button>
+                  <button
+                    onClick={() => setPanel4View('quick_trade')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      panel4View === 'quick_trade' ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-slate-400'
+                    }`}
+                  >
+                    Eksekusi Cepat
+                  </button>
+                </div>
               )}
               <div className="p-4">
-                <RiskCalculatorCard
-                  initialRiskPlan={evaluation.riskPlan}
-                  symbol={symbol}
-                  indicators={evaluation.indicators}
-                  currentPrice={activeDisplayPrice}
-                  lang={lang}
-                  theme={theme}
-                />
+                {panel4View === 'calculator' ? (
+                  <RiskCalculatorCard
+                    initialRiskPlan={evaluation.riskPlan}
+                    symbol={symbol}
+                    indicators={evaluation.indicators}
+                    currentPrice={activeDisplayPrice}
+                    lang={lang}
+                    theme={theme}
+                  />
+                ) : (
+                  <LaunchpadQuickTrade
+                    symbol={symbol}
+                    currentPrice={activeDisplayPrice}
+                    riskPlan={evaluation.riskPlan}
+                    selectedExchange={selectedExchange}
+                    selectedMarketType={selectedMarketType}
+                    onExecuteSimulatedTrade={handleExecuteSimTrade}
+                    isDark={isDark}
+                    lang={lang}
+                  />
+                )}
               </div>
             </>
           )}
@@ -539,165 +676,285 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
       ) : (
         // Standard Multi-Tile Grid
         <div
-          className={`grid gap-3 ${
+          className={`grid gap-3.5 ${
             layoutPreset === 'quad'
               ? 'grid-cols-1 xl:grid-cols-2'
               : layoutPreset === 'chart_focus'
               ? 'grid-cols-1 lg:grid-cols-12'
+              : layoutPreset === 'execution_focus'
+              ? 'grid-cols-1 lg:grid-cols-12'
               : layoutPreset === 'dual_chart_confluence'
               ? 'grid-cols-1 lg:grid-cols-2'
+              : layoutPreset === 'triple_analytics'
+              ? 'grid-cols-1 lg:grid-cols-3'
               : 'grid-cols-1 lg:grid-cols-2'
           }`}
         >
-          {/* TILE 1: Interactive Candlestick Chart */}
-          <div
-            className={`rounded-xl border overflow-hidden transition-colors ${
-              isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200'
-            } ${layoutPreset === 'chart_focus' ? 'lg:col-span-8' : ''}`}
-          >
-            {renderPanelHeader(
-              isId ? 'Langkah 3: Validasi' : 'Step 3: Validation',
-              isId ? 'Grafik Candlestick & L2 Depth' : 'Candlestick Chart & L2 Depth',
-              'LIVE',
-              CandlestickChart,
-              'chart',
-              'ticker',
-              isId ? 'Grafik Penuh' : 'Full Chart'
-            )}
-            <div className="p-3">
-              <InteractiveChart
-                candles={candles}
-                symbol={symbol}
-                timeframe={timeframe}
-                indicators={evaluation?.indicators}
-                lang={lang}
-                selectedExchange={selectedExchange}
-                selectedMarketType={selectedMarketType}
-                onSelectExchange={onSelectExchange}
-                onSelectMarketType={onSelectMarketType}
-                latencyMs={latencyMs}
-                wsStatus={wsStatus}
-                theme={theme}
-              />
-            </div>
-          </div>
-
-          {/* TILE 2: Confluence Radar & Scorecard */}
-          <div
-            className={`rounded-xl border overflow-hidden transition-colors ${
-              isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200'
-            } ${layoutPreset === 'chart_focus' ? 'lg:col-span-4' : ''}`}
-          >
-            {renderPanelHeader(
-              isId ? 'Langkah 3: Konfluensi' : 'Step 3: Confluence',
-              isId ? 'Radar Konfluensi & 12 Indikator' : 'Confluence Radar & 12 Inds',
-              'QUANTUM 100',
-              Gauge,
-              'confluence',
-              'indicators',
-              isId ? '12 Indikator' : '12 Indicators'
-            )}
-            <div className="p-4 space-y-4">
-              {evaluation ? (
-                <>
-                  <div className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-900/40 border border-slate-800/80">
-                    <GaugeChart
-                      score={evaluation.confluenceScore}
-                      bias={evaluation.marketBias}
-                      bullishCount={evaluation.bullishCount}
-                      bearishCount={evaluation.bearishCount}
-                      neutralCount={evaluation.neutralCount}
-                      lang={lang}
-                      theme={theme}
-                    />
-                    <div className="mt-2 text-center">
-                      <h4 className={`text-sm font-bold ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`}>{evaluation.marketBias}</h4>
-                      <p className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                        {evaluation.bullishCount} Bullish • {evaluation.bearishCount} Bearish • {evaluation.neutralCount} {isId ? 'Netral' : 'Neutral'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Compact Quick 12-Indicator Status Pills */}
-                  <div className="space-y-1.5 max-h-[300px] overflow-y-auto pr-1">
-                    {Object.entries(evaluation.indicators).map(([key, ind]: [string, any]) => (
-                      <div
-                        key={key}
-                        className={`px-3 py-1.5 rounded-lg border text-xs flex items-center justify-between ${
-                          isDark ? 'bg-[#090d16] border-[#1e293b]' : 'bg-slate-50 border-slate-200'
-                        }`}
-                      >
-                        <span className={`font-semibold text-[11px] truncate max-w-[150px] ${
-                          isDark ? 'text-slate-200' : 'text-slate-800'
-                        }`}>
-                          {key}
-                        </span>
-                        <span
-                          className={`px-2 py-0.2 rounded text-[10px] font-bold ${
-                            ind?.signal === 'BULLISH'
-                              ? isDark
-                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                                : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                              : ind?.signal === 'BEARISH'
-                              ? isDark
-                                ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
-                                : 'bg-rose-100 text-rose-800 border border-rose-300'
-                              : isDark
-                              ? 'bg-slate-800 text-slate-300'
-                              : 'bg-slate-200 text-slate-800'
-                          }`}
-                        >
-                          {ind?.signal}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ) : isLoading ? (
-                <div className="py-16 text-center text-slate-500 text-xs flex flex-col items-center justify-center gap-2">
-                  <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-                  <span>{isId ? 'Menghitung 12 Indikator & Confluence...' : 'Calculating 12 Indicators & Confluence...'}</span>
-                </div>
-              ) : (
-                <div className="py-12 px-4 text-center flex flex-col items-center justify-center">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${
-                    isDark ? 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400' : 'bg-cyan-50 border border-cyan-200 text-cyan-700'
-                  }`}>
-                    <Gauge className="w-6 h-6" />
-                  </div>
-                  <p className={`text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
-                    {isId ? `Chart ${timeframe} Siap` : `${timeframe} Chart Ready`}
-                  </p>
-                  <p className={`text-xs max-w-xs mt-1 mb-4 leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                    {isId
-                      ? 'Grafik dibuka seketika tanpa jeda analisis. Klik di bawah untuk memproses kalkulasi 12-Indikator.'
-                      : 'Chart opened first for zero lag. Click below to compute the 12-indicator confluence.'}
-                  </p>
-                  {onTriggerAnalyze && (
-                    <button
-                      onClick={onTriggerAnalyze}
-                      className={`px-4 py-2 rounded-lg font-bold text-xs transition-all shadow-md flex items-center gap-2 cursor-pointer ${
-                        isDark
-                          ? 'bg-gradient-to-r from-cyan-500 to-cyan-400 text-slate-950 hover:from-cyan-400 hover:to-cyan-300 shadow-cyan-500/20'
-                          : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-cyan-600/20'
-                      }`}
-                    >
-                      <Zap className="w-3.5 h-3.5 fill-current" />
-                      {isId ? `Jalankan Analisis (${timeframe})` : `Run Analysis (${timeframe})`}
-                    </button>
-                  )}
-                  <span className="text-[10px] text-slate-500 mt-2 font-mono">Shortcut: [R]</span>
+          {/* TILE 1: Candlestick Chart & L2 Depth Stream */}
+          {panelConfig.showChart && (
+            <div
+              className={`rounded-2xl border overflow-hidden transition-colors ${
+                isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200'
+              } ${
+                layoutPreset === 'chart_focus'
+                  ? 'lg:col-span-8'
+                  : layoutPreset === 'execution_focus'
+                  ? 'lg:col-span-7'
+                  : ''
+              }`}
+            >
+              {renderPanelHeader(
+                isId ? 'Langkah 3: Validasi' : 'Step 3: Validation',
+                isId ? 'Grafik Candlestick & L2 Depth' : 'Candlestick Chart & L2 Depth',
+                'LIVE',
+                CandlestickChart,
+                'chart',
+                'ticker',
+                isId ? 'Grafik Penuh' : 'Full Chart',
+                <div className="flex items-center gap-1 mr-1.5">
+                  <button
+                    onClick={() => setPanel1View('chart')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors cursor-pointer ${
+                      panel1View === 'chart'
+                        ? 'bg-cyan-500 text-slate-950'
+                        : 'bg-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Chart
+                  </button>
+                  <button
+                    onClick={() => setPanel1View('orderbook')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors cursor-pointer ${
+                      panel1View === 'orderbook'
+                        ? 'bg-cyan-500 text-slate-950'
+                        : 'bg-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Depth / Tape
+                  </button>
                 </div>
               )}
+              <div className="p-3">
+                {panel1View === 'chart' ? (
+                  <InteractiveChart
+                    candles={candles}
+                    symbol={symbol}
+                    timeframe={timeframe}
+                    indicators={evaluation?.indicators}
+                    lang={lang}
+                    selectedExchange={selectedExchange}
+                    selectedMarketType={selectedMarketType}
+                    onSelectExchange={onSelectExchange}
+                    onSelectMarketType={onSelectMarketType}
+                    latencyMs={latencyMs}
+                    wsStatus={wsStatus}
+                    theme={theme}
+                  />
+                ) : (
+                  <LaunchpadOrderBookTape
+                    symbol={symbol}
+                    currentPrice={activeDisplayPrice}
+                    recentLiveTrades={recentLiveTrades}
+                    orderBookBids={orderBookBids}
+                    orderBookAsks={orderBookAsks}
+                    bidTotal={bidTotal}
+                    askTotal={askTotal}
+                    selectedExchange={selectedExchange}
+                    selectedMarketType={selectedMarketType}
+                    isDark={isDark}
+                    lang={lang}
+                  />
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* TILE 3: Liquidation Heatmap & CVD (Hidden in dual preset or execution focus) */}
-          {layoutPreset !== 'execution_focus' && layoutPreset !== 'dual_chart_confluence' && (
+          {/* TILE 2: Confluence Radar & Scorecard */}
+          {panelConfig.showConfluence && (
             <div
-              className={`rounded-xl border overflow-hidden transition-colors ${
+              className={`rounded-2xl border overflow-hidden transition-colors ${
                 isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200'
-              } ${layoutPreset === 'chart_focus' ? 'lg:col-span-6' : ''}`}
+              } ${
+                layoutPreset === 'chart_focus'
+                  ? 'lg:col-span-4'
+                  : layoutPreset === 'execution_focus'
+                  ? 'lg:col-span-5'
+                  : ''
+              }`}
+            >
+              {renderPanelHeader(
+                isId ? 'Langkah 3: Konfluensi' : 'Step 3: Confluence',
+                isId ? 'Radar Konfluensi & 12 Indikator' : 'Confluence Radar & 12 Inds',
+                'QUANTUM 100',
+                Gauge,
+                'confluence',
+                'indicators',
+                isId ? '12 Indikator' : '12 Indicators',
+                <button
+                  onClick={handleCopyConfluence}
+                  className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold flex items-center gap-1 cursor-pointer mr-1"
+                  title={isId ? 'Salin Ringkasan Konfluensi' : 'Copy Confluence Summary'}
+                >
+                  {copiedConfluence ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedConfluence ? 'Tersalin' : 'Salin'}</span>
+                </button>
+              )}
+              <div className="p-4 space-y-3">
+                {evaluation ? (
+                  <>
+                    <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-900/50 border border-slate-800/80">
+                      <GaugeChart
+                        score={evaluation.confluenceScore}
+                        bias={evaluation.marketBias}
+                        bullishCount={evaluation.bullishCount}
+                        bearishCount={evaluation.bearishCount}
+                        neutralCount={evaluation.neutralCount}
+                        lang={lang}
+                        theme={theme}
+                      />
+                      <div className="mt-2 text-center">
+                        <h4 className={`text-sm font-bold ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`}>{evaluation.marketBias}</h4>
+                        <p className={`text-[11px] mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                          {evaluation.bullishCount} Bullish • {evaluation.bearishCount} Bearish • {evaluation.neutralCount} {isId ? 'Netral' : 'Neutral'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Indicator Category Filters */}
+                    <div className="flex items-center gap-1 overflow-x-auto pb-1 text-[10px]">
+                      <button
+                        onClick={() => setIndicatorFilter('all')}
+                        className={`px-2 py-0.5 rounded font-bold cursor-pointer shrink-0 ${
+                          indicatorFilter === 'all'
+                            ? 'bg-cyan-500 text-slate-950'
+                            : 'bg-slate-800 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        Semua (12)
+                      </button>
+                      <button
+                        onClick={() => setIndicatorFilter('bullish')}
+                        className={`px-2 py-0.5 rounded font-bold cursor-pointer shrink-0 ${
+                          indicatorFilter === 'bullish'
+                            ? 'bg-emerald-500 text-slate-950'
+                            : 'bg-slate-800 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        Bullish ({evaluation.bullishCount})
+                      </button>
+                      <button
+                        onClick={() => setIndicatorFilter('bearish')}
+                        className={`px-2 py-0.5 rounded font-bold cursor-pointer shrink-0 ${
+                          indicatorFilter === 'bearish'
+                            ? 'bg-rose-500 text-slate-950'
+                            : 'bg-slate-800 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        Bearish ({evaluation.bearishCount})
+                      </button>
+                      <button
+                        onClick={() => setIndicatorFilter('smc')}
+                        className={`px-2 py-0.5 rounded font-bold cursor-pointer shrink-0 ${
+                          indicatorFilter === 'smc'
+                            ? 'bg-cyan-500 text-slate-950'
+                            : 'bg-slate-800 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        SMC & Flow
+                      </button>
+                    </div>
+
+                    {/* Compact Quick 12-Indicator Status Pills */}
+                    <div className="space-y-1.5 max-h-[260px] overflow-y-auto pr-1">
+                      {filteredIndicators.map(([key, ind]: [string, any]) => (
+                        <div
+                          key={key}
+                          className={`px-3 py-1.5 rounded-xl border text-xs flex items-center justify-between ${
+                            isDark ? 'bg-[#090d16] border-[#1e293b]' : 'bg-slate-50 border-slate-200'
+                          }`}
+                        >
+                          <div className="min-w-0 pr-2">
+                            <span className={`font-semibold text-[11px] truncate block ${
+                              isDark ? 'text-slate-200' : 'text-slate-800'
+                            }`}>
+                              {key}
+                            </span>
+                            <span className="text-[10px] text-slate-500 truncate block">
+                              {ind?.summary}
+                            </span>
+                          </div>
+                          <span
+                            className={`px-2 py-0.2 rounded text-[10px] font-bold shrink-0 ${
+                              ind?.signal === 'BULLISH'
+                                ? isDark
+                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                                  : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                : ind?.signal === 'BEARISH'
+                                ? isDark
+                                  ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                                  : 'bg-rose-100 text-rose-800 border border-rose-300'
+                                : isDark
+                                ? 'bg-slate-800 text-slate-300'
+                                : 'bg-slate-200 text-slate-800'
+                            }`}
+                          >
+                            {ind?.signal}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : isLoading ? (
+                  <div className="py-16 text-center text-slate-500 text-xs flex flex-col items-center justify-center gap-2">
+                    <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+                    <span>{isId ? 'Menghitung 12 Indikator & Confluence...' : 'Calculating 12 Indicators & Confluence...'}</span>
+                  </div>
+                ) : (
+                  <div className="py-12 px-4 text-center flex flex-col items-center justify-center">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${
+                      isDark ? 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400' : 'bg-cyan-50 border border-cyan-200 text-cyan-700'
+                    }`}>
+                      <Gauge className="w-6 h-6" />
+                    </div>
+                    <p className={`text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
+                      {isId ? `Chart ${timeframe} Siap` : `${timeframe} Chart Ready`}
+                    </p>
+                    <p className={`text-xs max-w-xs mt-1 mb-4 leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                      {isId
+                        ? 'Grafik dibuka seketika. Klik di bawah atau tekan [R] untuk memproses kalkulasi 12-Indikator.'
+                        : 'Chart ready. Click below or press [R] to compute the 12-indicator confluence.'}
+                    </p>
+                    {onTriggerAnalyze && (
+                      <button
+                        onClick={onTriggerAnalyze}
+                        className={`px-4 py-2 rounded-xl font-bold text-xs transition-all shadow-md flex items-center gap-2 cursor-pointer ${
+                          isDark
+                            ? 'bg-gradient-to-r from-cyan-500 to-cyan-400 text-slate-950 hover:from-cyan-400 hover:to-cyan-300 shadow-cyan-500/20'
+                            : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-cyan-600/20'
+                        }`}
+                      >
+                        <Zap className="w-3.5 h-3.5 fill-current" />
+                        {isId ? `Pindai Konfluensi (${timeframe}) [R]` : `Run Analysis (${timeframe}) [R]`}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TILE 3: Liquidation Heatmap & CVD (Hidden in dual preset) */}
+          {panelConfig.showLiquidity && layoutPreset !== 'dual_chart_confluence' && (
+            <div
+              className={`rounded-2xl border overflow-hidden transition-colors ${
+                isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200'
+              } ${
+                layoutPreset === 'chart_focus'
+                  ? 'lg:col-span-6'
+                  : layoutPreset === 'execution_focus'
+                  ? 'lg:col-span-6'
+                  : ''
+              }`}
             >
               {renderPanelHeader(
                 isId ? 'Langkah 3: Likuiditas' : 'Step 3: Liquidity',
@@ -721,59 +978,120 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
             </div>
           )}
 
-          {/* TILE 4: Risk Calculator & Execution Planner (Hidden in dual preset) */}
-          {layoutPreset !== 'dual_chart_confluence' && (
+          {/* TILE 4: Risk Protocol & Quick Execution Planner (Hidden in dual preset) */}
+          {panelConfig.showRisk && layoutPreset !== 'dual_chart_confluence' && (
             <div
-              className={`rounded-xl border overflow-hidden transition-colors ${
+              className={`rounded-2xl border overflow-hidden transition-colors ${
                 isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200'
               } ${
                 layoutPreset === 'chart_focus'
                   ? 'lg:col-span-6'
                   : layoutPreset === 'execution_focus'
-                  ? 'lg:col-span-1'
+                  ? 'lg:col-span-6'
                   : ''
               }`}
             >
               {renderPanelHeader(
                 isId ? 'Langkah 4: Hitung Risiko' : 'Step 4: Risk Protocol',
-                isId ? 'Kalkulator Risiko & Sizing' : 'Risk Calculator & Sizing',
+                isId ? 'Kalkulator Risiko & Eksekusi' : 'Risk Calculator & Execution',
                 'PLANNER',
                 ShieldCheck,
                 'risk',
                 'manual_trading',
-                isId ? 'Eksekusi ⚡' : 'Execute ⚡'
+                isId ? 'Eksekusi ⚡' : 'Execute ⚡',
+                <div className="flex items-center gap-1 mr-1.5">
+                  <button
+                    onClick={() => setPanel4View('calculator')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors cursor-pointer ${
+                      panel4View === 'calculator'
+                        ? 'bg-cyan-500 text-slate-950'
+                        : 'bg-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Kalkulator
+                  </button>
+                  <button
+                    onClick={() => setPanel4View('quick_trade')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors cursor-pointer ${
+                      panel4View === 'quick_trade'
+                        ? 'bg-cyan-500 text-slate-950'
+                        : 'bg-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Order Cepat
+                  </button>
+                </div>
               )}
               <div className="p-3">
-                {evaluation?.riskPlan ? (
-                  <RiskCalculatorCard
-                    initialRiskPlan={evaluation.riskPlan}
-                    symbol={symbol}
-                    indicators={evaluation.indicators}
-                    currentPrice={activeDisplayPrice}
-                    lang={lang}
-                    theme={theme}
-                  />
+                {panel4View === 'calculator' ? (
+                  evaluation?.riskPlan ? (
+                    <RiskCalculatorCard
+                      initialRiskPlan={evaluation.riskPlan}
+                      symbol={symbol}
+                      indicators={evaluation.indicators}
+                      currentPrice={activeDisplayPrice}
+                      lang={lang}
+                      theme={theme}
+                    />
+                  ) : (
+                    <div className="py-12 px-4 text-center flex flex-col items-center justify-center">
+                      <ShieldCheck className="w-8 h-8 text-slate-500 mb-2" />
+                      <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                        {isId ? 'Menunggu kalkulasi Confluence...' : 'Awaiting Confluence calculation...'}
+                      </p>
+                      {onTriggerAnalyze && (
+                        <button
+                          onClick={onTriggerAnalyze}
+                          className="mt-2 text-xs text-cyan-400 hover:underline font-semibold cursor-pointer"
+                        >
+                          {isId ? '⚡ Hitung Protokol Risiko [R]' : '⚡ Calculate Risk Protocol [R]'}
+                        </button>
+                      )}
+                    </div>
+                  )
                 ) : (
-                  <div className="py-12 px-4 text-center flex flex-col items-center justify-center">
-                    <ShieldCheck className="w-8 h-8 text-slate-500 mb-2" />
-                    <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                      {isId ? 'Menunggu kalkulasi Confluence...' : 'Awaiting Confluence calculation...'}
-                    </p>
-                    {onTriggerAnalyze && (
-                      <button
-                        onClick={onTriggerAnalyze}
-                        className="mt-2 text-xs text-cyan-400 hover:underline font-semibold cursor-pointer"
-                      >
-                        {isId ? '⚡ Hitung Protokol Risiko' : '⚡ Calculate Risk Protocol'}
-                      </button>
-                    )}
-                  </div>
+                  <LaunchpadQuickTrade
+                    symbol={symbol}
+                    currentPrice={activeDisplayPrice}
+                    riskPlan={evaluation?.riskPlan}
+                    selectedExchange={selectedExchange}
+                    selectedMarketType={selectedMarketType}
+                    onExecuteSimulatedTrade={handleExecuteSimTrade}
+                    isDark={isDark}
+                    lang={lang}
+                  />
                 )}
               </div>
             </div>
           )}
         </div>
       )}
+
+      {/* 4. Active Grid Simulated Positions Bar */}
+      {panelConfig.showPositionsBar && (
+        <LaunchpadPositionsBar
+          positions={gridPositions}
+          currentPrice={activeDisplayPrice}
+          onClosePosition={handleClosePosition}
+          onClearAllPositions={handleClearAllPositions}
+          isDark={isDark}
+          lang={lang}
+        />
+      )}
+
+      {/* 5. Customizer Modal */}
+      <LaunchpadCustomizerModal
+        isOpen={isCustomizerOpen}
+        onClose={() => setIsCustomizerOpen(false)}
+        panelConfig={panelConfig}
+        onUpdatePanelConfig={handleUpdatePanelConfig}
+        layoutPreset={layoutPreset}
+        onSelectLayoutPreset={handleSelectLayout}
+        soundAlerts={soundAlerts}
+        onToggleSoundAlerts={toggleSound}
+        isDark={isDark}
+        lang={lang}
+      />
     </div>
   );
 };

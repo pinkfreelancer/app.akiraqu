@@ -1,18 +1,42 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Helper to verify user is authenticated and is resource owner
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Helper to ensure request data does not leak raw plaintext API secrets
+    function doesNotContainRawSecrets() {
+      return !('apiKey' in request.resource.data) &&
+             !('apiSecret' in request.resource.data) &&
+             !('secret' in request.resource.data) &&
+             !('rawSecret' in request.resource.data) &&
+             !('passphrase' in request.resource.data);
+    }
+
     // User profile matching
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
       
       // Subcollection for user trading journals
       match /journal/{journalId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read, write: if isOwner(userId);
       }
       
-      // Subcollection for user watchlists and settings
+      // Subcollection for user watchlists and general settings
       match /settings/{settingId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId) && doesNotContainRawSecrets();
+      }
+
+      // Dedicated exchange credentials vault: allows storing AES-256-GCM encrypted metadata only
+      match /credentials/{credId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && 
+          doesNotContainRawSecrets() &&
+          request.resource.data.keys().hasAll(['exchange', 'maskedKey', 'cipherBlob', 'iv', 'tag', 'updatedAt']);
+        allow delete: if isOwner(userId);
       }
     }
   }

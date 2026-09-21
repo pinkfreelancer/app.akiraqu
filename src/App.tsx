@@ -297,6 +297,7 @@ function TerminalApp() {
               <LaunchpadWorkspace
                 candles={candles}
                 symbol={selectedSymbol}
+                symbols={symbols}
                 timeframe={selectedTimeframe}
                 evaluation={evaluation}
                 livePrice={activeDisplayPrice || undefined}
@@ -311,6 +312,7 @@ function TerminalApp() {
                 askTotal={askTotal}
                 selectedExchange={selectedExchange}
                 selectedMarketType={selectedMarketType}
+                onSelectSymbol={handleSymbolChange}
                 onSelectExchange={handleExchangeChange}
                 onSelectMarketType={handleMarketTypeChange}
                 onSelectTimeframe={handleTimeframeChange}

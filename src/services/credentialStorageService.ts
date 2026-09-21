@@ -88,6 +88,65 @@ export function saveExchangeCredentials(credentials: ExchangeApiCredential[]): v
 }
 
 /**
+ * Encrypts API credentials via Server-Side AES-256-GCM
+ */
+export async function encryptCredentialsServerSide(params: {
+  exchange: string;
+  apiKey: string;
+  apiSecret: string;
+  passphrase?: string;
+}): Promise<{
+  maskedKey: string;
+  cipherBlob: string;
+  iv: string;
+  tag: string;
+  version: number;
+} | null> {
+  try {
+    const res = await fetch('/api/v1/credentials/encrypt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json.data;
+    }
+  } catch (err) {
+    console.error('[AKIRAQU Credentials] Server-side encryption error:', err);
+  }
+  return null;
+}
+
+/**
+ * Tests connection via Server-side Decryption without client ever seeing raw secrets
+ */
+export async function verifyCredentialsServerSide(params: {
+  exchange: string;
+  cipherBlob: string;
+  iv: string;
+  tag: string;
+}): Promise<{ verified: boolean; message?: string }> {
+  try {
+    const res = await fetch('/api/v1/credentials/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params),
+    });
+    const json = await res.json();
+    return {
+      verified: json.verified === true,
+      message: json.message,
+    };
+  } catch (err: any) {
+    return {
+      verified: false,
+      message: err.message || 'Network error during exchange credential check',
+    };
+  }
+}
+
+/**
  * React hook to read and listen to exchange credentials updates in real time
  */
 export function useExchangeCredentials(): [ExchangeApiCredential[], (newCreds: ExchangeApiCredential[]) => void] {

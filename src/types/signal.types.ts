@@ -4,7 +4,29 @@ import { Timeframe, SupportedExchange, CryptoCategory } from './market.types';
 
 export type SignalDirection = 'LONG' | 'SHORT';
 export type SignalGrade = 'STRONG_BUY' | 'BUY' | 'NEUTRAL' | 'SELL' | 'STRONG_SELL';
-export type SignalStatus = 'ACTIVE' | 'TP1_HIT' | 'TP2_HIT' | 'TP3_HIT' | 'SL_HIT' | 'EXPIRED';
+
+// AKIRAQU Institutional Signal Taxonomy & Lifecycle Spec
+export type SignalModelCategory = 'ALPHA' | 'GAMMA' | 'CLASSIC' | 'INV';
+export type SignalStrength = 'NORMAL' | 'STRONG';
+export type SignalResolution = '1H' | '4H' | '8H' | '12H' | '1D' | '1W';
+
+export type SignalLifecycleStatus =
+  | 'PENDING'
+  | 'R1'
+  | 'R2'
+  | 'R3'
+  | 'R4'
+  | 'R5'
+  | 'R6'
+  | 'R7'
+  | 'R8'
+  | 'TRAILING'
+  | 'TAKEPROFIT'
+  | 'STOPLOSS'
+  | 'EXPIRED';
+
+// Legacy compatibility
+export type SignalStatus = 'ACTIVE' | 'TP1_HIT' | 'TP2_HIT' | 'TP3_HIT' | 'SL_HIT' | 'EXPIRED' | SignalLifecycleStatus;
 
 export type SignalPipelineStage =
   | 'INGEST'
@@ -28,6 +50,24 @@ export interface AuditTrailItem {
   pnlPct: number;
 }
 
+export interface SignalPriceLevels {
+  entry: number;
+  r1: number;
+  r2: number;
+  r3: number;
+  r4: number;
+  r5: number;
+  r6: number;
+  r7: number;
+  r8: number;
+  s1: number;
+  s2: number;
+  s3: number;
+  s4: number;
+  trailingStop?: number;
+  isTrailingActive?: boolean;
+}
+
 export interface CryptoTradingSignal {
   id: string;
   symbol: string;
@@ -36,7 +76,7 @@ export interface CryptoTradingSignal {
   exchange: SupportedExchange;
   direction: SignalDirection;
   grade: SignalGrade;
-  timeframe: Timeframe;
+  timeframe: Timeframe | SignalResolution;
   strategyName: string;
   strategyCategory: 'SMC' | 'TREND' | 'DIVERGENCE' | 'ORDERFLOW' | 'AI_CONFLUENCE' | 'VOLATILITY';
   confluenceScore: number;
@@ -55,6 +95,19 @@ export interface CryptoTradingSignal {
   expiresAt: string;
   indicatorsSummary: string[];
   notes: string;
+  
+  // AKIRAQU 4-Dimensional Taxonomy & Level Framework
+  modelCategory?: SignalModelCategory;
+  strength?: SignalStrength;
+  resolution?: SignalResolution;
+  lifecycleStatus?: SignalLifecycleStatus;
+  priceLevels?: SignalPriceLevels;
+  highestRReached?: number; // 0 to 8
+  isTrailingActive?: boolean;
+  trailingStopPrice?: number;
+  realizedPnlPct?: number;
+  outcomeResult?: 'WIN' | 'LOSS' | 'EXPIRED' | 'IN_PROGRESS';
+
   // Workflow Pipeline & MarketOwl Spec
   pipelineStage?: SignalPipelineStage;
   triggerType?: SignalTriggerType;
@@ -72,7 +125,6 @@ export interface CryptoTradingSignal {
   auditTrail?: AuditTrailItem[];
   closedAt?: string;
   exitPrice?: number;
-  realizedPnlPct?: number;
 }
 
 export type MacdStatus = 'BULLISH_CROSS' | 'BEARISH_CROSS' | 'BULLISH' | 'BEARISH' | 'NEUTRAL';

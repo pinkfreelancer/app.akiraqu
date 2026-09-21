@@ -1,43 +1,21 @@
 import React, { useState, useMemo } from 'react';
 import {
-  CandlestickChart,
   Search,
-  Flame,
-  Newspaper,
-  Layers,
-  Gauge,
-  FlaskConical,
-  FileText,
-  ShieldCheck,
-  Bot,
-  BookOpen,
-  Wallet,
-  Star,
-  BarChart3,
-  Sliders,
   PanelLeftClose,
   PanelLeftOpen,
-  Activity,
-  Zap,
-  Compass,
   TrendingUp,
   TrendingDown,
-  Radio,
   X,
-  Sparkles,
   RotateCcw,
-  Globe,
-  Database,
-  Calendar,
-  Network,
-  Calculator,
-  BellRing,
-  Clock,
-  PieChart,
-  Settings as SettingsIcon,
+  CandlestickChart,
 } from 'lucide-react';
 import { StageId, MarketBias } from '../types/market.types';
 import { Language } from '../i18n/translations';
+import {
+  CategoryKey,
+  SIDEBAR_NAV_GROUPS,
+  CATEGORY_TABS,
+} from './sidebarConfig';
 
 interface SidebarProps {
   currentStage: StageId;
@@ -50,35 +28,6 @@ interface SidebarProps {
   marketBias?: MarketBias | string;
   wsStatus?: 'connected' | 'connecting' | 'disconnected' | 'error' | 'fallback';
   latencyMs?: number;
-}
-
-type CategoryKey =
-  | 'all'
-  | 'macro'
-  | 'market'
-  | 'technical'
-  | 'research'
-  | 'execution'
-  | 'connection'
-  | 'evaluation'
-  | 'system';
-
-interface NavItem {
-  id: StageId;
-  stepNumber: string;
-  label: string;
-  icon: React.ElementType;
-  badge?: string;
-  badgeColor?: string;
-  category: CategoryKey;
-}
-
-interface NavGroup {
-  key: CategoryKey;
-  groupName: string;
-  icon: React.ElementType;
-  isSystemDivider?: boolean;
-  items: NavItem[];
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -100,312 +49,44 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeCategory, setActiveCategory] = useState<CategoryKey>('all');
 
-  const navGroups: NavGroup[] = useMemo(
-    () => [
-      // 1. 🌐 DATA MAKRO & KONTEKS (Buka Sesi)
-      {
-        key: 'macro',
-        groupName: isId ? '🌐 1. DATA MAKRO & KONTEKS' : '🌐 1. MACRO & CONTEXT DATA',
-        icon: Globe,
-        items: [
-          {
-            id: 'btc_dominance',
-            stepNumber: '01',
-            label: isId ? 'Dominasi BTC/Altcoin' : 'BTC/Altcoin Dominance',
-            icon: PieChart,
-            category: 'macro',
-          },
-          {
-            id: 'onchain_data',
-            stepNumber: '02',
-            label: isId ? 'Data On-Chain' : 'On-Chain Data',
-            icon: Database,
-            category: 'macro',
-          },
-          {
-            id: 'economic_calendar',
-            stepNumber: '03',
-            label: isId ? 'Kalender Ekonomi & Crypto' : 'Economic & Crypto Calendar',
-            icon: Calendar,
-            category: 'macro',
-          },
-          {
-            id: 'sentiment',
-            stepNumber: '04',
-            label: isId ? 'Berita & Sentimen' : 'News & Sentiment',
-            icon: Newspaper,
-            badge: 'Alert',
-            badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-            category: 'macro',
-          },
-        ],
-      },
+  // Compute localized Nav Groups with dynamic badges (e.g. confluence score)
+  const navGroups = useMemo(() => {
+    return SIDEBAR_NAV_GROUPS.map((group) => {
+      const localizedItems = group.items.map((item) => {
+        let badge = item.badge;
+        let badgeColor = item.badgeColor;
 
-      // 2. 📊 PASAR & SCREENING (Cari Peluang)
-      {
-        key: 'market',
-        groupName: isId ? '📊 2. PASAR & SCREENING' : '📊 2. MARKET & SCREENING',
-        icon: Compass,
-        items: [
-          {
-            id: 'market_heatmap',
-            stepNumber: '05',
-            label: isId ? 'Heatmap Pasar' : 'Market Heatmap',
-            icon: Flame,
-            category: 'market',
-          },
-          {
-            id: 'gainers_losers',
-            stepNumber: '06',
-            label: isId ? 'Top Gainers & Losers' : 'Top Gainers & Losers',
-            icon: TrendingUp,
-            category: 'market',
-          },
-          {
-            id: 'screening',
-            stepNumber: '07',
-            label: isId ? 'Penyaring Koin' : 'Coin Screener',
-            icon: BarChart3,
-            badge: 'Filter',
-            badgeColor: 'bg-pink-500/15 text-pink-300 border-pink-500/30',
-            category: 'market',
-          },
-          {
-            id: 'watchlist',
-            stepNumber: '08',
-            label: isId ? 'Watchlist' : 'Watchlist',
-            icon: Star,
-            category: 'market',
-          },
-          {
-            id: 'signal',
-            stepNumber: '09',
-            label: isId ? 'Sinyal Trading' : 'Trading Signals',
-            icon: Radio,
-            badge: 'LIVE',
-            badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-            category: 'market',
-          },
-        ],
-      },
+        // Dynamic badge for confluence score
+        if (item.id === 'confluence') {
+          badge = confluenceScore !== undefined ? `${confluenceScore}/100` : undefined;
+          badgeColor =
+            confluenceScore && confluenceScore >= 70
+              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+              : confluenceScore && confluenceScore <= 40
+              ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+              : 'bg-pink-500/15 text-pink-300 border-pink-500/30';
+        }
 
-      // 3. 🔍 INDIKATOR & SCREENING TEKNIKAL (Validasi Sinyal)
-      {
-        key: 'technical',
-        groupName: isId ? '🔍 3. INDIKATOR & TEKNIKAL' : '🔍 3. INDICATORS & TECHNICAL',
-        icon: Layers,
-        items: [
-          {
-            id: 'ticker',
-            stepNumber: '10',
-            label: isId ? 'Grafik Utama' : 'Main Chart',
-            icon: CandlestickChart,
-            category: 'technical',
-          },
-          {
-            id: 'indicators',
-            stepNumber: '11',
-            label: isId ? '12 Indikator' : '12 Indicators',
-            icon: Layers,
-            category: 'technical',
-          },
-          {
-            id: 'confluence',
-            stepNumber: '12',
-            label: isId ? 'Skor Konfluensi' : 'Confluence Score',
-            icon: Gauge,
-            badge: confluenceScore !== undefined ? `${confluenceScore}/100` : undefined,
-            badgeColor:
-              confluenceScore && confluenceScore >= 70
-                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                : confluenceScore && confluenceScore <= 40
-                ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                : 'bg-pink-500/15 text-pink-300 border-pink-500/30',
-            category: 'technical',
-          },
-          {
-            id: 'mtf_screener',
-            stepNumber: '13',
-            label: isId ? 'Screener Multi-Timeframe' : 'Multi-Timeframe Screener',
-            icon: Layers,
-            category: 'technical',
-          },
-          {
-            id: 'orderflow',
-            stepNumber: '14',
-            label: isId ? 'Order Flow & Likuiditas' : 'Order Flow & Liquidity',
-            icon: Flame,
-            category: 'technical',
-          },
-          {
-            id: 'volatility_scanner',
-            stepNumber: '15',
-            label: isId ? 'Volatility Scanner' : 'Volatility Scanner',
-            icon: Activity,
-            category: 'technical',
-          },
-          {
-            id: 'correlation_beta',
-            stepNumber: '16',
-            label: isId ? 'Correlation & Beta Analyzer' : 'Correlation & Beta Analyzer',
-            icon: Network,
-            category: 'technical',
-          },
-        ],
-      },
+        return {
+          id: item.id,
+          stepNumber: item.stepNumber,
+          label: isId ? item.labelId : item.labelEn,
+          icon: item.icon,
+          badge,
+          badgeColor,
+          category: item.category,
+        };
+      });
 
-      // 4. 🧪 RISET & STRATEGI (Hitung Risiko)
-      {
-        key: 'research',
-        groupName: isId ? '🧪 4. RISET & STRATEGI' : '🧪 4. RESEARCH & STRATEGY',
-        icon: FlaskConical,
-        items: [
-          {
-            id: 'risk',
-            stepNumber: '17',
-            label: isId ? 'Kalkulator Risiko' : 'Risk Calculator',
-            icon: ShieldCheck,
-            category: 'research',
-          },
-          {
-            id: 'backtest',
-            stepNumber: '18',
-            label: isId ? 'Backtest Lab' : 'Backtest Lab',
-            icon: FlaskConical,
-            category: 'research',
-          },
-          {
-            id: 'return_distribution',
-            stepNumber: '19',
-            label: isId ? 'Statistik & Distribusi Return' : 'Return Stats & Distribution',
-            icon: BarChart3,
-            category: 'research',
-          },
-          {
-            id: 'output',
-            stepNumber: '20',
-            label: isId ? 'Laporan AI' : 'AI Report',
-            icon: FileText,
-            badge: 'AI',
-            badgeColor: 'bg-pink-500/15 text-pink-300 border-pink-500/30',
-            category: 'research',
-          },
-        ],
-      },
-
-      // 5. ⚡ EKSEKUSI AKTIF (Eksekusi)
-      {
-        key: 'execution',
-        groupName: isId ? '⚡ 5. EKSEKUSI AKTIF' : '⚡ 5. ACTIVE EXECUTION',
-        icon: Zap,
-        items: [
-          {
-            id: 'manual_trading',
-            stepNumber: '21',
-            label: isId ? 'Trading Manual' : 'Manual Trading',
-            icon: Zap,
-            badge: 'Live',
-            badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-            category: 'execution',
-          },
-          {
-            id: 'bot',
-            stepNumber: '22',
-            label: isId ? 'Trading Bot' : 'Trading Bot',
-            icon: Bot,
-            category: 'execution',
-          },
-          {
-            id: 'position_sizing',
-            stepNumber: '23',
-            label: isId ? 'Position Sizing Otomatis' : 'Automated Position Sizing',
-            icon: Calculator,
-            category: 'execution',
-          },
-          {
-            id: 'active_orders',
-            stepNumber: '24',
-            label: isId ? 'Manajemen Order Aktif' : 'Active Orders Management',
-            icon: Clock,
-            category: 'execution',
-          },
-        ],
-      },
-
-      // 6. 🔧 KONEKSI & ALERT (Pantau)
-      {
-        key: 'connection',
-        groupName: isId ? '🔧 6. KONEKSI & ALERT' : '🔧 6. CONNECTIONS & ALERTS',
-        icon: BellRing,
-        items: [
-          {
-            id: 'alerts',
-            stepNumber: '25',
-            label: isId ? 'Alert & Notifikasi Builder' : 'Alert & Notification Builder',
-            icon: BellRing,
-            category: 'connection',
-          },
-          {
-            id: 'portfolio',
-            stepNumber: '26',
-            label: isId ? 'Portofolio' : 'Portfolio',
-            icon: Wallet,
-            category: 'connection',
-          },
-          {
-            id: 'multi_exchange',
-            stepNumber: '27',
-            label: isId ? 'Multi-Exchange Manager' : 'Multi-Exchange Manager',
-            icon: Layers,
-            category: 'connection',
-          },
-        ],
-      },
-
-      // 7. 📈 EVALUASI & RIWAYAT (Evaluasi)
-      {
-        key: 'evaluation',
-        groupName: isId ? '📈 7. EVALUASI & RIWAYAT' : '📈 7. EVALUATION & HISTORY',
-        icon: BookOpen,
-        items: [
-          {
-            id: 'journal',
-            stepNumber: '28',
-            label: isId ? 'Jurnal Trading' : 'Trading Journal',
-            icon: BookOpen,
-            category: 'evaluation',
-          },
-          {
-            id: 'reports',
-            stepNumber: '29',
-            label: isId ? 'Laporan Kinerja' : 'Performance Reports',
-            icon: FileText,
-            badge: 'CSV',
-            badgeColor: 'bg-slate-800/80 text-slate-300 border-slate-700/60',
-            category: 'evaluation',
-          },
-        ],
-      },
-
-      // 8. ⚙️ SISTEM (Divided)
-      {
-        key: 'system',
-        groupName: isId ? '⚙️ SISTEM' : '⚙️ SYSTEM',
-        icon: SettingsIcon,
-        isSystemDivider: true,
-        items: [
-          {
-            id: 'settings',
-            stepNumber: '30',
-            label: isId ? 'Pengaturan' : 'Settings',
-            icon: Sliders,
-            category: 'system',
-          },
-        ],
-      },
-    ],
-    [isId, confluenceScore]
-  );
+      return {
+        key: group.key,
+        groupName: isId ? group.groupNameId : group.groupNameEn,
+        icon: group.icon,
+        isSystemDivider: group.isSystemDivider,
+        items: localizedItems,
+      };
+    });
+  }, [isId, confluenceScore]);
 
   // Filter groups and items based on search query and category tab
   const filteredNavGroups = useMemo(() => {
@@ -435,7 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     [filteredNavGroups]
   );
 
-  // Efficient stage selection: Auto-close drawer on mobile screens (<768px)
+  // Auto-close drawer on mobile (<768px)
   const handleItemClick = (stageId: StageId) => {
     onSelectStage(stageId);
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
@@ -445,7 +126,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      {/* 1. Mobile Backdrop Overlay (Only visible on small screens when drawer is open) */}
+      {/* 1. Mobile Backdrop Overlay */}
       {isOpen && (
         <div
           id="sidebar-mobile-backdrop"
@@ -461,12 +142,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         role="navigation"
         aria-label="Terminal Navigation"
         className={`shrink-0 flex flex-col select-none transition-all duration-200 ease-in-out ${
-          /* Mobile styling */
           isOpen
             ? 'fixed inset-y-0 left-0 z-50 w-72 sm:w-80 shadow-2xl md:shadow-none'
             : 'hidden md:flex'
         } ${
-          /* Desktop styling */
           isOpen ? 'md:relative md:inset-auto md:z-30 md:w-64 lg:md:w-72' : 'md:relative md:inset-auto md:z-30 md:w-14 lg:md:w-16'
         } ${
           isDark
@@ -571,126 +250,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             {/* Category Filter Pills (Ordered by Workflow) */}
             <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none text-[11px] font-mono font-semibold">
-              <button
-                type="button"
-                onClick={() => setActiveCategory('all')}
-                className={`px-2 py-1 rounded-md transition-colors cursor-pointer shrink-0 ${
-                  activeCategory === 'all'
-                    ? isDark
-                      ? 'bg-pink-500/15 text-pink-300 border border-pink-500/30'
-                      : 'bg-pink-600 text-white shadow-xs'
-                    : isDark
-                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                {isId ? 'Semua' : 'All'} (30)
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveCategory('macro')}
-                className={`px-2 py-1 rounded-md transition-colors cursor-pointer shrink-0 ${
-                  activeCategory === 'macro'
-                    ? isDark
-                      ? 'bg-pink-500/15 text-pink-300 border border-pink-500/30'
-                      : 'bg-pink-600 text-white shadow-xs'
-                    : isDark
-                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                1. {isId ? 'Makro' : 'Macro'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveCategory('market')}
-                className={`px-2 py-1 rounded-md transition-colors cursor-pointer shrink-0 ${
-                  activeCategory === 'market'
-                    ? isDark
-                      ? 'bg-pink-500/15 text-pink-300 border border-pink-500/30'
-                      : 'bg-pink-600 text-white shadow-xs'
-                    : isDark
-                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                2. {isId ? 'Pasar' : 'Market'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveCategory('technical')}
-                className={`px-2 py-1 rounded-md transition-colors cursor-pointer shrink-0 ${
-                  activeCategory === 'technical'
-                    ? isDark
-                      ? 'bg-pink-500/15 text-pink-300 border border-pink-500/30'
-                      : 'bg-pink-600 text-white shadow-xs'
-                    : isDark
-                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                3. {isId ? 'Teknikal' : 'Technical'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveCategory('research')}
-                className={`px-2 py-1 rounded-md transition-colors cursor-pointer shrink-0 ${
-                  activeCategory === 'research'
-                    ? isDark
-                      ? 'bg-pink-500/15 text-pink-300 border border-pink-500/30'
-                      : 'bg-pink-600 text-white shadow-xs'
-                    : isDark
-                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                4. {isId ? 'Riset' : 'Research'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveCategory('execution')}
-                className={`px-2 py-1 rounded-md transition-colors cursor-pointer shrink-0 ${
-                  activeCategory === 'execution'
-                    ? isDark
-                      ? 'bg-pink-500/15 text-pink-300 border border-pink-500/30'
-                      : 'bg-pink-600 text-white shadow-xs'
-                    : isDark
-                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                5. {isId ? 'Eksekusi' : 'Execution'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveCategory('connection')}
-                className={`px-2 py-1 rounded-md transition-colors cursor-pointer shrink-0 ${
-                  activeCategory === 'connection'
-                    ? isDark
-                      ? 'bg-pink-500/15 text-pink-300 border border-pink-500/30'
-                      : 'bg-pink-600 text-white shadow-xs'
-                    : isDark
-                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                6. {isId ? 'Koneksi' : 'Connect'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveCategory('evaluation')}
-                className={`px-2 py-1 rounded-md transition-colors cursor-pointer shrink-0 ${
-                  activeCategory === 'evaluation'
-                    ? isDark
-                      ? 'bg-pink-500/15 text-pink-300 border border-pink-500/30'
-                      : 'bg-pink-600 text-white shadow-xs'
-                    : isDark
-                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                7. {isId ? 'Evaluasi' : 'Evaluate'}
-              </button>
+              {CATEGORY_TABS.map((tab) => {
+                const isActive = activeCategory === tab.key;
+                return (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setActiveCategory(tab.key)}
+                    className={`px-2 py-1 rounded-md transition-colors cursor-pointer shrink-0 ${
+                      isActive
+                        ? isDark
+                          ? 'bg-pink-500/15 text-pink-300 border border-pink-500/30'
+                          : 'bg-pink-600 text-white shadow-xs'
+                        : isDark
+                        ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    }`}
+                  >
+                    {isId ? tab.labelId : tab.labelEn}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
