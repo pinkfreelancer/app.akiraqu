@@ -26,6 +26,9 @@ import {
   Activity,
   Maximize2,
   Minimize2,
+  BookOpen,
+  Sparkles,
+  LayoutTemplate,
 } from 'lucide-react';
 
 export type LaunchpadLayoutPreset =
@@ -59,6 +62,7 @@ interface LaunchpadToolbarProps {
   selectedExchange?: SupportedExchange;
   selectedMarketType?: MarketType;
   layoutPreset: LaunchpadLayoutPreset;
+  densityMode?: 'pro' | 'simple';
   livePrice?: number;
   priceDirection?: 'up' | 'down' | 'neutral';
   evaluation: ConfluenceEvaluation | null;
@@ -75,9 +79,12 @@ interface LaunchpadToolbarProps {
   onSelectExchange?: (ex: SupportedExchange) => void;
   onSelectMarketType?: (mt: MarketType) => void;
   onSelectLayout: (preset: LaunchpadLayoutPreset) => void;
+  onToggleDensityMode?: () => void;
   onToggleSoundAlerts: () => void;
   onToggleGuide: () => void;
   onOpenCustomizer: () => void;
+  onOpenGlossary?: () => void;
+  onOpenOnboarding?: () => void;
   onTriggerAnalyze?: () => void;
 }
 
@@ -88,6 +95,7 @@ export const LaunchpadToolbar: React.FC<LaunchpadToolbarProps> = ({
   selectedExchange = 'BINANCE',
   selectedMarketType = 'SPOT',
   layoutPreset,
+  densityMode = 'pro',
   livePrice = 0,
   priceDirection = 'neutral',
   evaluation,
@@ -103,9 +111,12 @@ export const LaunchpadToolbar: React.FC<LaunchpadToolbarProps> = ({
   onSelectExchange,
   onSelectMarketType,
   onSelectLayout,
+  onToggleDensityMode,
   onToggleSoundAlerts,
   onToggleGuide,
   onOpenCustomizer,
+  onOpenGlossary,
+  onOpenOnboarding,
   onTriggerAnalyze,
 }) => {
   const isId = lang === 'id';
@@ -412,17 +423,41 @@ export const LaunchpadToolbar: React.FC<LaunchpadToolbarProps> = ({
             </button>
           </div>
 
+          {/* Density Toggle (Simple vs Pro) */}
+          {onToggleDensityMode && (
+            <button
+              onClick={onToggleDensityMode}
+              className={`px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer min-h-[38px] ${
+                densityMode === 'simple'
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-xs'
+                  : isDark
+                  ? 'bg-slate-900 border-slate-700 text-slate-300 hover:text-cyan-300 hover:border-cyan-500/50'
+                  : 'bg-slate-100 border-slate-300 text-slate-700 hover:text-cyan-800'
+              }`}
+              title={
+                densityMode === 'simple'
+                  ? isId
+                    ? 'Beralih ke Mode Kuantitatif Pro (Semua Panel & 12 Indikator)'
+                    : 'Switch to Pro Quant Mode'
+                  : isId
+                  ? 'Beralih ke Mode Ringkas (Hanya Level Kritis & Eksekusi Cepat)'
+                  : 'Switch to Simple Clean Mode'
+              }
+            >
+              <LayoutTemplate className="w-3.5 h-3.5 text-cyan-400" />
+              <span>{densityMode === 'simple' ? (isId ? 'Ringkas' : 'Simple') : isId ? 'Pro (12-Ind)' : 'Pro'}</span>
+            </button>
+          )}
+
           {/* Action Trigger Button: Analyze Confluence */}
           {onTriggerAnalyze && (
             <button
               onClick={onTriggerAnalyze}
               disabled={isLoading}
-              className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-md ${
+              className={`px-3 py-1.5 rounded-[2px] font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-xs min-h-[38px] ${
                 isLoading
-                  ? 'bg-cyan-500/40 text-slate-400 cursor-not-allowed'
-                  : isDark
-                  ? 'bg-gradient-to-r from-cyan-500 to-cyan-400 text-slate-950 hover:from-cyan-400 hover:to-cyan-300 shadow-cyan-500/20 active:scale-95'
-                  : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-cyan-600/20 active:scale-95'
+                  ? 'bg-pink-500/40 text-slate-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white active:scale-95'
               }`}
               title={isId ? 'Jalankan kalkulasi konfluensi 12 algoritma (Shortcut: [R])' : 'Run 12-indicator confluence scan (Shortcut: [R])'}
             >
@@ -433,11 +468,39 @@ export const LaunchpadToolbar: React.FC<LaunchpadToolbarProps> = ({
             </button>
           )}
 
-          {/* Sound, Guide & Customizer Controls */}
+          {/* Sound, Guide, Glossary & Customizer Controls */}
           <div className="flex items-center gap-1">
+            {onOpenGlossary && (
+              <button
+                onClick={onOpenGlossary}
+                className={`p-2 rounded-xl border transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center ${
+                  isDark
+                    ? 'bg-slate-900 border-slate-800 text-slate-400 hover:text-cyan-300 hover:border-slate-700'
+                    : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-cyan-700 hover:border-slate-300'
+                }`}
+                title={isId ? 'Kamus Istilah Trading (CVD, MSS, FVG, Killzone)' : 'Trading Glossary (CVD, MSS, FVG)'}
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            {onOpenOnboarding && (
+              <button
+                onClick={onOpenOnboarding}
+                className={`p-2 rounded-xl border transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center ${
+                  isDark
+                    ? 'bg-slate-900 border-slate-800 text-slate-400 hover:text-cyan-300 hover:border-slate-700'
+                    : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-cyan-700 hover:border-slate-300'
+                }`}
+                title={isId ? 'Mulai Tur Interaktif Meja Kerja' : 'Start Workspace Tour'}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              </button>
+            )}
+
             <button
               onClick={onToggleSoundAlerts}
-              className={`p-1.5 rounded-xl border transition-colors cursor-pointer ${
+              className={`p-2 rounded-xl border transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center ${
                 soundAlerts
                   ? isDark
                     ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
@@ -453,7 +516,7 @@ export const LaunchpadToolbar: React.FC<LaunchpadToolbarProps> = ({
 
             <button
               onClick={onToggleGuide}
-              className={`p-1.5 rounded-xl border transition-colors cursor-pointer ${
+              className={`p-2 rounded-xl border transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center ${
                 showWorkflowGuide
                   ? isDark
                     ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
@@ -469,7 +532,7 @@ export const LaunchpadToolbar: React.FC<LaunchpadToolbarProps> = ({
 
             <button
               onClick={onOpenCustomizer}
-              className={`p-1.5 rounded-xl border transition-colors cursor-pointer ${
+              className={`p-2 rounded-xl border transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center ${
                 isDark
                   ? 'bg-slate-900 border-slate-800 text-slate-400 hover:text-cyan-400 hover:border-slate-700'
                   : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-cyan-700 hover:border-slate-300'

@@ -2,18 +2,20 @@ export type EngineThemeId =
   | 'theme-light'
   | 'theme-dark'
   | 'theme-terminal'
+  | 'theme-glassnode'
   | 'theme-custom'
   // Legacy aliases for backward compatibility:
   | 'modern-pink-light'
   | 'cyber-pink-dark'
   | 'classic-terminal'
+  | 'glassnode'
   | 'custom';
 
 export interface ThemeOption {
   id: EngineThemeId;
   name: string;
   nameId: string;
-  category: 'Light' | 'Dark' | 'Terminal' | 'Custom';
+  category: 'Light' | 'Dark' | 'Terminal' | 'Custom' | 'Institutional';
   concept: string;
   conceptId: string;
   isDark: boolean;
@@ -25,6 +27,20 @@ export interface ThemeOption {
 }
 
 export const THEME_OPTIONS: ThemeOption[] = [
+  {
+    id: 'theme-glassnode',
+    name: 'Glassnode Research (Soft Pink)',
+    nameId: 'Konsol Riset Glassnode (Soft Pink)',
+    category: 'Institutional',
+    concept: 'Institutional Bloomberg terminal aesthetic: Cool cloud canvas (#EDEFF2), pure white cards (#FFFFFF) with 1px mist hairline borders (#DEDFE1), sharp 2px radii, and subtle Soft Pink accent wash.',
+    conceptId: 'Estetika konsol riset institusional: Kanvas Cloud (#EDEFF2), kartu White (#FFFFFF) dengan border hairline Mist 1px (#DEDFE1), radius tegas 2px, dan aksen Soft Pink wash.',
+    isDark: false,
+    accentColor: '#F472B6',
+    bgColor: '#EDEFF2',
+    surfaceColor: '#FFFFFF',
+    textColor: '#1A1A1A',
+    badgeLabel: 'Glassnode 2px',
+  },
   {
     id: 'theme-light',
     name: 'Light Theme',
@@ -159,6 +175,7 @@ export function getContrastTextColor(hexColor: string): string {
  */
 export function normalizeEngineTheme(theme: string | null | undefined): EngineThemeId {
   if (!theme) return 'theme-dark';
+  if (theme === 'theme-glassnode' || theme === 'glassnode') return 'theme-glassnode';
   if (theme === 'theme-light' || theme === 'modern-pink-light' || theme === 'light') return 'theme-light';
   if (theme === 'theme-terminal' || theme === 'classic-terminal' || theme === 'classic' || theme === 'terminal') return 'theme-terminal';
   if (theme === 'theme-custom' || theme === 'custom') return 'theme-custom';
@@ -171,7 +188,7 @@ export function normalizeEngineTheme(theme: string | null | undefined): EngineTh
  */
 export function isDarkEngineTheme(theme: EngineThemeId): boolean {
   const norm = normalizeEngineTheme(theme);
-  if (norm === 'theme-light') return false;
+  if (norm === 'theme-light' || norm === 'theme-glassnode') return false;
   if (norm === 'theme-custom' && typeof window !== 'undefined') {
     const customBg = document.documentElement.style.getPropertyValue('--custom-bg-hex');
     if (customBg) {
@@ -206,6 +223,7 @@ export function applyThemeToDocument(
     'theme-light',
     'theme-dark',
     'theme-terminal',
+    'theme-glassnode',
     'theme-custom',
     'theme-modern-pink-light',
     'theme-cyber-pink-dark',
@@ -213,6 +231,7 @@ export function applyThemeToDocument(
     'modern-pink-light',
     'cyber-pink-dark',
     'classic-terminal',
+    'glassnode',
     'custom',
   ];
   root.classList.remove(...allThemeClasses);
@@ -220,6 +239,7 @@ export function applyThemeToDocument(
   // Add active theme class
   root.classList.add(norm);
   // Add legacy class alias for any CSS selectors expecting legacy class names
+  if (norm === 'theme-glassnode') root.classList.add('theme-glassnode');
   if (norm === 'theme-light') root.classList.add('theme-modern-pink-light');
   if (norm === 'theme-dark') root.classList.add('theme-cyber-pink-dark');
   if (norm === 'theme-terminal') root.classList.add('theme-classic-terminal');

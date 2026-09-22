@@ -29,6 +29,13 @@ import {
   GridPanelVisibilityConfig,
 } from './launchpad/LaunchpadCustomizerModal';
 import {
+  LaunchpadMobileTabBar,
+  MobileTabKey,
+} from './launchpad/LaunchpadMobileTabBar';
+import { LaunchpadSimpleView } from './launchpad/LaunchpadSimpleView';
+import { LaunchpadOnboardingModal } from './launchpad/LaunchpadOnboardingModal';
+import { TradingGlossaryModal } from './launchpad/TradingGlossaryModal';
+import {
   Maximize2,
   Minimize2,
   CandlestickChart,
@@ -47,6 +54,7 @@ import {
   BarChart2,
   TrendingUp,
   TrendingDown,
+  BookOpen,
 } from 'lucide-react';
 import { formatCryptoPrice } from '../utils/formatters';
 
@@ -160,6 +168,44 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
     return [];
   });
 
+  // Density Mode State: 'pro' (Full 4-Panel Grid) | 'simple' (Clean 1-Screen Summary)
+  const [densityMode, setDensityMode] = useState<'pro' | 'simple'>(() => {
+    return (localStorage.getItem('imasbtc_grid_density') as 'pro' | 'simple') || 'pro';
+  });
+
+  // Mobile Active Tab: 'chart' | 'confluence' | 'liquidity' | 'risk'
+  const [mobileTab, setMobileTab] = useState<MobileTabKey>('chart');
+
+  // Modal States
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [isGlossaryOpen, setIsGlossaryOpen] = useState(false);
+
+  // Toast Notification State
+  const [toastMsg, setToastMsg] = useState<{ text: string; type: 'success' | 'info' } | null>(null);
+
+  const showToast = (text: string, type: 'success' | 'info' = 'success') => {
+    setToastMsg({ text, type });
+    setTimeout(() => {
+      setToastMsg((prev) => (prev?.text === text ? null : prev));
+    }, 3000);
+  };
+
+  const toggleDensityMode = () => {
+    const next = densityMode === 'pro' ? 'simple' : 'pro';
+    setDensityMode(next);
+    localStorage.setItem('imasbtc_grid_density', next);
+    showToast(
+      isId
+        ? next === 'simple'
+          ? 'Mode Ringkas Diaktifkan (Sederhana)'
+          : 'Mode Kuantitatif Pro Diaktifkan (12 Indikator)'
+        : next === 'simple'
+        ? 'Simple Mode Enabled'
+        : 'Pro Quant Mode Enabled',
+      'info'
+    );
+  };
+
   const [copiedConfluence, setCopiedConfluence] = useState(false);
 
   const activeDisplayPrice = livePrice || (candles.length > 0 ? candles[candles.length - 1].close : 0);
@@ -224,17 +270,25 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
     setGridPositions(updated);
     localStorage.setItem('imasbtc_grid_sim_positions', JSON.stringify(updated));
     playAudioChime(1100);
+    showToast(
+      isId
+        ? `Order Simulasi ${pos.side} $${formatCryptoPrice(pos.entryPrice)} Berhasil Ditempatkan!`
+        : `Simulated ${pos.side} order at $${formatCryptoPrice(pos.entryPrice)} placed!`,
+      'success'
+    );
   };
 
   const handleClosePosition = (id: string) => {
     const updated = gridPositions.filter((p) => p.id !== id);
     setGridPositions(updated);
     localStorage.setItem('imasbtc_grid_sim_positions', JSON.stringify(updated));
+    showToast(isId ? 'Posisi Berhasil Ditutup' : 'Position Closed', 'info');
   };
 
   const handleClearAllPositions = () => {
     setGridPositions([]);
     localStorage.removeItem('imasbtc_grid_sim_positions');
+    showToast(isId ? 'Semua Posisi Dikosongkan' : 'All Positions Cleared', 'info');
   };
 
   // Filtered 12 Indicators
@@ -268,6 +322,7 @@ Catatan: ${evaluation.executiveNarrative || 'Kalkulasi 12-Indikator kuantitatif 
 
     navigator.clipboard.writeText(text);
     setCopiedConfluence(true);
+    showToast(isId ? 'Ringkasan Konfluensi Berhasil Disalin ke Clipboard!' : 'Confluence summary copied to clipboard!', 'success');
     setTimeout(() => setCopiedConfluence(false), 2000);
   };
 
@@ -373,7 +428,27 @@ Catatan: ${evaluation.executiveNarrative || 'Kalkulasi 12-Indikator kuantitatif 
   };
 
   return (
-    <div className="w-full space-y-3 font-mono">
+    <div className="w-full space-y-3 font-mono relative">
+      {/* 🍞 Floating Toast Notification */}
+      {toastMsg && (
+        <div className="fixed top-20 right-6 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div
+            className={`px-4 py-2.5 rounded-2xl border shadow-xl flex items-center gap-2 text-xs font-bold ${
+              toastMsg.type === 'success'
+                ? isDark
+                  ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/40 shadow-emerald-950/50'
+                  : 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                : isDark
+                ? 'bg-cyan-950/90 text-cyan-300 border-cyan-500/40 shadow-cyan-950/50'
+                : 'bg-cyan-100 text-cyan-900 border-cyan-300'
+            }`}
+          >
+            <Check className="w-4 h-4 text-cyan-400" />
+            <span>{toastMsg.text}</span>
+          </div>
+        </div>
+      )}
+
       {/* 🧭 1. Advanced Launchpad Workspace Toolbar */}
       <LaunchpadToolbar
         symbol={symbol}
@@ -382,6 +457,7 @@ Catatan: ${evaluation.executiveNarrative || 'Kalkulasi 12-Indikator kuantitatif 
         selectedExchange={selectedExchange}
         selectedMarketType={selectedMarketType}
         layoutPreset={layoutPreset}
+        densityMode={densityMode}
         livePrice={activeDisplayPrice}
         priceDirection={priceDirection}
         evaluation={evaluation}
@@ -398,9 +474,12 @@ Catatan: ${evaluation.executiveNarrative || 'Kalkulasi 12-Indikator kuantitatif 
         onSelectExchange={onSelectExchange}
         onSelectMarketType={onSelectMarketType}
         onSelectLayout={handleSelectLayout}
+        onToggleDensityMode={toggleDensityMode}
         onToggleSoundAlerts={toggleSound}
         onToggleGuide={toggleGuide}
         onOpenCustomizer={() => setIsCustomizerOpen(true)}
+        onOpenGlossary={() => setIsGlossaryOpen(true)}
+        onOpenOnboarding={() => setIsOnboardingOpen(true)}
         onTriggerAnalyze={onTriggerAnalyze}
       />
 
@@ -444,8 +523,39 @@ Catatan: ${evaluation.executiveNarrative || 'Kalkulasi 12-Indikator kuantitatif 
         </div>
       )}
 
-      {/* 🚀 3. Main Multi-Window Grid */}
-      {maximizedPanel ? (
+      {/* 📱 Mobile Tabs Switcher (Shown on mobile when in Pro mode) */}
+      {!maximizedPanel && densityMode === 'pro' && (
+        <LaunchpadMobileTabBar
+          activeTab={mobileTab}
+          onSelectTab={setMobileTab}
+          confluenceScore={evaluation?.confluenceScore}
+          marketBias={evaluation?.marketBias}
+          isDark={isDark}
+          lang={lang}
+        />
+      )}
+
+      {/* 🎛️ Simple Density View OR Pro Multi-Grid View */}
+      {densityMode === 'simple' ? (
+        <LaunchpadSimpleView
+          candles={candles}
+          symbol={symbol}
+          timeframe={timeframe}
+          evaluation={evaluation}
+          currentPrice={activeDisplayPrice}
+          selectedExchange={selectedExchange}
+          selectedMarketType={selectedMarketType}
+          onExecuteTrade={handleExecuteSimTrade}
+          onSwitchToProView={() => {
+            setDensityMode('pro');
+            localStorage.setItem('imasbtc_grid_density', 'pro');
+          }}
+          onTriggerAnalyze={onTriggerAnalyze}
+          isLoading={isLoading}
+          isDark={isDark}
+          lang={lang}
+        />
+      ) : maximizedPanel ? (
         // Single Maximized Panel View
         <div
           className={`w-full rounded-2xl border overflow-hidden transition-colors ${
@@ -701,7 +811,7 @@ Catatan: ${evaluation.executiveNarrative || 'Kalkulasi 12-Indikator kuantitatif 
                   : layoutPreset === 'execution_focus'
                   ? 'lg:col-span-7'
                   : ''
-              }`}
+              } ${mobileTab !== 'chart' ? 'hidden lg:block' : ''}`}
             >
               {renderPanelHeader(
                 isId ? 'Langkah 3: Validasi' : 'Step 3: Validation',
@@ -780,7 +890,7 @@ Catatan: ${evaluation.executiveNarrative || 'Kalkulasi 12-Indikator kuantitatif 
                   : layoutPreset === 'execution_focus'
                   ? 'lg:col-span-5'
                   : ''
-              }`}
+              } ${mobileTab !== 'confluence' ? 'hidden lg:block' : ''}`}
             >
               {renderPanelHeader(
                 isId ? 'Langkah 3: Konfluensi' : 'Step 3: Confluence',
@@ -954,7 +1064,7 @@ Catatan: ${evaluation.executiveNarrative || 'Kalkulasi 12-Indikator kuantitatif 
                   : layoutPreset === 'execution_focus'
                   ? 'lg:col-span-6'
                   : ''
-              }`}
+              } ${mobileTab !== 'liquidity' ? 'hidden lg:block' : ''}`}
             >
               {renderPanelHeader(
                 isId ? 'Langkah 3: Likuiditas' : 'Step 3: Liquidity',
@@ -989,7 +1099,7 @@ Catatan: ${evaluation.executiveNarrative || 'Kalkulasi 12-Indikator kuantitatif 
                   : layoutPreset === 'execution_focus'
                   ? 'lg:col-span-6'
                   : ''
-              }`}
+              } ${mobileTab !== 'risk' ? 'hidden lg:block' : ''}`}
             >
               {renderPanelHeader(
                 isId ? 'Langkah 4: Hitung Risiko' : 'Step 4: Risk Protocol',
@@ -1089,6 +1199,22 @@ Catatan: ${evaluation.executiveNarrative || 'Kalkulasi 12-Indikator kuantitatif 
         onSelectLayoutPreset={handleSelectLayout}
         soundAlerts={soundAlerts}
         onToggleSoundAlerts={toggleSound}
+        isDark={isDark}
+        lang={lang}
+      />
+
+      {/* 6. Onboarding Tour Modal */}
+      <LaunchpadOnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+        isDark={isDark}
+        lang={lang}
+      />
+
+      {/* 7. Trading Glossary Modal */}
+      <TradingGlossaryModal
+        isOpen={isGlossaryOpen}
+        onClose={() => setIsGlossaryOpen(false)}
         isDark={isDark}
         lang={lang}
       />

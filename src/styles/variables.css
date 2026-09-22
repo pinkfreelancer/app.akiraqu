@@ -1,25 +1,68 @@
 /* ========================================================================= */
-/* AKIRA.QU 4-THEME SYSTEM WITH SOFT PINK ACCENTS                            */
-/* 1. Light Theme (theme-light)                                              */
+/* AKIRA.QU THEME SYSTEM WITH DESIGN.MD GLASSNODE + SOFT PINK ACCENTS        */
+/* 1. Glassnode Institutional Research (theme-glassnode)                     */
+/*    Background: #EDEFF2 (Cool Cloud Canvas)                                */
+/*    Surface/Card: #FFFFFF dengan 1px hairline border (#DEDFE1)             */
+/*    Radius: 2px sharp rectangular silhouette                              */
+/*    Accent: Soft Pink Wash (#FDF2F8 / #F472B6 / #DB2777)                   */
+/*                                                                           */
+/* 2. Light Theme (theme-light)                                              */
 /*    Background: #F8FAFC (Slate 50)                                         */
 /*    Surface/Card: #FFFFFF dengan subtle border (#E2E8F0)                   */
 /*    Accent Soft Pink: #F472B6 (Pink 400)                                   */
 /*                                                                           */
-/* 2. Dark Theme (theme-dark - Default)                                      */
+/* 3. Dark Theme (theme-dark - Default)                                      */
 /*    Background: #0B0F19 (Deep Navy/Slate 950)                              */
 /*    Surface/Card: #1E293B (Slate 800) dengan efek glassmorphism tipis      */
 /*    Accent Soft Pink: #EC4899 (Pink 500 dengan efek glow halus)            */
 /*                                                                           */
-/* 3. Terminal Theme (theme-terminal)                                        */
+/* 4. Terminal Theme (theme-terminal)                                        */
 /*    Background: #030712 (Pitch Black)                                      */
 /*    Surface/Card: #0B0F19 bergaris border tipis hijau-pink monokromatik    */
 /*    Text/Accent: Kombinasi Cyber Pink (#FF007A) & font JetBrains Mono      */
 /*                                                                           */
-/* 4. Custom Theme (theme-custom)                                            */
+/* 5. Custom Theme (theme-custom)                                            */
 /*    Mini Color Picker: Tingkat saturasi Soft Pink & kontras background     */
 /* ========================================================================= */
 
 :root {
+  /* Design.md Glassnode Colors */
+  --color-pure-black: #000000;
+  --color-obsidian: #1a1a1a;
+  --color-graphite: #333333;
+  --color-iron: #5a5a5a;
+  --color-slate: #666666;
+  --color-steel: #808080;
+  --color-fog: #a0a0a0;
+  --color-ash: #bfbfbf;
+  --color-mist: #dedfe1;
+  --color-cloud: #edeff2;
+  --color-paper: #f7f8fa;
+  --color-white: #ffffff;
+
+  /* Soft Pink Accent System (Replacing original Glacier Tint #E2E7FC) */
+  --color-glacier-tint: #fdf2f8;
+  --color-pink-tint: #fdf2f8;
+  --color-pink-wash: rgba(244, 114, 182, 0.08);
+  --color-pink-border: #fbcfe8;
+  --color-pink-soft: #f472b6;
+  --color-pink-deep: #db2777;
+  --color-pink-glow: rgba(236, 72, 153, 0.3);
+
+  /* Glassnode 2px Radii System */
+  --radius-sm: 2px;
+  --radius-nav: 2px;
+  --radius-tags: 2px;
+  --radius-cards: 2px;
+  --radius-inputs: 2px;
+  --radius-buttons: 2px;
+
+  /* Glassnode Hairline Shadows */
+  --shadow-sm: rgba(0, 0, 0, 0.04) 0px 2px 4px 0px;
+  --shadow-sm-2: rgba(0, 0, 0, 0.04) 0px 2px 4px 0px, rgba(0, 0, 0, 0.08) 0px 8px 32px 0px;
+
+  /* Fonts */
+  --font-inter: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono-numbers: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Default theme values: Dark Theme (theme-dark) */
@@ -36,6 +79,135 @@
   --text-main: #F8FAFC;
   --text-muted: #94A3B8;
   --text-accent: #EC4899;
+}
+
+/* ========================================================================= */
+/* 0. GLASSNODE INSTITUTIONAL THEME (theme-glassnode)                         */
+/* Cool cloud canvas (#EDEFF2), pure white cards (#FFFFFF) with 1px hairline */
+/* mist border (#DEDFE1), sharp 2px radii, & subtle Soft Pink accent wash.   */
+/* ========================================================================= */
+[data-theme="theme-glassnode"],
+[data-theme="glassnode"],
+html.theme-glassnode,
+html.glassnode {
+  --bg-color: #EDEFF2;
+  --surface-color: #FFFFFF;
+  --card-color: #FFFFFF;
+  --border-color: #DEDFE1;
+  --accent-color: #F472B6;
+  --accent-rgb: 244, 114, 182;
+  --accent-hover: #EC4899;
+  --accent-glow: 0 0 8px rgba(244, 114, 182, 0.2);
+  --accent-subtle: #FDF2F8;
+  --accent-border: #FBCFE8;
+  --text-main: #1A1A1A;
+  --text-muted: #5A5A5A;
+  --text-accent: #DB2777;
+  color-scheme: light;
+}
+
+[data-theme="theme-glassnode"] body,
+html.theme-glassnode body {
+  background-color: #EDEFF2;
+  color: #1A1A1A;
+  font-family: var(--font-inter);
+}
+
+/* Glassnode 2px strict radius override for institutional feel */
+[data-theme="theme-glassnode"] .rounded-2xl,
+[data-theme="theme-glassnode"] .rounded-xl,
+[data-theme="theme-glassnode"] .rounded-lg,
+[data-theme="theme-glassnode"] .rounded-md,
+html.theme-glassnode .rounded-2xl,
+html.theme-glassnode .rounded-xl,
+html.theme-glassnode .rounded-lg {
+  border-radius: 2px !important;
+}
+
+/* Hairline borders & White Card surfaces on Glassnode */
+[data-theme="theme-glassnode"] .bg-slate-900,
+[data-theme="theme-glassnode"] .bg-\[\#0f172a\],
+[data-theme="theme-glassnode"] .bg-\[\#0b0f19\],
+[data-theme="theme-glassnode"] .bg-\[\#080c14\],
+[data-theme="theme-glassnode"] .bg-\[\#070b14\],
+[data-theme="theme-glassnode"] .bg-\[\#090d16\],
+[data-theme="theme-glassnode"] .bg-\[\#040711\],
+html.theme-glassnode .bg-\[\#0f172a\],
+html.theme-glassnode .bg-\[\#0b0f19\],
+html.theme-glassnode .bg-\[\#070b14\] {
+  background-color: #FFFFFF !important;
+  border-color: #DEDFE1 !important;
+  color: #1A1A1A;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="theme-glassnode"] .border-slate-800,
+[data-theme="theme-glassnode"] .border-slate-700,
+[data-theme="theme-glassnode"] .border-\[\#1e293b\],
+[data-theme="theme-glassnode"] .border-\[\#334155\],
+html.theme-glassnode .border-slate-800,
+html.theme-glassnode .border-\[\#1e293b\] {
+  border-color: #DEDFE1 !important;
+}
+
+/* Glassnode Text Legibility on White/Cloud Surfaces */
+[data-theme="theme-glassnode"] .text-white,
+html.theme-glassnode .text-white {
+  color: #1A1A1A !important;
+}
+
+[data-theme="theme-glassnode"] .text-slate-200,
+[data-theme="theme-glassnode"] .text-slate-300,
+html.theme-glassnode .text-slate-300 {
+  color: #333333 !important;
+}
+
+[data-theme="theme-glassnode"] .text-slate-400,
+html.theme-glassnode .text-slate-400 {
+  color: #5A5A5A !important;
+}
+
+[data-theme="theme-glassnode"] .text-slate-500,
+html.theme-glassnode .text-slate-500 {
+  color: #808080 !important;
+}
+
+/* Glassnode Soft Pink Accent Wash */
+[data-theme="theme-glassnode"] .text-cyan-300,
+[data-theme="theme-glassnode"] .text-cyan-400,
+[data-theme="theme-glassnode"] .text-cyan-500,
+html.theme-glassnode .text-cyan-400,
+html.theme-glassnode .text-cyan-500 {
+  color: #DB2777 !important;
+}
+
+[data-theme="theme-glassnode"] .border-cyan-400,
+[data-theme="theme-glassnode"] .border-cyan-500,
+[data-theme="theme-glassnode"] .border-cyan-500\/40,
+[data-theme="theme-glassnode"] .border-cyan-500\/30,
+[data-theme="theme-glassnode"] .border-cyan-500\/20,
+html.theme-glassnode .border-cyan-400 {
+  border-color: #FBCFE8 !important;
+}
+
+[data-theme="theme-glassnode"] .bg-cyan-500,
+[data-theme="theme-glassnode"] .bg-cyan-600,
+html.theme-glassnode .bg-cyan-500 {
+  background-color: #1A1A1A !important;
+  color: #FFFFFF !important;
+  border-radius: 2px !important;
+}
+
+[data-theme="theme-glassnode"] .bg-cyan-500\/10,
+[data-theme="theme-glassnode"] .bg-cyan-500\/15,
+[data-theme="theme-glassnode"] .bg-cyan-500\/20,
+[data-theme="theme-glassnode"] .bg-cyan-500\/25,
+[data-theme="theme-glassnode"] .bg-cyan-950\/40,
+[data-theme="theme-glassnode"] .bg-cyan-950\/20,
+html.theme-glassnode .bg-cyan-500\/10 {
+  background-color: #FDF2F8 !important;
+  color: #DB2777 !important;
+  border-color: #FBCFE8 !important;
 }
 
 /* ========================================================================= */
@@ -391,13 +563,31 @@ html.theme-custom .bg-cyan-500 {
   box-shadow: 0 0 12px var(--custom-accent-subtle, rgba(236, 72, 153, 0.35));
 }
 
-[data-theme="theme-custom"] .bg-cyan-500\/10,
-[data-theme="theme-custom"] .bg-cyan-500\/15,
-[data-theme="theme-custom"] .bg-cyan-500\/20,
-[data-theme="theme-custom"] .bg-cyan-500\/25,
-[data-theme="theme-custom"] .bg-cyan-950\/40,
-[data-theme="theme-custom"] .bg-cyan-950\/20,
-[data-theme="custom"] .bg-cyan-500\/10,
-html.theme-custom .bg-cyan-500\/10 {
-  background-color: var(--custom-accent-subtle, rgba(236, 72, 153, 0.15)) !important;
+/* ========================================================================= */
+/* GLOBAL INSTITUTIONAL 2PX RADIUS & HAIRLINE SYSTEM (DESIGN.MD)             */
+/* ========================================================================= */
+.gn-card,
+[data-theme] .rounded-2xl,
+[data-theme] .rounded-xl,
+html.theme-glassnode .rounded-2xl,
+html.theme-glassnode .rounded-xl,
+html.theme-dark .rounded-2xl,
+html.theme-dark .rounded-xl,
+html.theme-light .rounded-2xl,
+html.theme-light .rounded-xl,
+html.theme-terminal .rounded-2xl,
+html.theme-terminal .rounded-xl {
+  border-radius: 2px !important;
 }
+
+.gn-pill,
+[data-theme] .rounded-full:not(.avatar-circle):not(.status-dot),
+html.theme-glassnode .rounded-full:not(.avatar-circle):not(.status-dot) {
+  border-radius: 2px !important;
+}
+
+.avatar-circle,
+.status-dot {
+  border-radius: 9999px !important;
+}
+

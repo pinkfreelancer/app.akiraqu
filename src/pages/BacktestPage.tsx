@@ -439,13 +439,13 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         <div className="w-full mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/20 shrink-0">
+              <div className="w-9 h-9 rounded-[2px] bg-pink-500/15 border border-pink-500/30 flex items-center justify-center text-pink-400 shrink-0">
                 <BarChart3 className="w-5 h-5" />
               </div>
               <div>
                 <h1 className="text-lg sm:text-xl font-black tracking-tight flex items-center gap-2">
                   <span>{isId ? 'Laboratorium Backtest Kuantitatif' : 'Quantitative Backtest Lab'}</span>
-                  <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-bold">
+                  <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-[2px] bg-pink-500/10 border border-pink-500/30 text-pink-400 font-bold">
                     Institutional v3.5 • Monte Carlo
                   </span>
                 </h1>
@@ -463,10 +463,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             <button
               onClick={() => handleExecuteBacktest()}
               disabled={isLoading}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-md min-h-[38px] ${
+              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-[2px] text-xs font-bold transition-all cursor-pointer shadow-xs min-h-[38px] ${
                 isLoading
                   ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 hover:brightness-110 active:scale-98 shadow-cyan-500/20 font-black'
+                  : 'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white active:scale-98 font-bold'
               }`}
             >
               <Play className={`w-3.5 h-3.5 fill-current ${isLoading ? 'animate-spin' : ''}`} />

@@ -298,9 +298,9 @@ Catatan: ${sig.notes}`;
 
       {/* Telegram Dispatch Success Notification */}
       {telegramNotificationSent && (
-        <div className="p-3 bg-pink-950/80 border border-pink-500/50 rounded-xl text-pink-200 font-mono text-xs flex items-center justify-between animate-in fade-in">
+        <div className="p-3 bg-pink-950/80 border border-pink-500/50 rounded-[2px] text-pink-200 font-mono text-xs flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Send className="w-4 h-4 text-pink-400 animate-bounce" />
+            <Send className="w-4 h-4 text-pink-400" />
             <span>
               Sinyal <strong>{telegramNotificationSent}</strong> berhasil disiarkan ke Telegram Webhook Channel dengan verifikasi audit lengkap!
             </span>

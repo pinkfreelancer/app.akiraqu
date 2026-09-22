@@ -153,19 +153,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             className="flex items-center space-x-3 cursor-pointer group select-none"
           >
             <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500/20 via-purple-600/10 to-pink-500/30 border border-pink-500/40 flex items-center justify-center shadow-[0_0_18px_rgba(244,114,182,0.25)] group-hover:shadow-[0_0_24px_rgba(244,114,182,0.45)] transition-all">
+              <div className="w-10 h-10 rounded-[2px] bg-pink-500/10 border border-pink-500/40 flex items-center justify-center transition-all">
                 <AkiraQuLogo size={26} theme={isDark ? 'dark' : 'light'} variant="symbol" />
               </div>
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-400 rounded-full animate-ping opacity-75 pointer-events-none" />
               <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-500 rounded-full pointer-events-none" />
             </div>
 
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <span className="text-xl font-black tracking-wider bg-gradient-to-r from-white via-slate-100 to-pink-300 bg-clip-text text-transparent font-display">
+                <span className={`text-xl font-black tracking-wider font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   AKIRAQU
                 </span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded font-mono font-bold bg-pink-500/15 text-pink-400 border border-pink-500/30">
+                <span className="text-[10px] px-1.5 py-0.5 rounded-[2px] font-mono font-bold bg-pink-500/15 text-pink-400 border border-pink-500/30">
                   CYBORG INTELLIGENCE
                 </span>
               </div>
@@ -187,7 +186,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               Akira AI
             </a>
             <a href="#themes" className={`transition-colors ${isDark ? 'text-slate-400 hover:text-pink-400' : 'text-slate-600 hover:text-pink-600'}`}>
-              {isId ? '4 Tema' : 'Themes'}
+              {isId ? '5 Tema' : '5 Themes'}
             </a>
           </nav>
 
@@ -196,7 +195,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Language Toggle */}
             <button
               onClick={() => onSetLang(isId ? 'en' : 'id')}
-              className={`px-2 sm:px-2.5 py-1.5 rounded-lg border text-xs font-mono font-bold transition-colors cursor-pointer ${
+              className={`px-2 sm:px-2.5 py-1.5 rounded-[2px] border text-xs font-mono font-bold transition-colors cursor-pointer ${
                 isDark ? 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-pink-400' : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600'
               }`}
               title={isId ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
@@ -207,7 +206,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Dark / Light Toggle */}
             <button
               onClick={onToggleTheme}
-              className={`p-1.5 sm:p-2 rounded-lg border transition-colors cursor-pointer ${
+              className={`p-1.5 sm:p-2 rounded-[2px] border transition-colors cursor-pointer ${
                 isDark ? 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-pink-400' : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600'
               }`}
               title={isDark ? 'Mode Terang' : 'Dark Mode'}
@@ -218,7 +217,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Launch App CTA */}
             <button
               onClick={() => onNavigateToTerminal()}
-              className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-white font-mono font-bold text-xs sm:text-sm shadow-[0_0_20px_rgba(236,72,153,0.35)] hover:shadow-[0_0_28px_rgba(236,72,153,0.55)] transition-all duration-300 flex items-center space-x-1.5 sm:space-x-2 cursor-pointer active:scale-95"
+              className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-[2px] bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-mono font-bold text-xs sm:text-sm transition-all duration-200 flex items-center space-x-1.5 sm:space-x-2 cursor-pointer active:scale-95"
             >
               <span className="hidden xs:inline sm:inline">{isId ? 'Buka Terminal' : 'Launch Terminal'}</span>
               <span className="xs:hidden sm:hidden font-mono text-xs font-bold">App</span>
@@ -228,7 +227,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Mobile Hamburger Menu Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`md:hidden p-2 rounded-lg border transition-colors cursor-pointer ${
+              className={`md:hidden p-2 rounded-[2px] border transition-colors cursor-pointer ${
                 isDark ? 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-pink-400' : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600'
               }`}
               aria-label="Toggle navigation menu"
@@ -247,30 +246,30 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <a
                 href="#features"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`py-2 px-3 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-800/60 text-slate-300' : 'hover:bg-slate-100 text-slate-700'}`}
+                className={`py-2 px-3 rounded-[2px] transition-colors ${isDark ? 'hover:bg-slate-800/60 text-slate-300' : 'hover:bg-slate-100 text-slate-700'}`}
               >
                 {isId ? 'Fitur & Analisis' : 'Features & Analysis'}
               </a>
               <a
                 href="#personas"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`py-2 px-3 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-800/60 text-slate-300' : 'hover:bg-slate-100 text-slate-700'}`}
+                className={`py-2 px-3 rounded-[2px] transition-colors ${isDark ? 'hover:bg-slate-800/60 text-slate-300' : 'hover:bg-slate-100 text-slate-700'}`}
               >
                 {isId ? 'Persona Trading' : 'Trading Personas'}
               </a>
               <a
                 href="#ai-core"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`py-2 px-3 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-800/60 text-slate-300' : 'hover:bg-slate-100 text-slate-700'}`}
+                className={`py-2 px-3 rounded-[2px] transition-colors ${isDark ? 'hover:bg-slate-800/60 text-slate-300' : 'hover:bg-slate-100 text-slate-700'}`}
               >
                 Akira AI Cybernetic
               </a>
               <a
                 href="#themes"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`py-2 px-3 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-800/60 text-slate-300' : 'hover:bg-slate-100 text-slate-700'}`}
+                className={`py-2 px-3 rounded-[2px] transition-colors ${isDark ? 'hover:bg-slate-800/60 text-slate-300' : 'hover:bg-slate-100 text-slate-700'}`}
               >
-                {isId ? '4 Tema Engine' : '4 Engine Themes'}
+                {isId ? '5 Tema Engine' : '5 Engine Themes'}
               </a>
             </div>
           </div>
@@ -279,13 +278,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* 2. HERO SECTION */}
       <section className="relative pt-36 pb-20 sm:pt-44 sm:pb-28 overflow-hidden">
-        {/* Background Ambient Glow Soft Pink */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] h-[360px] bg-pink-500/12 blur-[140px] rounded-full pointer-events-none" />
-        <div className="absolute top-1/3 left-1/4 w-[380px] h-[260px] bg-purple-600/10 blur-[130px] rounded-full pointer-events-none" />
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           {/* Cybernetic Intelligence Pill Badge */}
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-300 text-xs font-mono font-semibold mb-6 shadow-[0_0_15px_rgba(244,114,182,0.15)]">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-[2px] bg-pink-500/10 border border-pink-500/30 text-pink-300 text-xs font-mono font-semibold mb-6">
             <Zap className="w-3.5 h-3.5 text-pink-400" />
             <span>Precision Crypto Analytics, Guided by Cybernetic Intelligence.</span>
           </div>
@@ -295,14 +290,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {isId ? (
               <>
                 Menghubungkan Intuisi & Teknologi untuk{' '}
-                <span className="bg-gradient-to-r from-pink-400 via-rose-300 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(244,114,182,0.3)]">
+                <span className="text-pink-400">
                   Kesuksesan Finansial
                 </span>
               </>
             ) : (
               <>
                 Bridging Intuition & Technology for{' '}
-                <span className="bg-gradient-to-r from-pink-400 via-rose-300 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(244,114,182,0.3)]">
+                <span className="text-pink-400">
                   Crypto Success
                 </span>
               </>
@@ -322,7 +317,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5">
             <button 
               onClick={() => onNavigateToTerminal()} 
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-mono font-bold text-sm shadow-[0_0_30px_rgba(236,72,153,0.45)] hover:shadow-[0_0_40px_rgba(236,72,153,0.65)] transition-all flex items-center justify-center space-x-3 cursor-pointer active:scale-98"
+              className="w-full sm:w-auto px-8 py-4 rounded-[2px] bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-mono font-bold text-sm transition-all flex items-center justify-center space-x-3 cursor-pointer active:scale-98"
             >
               <span>{isId ? 'Jelajahi Akiraqu' : 'Explore Akiraqu'}</span>
               <ArrowRight className="w-4 h-4" />
@@ -330,10 +325,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             <button 
               onClick={() => onNavigateToTerminal('ticker')} 
-              className={`w-full sm:w-auto px-8 py-4 rounded-xl border font-mono font-bold text-sm transition-all flex items-center justify-center space-x-2.5 cursor-pointer active:scale-98 ${
+              className={`w-full sm:w-auto px-8 py-4 rounded-[2px] border font-mono font-bold text-sm transition-all flex items-center justify-center space-x-2.5 cursor-pointer active:scale-98 ${
                 isDark 
-                  ? 'bg-slate-900/90 hover:bg-slate-800/90 text-slate-200 border-slate-800 hover:border-pink-500/40 shadow-lg shadow-black/40' 
-                  : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-md'
+                  ? 'bg-slate-900/90 hover:bg-slate-800/90 text-slate-200 border-slate-800 hover:border-pink-500/40 shadow-sm shadow-black/40' 
+                  : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-sm'
               }`}
             >
               <Activity className="w-4 h-4 text-pink-400" />
@@ -341,12 +336,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </button>
           </div>
 
-          {/* Hero Graphic: Visual Abstract / Glow Soft Pink Cyborg Hand Interface */}
+          {/* Hero Graphic: Visual Abstract / Soft Pink Cyborg Hand Interface */}
           <div className="mt-14 relative max-w-4xl mx-auto">
-            <div className={`p-4 sm:p-6 rounded-3xl border transition-all relative overflow-hidden backdrop-blur-xl shadow-2xl ${
+            <div className={`p-4 sm:p-6 rounded-[2px] border transition-all relative overflow-hidden ${
               isDark 
-                ? 'bg-[#0D1322]/90 border-pink-500/30 shadow-[0_0_60px_rgba(244,114,182,0.18)]' 
-                : 'bg-white/95 border-pink-200 shadow-slate-300/60'
+                ? 'bg-[#0D1322] border-pink-500/30 shadow-xl' 
+                : 'bg-white border-pink-200 shadow-md shadow-slate-200/50'
             }`}>
               {/* Soft Pink decorative top accent line */}
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 via-rose-400 to-purple-500" />
@@ -369,7 +364,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
               {/* Graphic Body: Interactive Data Teaser */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 text-left">
-                <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-900/80 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
+                <div className={`p-4 rounded-[2px] border ${isDark ? 'bg-slate-900/80 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
                   <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
                     <span>ASSET BIAS</span>
                     <span className="text-emerald-400 font-bold">BULLISH 84%</span>
@@ -381,7 +376,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </div>
                 </div>
 
-                <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-900/80 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
+                <div className={`p-4 rounded-[2px] border ${isDark ? 'bg-slate-900/80 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
                   <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
                     <span>CYBORG GUIDANCE</span>
                     <span className="text-pink-400 font-bold">OPTIMAL EDGE</span>
@@ -394,7 +389,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </div>
                 </div>
 
-                <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-900/80 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
+                <div className={`p-4 rounded-[2px] border ${isDark ? 'bg-slate-900/80 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
                   <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
                     <span>EXECUTION ENGINE</span>
                     <span className="text-cyan-400 font-bold">READY</span>
@@ -404,7 +399,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </div>
                   <button 
                     onClick={() => onNavigateToTerminal('ticker')}
-                    className="mt-2 w-full py-1.5 rounded-lg bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 border border-pink-500/40 text-[11px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors"
+                    className="mt-2 w-full py-1.5 rounded-[2px] bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 border border-pink-500/40 text-[11px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors"
                   >
                     <span>{isId ? 'Akses Layar Utama' : 'Open Main Screen'}</span>
                     <ChevronRight className="w-3.5 h-3.5" />
@@ -426,7 +421,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               const IconComp = metric.icon;
               return (
                 <div key={idx} className="flex items-center space-x-3.5 group">
-                  <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/25 flex items-center justify-center text-pink-400 shrink-0 group-hover:scale-105 transition-transform">
+                  <div className="w-10 h-10 rounded-[2px] bg-pink-500/10 border border-pink-500/25 flex items-center justify-center text-pink-400 shrink-0 group-hover:scale-105 transition-transform">
                     <IconComp className="w-5 h-5" />
                   </div>
                   <div className="flex flex-col">
@@ -453,7 +448,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-mono font-bold mb-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[2px] bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-mono font-bold mb-3">
               <Compass className="w-3.5 h-3.5" />
               <span>{isId ? 'Sistem 3 Persona Kuantitatif' : '3 Persona Architecture'}</span>
             </div>
@@ -472,9 +467,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <button
                   key={p.id}
                   onClick={() => setActivePersona(p.id)}
-                  className={`px-4 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer ${
+                  className={`px-4 py-2 rounded-[2px] text-xs font-mono font-bold border transition-all cursor-pointer ${
                     activePersona === p.id
-                      ? 'bg-pink-500 text-white border-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.35)]'
+                      ? 'bg-pink-500 text-white border-pink-400 shadow-xs'
                       : isDark
                       ? 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
                       : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900'
@@ -495,11 +490,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div
                   key={persona.id}
                   onClick={() => setActivePersona(persona.id)}
-                  className={`p-6 sm:p-8 rounded-2xl border transition-all duration-300 relative flex flex-col justify-between group cursor-pointer ${
+                  className={`p-6 sm:p-8 rounded-[2px] border transition-all duration-200 relative flex flex-col justify-between group cursor-pointer ${
                     isSelected
                       ? isDark
-                        ? 'bg-slate-900/90 border-pink-500/60 shadow-[0_0_30px_rgba(244,114,182,0.2)]'
-                        : 'bg-white border-pink-500 shadow-xl shadow-pink-500/10'
+                        ? 'bg-slate-900/90 border-pink-500'
+                        : 'bg-white border-pink-500 shadow-md shadow-pink-500/10'
                       : isDark
                       ? 'bg-slate-900/50 border-slate-800/80 hover:border-pink-500/30'
                       : 'bg-slate-50 border-slate-200 hover:border-pink-300'
@@ -508,12 +503,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <div>
                     <div className="flex items-center justify-between mb-6">
                       <div 
-                        className="w-12 h-12 rounded-xl border flex items-center justify-center transition-transform group-hover:scale-110"
+                        className="w-12 h-12 rounded-[2px] border flex items-center justify-center transition-transform group-hover:scale-110"
                         style={{ backgroundColor: `${persona.accentGlow}`, borderColor: 'rgba(244,114,182,0.3)' }}
                       >
                         <Icon className="w-6 h-6 text-pink-400" />
                       </div>
-                      <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-full border bg-gradient-to-r ${persona.badgeColor}`}>
+                      <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-[2px] border bg-gradient-to-r ${persona.badgeColor}`}>
                         {persona.badge}
                       </span>
                     </div>
@@ -557,13 +552,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <section id="ai-core" className={`py-24 border-b transition-colors relative overflow-hidden ${
         isDark ? 'bg-[#0A0E1A] border-slate-800/80' : 'bg-slate-50 border-slate-200'
       }`}>
-        <div className="absolute top-1/2 left-0 w-96 h-96 bg-pink-500/10 blur-[150px] rounded-full pointer-events-none" />
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left Column: Philosophical & Narrative Explanation */}
             <div className="lg:col-span-6 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-mono font-bold">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-[2px] bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-mono font-bold">
                 <Bot className="w-4 h-4" />
                 <span>AKIRA AI // INTELLIGENT COMPANION</span>
               </div>
@@ -572,14 +565,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 {isId ? (
                   <>
                     Menerjemahkan Kerumitan Pasar Menjadi{' '}
-                    <span className="bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
+                    <span className="text-pink-400">
                       Wawasan Pasti
                     </span>
                   </>
                 ) : (
                   <>
                     Translating Market Chaos Into{' '}
-                    <span className="bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
+                    <span className="text-pink-400">
                       Actionable Clarity
                     </span>
                   </>
@@ -593,8 +586,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-200'}`}>
-                  <div className="w-8 h-8 rounded-lg bg-pink-500/15 text-pink-400 flex items-center justify-center mb-2">
+                <div className={`p-4 rounded-[2px] border ${isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-200'}`}>
+                  <div className="w-8 h-8 rounded-[2px] bg-pink-500/15 text-pink-400 flex items-center justify-center mb-2">
                     <Sparkles className="w-4 h-4" />
                   </div>
                   <h4 className="text-xs font-mono font-bold text-white mb-1">
@@ -605,8 +598,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </p>
                 </div>
 
-                <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-200'}`}>
-                  <div className="w-8 h-8 rounded-lg bg-purple-500/15 text-purple-400 flex items-center justify-center mb-2">
+                <div className={`p-4 rounded-[2px] border ${isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-200'}`}>
+                  <div className="w-8 h-8 rounded-[2px] bg-purple-500/15 text-purple-400 flex items-center justify-center mb-2">
                     <Lock className="w-4 h-4" />
                   </div>
                   <h4 className="text-xs font-mono font-bold text-white mb-1">
@@ -621,7 +614,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="pt-2">
                 <button
                   onClick={() => onNavigateToTerminal('output')}
-                  className="px-6 py-3 rounded-xl bg-pink-500/15 hover:bg-pink-500/25 text-pink-300 border border-pink-500/40 text-xs font-mono font-bold flex items-center gap-2 cursor-pointer transition-colors"
+                  className="px-6 py-3 rounded-[2px] bg-pink-500/15 hover:bg-pink-500/25 text-pink-300 border border-pink-500/40 text-xs font-mono font-bold flex items-center gap-2 cursor-pointer transition-colors"
                 >
                   <span>{isId ? 'Coba AI Analysis di Terminal' : 'Try AI Analysis in Terminal'}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -631,15 +624,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             {/* Right Column: AI Terminal Chat Preview */}
             <div className="lg:col-span-6">
-              <div className={`rounded-2xl border p-5 sm:p-6 shadow-2xl relative overflow-hidden backdrop-blur-xl ${
+              <div className={`rounded-[2px] border p-5 sm:p-6 relative overflow-hidden ${
                 isDark 
-                  ? 'bg-[#0E1424] border-pink-500/30 shadow-[0_0_50px_rgba(244,114,182,0.15)]' 
-                  : 'bg-white border-pink-200 shadow-slate-300'
+                  ? 'bg-[#0E1424] border-pink-500/30 shadow-xl shadow-black/40' 
+                  : 'bg-white border-pink-200 shadow-md shadow-slate-200/50'
               }`}>
                 {/* AI Header */}
                 <div className="flex items-center justify-between pb-4 border-b border-slate-800/80 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-pink-500/30">
+                    <div className="w-9 h-9 rounded-[2px] bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-pink-500/30">
                       <Cpu className="w-5 h-5" />
                     </div>
                     <div>
@@ -650,7 +643,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       </div>
                     </div>
                   </div>
-                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-pink-500/15 text-pink-300 border border-pink-500/30 font-bold">
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-[2px] bg-pink-500/15 text-pink-300 border border-pink-500/30 font-bold">
                     BTC ANALYSIS
                   </span>
                 </div>
@@ -658,7 +651,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 {/* Simulated Conversation */}
                 <div className="space-y-3.5 text-xs font-mono">
                   {/* User query */}
-                  <div className={`p-3 rounded-xl border text-left ${
+                  <div className={`p-3 rounded-[2px] border text-left ${
                     isDark ? 'bg-slate-900/90 border-slate-800 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-800'
                   }`}>
                     <span className="text-pink-400 font-bold mr-1">Trader:</span>
@@ -666,7 +659,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </div>
 
                   {/* AI response */}
-                  <div className={`p-4 rounded-xl border text-left space-y-2 ${
+                  <div className={`p-4 rounded-[2px] border text-left space-y-2 ${
                     isDark ? 'bg-pink-950/20 border-pink-500/30 text-slate-200' : 'bg-pink-50/70 border-pink-200 text-slate-900'
                   }`}>
                     <div className="flex items-center gap-1.5 text-pink-400 font-bold text-[11px]">
@@ -679,13 +672,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         : 'Detected strong positive CVD accumulation (+318 BTC) in the $67,800 - $68,200 range. Confluence matrix scores 8.2/10 (Strong Bullish). Immediate short liquidation pool rests at $69,450.'}
                     </p>
                     <div className="pt-2 flex flex-wrap items-center gap-2 text-[10px] font-bold">
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                      <span className="px-2 py-0.5 rounded-[2px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                         Stop-Loss: $67,400
                       </span>
-                      <span className="px-2 py-0.5 rounded bg-pink-500/20 text-pink-400 border border-pink-500/30">
+                      <span className="px-2 py-0.5 rounded-[2px] bg-pink-500/20 text-pink-400 border border-pink-500/30">
                         Target 1: $69,400
                       </span>
-                      <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                      <span className="px-2 py-0.5 rounded-[2px] bg-purple-500/20 text-purple-400 border border-purple-500/30">
                         R:R 1:3.4
                       </span>
                     </div>
@@ -697,37 +690,37 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* 6. THEME SELECTOR PREVIEW (4-Engine Themes: Light, Dark, Terminal, Custom) */}
+      {/* 6. THEME SELECTOR PREVIEW (5-Engine Themes: Glassnode, Light, Dark, Terminal, Custom) */}
       <section id="themes" className={`py-24 border-b transition-colors ${
         isDark ? 'bg-[#080C16] border-slate-800/80' : 'bg-white border-slate-200'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-3xl mx-auto mb-14">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-mono font-bold mb-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[2px] bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-mono font-bold mb-3">
               <Sliders className="w-3.5 h-3.5" />
-              <span>{isId ? 'Arsitektur 4 Mesin Tema' : '4-Engine Visual Themes'}</span>
+              <span>{isId ? 'Arsitektur 5 Mesin Tema' : '5-Engine Visual Themes'}</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-display">
               {isId ? 'Dirancang untuk Kenyamanan Mata Ekstrem' : 'Engineered for Optical Comfort'}
             </h2>
             <p className={`mt-4 text-sm sm:text-base leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
               {isId
-                ? 'Pilih estetika visual Anda dari Light Theme (#F8FAFC + aksen Soft Pink #F472B6), Dark Theme (#0B0F19 + aksen #EC4899), Terminal Theme pitch black (#030712 + #FF007A), hingga kustomisasi Color Picker kustom.'
-                : 'Choose your visual rhythm across Light Theme (Slate 50 + Soft Pink), Dark Theme (Slate 950 + Glow Pink), Terminal Theme (Pitch Black + Monospace), or bespoke Custom Theme with color picker.'}
+                ? 'Pilih estetika visual Anda dari Glassnode Research Console (#EDEFF2 + Soft Pink #F472B6), Light Theme (#F8FAFC), Dark Theme (#0B0F19), Terminal Theme (#030712), hingga kustomisasi Color Picker kustom.'
+                : 'Choose your visual rhythm across Glassnode Research Console (Cloud Slate + Soft Pink), Light Theme, Dark Theme, Terminal Theme, or bespoke Custom Theme with color picker.'}
             </p>
           </div>
 
           {/* Theme Option Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {THEME_OPTIONS.map((th) => {
               const isSelected = selectedThemePreview === th.id;
               return (
                 <div
                   key={th.id}
                   onClick={() => setSelectedThemePreview(th.id)}
-                  className={`p-5 rounded-2xl border text-left transition-all duration-200 cursor-pointer relative flex flex-col justify-between ${
+                  className={`p-4 rounded-[2px] border text-left transition-all duration-200 cursor-pointer relative flex flex-col justify-between ${
                     isSelected
-                      ? 'border-pink-500 shadow-[0_0_25px_rgba(244,114,182,0.25)] scale-[1.02]'
+                      ? 'border-pink-500 bg-pink-500/5'
                       : isDark
                       ? 'bg-slate-900/60 border-slate-800 hover:border-pink-500/30'
                       : 'bg-slate-50 border-slate-200 hover:border-pink-300'
@@ -738,33 +731,33 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 >
                   <div>
                     {/* Color Swatch Circle Preview */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-1.5">
                         <span 
-                          className="w-5 h-5 rounded-full border border-black/20 shadow-xs"
+                          className="w-4 h-4 rounded-full border border-black/20 shadow-xs"
                           style={{ backgroundColor: th.accentColor }} 
                         />
                         <span 
-                          className="w-5 h-5 rounded-full border border-black/20 shadow-xs"
+                          className="w-4 h-4 rounded-full border border-black/20 shadow-xs"
                           style={{ backgroundColor: th.bgColor }} 
                         />
                       </div>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded font-bold bg-pink-500/10 text-pink-400 border border-pink-500/30">
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-[2px] font-bold bg-pink-500/10 text-pink-400 border border-pink-500/30">
                         {th.badgeLabel}
                       </span>
                     </div>
 
-                    <h3 className={`text-base font-bold font-display mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    <h3 className={`text-sm font-bold font-display mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       {isId ? th.nameId : th.name}
                     </h3>
-                    <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                    <p className="text-[11px] text-slate-400 leading-relaxed mb-3">
                       {isId ? th.conceptId : th.concept}
                     </p>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-800/40 flex items-center justify-between text-[11px] font-mono text-pink-400 font-bold">
-                    <span>{isSelected ? (isId ? 'Tema Aktif' : 'Active Theme') : (isId ? 'Pilih Tema' : 'Select Theme')}</span>
-                    <CheckCircle2 className={`w-4 h-4 ${isSelected ? 'opacity-100' : 'opacity-40'}`} />
+                  <div className="pt-2.5 border-t border-slate-800/40 flex items-center justify-between text-[10px] font-mono text-pink-400 font-bold">
+                    <span>{isSelected ? (isId ? 'Tema Aktif' : 'Active') : (isId ? 'Pilih' : 'Select')}</span>
+                    <CheckCircle2 className={`w-3.5 h-3.5 ${isSelected ? 'opacity-100' : 'opacity-40'}`} />
                   </div>
                 </div>
               );
@@ -774,7 +767,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="mt-12">
             <button
               onClick={() => onNavigateToTerminal()}
-              className="px-8 py-4 rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-white font-mono font-bold text-sm shadow-[0_0_25px_rgba(236,72,153,0.4)] hover:shadow-[0_0_35px_rgba(236,72,153,0.6)] transition-all cursor-pointer inline-flex items-center gap-2"
+              className="px-8 py-4 rounded-[2px] bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-mono font-bold text-sm transition-all cursor-pointer inline-flex items-center gap-2"
             >
               <span>{isId ? 'Terapkan Tema & Buka Terminal' : 'Apply Theme & Open Terminal'}</span>
               <ArrowRight className="w-4 h-4" />
@@ -791,7 +784,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
             {/* Brand with Cyborg Soft Pink Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-pink-500/15 border border-pink-500/30 flex items-center justify-center text-pink-400">
+              <div className="w-8 h-8 rounded-[2px] bg-pink-500/15 border border-pink-500/30 flex items-center justify-center text-pink-400">
                 <AkiraQuLogo size={20} theme={isDark ? 'dark' : 'light'} variant="symbol" />
               </div>
               <div className="flex flex-col">

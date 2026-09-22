@@ -76,11 +76,7 @@ export const PendingAnalysisCard: React.FC<PendingAnalysisCardProps> = ({
         <button
           onClick={onTriggerAnalyze}
           disabled={isLoading}
-          className={`w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 ${
-            isDark
-              ? 'bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-500 text-slate-950 hover:brightness-110 shadow-cyan-500/25'
-              : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-cyan-600/25'
-          }`}
+          className="w-full sm:w-auto px-6 py-3 rounded-[2px] font-bold text-sm transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white"
         >
           <Zap className={`w-4 h-4 fill-current ${isLoading ? 'animate-spin' : ''}`} />
           <span>
@@ -93,7 +89,7 @@ export const PendingAnalysisCard: React.FC<PendingAnalysisCardProps> = ({
         {onGoToChart && (
           <button
             onClick={onGoToChart}
-            className={`w-full sm:w-auto px-5 py-3 rounded-xl font-semibold text-sm border transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`w-full sm:w-auto px-5 py-3 rounded-[2px] font-semibold text-sm border transition-all flex items-center justify-center gap-2 cursor-pointer ${
               isDark
                 ? 'border-slate-700 hover:bg-slate-800 text-slate-300'
                 : 'border-slate-300 hover:bg-slate-100 text-slate-700'

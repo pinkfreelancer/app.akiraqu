@@ -72,32 +72,28 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     <div className={`min-h-[calc(100vh-60px)] flex flex-col justify-center items-center px-4 py-8 relative overflow-hidden ${
       isDark ? 'bg-[#070b14] text-slate-100' : 'bg-slate-50 text-slate-900'
     }`}>
-      {/* Ambient background glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-[350px] h-[250px] bg-blue-600/10 blur-[100px] rounded-full pointer-events-none" />
-
       <div className="w-full max-w-xl relative z-10">
         {/* Navigation Breadcrumb / Back button */}
         <div className="flex items-center justify-between mb-4 text-xs font-mono">
           <button
             onClick={onNavigateToLanding}
             className={`flex items-center gap-1.5 transition-colors cursor-pointer ${
-              isDark ? 'text-slate-400 hover:text-cyan-400' : 'text-slate-600 hover:text-cyan-600'
+              isDark ? 'text-slate-400 hover:text-pink-400' : 'text-slate-600 hover:text-pink-600'
             }`}
           >
             ← {lang === 'id' ? 'Kembali ke Landing Page' : 'Back to Landing Page'}
           </button>
-          <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${
-            isDark ? 'bg-cyan-950/40 border-cyan-500/30 text-cyan-300' : 'bg-cyan-50 border-cyan-200 text-cyan-800'
+          <span className={`px-2.5 py-1 rounded-[2px] text-[11px] font-bold border ${
+            isDark ? 'bg-pink-950/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 border-pink-200 text-pink-800'
           }`}>
             Firebase Auth Cloud Sync
           </span>
         </div>
 
         {/* Main Card */}
-        <div className={`p-6 sm:p-8 rounded-2xl border shadow-xl backdrop-blur-md ${
+        <div className={`p-6 sm:p-8 rounded-[2px] border shadow-xl backdrop-blur-md ${
           isDark 
-            ? 'bg-[#0b101f]/90 border-[#1e293b] shadow-black/40' 
+            ? 'bg-[#0b101f]/90 border-slate-800 shadow-black/40' 
             : 'bg-white/95 border-slate-200 shadow-slate-200/50'
         }`}>
           {/* Header & Logo */}
@@ -115,18 +111,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           {/* If already authenticated */}
           {isAuthenticated && user ? (
             <div className="space-y-5">
-              <div className={`p-4 rounded-xl border flex items-center gap-3.5 ${
+              <div className={`p-4 rounded-[2px] border flex items-center gap-3.5 ${
                 isDark ? 'bg-emerald-950/20 border-emerald-500/30' : 'bg-emerald-50 border-emerald-200'
               }`}>
                 {user.photoURL ? (
                   <img
                     src={user.photoURL}
                     alt={user.displayName || 'User'}
-                    className="w-12 h-12 rounded-full border-2 border-emerald-500/40 object-cover shrink-0"
+                    className="w-12 h-12 avatar-circle border-2 border-emerald-500/40 object-cover shrink-0"
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-lg border border-emerald-500/40 shrink-0">
+                  <div className="w-12 h-12 avatar-circle bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-lg border border-emerald-500/40 shrink-0">
                     {user.displayName?.charAt(0).toUpperCase() || 'U'}
                   </div>
                 )}
@@ -137,7 +133,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                       {lang === 'id' ? 'Sedang Masuk' : 'Signed In'}
                     </span>
                     {user.isAnonymous && (
-                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-400 font-mono font-bold">
+                      <span className="text-[10px] px-1.5 py-0.2 rounded-[2px] bg-amber-500/20 text-amber-400 font-mono font-bold">
                         DEMO / GUEST
                       </span>
                     )}
@@ -154,14 +150,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={onNavigateToTerminal}
-                  className="flex-1 py-3 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-xl font-bold font-mono text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 cursor-pointer transition-all active:scale-[0.99]"
+                  className="flex-1 py-3 px-4 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-[2px] font-bold font-mono text-xs flex items-center justify-center gap-2 shadow-lg shadow-pink-500/20 cursor-pointer transition-all active:scale-[0.99]"
                 >
                   <span>{lang === 'id' ? 'Lanjut ke Terminal' : 'Proceed to Terminal'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
                 <button
                   onClick={logout}
-                  className={`py-3 px-4 rounded-xl font-semibold font-mono text-xs flex items-center justify-center gap-2 border cursor-pointer transition-colors ${
+                  className={`py-3 px-4 rounded-[2px] font-semibold font-mono text-xs flex items-center justify-center gap-2 border cursor-pointer transition-colors ${
                     isDark
                       ? 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300'
                       : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
@@ -176,7 +172,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             /* Login Form / Options */
             <div className="space-y-5">
               {error && (
-                <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono flex items-start gap-2.5">
+                <div className="p-3.5 rounded-[2px] bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono flex items-start gap-2.5">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold block">{lang === 'id' ? 'Pemberitahuan Login' : 'Login Notice'}</span>
@@ -190,7 +186,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 id="btn-google-login"
                 onClick={handleGoogleSignIn}
                 disabled={isLoading}
-                className={`w-full py-3.5 px-4 rounded-xl font-bold text-xs font-mono flex items-center justify-center gap-3 border shadow-md transition-all cursor-pointer active:scale-[0.99] ${
+                className={`w-full py-3.5 px-4 rounded-[2px] font-bold text-xs font-mono flex items-center justify-center gap-3 border shadow-md transition-all cursor-pointer active:scale-[0.99] ${
                   isDark
                     ? 'bg-white hover:bg-slate-100 text-slate-900 border-slate-200'
                     : 'bg-white hover:bg-slate-50 text-slate-900 border-slate-300 shadow-slate-200'
@@ -239,10 +235,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                       loginAsGuest('nintynine.coin@gmail.com');
                       onNavigateToTerminal();
                     }}
-                    className={`w-full py-2.5 px-4 rounded-xl text-xs font-mono font-bold flex items-center justify-center gap-2 border transition-colors cursor-pointer ${
+                    className={`w-full py-2.5 px-4 rounded-[2px] text-xs font-mono font-bold flex items-center justify-center gap-2 border transition-colors cursor-pointer ${
                       isDark
-                        ? 'bg-slate-800/80 hover:bg-slate-800 border-[#1e293b] text-cyan-400'
-                        : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-cyan-700'
+                        ? 'bg-slate-800/80 hover:bg-slate-800 border-slate-700 text-pink-400'
+                        : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-pink-700'
                     }`}
                   >
                     <Zap className="w-3.5 h-3.5 text-amber-400" />
@@ -270,7 +266,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                       placeholder="contoh: nama.trader@gmail.com"
                       value={demoEmailInput}
                       onChange={(e) => setDemoEmailInput(e.target.value)}
-                      className={`w-full px-3 py-2 rounded-lg text-xs font-mono border outline-none focus:ring-1 focus:ring-cyan-500 ${
+                      className={`w-full px-3 py-2 rounded-[2px] text-xs font-mono border outline-none focus:ring-1 focus:ring-pink-500 ${
                         isDark ? 'bg-[#090d16] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                       }`}
                     />
@@ -278,14 +274,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   <div className="flex gap-2">
                     <button
                       type="submit"
-                      className="flex-1 py-2 px-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold font-mono text-xs rounded-lg cursor-pointer transition-colors"
+                      className="flex-1 py-2 px-3 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold font-mono text-xs rounded-[2px] cursor-pointer transition-colors"
                     >
                       {lang === 'id' ? 'Lanjut Masuk' : 'Continue'}
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowDemoForm(false)}
-                      className={`px-3 py-2 rounded-lg text-xs font-mono border cursor-pointer ${
+                      className={`px-3 py-2 rounded-[2px] text-xs font-mono border cursor-pointer ${
                         isDark ? 'border-slate-700 text-slate-400 hover:text-white' : 'border-slate-300 text-slate-600 hover:text-slate-900'
                       }`}
                     >
@@ -298,7 +294,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           )}
 
           {/* Benefits Feature Checklist */}
-          <div className={`mt-6 pt-5 border-t space-y-2.5 ${isDark ? 'border-[#1e293b]' : 'border-slate-100'}`}>
+          <div className={`mt-6 pt-5 border-t space-y-2.5 ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
             <span className={`text-[10px] font-mono uppercase font-bold tracking-wider block ${
               isDark ? 'text-slate-400' : 'text-slate-600'
             }`}>
@@ -306,7 +302,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
               <div className={`flex items-center gap-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                <Database className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <Database className="w-3.5 h-3.5 text-pink-400 shrink-0" />
                 <span>Cloud Sync Jurnal Trading</span>
               </div>
               <div className={`flex items-center gap-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
@@ -314,7 +310,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 <span>Privasi Data Aman Firebase</span>
               </div>
               <div className={`flex items-center gap-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                <TrendingUp className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                <TrendingUp className="w-3.5 h-3.5 text-rose-400 shrink-0" />
                 <span>Preset Risiko & DCA Simpanan</span>
               </div>
               <div className={`flex items-center gap-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
@@ -335,8 +331,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           </div>
           <p>
             {lang === 'id'
-              ? 'IMASBTC tidak pernah meminta private key atau dana Anda. Kami hanya mengakses profil publik Google untuk sinkronisasi preferensi analitik.'
-              : 'IMASBTC never requests private keys or funds. We only request basic Google public profile for preferences synchronization.'}
+              ? 'Akiraqu tidak pernah meminta private key atau dana Anda. Kami hanya mengakses profil publik Google untuk sinkronisasi preferensi analitik.'
+              : 'Akiraqu never requests private keys or funds. We only request basic Google public profile for preferences synchronization.'}
           </p>
         </div>
       </div>

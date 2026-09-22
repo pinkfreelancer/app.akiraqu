@@ -52,7 +52,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             </div>
 
             {this.state.error?.message && (
-              <div className="p-3 bg-black/40 border border-slate-800 rounded-lg text-left text-[11px] font-mono text-rose-300 max-h-24 overflow-y-auto">
+              <div className="p-3 bg-black/40 border border-slate-800 rounded-[2px] text-left text-[11px] font-mono text-rose-300 max-h-24 overflow-y-auto">
                 {this.state.error.message}
               </div>
             )}
@@ -60,7 +60,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             <div className="flex flex-col gap-2 pt-2">
               <button
                 onClick={this.handleReset}
-                className="w-full py-2.5 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-lg shadow-cyan-500/20"
+                className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-mono font-bold text-xs rounded-[2px] flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-xs"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span>Muat Ulang Terminal</span>
@@ -68,7 +68,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
               <button
                 onClick={this.handleHardReset}
-                className="w-full py-2 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs rounded-xl flex items-center justify-center gap-2 border border-slate-700 cursor-pointer transition-colors"
+                className="w-full py-2 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs rounded-[2px] flex items-center justify-center gap-2 border border-slate-700 cursor-pointer transition-colors"
               >
                 <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
                 <span>Reset Cache & Sesi Bersih</span>

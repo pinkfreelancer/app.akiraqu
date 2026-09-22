@@ -242,7 +242,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           <button
             onClick={handleDownloadArtifact}
             disabled={isExporting || !evaluation}
-            className="w-full mt-3 py-2.5 bg-gradient-to-r from-cyan-500 to-cyan-400 hover:from-cyan-400 text-slate-950 font-bold text-sm rounded-lg transition-all shadow-md shadow-cyan-500/20 cursor-pointer disabled:opacity-50"
+            className="w-full mt-3 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold text-sm rounded-[2px] transition-all shadow-xs cursor-pointer disabled:opacity-50"
           >
             {isExporting
               ? (lang === 'id' ? 'Menghasilkan Paket...' : 'Generating Bundle...')

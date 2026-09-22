@@ -262,13 +262,13 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsSettingsOpen((prev) => !prev)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-mono font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] border text-xs font-mono font-bold transition-all cursor-pointer ${
                 isDark
-                  ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-cyan-300 hover:border-cyan-500/30'
-                  : 'bg-white border-slate-200 text-slate-700 hover:text-cyan-600 hover:border-cyan-500/30'
+                  ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-pink-300 hover:border-pink-500/30'
+                  : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600 hover:border-pink-500/30'
               }`}
             >
-              <Settings className="w-3.5 h-3.5 text-cyan-500" />
+              <Settings className="w-3.5 h-3.5 text-pink-400" />
               <span className="hidden sm:inline">{isId ? 'Pengaturan' : 'Settings'}</span>
               <ChevronDown className="w-3 h-3 text-slate-400" />
             </button>
@@ -276,7 +276,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Dropdown Menu Overlay */}
             {isSettingsOpen && (
               <div
-                className={`absolute right-0 mt-2 w-64 rounded-xl border p-4 shadow-xl z-50 transition-all ${
+                className={`absolute right-0 mt-2 w-64 rounded-[2px] border p-4 shadow-xl z-50 transition-all ${
                   isDark
                     ? 'bg-[#0f172a] border-[#1e293b] text-white shadow-black/50'
                     : 'bg-white border-slate-200 text-slate-800 shadow-slate-300/50'
@@ -290,6 +290,7 @@ export const Header: React.FC<HeaderProps> = ({
                         {isId ? 'Tema Engine' : 'Engine Theme'}
                       </span>
                       <span className="text-[10px] font-mono text-pink-400 font-semibold">
+                        {normalizedTheme === 'theme-glassnode' && 'Glassnode'}
                         {normalizedTheme === 'theme-light' && 'Light'}
                         {normalizedTheme === 'theme-dark' && 'Dark'}
                         {normalizedTheme === 'theme-terminal' && 'Terminal'}
@@ -297,14 +298,28 @@ export const Header: React.FC<HeaderProps> = ({
                       </span>
                     </div>
                     <div
-                      className={`grid grid-cols-2 gap-1 p-1 rounded-lg border ${
+                      className={`grid grid-cols-2 gap-1 p-1 rounded-[2px] border ${
                         isDark ? 'bg-[#0b0f19] border-[#1e293b]' : 'bg-slate-100 border-slate-200'
                       }`}
                     >
                       <button
                         type="button"
+                        onClick={() => onSelectTheme ? onSelectTheme('theme-glassnode') : onToggleTheme()}
+                        className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-[2px] text-[11px] font-bold transition-all cursor-pointer ${
+                          normalizedTheme === 'theme-glassnode'
+                            ? 'bg-white text-[#DB2777] shadow-xs border border-[#FBCFE8]'
+                            : 'text-slate-400 hover:text-slate-200 bg-[#070b14]'
+                        }`}
+                        title="Glassnode Research Console (Soft Pink)"
+                      >
+                        <Layers className="w-3 h-3 text-[#DB2777]" />
+                        <span>Glassnode Research (Soft Pink 2px)</span>
+                      </button>
+
+                      <button
+                        type="button"
                         onClick={() => onSelectTheme ? onSelectTheme('theme-light') : onToggleTheme()}
-                        className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                        className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-[2px] text-[11px] font-bold transition-all cursor-pointer ${
                           normalizedTheme === 'theme-light'
                             ? 'bg-white text-pink-600 shadow-xs border border-pink-200'
                             : 'text-slate-400 hover:text-slate-200'
@@ -318,7 +333,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <button
                         type="button"
                         onClick={() => onSelectTheme ? onSelectTheme('theme-dark') : onToggleTheme()}
-                        className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                        className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-[2px] text-[11px] font-bold transition-all cursor-pointer ${
                           normalizedTheme === 'theme-dark'
                             ? 'bg-pink-500/20 text-pink-300 shadow-xs border border-pink-500/40'
                             : 'text-slate-400 hover:text-slate-200'
@@ -332,7 +347,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <button
                         type="button"
                         onClick={() => onSelectTheme ? onSelectTheme('theme-terminal') : onToggleTheme()}
-                        className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                        className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-[2px] text-[11px] font-bold transition-all cursor-pointer ${
                           normalizedTheme === 'theme-terminal'
                             ? 'bg-[#030712] text-[#FF007A] shadow-xs border border-emerald-500/40'
                             : 'text-slate-400 hover:text-slate-200'
@@ -346,7 +361,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <button
                         type="button"
                         onClick={() => onSelectTheme ? onSelectTheme('theme-custom', customThemeColor, customThemeBg) : onToggleTheme()}
-                        className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                        className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-[2px] text-[11px] font-bold transition-all cursor-pointer ${
                           normalizedTheme === 'theme-custom'
                             ? 'bg-pink-950/60 text-pink-300 shadow-xs border border-pink-500/40'
                             : 'text-slate-400 hover:text-slate-200'
@@ -365,17 +380,17 @@ export const Header: React.FC<HeaderProps> = ({
                       {isId ? 'Bahasa Pengantar' : 'Interface Language'}
                     </span>
                     <div
-                      className={`flex p-0.5 rounded-lg border ${
+                      className={`flex p-0.5 rounded-[2px] border ${
                         isDark ? 'bg-[#0b0f19] border-[#1e293b]' : 'bg-slate-100 border-slate-200'
                       }`}
                     >
                       <button
                         onClick={() => onToggleLang('id')}
-                        className={`flex-1 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer text-center ${
+                        className={`flex-1 py-1.5 rounded-[2px] text-xs font-bold transition-all cursor-pointer text-center ${
                           lang === 'id'
                             ? isDark
-                              ? 'bg-cyan-500/25 text-cyan-300'
-                              : 'bg-white text-cyan-600 shadow-xs'
+                              ? 'bg-pink-500/25 text-pink-300'
+                              : 'bg-white text-pink-600 shadow-xs'
                             : 'text-slate-400 hover:text-slate-200'
                         }`}
                       >
@@ -383,11 +398,11 @@ export const Header: React.FC<HeaderProps> = ({
                       </button>
                       <button
                         onClick={() => onToggleLang('en')}
-                        className={`flex-1 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer text-center ${
+                        className={`flex-1 py-1.5 rounded-[2px] text-xs font-bold transition-all cursor-pointer text-center ${
                           lang === 'en'
                             ? isDark
-                              ? 'bg-cyan-500/25 text-cyan-300'
-                              : 'bg-white text-cyan-600 shadow-xs'
+                              ? 'bg-pink-500/25 text-pink-300'
+                              : 'bg-white text-pink-600 shadow-xs'
                             : 'text-slate-400 hover:text-slate-200'
                         }`}
                       >
@@ -403,7 +418,7 @@ export const Header: React.FC<HeaderProps> = ({
                         onToggleFullscreen();
                         setIsSettingsOpen(false);
                       }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-mono border transition-colors cursor-pointer ${
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-[2px] text-xs font-mono border transition-colors cursor-pointer ${
                         isDark
                           ? 'bg-[#0b0f19] border-[#1e293b] hover:bg-slate-800/70 text-slate-200'
                           : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700'
@@ -411,9 +426,9 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <span className="flex items-center gap-2">
                         {isFullscreen ? (
-                          <Minimize className="w-3.5 h-3.5 text-cyan-400" />
+                          <Minimize className="w-3.5 h-3.5 text-pink-400" />
                         ) : (
-                          <Maximize className="w-3.5 h-3.5 text-cyan-400" />
+                          <Maximize className="w-3.5 h-3.5 text-pink-400" />
                         )}
                         <span>{isFullscreen ? t.header.exitFullscreen : t.header.fullscreen}</span>
                       </span>
@@ -428,7 +443,7 @@ export const Header: React.FC<HeaderProps> = ({
                         onSelectStage('settings');
                         setIsSettingsOpen(false);
                       }}
-                      className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-mono font-bold transition-all cursor-pointer shadow-xs"
+                      className="w-full flex items-center justify-center gap-1.5 py-2 rounded-[2px] bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xs font-mono font-bold transition-all cursor-pointer shadow-xs"
                     >
                       <Sliders className="w-3.5 h-3.5" />
                       <span>{isId ? 'Buka Pengaturan Lengkap' : 'Open Full Settings'}</span>
@@ -453,12 +468,12 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="btn-mobile-menu-toggle"
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-            className={`flex md:hidden items-center justify-center p-1.5 rounded-lg border text-xs cursor-pointer min-h-[36px] min-w-[36px] ${
+            className={`flex md:hidden items-center justify-center p-1.5 rounded-[2px] border text-xs cursor-pointer min-h-[36px] min-w-[36px] ${
               isDark ? 'bg-[#0f172a] border-[#1e293b] text-slate-300' : 'bg-white border-slate-200 text-slate-700'
             }`}
             aria-label="Toggle Mobile Menu"
           >
-            {isMobileMenuOpen ? <X className="w-4 h-4 text-cyan-400" /> : <Menu className="w-4 h-4 text-cyan-400" />}
+            {isMobileMenuOpen ? <X className="w-4 h-4 text-pink-400" /> : <Menu className="w-4 h-4 text-pink-400" />}
           </button>
         </div>
       </div>
@@ -473,23 +488,23 @@ export const Header: React.FC<HeaderProps> = ({
             id="btn-open-pair-search"
             type="button"
             onClick={() => setIsSearchOpen(true)}
-            className={`flex items-center justify-between gap-2 px-3.5 py-1.5 border rounded-lg text-xs font-mono transition-all cursor-pointer shadow-xs group min-h-[38px] w-56 sm:w-64 md:w-72 lg:w-80 ${
+            className={`flex items-center justify-between gap-2 px-3.5 py-1.5 border rounded-[2px] text-xs font-mono transition-all cursor-pointer shadow-xs group min-h-[38px] w-56 sm:w-64 md:w-72 lg:w-80 ${
               isDark
-                ? 'bg-[#0f172a] border-[#1e293b] text-slate-200 hover:border-cyan-500/50 hover:bg-slate-800/80'
-                : 'bg-white border-slate-200 text-slate-800 hover:border-cyan-400 hover:bg-slate-50'
+                ? 'bg-[#0f172a] border-[#1e293b] text-slate-200 hover:border-pink-500/50 hover:bg-slate-800/80'
+                : 'bg-white border-slate-200 text-slate-800 hover:border-pink-400 hover:bg-slate-50'
             }`}
             title={`${t.header.searchModalTitle} (Shortcut: Ctrl+K atau /)`}
           >
             <div className="flex items-center gap-2 min-w-0">
               <Search
                 className={`w-3.5 h-3.5 shrink-0 group-hover:scale-110 transition-transform ${
-                  isDark ? 'text-cyan-400' : 'text-cyan-600'
+                  isDark ? 'text-pink-400' : 'text-pink-600'
                 }`}
               />
               <span className={`font-bold text-xs sm:text-sm truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {selectedSymbol}
               </span>
-              <span className={`text-xs font-semibold shrink-0 ${isDark ? 'text-cyan-300' : 'text-cyan-700'}`}>
+              <span className={`text-xs font-semibold shrink-0 ${isDark ? 'text-pink-300' : 'text-pink-700'}`}>
                 ${formatPrice(displayPrice)}
               </span>
             </div>
@@ -497,7 +512,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="flex items-center gap-1.5 shrink-0">
               {currentCoin && (
                 <span
-                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded-[2px] ${
                     currentCoin.change24h >= 0
                       ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                       : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
@@ -507,13 +522,13 @@ export const Header: React.FC<HeaderProps> = ({
                   {currentCoin.change24h}%
                 </span>
               )}
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-400" />
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-pink-400" />
             </div>
           </button>
 
           {/* Segmented Timeframe Buttons */}
           <div
-            className={`flex items-center p-0.5 rounded-lg border ${
+            className={`flex items-center p-0.5 rounded-[2px] border ${
               isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-slate-100 border-slate-200'
             }`}
           >
@@ -521,7 +536,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 key={tf}
                 onClick={() => onSelectTimeframe(tf)}
-                className={`px-2 sm:px-2.5 py-1 text-xs font-mono rounded-md transition-colors cursor-pointer min-h-[30px] flex items-center justify-center ${
+                className={`px-2 sm:px-2.5 py-1 text-xs font-mono rounded-[2px] transition-colors cursor-pointer min-h-[30px] flex items-center justify-center ${
                   selectedTimeframe === tf
                     ? isDark
                       ? 'bg-slate-800 text-white font-semibold shadow-xs'
@@ -540,7 +555,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onTriggerAnalyze}
             disabled={isLoading}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 font-semibold text-xs rounded-lg transition-colors bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50 cursor-pointer min-h-[38px] shadow-xs"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 font-semibold text-xs rounded-[2px] transition-colors bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white disabled:opacity-50 cursor-pointer min-h-[38px] shadow-xs"
             title={
               !hasEvaluation
                 ? isId
@@ -570,12 +585,12 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="btn-header-alert-center"
             onClick={() => openAlertCenter()}
-            className={`relative flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer min-h-[38px] border ${
+            className={`relative flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-[2px] text-xs font-mono font-medium transition-all cursor-pointer min-h-[38px] border ${
               unreadCount > 0
-                ? 'bg-amber-600/20 hover:bg-amber-600/30 border-amber-500/60 text-amber-400 font-semibold shadow-xs'
+                ? 'bg-pink-600/20 hover:bg-pink-600/30 border-pink-500/60 text-pink-400 font-semibold shadow-xs'
                 : isDark
-                ? 'bg-[#0f172a] hover:bg-amber-950/40 border-[#1e293b] hover:border-amber-500/40 text-slate-300 hover:text-amber-400'
-                : 'bg-white hover:bg-amber-50 border-slate-200 hover:border-amber-300 text-slate-700 hover:text-amber-700'
+                ? 'bg-[#0f172a] hover:bg-pink-950/40 border-[#1e293b] hover:border-pink-500/40 text-slate-300 hover:text-pink-400'
+                : 'bg-white hover:bg-pink-50 border-slate-200 hover:border-pink-300 text-slate-700 hover:text-pink-700'
             }`}
             title={
               isId
@@ -585,12 +600,12 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <div className="relative">
               {unreadCount > 0 ? (
-                <BellRing className="w-4 h-4 text-amber-400 animate-pulse" />
+                <BellRing className="w-4 h-4 text-pink-400 animate-pulse" />
               ) : (
                 <Bell className="w-4 h-4" />
               )}
               {unreadCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 px-1 rounded-full bg-amber-500 text-white text-[9px] font-bold font-mono items-center justify-center">
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 px-1 rounded-full bg-pink-500 text-white text-[9px] font-bold font-mono items-center justify-center">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -603,12 +618,12 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="btn-header-workspace-mode"
               onClick={onToggleWorkspaceMode}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 border rounded-lg text-xs font-mono font-bold transition-all cursor-pointer min-h-[38px] ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 border rounded-[2px] text-xs font-mono font-bold transition-all cursor-pointer min-h-[38px] ${
                 workspaceMode === 'launchpad'
-                  ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300 shadow-xs'
+                  ? 'bg-pink-500/20 border-pink-500/50 text-pink-300 shadow-xs'
                   : isDark
-                  ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-cyan-300 hover:border-cyan-500/30'
-                  : 'bg-white border-slate-200 text-slate-700 hover:text-cyan-700'
+                  ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-pink-300 hover:border-pink-500/30'
+                  : 'bg-white border-slate-200 text-slate-700 hover:text-pink-700'
               }`}
               title={
                 isId
@@ -618,7 +633,7 @@ export const Header: React.FC<HeaderProps> = ({
             >
               {workspaceMode === 'launchpad' ? (
                 <>
-                  <LayoutGrid className="w-3.5 h-3.5 text-cyan-400" />
+                  <LayoutGrid className="w-3.5 h-3.5 text-pink-400" />
                   <span className="hidden xl:inline">Grid</span>
                 </>
               ) : (
@@ -656,15 +671,15 @@ export const Header: React.FC<HeaderProps> = ({
                         onSelectStage(stg.id);
                         setIsMobileMenuOpen(false);
                       }}
-                      className={`flex items-center gap-2 p-2 rounded-lg text-xs font-mono font-semibold border transition cursor-pointer ${
+                      className={`flex items-center gap-2 p-2 rounded-[2px] text-xs font-mono font-semibold border transition cursor-pointer ${
                         isCur
-                          ? 'bg-cyan-500 text-slate-950 font-bold border-cyan-400'
+                          ? 'bg-pink-500 text-white font-bold border-pink-400'
                           : isDark
                           ? 'bg-[#0f172a] border-[#1e293b] text-slate-300'
                           : 'bg-white border-slate-200 text-slate-700'
                       }`}
                     >
-                      <StgIcon className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                      <StgIcon className="w-3.5 h-3.5 text-pink-400 shrink-0" />
                       <span className="truncate">{stg.name}</span>
                     </button>
                   );
@@ -689,11 +704,11 @@ export const Header: React.FC<HeaderProps> = ({
                       onSelectSymbol(sym);
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition cursor-pointer min-h-[38px] shrink-0 ${
+                    className={`px-3 py-1.5 rounded-[2px] text-xs font-mono font-bold transition cursor-pointer min-h-[38px] shrink-0 ${
                       isSelected
                         ? isDark
-                          ? 'bg-cyan-500 text-slate-950 shadow-xs'
-                          : 'bg-cyan-600 text-white shadow-xs'
+                          ? 'bg-pink-500 text-white shadow-xs'
+                          : 'bg-pink-600 text-white shadow-xs'
                         : isDark
                         ? 'bg-[#0f172a] text-slate-300 border border-[#1e293b]'
                         : 'bg-white text-slate-700 border border-slate-200'
@@ -714,7 +729,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onToggleSidebar();
                   setIsMobileMenuOpen(false);
                 }}
-                className={`col-span-2 flex items-center justify-center gap-2 p-2.5 rounded-lg text-xs font-semibold border transition cursor-pointer min-h-[44px] ${
+                className={`col-span-2 flex items-center justify-center gap-2 p-2.5 rounded-[2px] text-xs font-semibold border transition cursor-pointer min-h-[44px] ${
                   isSidebarOpen
                     ? 'bg-pink-500/15 border-pink-500/30 text-pink-200'
                     : isDark
@@ -732,11 +747,11 @@ export const Header: React.FC<HeaderProps> = ({
                 onOpenExportModal();
                 setIsMobileMenuOpen(false);
               }}
-              className={`flex items-center justify-center gap-2 p-2.5 rounded-lg text-xs font-semibold border transition cursor-pointer min-h-[44px] ${
+              className={`flex items-center justify-center gap-2 p-2.5 rounded-[2px] text-xs font-semibold border transition cursor-pointer min-h-[44px] ${
                 isDark ? 'bg-[#0f172a] border-[#1e293b] text-slate-200' : 'bg-white border-slate-200 text-slate-700'
               }`}
             >
-              <Download className="w-4 h-4 text-cyan-400" />
+              <Download className="w-4 h-4 text-pink-400" />
               <span>{t.header.exportArtifacts}</span>
             </button>
 
@@ -746,15 +761,15 @@ export const Header: React.FC<HeaderProps> = ({
                   onToggleFullscreen();
                   setIsMobileMenuOpen(false);
                 }}
-                className={`flex items-center justify-center gap-2 p-2.5 rounded-lg text-xs font-semibold border transition cursor-pointer min-h-[44px] ${
+                className={`flex items-center justify-center gap-2 p-2.5 rounded-[2px] text-xs font-semibold border transition cursor-pointer min-h-[44px] ${
                   isFullscreen
-                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                    ? 'bg-pink-500/20 text-pink-300 border-pink-500/40'
                     : isDark
                     ? 'bg-[#0f172a] border-[#1e293b] text-slate-200'
                     : 'bg-white border-slate-200 text-slate-700'
                 }`}
               >
-                {isFullscreen ? <Minimize className="w-4 h-4 text-cyan-400" /> : <Maximize className="w-4 h-4 text-cyan-400" />}
+                {isFullscreen ? <Minimize className="w-4 h-4 text-pink-400" /> : <Maximize className="w-4 h-4 text-pink-400" />}
                 <span>{isFullscreen ? t.header.exitFullscreen : t.header.fullscreen}</span>
               </button>
             )}
@@ -764,7 +779,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onOpenAssuranceModal();
                 setIsMobileMenuOpen(false);
               }}
-              className={`flex items-center justify-center gap-2 p-2.5 rounded-lg text-xs font-semibold border transition cursor-pointer min-h-[44px] ${
+              className={`flex items-center justify-center gap-2 p-2.5 rounded-[2px] text-xs font-semibold border transition cursor-pointer min-h-[44px] ${
                 isDark ? 'bg-[#0f172a] border-[#1e293b] text-slate-200' : 'bg-white border-slate-200 text-slate-700'
               }`}
             >

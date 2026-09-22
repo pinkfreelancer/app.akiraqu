@@ -959,7 +959,53 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5">
+                {/* 0. Glassnode Institutional (theme-glassnode) */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onSelectTheme) onSelectTheme('theme-glassnode');
+                    else if (isDark) onToggleTheme();
+                    handleUpdateSettings({ display: { ...settings.display, themeMode: 'light' } });
+                  }}
+                  className={`p-4 rounded-[2px] border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    normalizedTheme === 'theme-glassnode'
+                      ? 'bg-white border-[#1A1A1A] ring-2 ring-[#F472B6]/40 shadow-sm'
+                      : isDark
+                      ? 'bg-[#0B0F19] border-[#1e293b] hover:border-slate-700'
+                      : 'bg-[#EDEFF2] border-[#DEDFE1] hover:border-slate-400'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-[2px] bg-[#FFFFFF] border border-[#DEDFE1] flex items-center justify-center">
+                          <Layers className="w-4 h-4 text-[#1A1A1A]" />
+                        </div>
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-[2px] bg-[#FDF2F8] text-[#DB2777] border border-[#FBCFE8] font-mono">
+                          Glassnode 2px
+                        </span>
+                      </div>
+                      {normalizedTheme === 'theme-glassnode' && (
+                        <Check className="w-4 h-4 text-[#DB2777]" />
+                      )}
+                    </div>
+                    <span className="text-sm font-bold font-mono text-slate-900 block">Glassnode Console</span>
+                    <p className="text-[11px] text-[#5A5A5A] mt-1.5 leading-relaxed">
+                      {isId
+                        ? 'Kanvas Cloud (#EDEFF2), kartu putih dengan border hairline 1px (#DEDFE1), radius tegas 2px & Soft Pink wash.'
+                        : 'Cool Cloud canvas (#EDEFF2), pure white cards with 1px hairline border (#DEDFE1), sharp 2px radii & Soft Pink wash.'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-[#DEDFE1]">
+                    <span className="text-[10px] text-[#808080] font-mono">Palet:</span>
+                    <span className="w-3.5 h-3.5 rounded-[2px] bg-[#EDEFF2] border border-[#DEDFE1]" title="#EDEFF2" />
+                    <span className="w-3.5 h-3.5 rounded-[2px] bg-[#FFFFFF] border border-[#DEDFE1]" title="#FFFFFF" />
+                    <span className="w-3.5 h-3.5 rounded-[2px] bg-[#1A1A1A]" title="#1A1A1A" />
+                    <span className="w-3.5 h-3.5 rounded-[2px] bg-[#F472B6]" title="#F472B6" />
+                  </div>
+                </button>
+
                 {/* 1. Light Theme (theme-light) */}
                 <button
                   type="button"

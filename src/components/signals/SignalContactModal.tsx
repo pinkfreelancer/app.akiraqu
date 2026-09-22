@@ -44,20 +44,20 @@ export const SignalContactModal: React.FC<SignalContactModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs font-mono">
       <div
-        className={`w-full max-w-lg rounded-2xl border p-6 space-y-4 relative ${
+        className={`w-full max-w-lg rounded-[2px] border p-6 space-y-4 relative ${
           isDark ? 'bg-[#0f172a] border-[#1e293b] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xl'
         }`}
       >
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white cursor-pointer"
+          className="absolute top-4 right-4 p-1.5 rounded-[2px] bg-slate-800 text-slate-400 hover:text-white cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
 
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-pink-500/15 border border-pink-500/30 text-pink-400">
+          <div className="p-2.5 rounded-[2px] bg-pink-500/15 border border-pink-500/30 text-pink-400">
             <Headphones className="w-5 h-5" />
           </div>
           <div>
@@ -68,8 +68,8 @@ export const SignalContactModal: React.FC<SignalContactModalProps> = ({
 
         {isSubmitted ? (
           <div className="p-8 text-center space-y-3">
-            <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto animate-bounce" />
-            <h4 className="text-base font-bold text-white">Permintaan Terkirim!</h4>
+            <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
+            <h4 className="text-base font-bold text-white font-display">Permintaan Terkirim!</h4>
             <p className="text-xs text-slate-400">
               Tim Quant Specialist AKIRAQU akan segera menghubungi handle Telegram Anda dalam waktu kurang dari 15 menit.
             </p>
