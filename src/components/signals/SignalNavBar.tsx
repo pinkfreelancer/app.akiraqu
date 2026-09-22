@@ -6,8 +6,6 @@ import {
   LineChart,
   FileCode2,
   TrendingUp,
-  CreditCard,
-  Headphones,
   Bell,
   Volume2,
   VolumeX,
@@ -22,9 +20,7 @@ export type SignalNavTab =
   | 'ANALISIS_LANGSUNG'
   | 'BELAJAR'
   | 'METODOLOGI'
-  | 'WAWASAN'
-  | 'HARGA'
-  | 'KONTAK';
+  | 'WAWASAN';
 
 interface SignalNavBarProps {
   activeTab: SignalNavTab;
@@ -92,16 +88,6 @@ export const SignalNavBar: React.FC<SignalNavBarProps> = ({
       id: 'WAWASAN',
       label: isId ? 'Wawasan' : 'Insights',
       icon: TrendingUp,
-    },
-    {
-      id: 'HARGA',
-      label: isId ? 'Harga' : 'Pricing',
-      icon: CreditCard,
-    },
-    {
-      id: 'KONTAK',
-      label: isId ? 'Kontak' : 'Contact',
-      icon: Headphones,
     },
   ];
 
@@ -216,7 +202,7 @@ export const SignalNavBar: React.FC<SignalNavBarProps> = ({
           })}
         </div>
 
-        {/* Section Links: Metodologi, Wawasan, Harga, Kontak */}
+        {/* Section Links: Metodologi, Wawasan */}
         <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none font-mono text-xs border-t sm:border-t-0 pt-1.5 sm:pt-0 border-slate-800/60">
           {sectionLinks.map((link) => {
             const Icon = link.icon;

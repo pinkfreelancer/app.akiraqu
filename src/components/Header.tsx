@@ -512,7 +512,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="flex items-center gap-1.5 shrink-0">
               {currentCoin && (
                 <span
-                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded-[2px] ${
+                  className={`text-[11px] font-bold px-1.5 py-0.5 rounded-[2px] ${
                     currentCoin.change24h >= 0
                       ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                       : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
@@ -605,7 +605,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <Bell className="w-4 h-4" />
               )}
               {unreadCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 px-1 rounded-full bg-pink-500 text-white text-[9px] font-bold font-mono items-center justify-center">
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 px-1 rounded-full bg-pink-600 text-white text-[11px] font-bold font-mono items-center justify-center">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}

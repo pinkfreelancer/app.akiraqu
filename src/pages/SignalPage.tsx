@@ -16,8 +16,6 @@ import { SignalPerformanceView } from '../components/signals/SignalPerformanceVi
 import { SignalLiveAnalysisView } from '../components/signals/SignalLiveAnalysisView';
 import { SignalLearningView } from '../components/signals/SignalLearningView';
 import { SignalInsightsView } from '../components/signals/SignalInsightsView';
-import { SignalPricingView } from '../components/signals/SignalPricingView';
-import { SignalContactModal } from '../components/signals/SignalContactModal';
 import {
   INITIAL_INSTITUTIONAL_SIGNALS,
   computeInstitutionalPerformance,
@@ -45,7 +43,7 @@ export const SignalPage: React.FC<SignalPageProps> = ({
   const isId = lang === 'id';
   const { addAlert, openAlertCenter, unreadCount } = useAlerts();
 
-  // Primary Tab Navigation (Produk: Sinyal, Kinerja, Analisis Langsung, Belajar; Section: Metodologi, Wawasan, Harga, Kontak)
+  // Primary Tab Navigation (Produk: Sinyal, Kinerja, Analisis Langsung, Belajar; Section: Metodologi, Wawasan)
   const [activeTab, setActiveTab] = useState<SignalNavTab>('SINYAL');
 
   // Signals State
@@ -65,7 +63,6 @@ export const SignalPage: React.FC<SignalPageProps> = ({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [telegramNotificationSent, setTelegramNotificationSent] = useState<string | null>(null);
   const [showTelegramConfigModal, setShowTelegramConfigModal] = useState<boolean>(false);
-  const [showContactModal, setShowContactModal] = useState<boolean>(false);
   const [telegramWebhook, setTelegramWebhook] = useState<string>(
     'https://api.telegram.org/bot7892.../sendMessage'
   );
@@ -309,15 +306,11 @@ Catatan: ${sig.notes}`;
         </div>
       )}
 
-      {/* 2. Unified Navigation Bar (Produk: Sinyal, Kinerja, Analisis Langsung, Belajar; Section: Metodologi, Wawasan, Harga, Kontak) */}
+      {/* 2. Unified Navigation Bar (Produk: Sinyal, Kinerja, Analisis Langsung, Belajar; Section: Metodologi, Wawasan) */}
       <SignalNavBar
         activeTab={activeTab}
         onSelectTab={(tab) => {
-          if (tab === 'KONTAK') {
-            setShowContactModal(true);
-          } else {
-            setActiveTab(tab);
-          }
+          setActiveTab(tab);
         }}
         isDark={isDark}
         lang={lang}
@@ -398,27 +391,10 @@ Catatan: ${sig.notes}`;
       {/* 8. VIEW: WAWASAN (Market Intelligence & Sector Alpha) */}
       {activeTab === 'WAWASAN' && <SignalInsightsView isDark={isDark} lang={lang} />}
 
-      {/* 9. VIEW: HARGA (Subscription & API Pricing) */}
-      {activeTab === 'HARGA' && (
-        <SignalPricingView
-          isDark={isDark}
-          lang={lang}
-          onOpenContact={() => setShowContactModal(true)}
-        />
-      )}
-
-      {/* 10. Audit Modal (Verifiable cryptographic hash & trade chronology) */}
+      {/* 9. Audit Modal (Verifiable cryptographic hash & trade chronology) */}
       <SignalAuditModal
         signal={selectedSignalForAudit}
         onClose={() => setSelectedSignalForAudit(null)}
-        isDark={isDark}
-        lang={lang}
-      />
-
-      {/* 11. VIP Telegram Desk & Contact Modal */}
-      <SignalContactModal
-        isOpen={showContactModal}
-        onClose={() => setShowContactModal(false)}
         isDark={isDark}
         lang={lang}
       />

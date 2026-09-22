@@ -201,12 +201,12 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
       )}
 
       {/* Chart Top Bar & Overlays Controller */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-[#1e293b]">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-[#1e293b]">
         {/* Active Candle Telemetry */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-mono">
           <div className="flex items-center gap-1.5 font-bold text-white text-sm">
             <span>{symbol}</span>
-            <span className="px-1.5 py-0.5 rounded text-[11px] bg-slate-800 text-cyan-400 border border-slate-700">
+            <span className="px-1.5 py-0.5 rounded-[2px] text-[11px] bg-slate-800 text-pink-400 border border-slate-700">
               {timeframe}
             </span>
           </div>
@@ -227,7 +227,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
           <div className={`font-semibold ${isUpActive ? 'text-emerald-400' : 'text-rose-400'}`}>
             ({isUpActive ? '+' : ''}{pctChange}%)
           </div>
-          <div className="text-slate-500 hidden sm:inline-block">
+          <div className="text-slate-400 hidden sm:inline-block">
             Vol: {activeCandle.volume.toLocaleString()}
           </div>
         </div>
@@ -238,8 +238,8 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="chart-toggle-vwap"
             type="button"
             onClick={() => setShowVWAP(!showVWAP)}
-            className={`px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer border min-h-[30px] ${
-              showVWAP ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' : 'text-slate-500 border-transparent hover:text-slate-300'
+            className={`px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[32px] ${
+              showVWAP ? 'bg-pink-500/20 text-pink-300 border-pink-500/40' : 'text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
           >
             VWAP
@@ -248,7 +248,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="chart-toggle-avwap"
             type="button"
             onClick={() => setShowAVWAP(!showAVWAP)}
-            className={`px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer border min-h-[30px] flex items-center gap-1 ${
+            className={`px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[32px] flex items-center gap-1 ${
               showAVWAP ? 'bg-indigo-950/60 text-indigo-300 border-indigo-500/50' : 'text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
             title="Anchored VWAP (Daily Session, Swing High, Swing Low)"
@@ -260,7 +260,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="chart-toggle-smc"
             type="button"
             onClick={() => setShowSMC(!showSMC)}
-            className={`px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer border min-h-[30px] ${
+            className={`px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[32px] ${
               showSMC ? 'bg-amber-950/60 text-amber-300 border-amber-500/50' : 'text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
           >
@@ -270,8 +270,8 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="chart-toggle-fib"
             type="button"
             onClick={() => setShowFib(!showFib)}
-            className={`px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer border min-h-[30px] ${
-              showFib ? 'bg-sky-950/60 text-sky-300 border-sky-500/50' : 'text-slate-400 border-slate-800 hover:text-slate-200'
+            className={`px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[32px] ${
+              showFib ? 'bg-slate-800 text-pink-300 border-pink-500/40' : 'text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
           >
             Fib GP
@@ -280,8 +280,8 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="chart-toggle-sr"
             type="button"
             onClick={() => setShowSR(!showSR)}
-            className={`px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer border min-h-[30px] ${
-              showSR ? 'bg-blue-950/60 text-blue-300 border-blue-500/50' : 'text-slate-400 border-slate-800 hover:text-slate-200'
+            className={`px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[32px] ${
+              showSR ? 'bg-slate-800 text-slate-200 border-slate-600' : 'text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
           >
             S/R
@@ -290,7 +290,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="chart-toggle-liq-heatmap"
             type="button"
             onClick={() => setShowLiqHeatmap(!showLiqHeatmap)}
-            className={`px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer border flex items-center gap-1 min-h-[30px] ${
+            className={`px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border flex items-center gap-1 min-h-[32px] ${
               showLiqHeatmap
                 ? 'bg-amber-950/60 text-amber-300 border-amber-500/50'
                 : 'text-slate-400 border-slate-800 hover:text-slate-200'
@@ -306,7 +306,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="btn-chart-maximize"
             type="button"
             onClick={() => setIsChartFullscreen(!isChartFullscreen)}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors cursor-pointer border min-h-[30px] ${
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[32px] ${
               isChartFullscreen
                 ? 'bg-slate-700 text-white font-semibold border-slate-500'
                 : 'text-slate-300 hover:text-white bg-slate-800/80 border-slate-700 hover:border-slate-500'
@@ -542,19 +542,19 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
                     />
                     <rect
                       x={padding.left + 8}
-                      y={yHighAnchor - 9}
-                      width={124}
-                      height={16}
+                      y={yHighAnchor - 10}
+                      width={145}
+                      height={18}
                       fill="#0f172a"
                       stroke="#f43f5e"
                       strokeWidth="0.8"
-                      rx="3"
+                      rx="2"
                     />
                     <text
                       x={padding.left + 12}
                       y={yHighAnchor + 3}
                       fill="#f43f5e"
-                      fontSize="9"
+                      fontSize="11"
                       fontWeight="bold"
                       fontFamily="JetBrains Mono, monospace"
                     >
@@ -577,19 +577,19 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
                     />
                     <rect
                       x={padding.left + 8}
-                      y={yLowAnchor - 9}
-                      width={124}
-                      height={16}
+                      y={yLowAnchor - 10}
+                      width={145}
+                      height={18}
                       fill="#0f172a"
                       stroke="#10b981"
                       strokeWidth="0.8"
-                      rx="3"
+                      rx="2"
                     />
                     <text
                       x={padding.left + 12}
                       y={yLowAnchor + 3}
                       fill="#10b981"
-                      fontSize="9"
+                      fontSize="11"
                       fontWeight="bold"
                       fontFamily="JetBrains Mono, monospace"
                     >
