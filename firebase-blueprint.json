@@ -1,29 +1,63 @@
 {
   "entities": {
     "User": {
-      "fields": {
+      "title": "User",
+      "description": "User profile with authentication and preference metadata",
+      "type": "object",
+      "properties": {
         "uid": { "type": "string", "description": "Unique Google user ID" },
         "email": { "type": "string", "description": "User Gmail address" },
         "displayName": { "type": "string", "description": "User Google display name" },
         "photoURL": { "type": "string", "description": "User profile picture URL" },
         "createdAt": { "type": "string", "description": "ISO timestamp of account creation" },
-        "lastLoginAt": { "type": "string", "description": "ISO timestamp of last sign in" },
-        "preferences": { "type": "object", "description": "User preferences like theme, language, default pair" }
+        "lastLoginAt": { "type": "string", "description": "ISO timestamp of last sign in" }
       },
-      "rules": "read, write: if request.auth != null && request.auth.uid == uid;"
+      "required": ["uid", "email"]
+    },
+    "ExchangeCredential": {
+      "title": "ExchangeCredential",
+      "description": "Encrypted exchange API key and secret metadata vault with AES-256-GCM cipher",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique credential UUID" },
+        "exchange": { "type": "string", "description": "Exchange identifier e.g. BINANCE, BYBIT" },
+        "maskedKey": { "type": "string", "description": "Masked API key preview" },
+        "cipherBlob": { "type": "string", "description": "AES-256-GCM encrypted ciphertext base64" },
+        "iv": { "type": "string", "description": "Initialization vector hex" },
+        "tag": { "type": "string", "description": "Authentication tag hex" },
+        "version": { "type": "number", "description": "Key encryption scheme version" },
+        "updatedAt": { "type": "string", "description": "Firestore server timestamp" }
+      },
+      "required": ["exchange", "maskedKey", "cipherBlob", "iv", "tag"]
     },
     "TradingJournal": {
-      "fields": {
+      "title": "TradingJournal",
+      "description": "Trading journal trade log entries",
+      "type": "object",
+      "properties": {
         "userId": { "type": "string", "description": "Owner user ID" },
-        "pair": { "type": "string", "description": "Crypto symbol traded (e.g. BTC/USDT)" },
+        "pair": { "type": "string", "description": "Crypto symbol traded" },
         "type": { "type": "string", "description": "LONG or SHORT" },
         "entryPrice": { "type": "number", "description": "Entry execution price" },
         "exitPrice": { "type": "number", "description": "Exit price" },
         "pnl": { "type": "number", "description": "Realized profit or loss in USD" },
-        "notes": { "type": "string", "description": "Strategy analysis and review" },
-        "createdAt": { "type": "string", "description": "Creation timestamp" }
+        "notes": { "type": "string", "description": "Strategy analysis and review" }
       },
-      "rules": "read, write: if request.auth != null && request.auth.uid == userId;"
+      "required": ["userId", "pair", "type", "entryPrice"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Stores user profile data"
+    },
+    "/users/{userId}/credentials/{credId}": {
+      "schema": "ExchangeCredential",
+      "description": "Encrypted credentials vault for exchange integrations"
+    },
+    "/users/{userId}/journal/{journalId}": {
+      "schema": "TradingJournal",
+      "description": "User trading logs and journal history"
     }
   }
 }

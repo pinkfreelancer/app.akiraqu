@@ -148,4 +148,12 @@ export interface ExchangeApiCredential {
   accountBalanceUsd?: number;
   initialDemoBalanceUsd?: number;
   createdTime: number;
+
+  // Encrypted Vault Properties (Server-Side AES-256-GCM)
+  isEncrypted?: boolean;
+  maskedKey?: string;
+  cipherBlob?: string;
+  iv?: string;
+  tag?: string;
+  version?: number;
 }

@@ -69,7 +69,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { MyExchangesSettings } from '../components/MyExchangesSettings';
 import { ExchangeApiCredential, SupportedExchange, MarketType } from '../types/crypto.types';
 import { INITIAL_EXCHANGE_CREDENTIALS } from '../services/terminalExtensionService';
-import { loadExchangeCredentials, saveExchangeCredentials } from '../services/credentialStorageService';
+import {
+  loadExchangeCredentials,
+  saveExchangeCredentials,
+  syncCredentialsWithFirestore,
+} from '../services/credentialStorageService';
 import {
   formatCryptoPrice,
   formatCurrency,
@@ -90,7 +94,7 @@ interface SettingsPageProps {
   onToggleFullscreen: () => void;
   isFullWidth: boolean;
   onToggleFullWidth: () => void;
-  workspaceMode: 'classic' | 'launchpad';
+  workspaceMode: 'classic' | 'split' | 'launchpad';
   onToggleWorkspaceMode: () => void;
   exchangeCredentials?: ExchangeApiCredential[];
   onSaveExchangeCredentials?: (creds: ExchangeApiCredential[]) => void;
@@ -119,7 +123,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   onSaveExchangeCredentials,
   onNavigateToStage,
 }) => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, loading: authLoading } = useAuth();
   const t = getTranslation(lang);
   const normalizedTheme = normalizeEngineTheme(theme);
   const isDark = normalizedTheme !== 'theme-light';
@@ -152,7 +156,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
     setTimeout(() => setSaveSuccessNotice(null), 2500);
   };
 
-  // Sync Auth User if changes
+  // Sync Auth User & Firestore Encrypted Credentials Vault if changes
   useEffect(() => {
     if (user?.email) {
       setSettings((prev) => ({
@@ -164,8 +168,22 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           photoURL: user.photoURL || prev.account.photoURL,
         },
       }));
+
+      // Synchronize encrypted exchange credentials from Firestore vault
+      // Only query Firestore if Firebase Auth is ready and user is not in guest/demo mode
+      if (!authLoading && user.uid && !user.isAnonymous && !user.uid.startsWith('demo_')) {
+        syncCredentialsWithFirestore(user.uid)
+          .then((creds) => {
+            if (creds && creds.length > 0) {
+              setLocalCredentials(creds);
+            }
+          })
+          .catch((err) => {
+            console.warn('[AKIRAQU Credentials] Firestore sync warning:', err);
+          });
+      }
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   // Save changes handler with auto-feedback
   const handleUpdateSettings = (updated: Partial<MasterUserSettings>) => {

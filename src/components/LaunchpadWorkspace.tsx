@@ -291,6 +291,24 @@ export const LaunchpadWorkspace: React.FC<LaunchpadWorkspaceProps> = ({
     showToast(isId ? 'Semua Posisi Dikosongkan' : 'All Positions Cleared', 'info');
   };
 
+  const getIndicatorMeta = (key: string) => {
+    const metaMap: Record<string, { name: string; weight: string }> = {
+      priceAction: { name: 'Price Action & Trends', weight: '12%' },
+      smc: { name: 'Smart Money (SMC / OB / FVG)', weight: '12%' },
+      orderFlow: { name: 'Order Flow & Delta', weight: '11%' },
+      ict: { name: 'ICT (Killzones & Liquidity)', weight: '10%' },
+      optionFlow: { name: 'Option Flow (PCR & Max Pain)', weight: '9%' },
+      rsi: { name: 'RSI(14) Momentum', weight: '8%' },
+      vwap: { name: 'Institutional VWAP Bands', weight: '8%' },
+      fibonacci: { name: 'Fibonacci Retracement', weight: '8%' },
+      macd: { name: 'MACD (12, 26, 9)', weight: '8%' },
+      ichimoku: { name: 'Ichimoku Kumo Cloud', weight: '6%' },
+      tdSequential: { name: 'TD Sequential (DeMark)', weight: '4%' },
+      elliottWave: { name: 'Elliott Wave Theory', weight: '4%' },
+    };
+    return metaMap[key] || { name: key.toUpperCase(), weight: '8%' };
+  };
+
   // Filtered 12 Indicators
   const filteredIndicators = useMemo(() => {
     if (!evaluation?.indicators) return [];
@@ -976,42 +994,50 @@ Catatan: ${evaluation.executiveNarrative || 'Kalkulasi 12-Indikator kuantitatif 
 
                     {/* Compact Quick 12-Indicator Status Pills */}
                     <div className="space-y-1.5 max-h-[260px] overflow-y-auto pr-1">
-                      {filteredIndicators.map(([key, ind]: [string, any]) => (
-                        <div
-                          key={key}
-                          className={`px-3 py-1.5 rounded-xl border text-xs flex items-center justify-between ${
-                            isDark ? 'bg-[#090d16] border-[#1e293b]' : 'bg-slate-50 border-slate-200'
-                          }`}
-                        >
-                          <div className="min-w-0 pr-2">
-                            <span className={`font-semibold text-[11px] truncate block ${
-                              isDark ? 'text-slate-200' : 'text-slate-800'
-                            }`}>
-                              {key}
-                            </span>
-                            <span className="text-[10px] text-slate-500 truncate block">
-                              {ind?.summary}
-                            </span>
-                          </div>
-                          <span
-                            className={`px-2 py-0.2 rounded text-[10px] font-bold shrink-0 ${
-                              ind?.signal === 'BULLISH'
-                                ? isDark
-                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                                  : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                                : ind?.signal === 'BEARISH'
-                                ? isDark
-                                  ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
-                                  : 'bg-rose-100 text-rose-800 border border-rose-300'
-                                : isDark
-                                ? 'bg-slate-800 text-slate-300'
-                                : 'bg-slate-200 text-slate-800'
+                      {filteredIndicators.map(([key, ind]: [string, any]) => {
+                        const meta = getIndicatorMeta(key);
+                        return (
+                          <div
+                            key={key}
+                            className={`px-3 py-1.5 rounded-xl border text-xs flex items-center justify-between ${
+                              isDark ? 'bg-[#090d16] border-[#1e293b]' : 'bg-slate-50 border-slate-200'
                             }`}
                           >
-                            {ind?.signal}
-                          </span>
-                        </div>
-                      ))}
+                            <div className="min-w-0 pr-2">
+                              <div className="flex items-center gap-1.5">
+                                <span className={`font-semibold text-[11px] truncate block ${
+                                  isDark ? 'text-slate-200' : 'text-slate-800'
+                                }`}>
+                                  {meta.name}
+                                </span>
+                                <span className="text-[9px] font-mono text-cyan-400/80 px-1 py-0.2 rounded bg-cyan-950/40 border border-cyan-800/40 shrink-0">
+                                  {meta.weight}
+                                </span>
+                              </div>
+                              <span className="text-[10px] text-slate-500 truncate block mt-0.5">
+                                {ind?.summary}
+                              </span>
+                            </div>
+                            <span
+                              className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono shrink-0 ${
+                                ind?.signal === 'BULLISH'
+                                  ? isDark
+                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                                    : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                  : ind?.signal === 'BEARISH'
+                                  ? isDark
+                                    ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                                    : 'bg-rose-100 text-rose-800 border border-rose-300'
+                                  : isDark
+                                  ? 'bg-slate-800 text-slate-300'
+                                  : 'bg-slate-200 text-slate-800'
+                              }`}
+                            >
+                              {ind?.signal}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </>
                 ) : isLoading ? (

@@ -715,28 +715,71 @@ function evaluateSignalAtBar(
 
     case 'confluence':
     default: {
-      // 12-Indicator Consensus Model
-      const indKeys = CONFLUENCE_12_INDICATORS;
+      const mode = params.confluence?.strategyMode ?? 'weighted';
 
-      let bullishVotes = 0;
-      let bearishVotes = 0;
+      if (mode === 'majority_vote') {
+        // Majority Voting Consensus Model
+        const indKeys = CONFLUENCE_12_INDICATORS;
+        let bullishVotes = 0;
+        let bearishVotes = 0;
 
-      for (const key of indKeys) {
-        const sig = evaluateSignalAtBar(candles, barIndex, key, params);
-        if (sig === 'BULLISH') bullishVotes++;
-        else if (sig === 'BEARISH') bearishVotes++;
+        for (const key of indKeys) {
+          const sig = evaluateSignalAtBar(candles, barIndex, key, params);
+          if (sig === 'BULLISH') bullishVotes++;
+          else if (sig === 'BEARISH') bearishVotes++;
+        }
+
+        const bullScore = Math.round((bullishVotes / indKeys.length) * 100);
+        const bearScore = Math.round((bearishVotes / indKeys.length) * 100);
+
+        const minAgreed = params.confluence?.minAgreedIndicators ?? 7;
+        const minScore = params.confluence?.minScoreThreshold ?? 60;
+
+        if (bullishVotes >= minAgreed && bullScore >= minScore) {
+          return 'BULLISH';
+        }
+        if (bearishVotes >= minAgreed && bearScore >= minScore) {
+          return 'BEARISH';
+        }
+        return 'NEUTRAL';
       }
 
-      const bullScore = Math.round((bullishVotes / indKeys.length) * 100);
-      const bearScore = Math.round((bearishVotes / indKeys.length) * 100);
+      // Default: Institutional Weighted Continuous Scoring Model (100% Identical with Live Confluence Engine)
+      const weights: Record<IndicatorKey, number> = {
+        priceAction: 0.12,
+        smc: 0.12,
+        orderFlow: 0.11,
+        ict: 0.10,
+        optionFlow: 0.09,
+        rsi: 0.08,
+        vwap: 0.08,
+        fibonacci: 0.08,
+        macd: 0.08,
+        ichimoku: 0.06,
+        tdSequential: 0.04,
+        elliottWave: 0.04,
+        confluence: 0,
+      };
 
-      const minAgreed = params.confluence?.minAgreedIndicators ?? 7;
+      let weightedBullScore = 0;
+      let weightedBearScore = 0;
+
+      for (const key of CONFLUENCE_12_INDICATORS) {
+        const sig = evaluateSignalAtBar(candles, barIndex, key, params);
+        const weight = weights[key] || (1 / 12);
+        if (sig === 'BULLISH') {
+          weightedBullScore += weight * 100;
+        } else if (sig === 'BEARISH') {
+          weightedBearScore += weight * 100;
+        }
+      }
+
       const minScore = params.confluence?.minScoreThreshold ?? 60;
 
-      if (bullishVotes >= minAgreed && bullScore >= minScore) {
+      if (weightedBullScore >= minScore && weightedBullScore > weightedBearScore + 10) {
         return 'BULLISH';
       }
-      if (bearishVotes >= minAgreed && bearScore >= minScore) {
+      if (weightedBearScore >= minScore && weightedBearScore > weightedBullScore + 10) {
         return 'BEARISH';
       }
       return 'NEUTRAL';

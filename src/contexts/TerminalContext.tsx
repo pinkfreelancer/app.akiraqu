@@ -46,9 +46,9 @@ export interface TerminalContextValue {
   t: Translations;
 
   // Display & Ergonomics Domain
-  workspaceMode: 'classic' | 'launchpad';
+  workspaceMode: 'classic' | 'split' | 'launchpad';
   toggleWorkspaceMode: () => void;
-  setWorkspaceModeDirect: (mode: 'classic' | 'launchpad') => void;
+  setWorkspaceModeDirect: (mode: 'classic' | 'split' | 'launchpad') => void;
   isFullWidth: boolean;
   toggleFullWidth: () => void;
   isFullscreen: boolean;
@@ -133,10 +133,10 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     toggleFullWidth,
   } = useTerminalSystem();
 
-  // Workspace Mode
-  const [workspaceMode, setWorkspaceMode] = useState<'classic' | 'launchpad'>(() => {
-    const saved = localStorage.getItem('nexus_workspace_mode') as 'classic' | 'launchpad' | null;
-    return saved === 'launchpad' ? 'launchpad' : 'classic';
+  // Workspace Mode (classic = Single Full, split = Master Anchor Split, launchpad = Quad Grid)
+  const [workspaceMode, setWorkspaceMode] = useState<'classic' | 'split' | 'launchpad'>(() => {
+    const saved = localStorage.getItem('nexus_workspace_mode') as 'classic' | 'split' | 'launchpad' | null;
+    return saved === 'launchpad' || saved === 'split' ? saved : 'classic';
   });
 
   // Trading parameters
@@ -212,13 +212,14 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const toggleWorkspaceMode = useCallback(() => {
     setWorkspaceMode((prev) => {
-      const next = prev === 'launchpad' ? 'classic' : 'launchpad';
+      const next: 'classic' | 'split' | 'launchpad' =
+        prev === 'classic' ? 'split' : prev === 'split' ? 'launchpad' : 'classic';
       localStorage.setItem('nexus_workspace_mode', next);
       return next;
     });
   }, []);
 
-  const setWorkspaceModeDirect = useCallback((mode: 'classic' | 'launchpad') => {
+  const setWorkspaceModeDirect = useCallback((mode: 'classic' | 'split' | 'launchpad') => {
     setWorkspaceMode(mode);
     localStorage.setItem('nexus_workspace_mode', mode);
   }, []);

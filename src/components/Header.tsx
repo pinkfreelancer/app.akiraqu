@@ -38,6 +38,7 @@ import {
   Zap,
   Sliders,
   Terminal as TerminalIcon,
+  Columns,
 } from 'lucide-react';
 import { CryptoSymbolInfo, Timeframe, WebSocketSyncMetrics, StageId } from '../types/crypto.types';
 import { Language, getTranslation } from '../i18n/translations';
@@ -80,8 +81,9 @@ interface HeaderProps {
   onToggleFullscreen?: () => void;
   isFullWidth?: boolean;
   onToggleFullWidth?: () => void;
-  workspaceMode?: 'classic' | 'launchpad';
+  workspaceMode?: 'classic' | 'split' | 'launchpad';
   onToggleWorkspaceMode?: () => void;
+  onSelectWorkspaceMode?: (mode: 'classic' | 'split' | 'launchpad') => void;
   onOpenCommandBar?: () => void;
   onOpenShortcuts?: () => void;
   currentStage?: StageId;
@@ -613,13 +615,15 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="hidden sm:inline font-bold">Alert</span>
           </button>
 
-          {/* Workspace Mode Switcher (Compact) */}
+          {/* Workspace Mode Switcher (Compact 3-state: Fokus, Split, Grid) */}
           {onToggleWorkspaceMode && (
             <button
               id="btn-header-workspace-mode"
               onClick={onToggleWorkspaceMode}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 border rounded-[2px] text-xs font-mono font-bold transition-all cursor-pointer min-h-[38px] ${
                 workspaceMode === 'launchpad'
+                  ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300 shadow-xs'
+                  : workspaceMode === 'split'
                   ? 'bg-pink-500/20 border-pink-500/50 text-pink-300 shadow-xs'
                   : isDark
                   ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-pink-300 hover:border-pink-500/30'
@@ -627,19 +631,24 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
               title={
                 isId
-                  ? 'Ganti Tampilan: Meja Kerja Multi-Panel vs Alur Tunggal (Tekan W)'
-                  : 'Switch Layout: Multi-Panel Workspace vs Single Stage (Key: W)'
+                  ? 'Ganti Tata Letak Meja Kerja: Fokus (Alur Tunggal) ➔ Split (Jangkar Chart) ➔ Grid (4 Kuadran) (Tekan W)'
+                  : 'Switch Layout: Single Focus ➔ Split Chart Anchor ➔ Quad Grid (Key: W)'
               }
             >
               {workspaceMode === 'launchpad' ? (
                 <>
-                  <LayoutGrid className="w-3.5 h-3.5 text-pink-400" />
-                  <span className="hidden xl:inline">Grid</span>
+                  <LayoutGrid className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className="hidden xl:inline">Grid 4P</span>
+                </>
+              ) : workspaceMode === 'split' ? (
+                <>
+                  <Columns className="w-3.5 h-3.5 text-pink-400" />
+                  <span className="hidden xl:inline">Split Chart</span>
                 </>
               ) : (
                 <>
                   <Layers className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="hidden xl:inline">{isId ? 'Alur' : 'Stages'}</span>
+                  <span className="hidden xl:inline">{isId ? 'Fokus' : 'Focus'}</span>
                 </>
               )}
             </button>

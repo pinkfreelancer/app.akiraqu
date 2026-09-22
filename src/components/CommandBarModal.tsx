@@ -48,12 +48,12 @@ interface CommandBarModalProps {
   selectedSymbol: string;
   selectedTimeframe: Timeframe;
   selectedExchange: SupportedExchange;
-  workspaceMode: 'classic' | 'launchpad';
+  workspaceMode: 'classic' | 'split' | 'launchpad';
   onSelectSymbol: (sym: string) => void;
   onSelectTimeframe: (tf: Timeframe) => void;
   onSelectExchange: (ex: SupportedExchange) => void;
   onSelectStage: (stage: StageId) => void;
-  onSelectWorkspaceMode: (mode: 'classic' | 'launchpad') => void;
+  onSelectWorkspaceMode: (mode: 'classic' | 'split' | 'launchpad') => void;
   onToggleFullscreen: () => void;
   onToggleTheme: () => void;
   onOpenExportModal: () => void;
@@ -105,6 +105,19 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
     const list: CommandItem[] = [];
 
     // 1. Workspace Layout Options
+    list.push({
+      id: 'ws-split',
+      type: 'workspace',
+      title: lang === 'id' ? 'Tata Letak Split (Master Chart + Modul)' : 'Split Layout (Master Chart + Module)',
+      subtitle: lang === 'id' ? 'Chart tetap terpaku di kiri, modul aktif di kanan' : 'Anchor chart pinned left, active module right',
+      badge: workspaceMode === 'split' ? 'AKTIF' : undefined,
+      icon: LayoutGrid,
+      action: () => {
+        onSelectWorkspaceMode('split');
+        onClose();
+      },
+    });
+
     list.push({
       id: 'ws-launchpad',
       type: 'workspace',

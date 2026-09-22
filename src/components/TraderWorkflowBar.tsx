@@ -33,6 +33,10 @@ import {
   ChevronDown,
   ChevronUp,
   ArrowRight,
+  LayoutGrid,
+  Columns,
+  Maximize2,
+  RefreshCw,
 } from 'lucide-react';
 import { StageId } from '../types/market.types';
 import { Language } from '../i18n/translations';
@@ -66,6 +70,10 @@ interface TraderWorkflowBarProps {
   theme?: 'light' | 'dark';
   onPersonaChange?: (persona: TraderPersona) => void;
   activePersona?: TraderPersona;
+  workspaceMode?: 'classic' | 'split' | 'launchpad';
+  onSelectWorkspaceMode?: (mode: 'classic' | 'split' | 'launchpad') => void;
+  onTriggerAnalyze?: () => void;
+  isAnalyzing?: boolean;
 }
 
 export const TraderWorkflowBar: React.FC<TraderWorkflowBarProps> = ({
@@ -75,6 +83,10 @@ export const TraderWorkflowBar: React.FC<TraderWorkflowBarProps> = ({
   theme = 'dark',
   onPersonaChange,
   activePersona = 'full_cycle',
+  workspaceMode = 'classic',
+  onSelectWorkspaceMode,
+  onTriggerAnalyze,
+  isAnalyzing = false,
 }) => {
   const isDark = theme === 'dark';
   const isId = lang === 'id';
@@ -392,8 +404,73 @@ export const TraderWorkflowBar: React.FC<TraderWorkflowBarProps> = ({
           </div>
         </div>
 
-        {/* Action / Minimize Toggle */}
-        <div className="flex items-center gap-2 ml-auto">
+        {/* Layout Modes & Action / Minimize Toggle */}
+        <div className="flex items-center gap-2 ml-auto flex-wrap">
+          {/* Layout Mode Presets */}
+          {onSelectWorkspaceMode && (
+            <div className="flex items-center gap-1 bg-slate-900/80 p-0.5 rounded-lg border border-slate-800">
+              <button
+                type="button"
+                onClick={() => onSelectWorkspaceMode('classic')}
+                className={`px-2 py-1 rounded text-xs font-mono font-medium transition-all flex items-center gap-1 cursor-pointer ${
+                  workspaceMode === 'classic'
+                    ? 'bg-pink-600 text-white font-bold shadow-xs'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+                title={isId ? 'Tampilan Fokus Alur Tunggal (1 Modul Penuh)' : 'Focused Single View'}
+              >
+                <Maximize2 className="w-3 h-3" />
+                <span className="hidden sm:inline">{isId ? 'Fokus' : 'Focus'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onSelectWorkspaceMode('split')}
+                className={`px-2 py-1 rounded text-xs font-mono font-medium transition-all flex items-center gap-1 cursor-pointer ${
+                  workspaceMode === 'split'
+                    ? 'bg-pink-600 text-white font-bold shadow-xs'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+                title={isId ? 'Tampilan Split (Chart Jangkar di Kiri + Modul Aktif di Kanan)' : 'Split Master-Detail Anchor View'}
+              >
+                <Columns className="w-3 h-3 text-pink-400" />
+                <span className="hidden sm:inline">{isId ? 'Split Chart' : 'Split'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onSelectWorkspaceMode('launchpad')}
+                className={`px-2 py-1 rounded text-xs font-mono font-medium transition-all flex items-center gap-1 cursor-pointer ${
+                  workspaceMode === 'launchpad'
+                    ? 'bg-pink-600 text-white font-bold shadow-xs'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+                title={isId ? 'Meja Kerja 4 Kuadran (Launchpad Grid)' : 'Quad-Grid Workspace'}
+              >
+                <LayoutGrid className="w-3 h-3 text-cyan-400" />
+                <span className="hidden sm:inline">Grid</span>
+              </button>
+            </div>
+          )}
+
+          {/* Quick Trigger Analyze Button */}
+          {onTriggerAnalyze && (
+            <button
+              type="button"
+              onClick={onTriggerAnalyze}
+              disabled={isAnalyzing}
+              className={`px-2.5 py-1 rounded-lg border text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                isAnalyzing
+                  ? 'bg-pink-500/20 border-pink-500/40 text-pink-300 animate-pulse cursor-not-allowed'
+                  : 'bg-slate-800/90 border-slate-700 text-slate-200 hover:text-pink-300 hover:border-pink-500/40'
+              }`}
+              title={isId ? 'Jalankan kalkulasi kuantitatif 12 indikator' : 'Run 12-indicator quant scan'}
+            >
+              <RefreshCw className={`w-3 h-3 ${isAnalyzing ? 'animate-spin text-pink-400' : 'text-slate-400'}`} />
+              <span className="hidden md:inline">{isAnalyzing ? (isId ? 'Memindai...' : 'Scanning...') : (isId ? 'Scan Kuantitatif' : 'Quant Scan')}</span>
+            </button>
+          )}
+
           <span className="hidden md:inline-block text-[11px] font-mono text-slate-400">
             {isId ? 'Tahap' : 'Step'} <strong className="text-pink-400">{currentStepIndex + 1}</strong> / 7
           </span>

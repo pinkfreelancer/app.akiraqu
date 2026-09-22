@@ -1,6 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
 
+/**
+ * ARCHITECTURE NOTICE: Rate Limiting Store
+ * Current Implementation: Single-Instance In-Memory Map.
+ * 
+ * In a single-container or local preview environment, this in-memory store
+ * tracks request counters by client IP with window resets.
+ * 
+ * For multi-instance horizontal scaling (e.g., multiple Cloud Run container replicas),
+ * persistent state across instances requires an external Redis store using REDIS_URL
+ * (as specified in .env.example). When scaling out, point rateLimitMiddleware to
+ * a Redis-backed distributed counter (ioredis / redis cluster).
+ */
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const isDistributedRedisConfigured = Boolean(process.env.REDIS_URL && process.env.REDIS_URL.trim().length > 0);
 
 export function securityHeadersMiddleware(_req: Request, res: Response, next: NextFunction) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -18,18 +31,28 @@ export function rateLimitMiddleware(req: Request, res: Response, next: NextFunct
   const clientIp = (typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : '') || req.socket.remoteAddress || '127.0.0.1';
   const now = Date.now();
   const windowMs = 60 * 1000;
-  const maxRequests = 600;
+  const maxRequests = Number(process.env.RATE_LIMIT_MAX) || 600;
+
+  // Track rate limiting mode in response headers for infrastructure observability
+  res.setHeader('X-RateLimit-Scope', isDistributedRedisConfigured ? 'distributed-redis-ready' : 'single-instance-in-memory');
+  res.setHeader('X-RateLimit-Limit', String(maxRequests));
 
   const currentRate = rateLimitMap.get(clientIp);
   if (!currentRate || now > currentRate.resetTime) {
     rateLimitMap.set(clientIp, { count: 1, resetTime: now + windowMs });
+    res.setHeader('X-RateLimit-Remaining', String(maxRequests - 1));
+    res.setHeader('X-RateLimit-Reset', String(Math.ceil((now + windowMs) / 1000)));
   } else {
     currentRate.count++;
+    res.setHeader('X-RateLimit-Remaining', String(Math.max(0, maxRequests - currentRate.count)));
+    res.setHeader('X-RateLimit-Reset', String(Math.ceil(currentRate.resetTime / 1000)));
+
     if (currentRate.count > maxRequests) {
       res.status(429).json({
         error: 'Too Many Requests',
-        message: 'Rate limit exceeded: 600 requests per minute',
+        message: `Rate limit exceeded: ${maxRequests} requests per minute`,
         retryAfter: Math.ceil((currentRate.resetTime - now) / 1000),
+        storeScope: isDistributedRedisConfigured ? 'distributed-redis-ready' : 'single-instance-in-memory',
       });
       return;
     }

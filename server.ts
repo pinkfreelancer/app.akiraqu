@@ -14,6 +14,9 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
+// Trust reverse proxy (e.g. Cloud Run, nginx) so client IP is accurately forwarded
+app.set('trust proxy', 1);
+
 // 1. Basic Body Parsing Middleware
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));

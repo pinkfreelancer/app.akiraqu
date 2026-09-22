@@ -11,6 +11,7 @@ import {
   FileText,
   Download,
   AlertCircle,
+  AlertTriangle,
   Clock,
   Percent,
   DollarSign,
@@ -899,6 +900,76 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             {selectedIndicator === 'confluence' ? (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Strategy Scoring Model Selection */}
+                  <div className={`p-3.5 rounded-lg border sm:col-span-2 ${isDark ? 'bg-slate-950/60 border-slate-800/80' : 'bg-white border-slate-200'}`}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-xs font-bold text-slate-200">
+                        {isId ? 'Algoritma Scoring Konfluensi' : 'Confluence Scoring Algorithm'}
+                      </label>
+                      <span className="text-xs font-mono font-bold text-cyan-400">
+                        {(params.confluence?.strategyMode ?? 'weighted') === 'weighted'
+                          ? (isId ? '⚡ Bobot Institusional (Identik Sinyal Live)' : '⚡ Institutional Weighted (Live Engine)')
+                          : (isId ? '🗳️ Voting Mayoritas' : '🗳️ Majority Voting')}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mb-2.5">
+                      {isId
+                        ? 'Mode "Bobot Institusional" menggunakan bobot kontinu 12-indikator (12%/12%/11%/.../4%) identik dengan sinyal Live Terminal.'
+                        : 'Mode "Institutional Weighted" uses calibrated continuous 12-indicator weights (12%/12%/11%/.../4%) matching Live Terminal.'}
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setParams((prev) => ({
+                            ...prev,
+                            confluence: { ...prev.confluence, strategyMode: 'weighted' },
+                          }));
+                        }}
+                        className={`p-2.5 rounded-lg text-xs font-bold border transition-all cursor-pointer text-left ${
+                          (params.confluence?.strategyMode ?? 'weighted') === 'weighted'
+                            ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 shadow-xs'
+                            : isDark
+                            ? 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                          <span>{isId ? 'Bobot Kontinu (Standar Live)' : 'Institutional Weighted (Live)'}</span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1 font-normal">
+                          {isId ? 'Menghitung bobot diferensial per model matematis' : 'Calculates differential model confidence weights'}
+                        </p>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setParams((prev) => ({
+                            ...prev,
+                            confluence: { ...prev.confluence, strategyMode: 'majority_vote' },
+                          }));
+                        }}
+                        className={`p-2.5 rounded-lg text-xs font-bold border transition-all cursor-pointer text-left ${
+                          params.confluence?.strategyMode === 'majority_vote'
+                            ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 shadow-xs'
+                            : isDark
+                            ? 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-slate-500" />
+                          <span>{isId ? 'Voting Mayoritas Sederhana' : 'Majority Vote Model'}</span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1 font-normal">
+                          {isId ? 'Berdasarkan ambang kuorum indikator yang sepakat' : 'Based on minimum agreed indicator count threshold'}
+                        </p>
+                      </button>
+                    </div>
+                  </div>
+
                   {/* Min Score Threshold */}
                   <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950/60 border-slate-800/80' : 'bg-white border-slate-200'}`}>
                     <div className="flex items-center justify-between mb-1.5">
@@ -1014,18 +1085,18 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 text-xs">
                     {[
-                      { key: 'priceAction', name: 'Price Action & S/R', sub: 'Pin Bar & Engulfing', weight: '12%' },
-                      { key: 'smc', name: 'Smart Money (SMC)', sub: 'BoS & FVG Imbalance', weight: '12%' },
-                      { key: 'orderFlow', name: 'Order Flow (CVD)', sub: 'Delta Volume Bias', weight: '11%' },
-                      { key: 'ict', name: 'ICT (OTE Discount)', sub: 'Optimal Trade Entry', weight: '10%' },
-                      { key: 'optionFlow', name: 'Option Flow (PCR)', sub: 'Put/Call Ratio & Max Pain', weight: '9%' },
-                      { key: 'rsi', name: 'RSI Momentum', sub: 'Oversold / Overbought', weight: '8%' },
-                      { key: 'vwap', name: 'VWAP Bands', sub: 'Institutional Reversion', weight: '8%' },
-                      { key: 'fibonacci', name: 'Fibonacci Levels', sub: 'Golden Pocket (0.618)', weight: '8%' },
-                      { key: 'macd', name: 'MACD Momentum', sub: 'Fast/Slow Cross', weight: '8%' },
-                      { key: 'ichimoku', name: 'Ichimoku Cloud', sub: 'Tenkan/Kijun & Kumo', weight: '6%' },
-                      { key: 'tdSequential', name: 'TD Sequential', sub: 'Setup Count 9-13', weight: '4%' },
-                      { key: 'elliottWave', name: 'Elliott Wave', sub: 'Trend Wave Alignment', weight: '4%' },
+                      { key: 'priceAction', name: 'Price Action & S/R', sub: 'Pin Bar & Engulfing', weight: '12%', isSimulated: false },
+                      { key: 'smc', name: 'Smart Money (SMC)', sub: 'BoS & FVG Imbalance', weight: '12%', isSimulated: false },
+                      { key: 'orderFlow', name: 'Order Flow (CVD)', sub: 'Delta Volume Bias', weight: '11%', isSimulated: false },
+                      { key: 'ict', name: 'ICT (OTE Discount)', sub: 'Optimal Trade Entry', weight: '10%', isSimulated: false },
+                      { key: 'optionFlow', name: 'Option Flow (PCR)', sub: 'Put/Call Ratio & Max Pain', weight: '9%', isSimulated: true },
+                      { key: 'rsi', name: 'RSI Momentum', sub: 'Oversold / Overbought', weight: '8%', isSimulated: false },
+                      { key: 'vwap', name: 'VWAP Bands', sub: 'Institutional Reversion', weight: '8%', isSimulated: false },
+                      { key: 'fibonacci', name: 'Fibonacci Levels', sub: 'Golden Pocket (0.618)', weight: '8%', isSimulated: false },
+                      { key: 'macd', name: 'MACD Momentum', sub: 'Fast/Slow Cross', weight: '8%', isSimulated: false },
+                      { key: 'ichimoku', name: 'Ichimoku Cloud', sub: 'Tenkan/Kijun & Kumo', weight: '6%', isSimulated: false },
+                      { key: 'tdSequential', name: 'TD Sequential', sub: 'Setup Count 9-13', weight: '4%', isSimulated: false },
+                      { key: 'elliottWave', name: 'Elliott Wave', sub: 'Trend Wave Alignment', weight: '4%', isSimulated: true },
                     ].map((item, idx) => (
                       <div
                         key={item.key}
@@ -1043,15 +1114,42 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                             {item.weight}
                           </span>
                         </div>
-                        <p className="text-[10px] text-slate-400 mt-0.5 truncate">{item.sub}</p>
+                        <div className="flex items-center justify-between gap-1 mt-1">
+                          <p className="text-[10px] text-slate-400 truncate">{item.sub}</p>
+                          {item.isSimulated && (
+                            <span className="text-[8px] font-bold px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+                              Simulasi
+                            </span>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
             ) : (
-              /* If individual indicator is selected: render its parameters dynamically */
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              /* If individual indicator is selected: render simulation warning if applicable and parameters dynamically */
+              <div className="space-y-4">
+                {(selectedIndicator === 'optionFlow' || selectedIndicator === 'elliottWave') && (
+                  <div className="p-3 rounded-lg border border-amber-500/40 bg-amber-500/10 flex items-start gap-3">
+                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <div className="text-xs">
+                      <strong className="text-amber-300 font-bold block mb-0.5">
+                        {isId ? 'Perhatian: Model Berbasis Estimasi Simulasi' : 'Notice: Simulated / Algorithmic Data Model'}
+                      </strong>
+                      <p className="text-amber-200/80 leading-relaxed text-[11px]">
+                        {selectedIndicator === 'optionFlow'
+                          ? (isId
+                              ? 'Option Flow (PCR) saat ini menggunakan estimasi derivatif sintetis dari pergerakan OHLCV sampai feed data deribit options terintegrasi langsung. Uji backtest mandiri ditujukan untuk eksplorasi konseptual.'
+                              : 'Option Flow (PCR) currently estimates synthetic derivative data from OHLCV until direct Deribit options feeds are connected.')
+                          : (isId
+                              ? 'Elliott Wave menggunakan pengenalan pola gelombang heuristik zig-zag. Uji backtest mandiri harus diinterpretasikan dengan mempertimbangkan sifat subjektif fraktal gelombang.'
+                              : 'Elliott Wave uses heuristic zig-zag wave cycle recognition. Standalone backtest results should be interpreted considering fractal wave subjectivity.')}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {selectedMeta.parameters.map((p) => {
                   const currentVal = (params as any)[selectedIndicator]?.[p.key] ?? p.defaultValue;
                   return (
@@ -1111,6 +1209,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                     </div>
                   );
                 })}
+                </div>
               </div>
             )}
           </div>
@@ -1319,7 +1418,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 {result.profitFactor}
               </span>
               <span className="text-[10px] text-slate-500 block mt-1">
-                {result.profitFactor >= 1.5 ? 'Institutional Grade' : 'Sub-Optimal'}
+                {result.totalTrades < 30
+                  ? (isId ? 'Sampel Belum Cukup (<30)' : 'Insufficient Sample (<30)')
+                  : (result.profitFactor >= 1.5 ? 'Institutional Grade' : 'Sub-Optimal')}
               </span>
             </div>
 
@@ -1399,7 +1500,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'overview'
                   ? 'bg-cyan-500 text-slate-950 shadow-xs font-black'
-                  : isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'
+                  : isDark ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               <BarChart3 className="w-3.5 h-3.5" />
@@ -1410,8 +1511,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               onClick={() => setActiveTab('monte_carlo')}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'monte_carlo'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-xs font-black'
-                  : isDark ? 'text-amber-400 hover:text-amber-200 hover:bg-amber-950/20' : 'text-amber-700 hover:bg-amber-50'
+                  ? 'bg-cyan-500 text-slate-950 shadow-xs font-black'
+                  : isDark ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               <Dice5 className="w-3.5 h-3.5" />
@@ -1427,8 +1528,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               onClick={() => setActiveTab('ai_learner')}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'ai_learner'
-                  ? 'bg-purple-600 text-white shadow-xs font-black'
-                  : isDark ? 'text-purple-300 hover:text-purple-100 hover:bg-purple-900/20' : 'text-purple-700 hover:bg-purple-100'
+                  ? 'bg-cyan-500 text-slate-950 shadow-xs font-black'
+                  : isDark ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               <BrainCircuit className="w-3.5 h-3.5" />
@@ -1443,11 +1544,23 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'trades'
                   ? 'bg-cyan-500 text-slate-950 shadow-xs font-black'
-                  : isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'
+                  : isDark ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
               <span>{isId ? 'Riwayat Transaksi' : 'Trade Logs'} ({result?.trades.length || 0})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('parameters')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'parameters'
+                  ? 'bg-cyan-500 text-slate-950 shadow-xs font-black'
+                  : isDark ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>{isId ? 'Audit Parameter & Risiko' : 'Parameters & Rules'}</span>
             </button>
           </div>
 
@@ -2071,6 +2184,124 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                       ))}
                     </tbody>
                   </table>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 5: Parameters & Risk Audit */}
+            {activeTab === 'parameters' && (
+              <div className="space-y-6">
+                {/* Header & Source Verification */}
+                <div className={`p-4 rounded-xl border ${
+                  isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200'
+                }`}>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+                        <Sliders className="w-4 h-4 text-cyan-400" />
+                        <span>{isId ? `Parameter Aktif: ${selectedMeta.name}` : `Active Parameters: ${selectedMeta.name}`}</span>
+                      </h4>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {selectedMeta.description}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] px-2.5 py-1 rounded-md bg-cyan-950/60 text-cyan-300 border border-cyan-800 font-mono">
+                        {selectedMeta.verificationSource}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Active Indicator Parameters Table */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 pt-2">
+                    {selectedMeta.parameters.map((p) => {
+                      const currentVal = (params as any)[selectedIndicator]?.[p.key] ?? p.defaultValue;
+                      return (
+                        <div
+                          key={p.key}
+                          className={`p-3 rounded-lg border ${
+                            isDark ? 'bg-slate-950/70 border-slate-800' : 'bg-white border-slate-200'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-bold text-slate-300">{p.label}</span>
+                            <span className="text-xs font-mono font-bold text-cyan-400">
+                              {currentVal} {p.unit || ''}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-400 line-clamp-2">{p.description}</p>
+                          <div className="mt-2 text-[10px] font-mono text-slate-500">
+                            Default: {p.defaultValue} | Min: {p.min} | Max: {p.max}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Execution & Friction Audit */}
+                <div className={`p-4 rounded-xl border ${
+                  isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200'
+                }`}>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3 flex items-center gap-2">
+                    <Scale className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>{isId ? 'Audit Konfigurasi Risiko & Friksi Eksekusi' : 'Risk & Execution Friction Configuration'}</span>
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-xs">
+                    <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                        {isId ? 'Modal Awal' : 'Initial Capital'}
+                      </span>
+                      <span className="text-sm font-mono font-bold text-slate-200">
+                        ${config.initialCapital.toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                        {isId ? 'Risiko per Transaksi' : 'Risk per Trade'}
+                      </span>
+                      <span className="text-sm font-mono font-bold text-slate-200">
+                        {config.riskPerTradePercent}%
+                      </span>
+                    </div>
+
+                    <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                        Stop Loss
+                      </span>
+                      <span className="text-sm font-mono font-bold text-rose-400">
+                        {config.stopLossPercent}%
+                      </span>
+                    </div>
+
+                    <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                        Take Profit (R:R)
+                      </span>
+                      <span className="text-sm font-mono font-bold text-emerald-400">
+                        1 : {config.takeProfitRRR}
+                      </span>
+                    </div>
+
+                    <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                        Slippage Model
+                      </span>
+                      <span className="text-sm font-mono font-bold text-amber-400">
+                        {config.slippagePercent}%
+                      </span>
+                    </div>
+
+                    <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                        Maker / Taker Fee
+                      </span>
+                      <span className="text-sm font-mono font-bold text-amber-400">
+                        {config.feePercent}%
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

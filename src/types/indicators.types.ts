@@ -287,5 +287,6 @@ export interface VerifiedParameters {
   confluence: {
     minScoreThreshold: number;
     minAgreedIndicators: number;
+    strategyMode?: 'weighted' | 'majority_vote';
   };
 }

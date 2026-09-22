@@ -7,12 +7,28 @@ const AUTH_TAG_LENGTH = 16;
 const SALT_LENGTH = 32;
 
 /**
- * Derives a 32-byte master encryption key from environment variable or system secret
+ * Derives a 32-byte master encryption key from environment variable or system secret.
+ * Fails fast with an immediate exception if ENCRYPTION_MASTER_KEY is not configured in production.
  */
 function getMasterKey(): Buffer {
-  const secret = process.env.ENCRYPTION_MASTER_KEY || process.env.GEMINI_API_KEY || 'AKIRAQU_FALLBACK_SECURE_VAULT_KEY_2026';
+  const isProduction = process.env.NODE_ENV === 'production';
+  const masterKey = process.env.ENCRYPTION_MASTER_KEY?.trim();
+
+  if (isProduction && !masterKey) {
+    throw new Error(
+      'CRITICAL SECURITY ERROR: ENCRYPTION_MASTER_KEY is not defined in production environment. Refusing to operate with unconfigured or insecure encryption key.'
+    );
+  }
+
+  const keyToUse = masterKey || process.env.GEMINI_API_KEY?.trim();
+  if (!keyToUse) {
+    throw new Error(
+      'CRITICAL SECURITY ERROR: No encryption master key found. ENCRYPTION_MASTER_KEY or GEMINI_API_KEY must be provided.'
+    );
+  }
+
   // Use SHA-256 to ensure exactly 32 bytes key length
-  return crypto.createHash('sha256').update(secret).digest();
+  return crypto.createHash('sha256').update(keyToUse).digest();
 }
 
 export interface EncryptedPayload {

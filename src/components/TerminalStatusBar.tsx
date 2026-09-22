@@ -24,7 +24,7 @@ interface TerminalStatusBarProps {
   wsStatus?: 'connected' | 'connecting' | 'fallback';
   latencyMs?: number;
   syncMetrics?: WebSocketSyncMetrics;
-  workspaceMode: 'classic' | 'launchpad';
+  workspaceMode: 'classic' | 'split' | 'launchpad';
   onToggleWorkspaceMode: () => void;
   onOpenCommandBar: () => void;
   onOpenShortcuts: () => void;

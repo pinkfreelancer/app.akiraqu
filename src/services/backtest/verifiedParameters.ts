@@ -78,6 +78,7 @@ export const DEFAULT_VERIFIED_PARAMETERS: VerifiedParameters = {
   confluence: {
     minScoreThreshold: 60,
     minAgreedIndicators: 7,
+    strategyMode: 'weighted',
   },
 };
 

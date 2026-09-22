@@ -51,6 +51,7 @@ import { PositionSizingView } from './components/execution/PositionSizingView';
 import { MultiExchangeManagerView } from './components/connection/MultiExchangeManagerView';
 import { AlertBuilderView } from './components/connection/AlertBuilderView';
 import { TraderWorkflowBar, TraderPersona } from './components/TraderWorkflowBar';
+import { MasterAnchorChart } from './components/workspace/MasterAnchorChart';
 
 function TerminalApp() {
   const {
@@ -255,6 +256,7 @@ function TerminalApp() {
         onToggleFullWidth={toggleFullWidth}
         workspaceMode={workspaceMode}
         onToggleWorkspaceMode={toggleWorkspaceMode}
+        onSelectWorkspaceMode={setWorkspaceModeDirect}
         onOpenCommandBar={() => setIsCommandBarOpen(true)}
         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
         currentStage={currentStage}
@@ -290,9 +292,13 @@ function TerminalApp() {
               theme={binaryTheme}
               activePersona={traderPersona}
               onPersonaChange={handlePersonaChange}
+              workspaceMode={workspaceMode}
+              onSelectWorkspaceMode={setWorkspaceModeDirect}
+              onTriggerAnalyze={runCurrentAnalysis}
+              isAnalyzing={isLoading}
             />
 
-            {/* Workspace Mode: Launchpad Quad-Grid or Classic Stage Stepper */}
+            {/* Workspace Mode: Launchpad Quad-Grid, Split Master Anchor, or Classic Single Stage */}
             {workspaceMode === 'launchpad' ? (
               <LaunchpadWorkspace
                 candles={candles}
@@ -344,7 +350,7 @@ function TerminalApp() {
               </div>
             )}
 
-            {/* Stage Screen Content */}
+            {/* Stage Screen Content: Split Master-Detail vs Full Stage View */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStage}
@@ -364,6 +370,385 @@ function TerminalApp() {
                     </span>
                   </div>
                 ) : (
+                  workspaceMode === 'split' && currentStage !== 'ticker' ? (
+                    <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+                      {/* Master Anchor: Chart & Live Ticker (Pinned on Left) */}
+                      <div className="xl:col-span-5 sticky top-2 z-10 min-w-0">
+                        <MasterAnchorChart
+                          candles={candles}
+                          symbol={selectedSymbol}
+                          timeframe={selectedTimeframe}
+                          evaluation={evaluation}
+                          livePrice={activeDisplayPrice || undefined}
+                          priceDirection={priceDirection}
+                          wsStatus={wsStatus}
+                          latencyMs={latencyMs}
+                          syncMetrics={syncMetrics}
+                          selectedExchange={selectedExchange}
+                          selectedMarketType={selectedMarketType}
+                          onSelectTimeframe={handleTimeframeChange}
+                          onSelectExchange={handleExchangeChange}
+                          onSelectMarketType={handleMarketTypeChange}
+                          onTriggerAnalyze={runCurrentAnalysis}
+                          onNavigateToStage={selectStage}
+                          isLoading={isLoading}
+                          lang={lang}
+                          theme={binaryTheme}
+                          onCloseSplit={() => setWorkspaceModeDirect('classic')}
+                        />
+                      </div>
+
+                      {/* Detail Column: Active Selected Stage Module */}
+                      <div className="xl:col-span-7 min-w-0 space-y-4">
+                        {currentStage === 'signal' && (
+                          <SignalPage
+                            currentSymbol={selectedSymbol}
+                            onSelectSymbol={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('ticker');
+                            }}
+                            onNavigateToTrade={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('manual_trading');
+                            }}
+                            selectedExchange={selectedExchange}
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'market_heatmap' && (
+                          <MarketHeatmapView
+                            onSelectCoin={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('ticker');
+                            }}
+                            onNavigateToTrade={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('manual_trading');
+                            }}
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'gainers_losers' && (
+                          <GainersLosersView
+                            onSelectCoin={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('ticker');
+                            }}
+                            onNavigateToTrade={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('manual_trading');
+                            }}
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'screening' && (
+                          <ScreeningPage
+                            currentSymbol={selectedSymbol}
+                            onSelectSymbol={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('ticker');
+                            }}
+                            onNavigateToTrade={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('manual_trading');
+                            }}
+                            onAddToWatchlist={(sym) => {
+                              handleSymbolChange(sym);
+                            }}
+                            selectedExchange={selectedExchange}
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'watchlist' && (
+                          <WatchlistPage
+                            currentSymbol={selectedSymbol}
+                            onSelectSymbol={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('ticker');
+                            }}
+                            onNavigateToTrade={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('manual_trading');
+                            }}
+                            selectedExchange={selectedExchange}
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'btc_dominance' && (
+                          <MacroDominanceView
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'onchain_data' && (
+                          <OnChainDataView
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'economic_calendar' && (
+                          <EconomicCalendarView
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'scanner' && (
+                          <ScannerPage
+                            onSelectCoin={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('ticker');
+                            }}
+                            selectedExchange={selectedExchange}
+                            selectedMarketType={selectedMarketType}
+                            lang={lang}
+                            theme={binaryTheme}
+                          />
+                        )}
+                        {currentStage === 'mtf_screener' && (
+                          <MtfScreenerView
+                            onSelectCoin={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('ticker');
+                            }}
+                            onNavigateToTrade={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('manual_trading');
+                            }}
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'orderflow' && (
+                          <OrderflowHeatmapPage
+                            symbol={selectedSymbol}
+                            evaluation={evaluation}
+                            candles={candles}
+                            timeframe={selectedTimeframe}
+                            selectedExchange={selectedExchange}
+                            selectedMarketType={selectedMarketType}
+                            lang={lang}
+                            theme={binaryTheme}
+                          />
+                        )}
+                        {currentStage === 'volatility_scanner' && (
+                          <VolatilityScannerView
+                            onSelectCoin={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('ticker');
+                            }}
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'correlation_beta' && (
+                          <CorrelationBetaView
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'return_distribution' && (
+                          <ReturnDistributionView
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'active_orders' && (
+                          <ActiveOrdersView
+                            onNavigateToTrade={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('manual_trading');
+                            }}
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'position_sizing' && (
+                          <PositionSizingView
+                            currentSymbol={selectedSymbol}
+                            currentPrice={activeDisplayPrice || 88500}
+                            onNavigateToTrade={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('manual_trading');
+                            }}
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'multi_exchange' && (
+                          <MultiExchangeManagerView
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'alerts' && (
+                          <AlertBuilderView
+                            currentSymbol={selectedSymbol}
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'indicators' && (
+                          evaluation ? (
+                            <IndicatorsPage
+                              indicators={evaluation.indicators}
+                              onOpenBacktest={openBacktest}
+                              lang={lang}
+                              theme={binaryTheme}
+                            />
+                          ) : (
+                            <PendingAnalysisCard
+                              symbol={selectedSymbol}
+                              timeframe={selectedTimeframe}
+                              onTriggerAnalyze={runCurrentAnalysis}
+                              onGoToChart={() => selectStage('ticker')}
+                              isLoading={isLoading}
+                              lang={lang}
+                              theme={binaryTheme}
+                            />
+                          )
+                        )}
+                        {currentStage === 'confluence' && (
+                          evaluation ? (
+                            <ConfluencePage
+                              score={evaluation.confluenceScore}
+                              bias={evaluation.marketBias}
+                              bullishCount={evaluation.bullishCount}
+                              bearishCount={evaluation.bearishCount}
+                              neutralCount={evaluation.neutralCount}
+                              indicators={evaluation.indicators}
+                              lang={lang}
+                              theme={binaryTheme}
+                            />
+                          ) : (
+                            <PendingAnalysisCard
+                              symbol={selectedSymbol}
+                              timeframe={selectedTimeframe}
+                              onTriggerAnalyze={runCurrentAnalysis}
+                              onGoToChart={() => selectStage('ticker')}
+                              isLoading={isLoading}
+                              lang={lang}
+                              theme={binaryTheme}
+                            />
+                          )
+                        )}
+                        {currentStage === 'sentiment' && (
+                          <SentimentNewsPage
+                            onSelectCoin={(sym) => {
+                              handleSymbolChange(sym);
+                              selectStage('ticker');
+                            }}
+                            theme={binaryTheme}
+                          />
+                        )}
+                        {currentStage === 'risk' && (
+                          evaluation ? (
+                            <RiskPage
+                              initialRiskPlan={evaluation.riskPlan}
+                              symbol={selectedSymbol}
+                              indicators={evaluation.indicators}
+                              currentPrice={activeDisplayPrice || evaluation.riskPlan?.currentPrice}
+                              lang={lang}
+                              theme={binaryTheme}
+                            />
+                          ) : (
+                            <PendingAnalysisCard
+                              symbol={selectedSymbol}
+                              timeframe={selectedTimeframe}
+                              onTriggerAnalyze={runCurrentAnalysis}
+                              onGoToChart={() => selectStage('ticker')}
+                              isLoading={isLoading}
+                              lang={lang}
+                              theme={binaryTheme}
+                            />
+                          )
+                        )}
+                        {(currentStage === 'trading' ||
+                          currentStage === 'manual_trading' ||
+                          currentStage === 'bot' ||
+                          currentStage === 'journal' ||
+                          currentStage === 'portfolio' ||
+                          currentStage === 'reports') && (
+                          <TradingHubPage
+                            currentSymbol={selectedSymbol}
+                            currentPrice={activeDisplayPrice || 88500}
+                            currentScore={evaluation?.confluenceScore || 80}
+                            selectedExchange={selectedExchange}
+                            selectedMarketType={selectedMarketType}
+                            currentStage={currentStage}
+                            onSelectStage={selectStage}
+                            onSelectSymbol={handleSymbolChange}
+                            theme={binaryTheme}
+                            lang={lang}
+                          />
+                        )}
+                        {currentStage === 'backtest' && (
+                          <BacktestPage
+                            symbol={selectedSymbol}
+                            timeframe={selectedTimeframe}
+                            currentCandles={candles}
+                            initialIndicator={backtestIndicator}
+                            lang={lang}
+                            theme={binaryTheme}
+                            isFullWidth={isFullWidth}
+                            isFullscreen={isFullscreen}
+                            onToggleFullscreen={toggleFullscreen}
+                            onToggleFullWidth={toggleFullWidth}
+                          />
+                        )}
+                        {currentStage === 'output' && (
+                          evaluation ? (
+                            <OutputPage
+                              evaluation={evaluation}
+                              markdownNarrative={evaluation.executiveNarrative}
+                              jsonPayload={evaluation.machinePayloadJson}
+                              symbol={evaluation.symbol}
+                              timeframe={evaluation.timeframe}
+                              aiEngine={evaluation.aiEngine}
+                              currentPrice={activeDisplayPrice || evaluation.riskPlan?.currentPrice}
+                              onNavigateToStage={selectStage}
+                              lang={lang}
+                              theme={binaryTheme}
+                            />
+                          ) : (
+                            <PendingAnalysisCard
+                              symbol={selectedSymbol}
+                              timeframe={selectedTimeframe}
+                              onTriggerAnalyze={runCurrentAnalysis}
+                              onGoToChart={() => selectStage('ticker')}
+                              isLoading={isLoading}
+                              lang={lang}
+                              theme={binaryTheme}
+                            />
+                          )
+                        )}
+                        {currentStage === 'settings' && (
+                          <SettingsPage
+                            lang={lang}
+                            onToggleLang={toggleLang}
+                            theme={theme}
+                            onToggleTheme={toggleTheme}
+                            onSelectTheme={setEngineTheme}
+                            customThemeColor={customThemeColor}
+                            onUpdateCustomColor={setCustomThemeColor}
+                            customThemeBg={customThemeBg}
+                            onUpdateCustomBg={setCustomThemeBg}
+                            isFullscreen={isFullscreen}
+                            onToggleFullscreen={toggleFullscreen}
+                            isFullWidth={isFullWidth}
+                            onToggleFullWidth={toggleFullWidth}
+                            workspaceMode={workspaceMode}
+                            onToggleWorkspaceMode={toggleWorkspaceMode}
+                            onNavigateToStage={selectStage}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  ) : (
                   <>
                     {currentStage === 'ticker' && (
                       <TickerPage
@@ -736,8 +1121,9 @@ function TerminalApp() {
                       />
                     )}
                   </>
-                )}
-              </motion.div>
+                )
+              )}
+            </motion.div>
             </AnimatePresence>
           </div>
         )}

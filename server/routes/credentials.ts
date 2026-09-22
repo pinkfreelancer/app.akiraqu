@@ -1,8 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { encryptExchangeCredentials, decryptExchangeCredentials } from '../services/cryptoEncryption';
+import { requireCredentialAuth } from '../middleware/auth';
 import ccxt from 'ccxt';
 
 export const credentialsRouter = Router();
+
+// Enforce authentication & authorization on all /credentials/* endpoints
+credentialsRouter.use(requireCredentialAuth);
 
 /**
  * POST /api/v1/credentials/encrypt
