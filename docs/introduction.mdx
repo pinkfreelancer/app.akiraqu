@@ -1,0 +1,84 @@
+---
+title: "Pengenalan AkiraQu"
+description: "Terminal analitik kuantitatif kripto multi-exchange berlatensi rendah dengan sinkronisasi cloud real-time."
+---
+
+import { Card, CardGroup, Note, Steps, Step, Check } from '@mintlify/components';
+
+## Gambaran Umum
+
+**AkiraQu** adalah terminal analitik dan eksekusi perdagangan kripto kelas institusional. Platform ini menggabungkan umpan data pasar (*real-time market feeds*) dari bursa global terkemuka, kalkulasi 10 indikator teknikal mandiri, serta manajemen risiko tingkat lanjut dalam satu antarmuka terpadu.
+
+<CardGroup cols={2}>
+  <Card title="Multi-Exchange Ultra-Fast" icon="bolt" color="#f43f5e">
+    Akses aliran harga real-time melalui WebSocket dan REST gateway Binance, OKX, Bybit, KuCoin, Bitget, dan Crypto.com tanpa batasan ISP.
+  </Card>
+  <Card title="Mesin Kuantitatif Lokal" icon="chart-mixed" color="#10b981">
+    Kalkulasi indikator mutakhir (SuperTrend, EMA Cloud, Order Flow Delta, VWAP) langsung di browser Anda dengan latensi di bawah 16 milidetik.
+  </Card>
+  <Card title="Jurnal Trading Cloud" icon="cloud-check" color="#38bdf8">
+    Simpan riwayat setup, screenshot grafik, evaluasi emosi, dan metrik PnL tersinkronisasi otomatis via Google Cloud Firestore.
+  </Card>
+  <Card title="Arsitektur Non-Kustodian" icon="shield-halved" color="#ec4899">
+    Kunci API dan aset sepenuhnya berada di bawah kendali Anda. AkiraQu tidak pernah memegang kendali penarikan dana.
+  </Card>
+</CardGroup>
+
+---
+
+## Solusi yang Ditawarkan AkiraQu
+
+Perdagangan kripto konvensional kerap terkendala oleh antarmuka bursa yang berat, eksekusi terfragmentasi antar-platform, dan bias psikologis pedagang. AkiraQu mengatasi masalah ini secara sistematis:
+
+1. **Agregasi Likuiditas Real-Time**  
+   Bandingkan harga Spot dan Kontrak Perpetual (Futures) secara berdampingan. Deteksi anomali spread dan lonjakan volume dalam hitungan milidetik.
+
+2. **Kalkulasi On-Demand Efisien**  
+   Algoritma kami hanya memproses data pada aset yang sedang Anda amati. Ini memangkas beban memori hingga 80% dan menjaga rendering grafik tetap mulus di 60 FPS.
+
+3. **Disiplin Manajemen Modal Terukur**  
+   Kalkulator ukuran posisi (*position sizing*) dan simulasi DCA terintegrasi langsung pada grafik untuk mencegah *overleveraging*.
+
+---
+
+## Panduan Memulai Cepat (Quick Start)
+
+Mulai analisis dan perdagangan Anda dalam waktu kurang dari dua menit:
+
+<Steps>
+  <Step title="Autentikasi dengan Akun Google (Gmail)">
+    Buka aplikasi dan klik tombol **Masuk dengan Akun Google**. Sistem menghubungkan identitas Anda secara instan menggunakan protokol aman OAuth 2.0 untuk mengaktifkan sinkronisasi jurnal cloud.
+
+    <Note>
+      AkiraQu tidak memerlukan kata sandi khusus dan tidak pernah meminta akses ke email pribadi Anda selain nama dan alamat Gmail publik.
+    </Note>
+  </Step>
+
+  <Step title="Pilih Pasangan Aset & Exchange">
+    Gunakan bilah pencarian instan (tekan `Ctrl + K` atau `Cmd + K`) untuk memilih lebih dari 900+ pasangan aset seperti `BTC/USDT`, `ETH/USDT`, atau `SOL/USDT`. Tentukan tipe pasar: **SPOT** atau **FUTURES**.
+  </Step>
+
+  <Step title="Aktifkan Indikator Kuantitatif">
+    Buka panel indikator di bagian atas kanvas grafik. Pilih kombinasi strategi Anda:
+    - **Trend Following:** SuperTrend (10, 3.0) + EMA Ribbon (20/50/200).
+    - **Momentum & Volume:** Order Flow CVD, Volume Profile, RSI (14), dan MACD.
+    - **Volatilitas:** Bollinger Bands & Average True Range (ATR).
+  </Step>
+
+  <Step title="Tentukan Parameter Risiko & Simpan Jurnal">
+    Masukkan modal akun dan toleransi risiko per perdagangan (contoh: 1% atau 2%). Terminal menghitung jumlah lot kontrak optimal secara otomatis. Simpan rencana transaksi Anda ke **Jurnal Trading** dengan satu klik.
+  </Step>
+</Steps>
+
+---
+
+## Langkah Berikutnya
+
+<CardGroup cols={2}>
+  <Card title="Panduan Keamanan API" icon="lock" href="/api-security">
+    Pelajari cara menghubungkan API Key bursa secara aman dengan izin terbatas.
+  </Card>
+  <Card title="Buka Terminal Sekarang" icon="arrow-up-right-from-square" href="https://vercel.app">
+    Akses terminal AkiraQu langsung di peramban web Anda.
+  </Card>
+</CardGroup>

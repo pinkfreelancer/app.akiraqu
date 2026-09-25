@@ -90,6 +90,7 @@ interface HeaderProps {
   onToggleWorkbench?: () => void;
   onOpenCommandBar?: () => void;
   onOpenShortcuts?: () => void;
+  onOpenDocs?: () => void;
   currentStage?: StageId;
   onSelectStage?: (stage: StageId) => void;
   isSidebarOpen?: boolean;
@@ -138,6 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleWorkbench,
   onOpenCommandBar,
   onOpenShortcuts,
+  onOpenDocs,
   currentStage = 'ticker',
   onSelectStage,
   isSidebarOpen = true,
@@ -307,6 +309,24 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <span className="hidden sm:inline">Alert</span>
           </button>
+
+          {/* Documentation Menu Button (Doc) */}
+          {onOpenDocs && (
+            <button
+              id="btn-header-docs-toggle"
+              type="button"
+              onClick={onOpenDocs}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] border text-xs font-mono font-bold transition-all cursor-pointer min-h-[30px] ${
+                isDark
+                  ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-pink-300 hover:border-pink-500/40 hover:bg-slate-800/80'
+                  : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600 hover:border-pink-500/30'
+              }`}
+              title={isId ? 'Buka Dokumentasi & Panduan API (Mintlify)' : 'Open Documentation & API Guide (Mintlify)'}
+            >
+              <BookOpen className="w-3.5 h-3.5 text-pink-400 shrink-0" />
+              <span>Doc</span>
+            </button>
+          )}
 
           {/* Combined Settings Dropdown (Theme, Language, Fullscreen) */}
           <div className="relative" ref={dropdownRef}>
@@ -483,6 +503,28 @@ export const Header: React.FC<HeaderProps> = ({
                         <span>{isFullscreen ? t.header.exitFullscreen : t.header.fullscreen}</span>
                       </span>
                       <span className="text-[10px] text-slate-400">F11 / ESC</span>
+                    </button>
+                  )}
+
+                  {/* Documentation Quick Action */}
+                  {onOpenDocs && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onOpenDocs();
+                        setIsSettingsOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-[2px] text-xs font-mono border transition-colors cursor-pointer ${
+                        isDark
+                          ? 'bg-[#0b0f19] border-[#1e293b] hover:bg-slate-800/70 text-slate-200 hover:border-pink-500/40'
+                          : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700 hover:border-pink-400'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <BookOpen className="w-3.5 h-3.5 text-pink-400" />
+                        <span>{isId ? 'Dokumentasi & API' : 'Documentation & API'}</span>
+                      </span>
+                      <span className="text-[10px] text-pink-400 font-bold">Doc</span>
                     </button>
                   )}
 
@@ -854,6 +896,22 @@ export const Header: React.FC<HeaderProps> = ({
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span>{t.header.assuranceRegister}</span>
             </button>
+
+            {onOpenDocs && (
+              <button
+                type="button"
+                onClick={() => {
+                  onOpenDocs();
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`col-span-2 flex items-center justify-center gap-2 p-2.5 rounded-[2px] text-xs font-semibold border transition cursor-pointer min-h-[44px] ${
+                  isDark ? 'bg-[#0f172a] border-pink-500/30 text-pink-300' : 'bg-pink-50 border-pink-200 text-pink-700'
+                }`}
+              >
+                <BookOpen className="w-4 h-4 text-pink-400" />
+                <span>{isId ? 'Dokumentasi & Panduan API (Doc)' : 'Documentation & API Guide (Doc)'}</span>
+              </button>
+            )}
           </div>
         </div>
       )}

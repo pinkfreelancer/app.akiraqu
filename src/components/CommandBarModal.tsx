@@ -59,6 +59,7 @@ interface CommandBarModalProps {
   onOpenExportModal: () => void;
   onOpenAssuranceModal: () => void;
   onOpenShortcutsModal: () => void;
+  onOpenDocsModal?: () => void;
   lang?: Language;
   theme?: 'light' | 'dark';
 }
@@ -81,6 +82,7 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
   onOpenExportModal,
   onOpenAssuranceModal,
   onOpenShortcutsModal,
+  onOpenDocsModal,
   lang = 'id',
   theme = 'dark',
 }) => {
@@ -294,6 +296,19 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
           onClose();
           onOpenAssuranceModal();
         },
+      },
+      {
+        id: 'act-docs',
+        type: 'action',
+        title: lang === 'id' ? 'Buka Dokumentasi & Panduan API (Mintlify)' : 'Open Documentation & API Guide (Mintlify)',
+        subtitle: 'introduction.mdx • api-security.mdx • mintlify.json',
+        icon: BookOpen,
+        shortcut: 'Doc',
+        badge: 'MINTLIFY',
+        action: () => {
+          onClose();
+          if (onOpenDocsModal) onOpenDocsModal();
+        },
       }
     );
 
@@ -316,6 +331,7 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
     onOpenExportModal,
     onOpenAssuranceModal,
     onOpenShortcutsModal,
+    onOpenDocsModal,
     onClose,
   ]);
 

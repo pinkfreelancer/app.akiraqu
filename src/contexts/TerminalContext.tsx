@@ -29,6 +29,7 @@ export interface TerminalContextValue {
   navigateToLanding: () => void;
   navigateToLogin: () => void;
   navigateToTerminal: (stage?: StageId) => void;
+  navigateToDocs: () => void;
   selectStage: (stage: StageId) => void;
   openBacktest: (indicatorKey?: IndicatorKey) => void;
 
@@ -114,6 +115,7 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     navigateToLanding,
     navigateToLogin,
     navigateToTerminal,
+    navigateToDocs,
     selectStage,
     openBacktest,
   } = useTerminalNavigation('ticker');
@@ -457,6 +459,7 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     navigateToLanding,
     navigateToLogin,
     navigateToTerminal,
+    navigateToDocs,
     selectStage,
     openBacktest,
 
@@ -530,6 +533,7 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     navigateToLanding,
     navigateToLogin,
     navigateToTerminal,
+    navigateToDocs,
     selectStage,
     openBacktest,
     lang,

@@ -53,6 +53,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
         { keys: ['F'], desc: lang === 'id' ? 'Toggle Fullscreen Tanpa Distraksi' : 'Toggle Distraction-Free Fullscreen' },
         { keys: ['R'], desc: lang === 'id' ? 'Re-analisa Confluence / Refresh Data' : 'Recompute Confluence / Refresh' },
         { keys: ['?'], desc: lang === 'id' ? 'Buka Panduan Shortcut Ini' : 'Open this Shortcuts Guide' },
+        { keys: ['Doc'], desc: lang === 'id' ? 'Buka Dokumentasi & Panduan API' : 'Open Documentation & API Guide' },
       ],
     },
     {

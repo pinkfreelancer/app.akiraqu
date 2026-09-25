@@ -8,6 +8,7 @@ import {
   X,
   RotateCcw,
   CandlestickChart,
+  BookOpen,
 } from 'lucide-react';
 import { StageId, MarketBias } from '../types/market.types';
 import { Language } from '../i18n/translations';
@@ -28,6 +29,7 @@ interface SidebarProps {
   marketBias?: MarketBias | string;
   wsStatus?: 'connected' | 'connecting' | 'disconnected' | 'error' | 'fallback';
   latencyMs?: number;
+  onOpenDocs?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -41,6 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   marketBias,
   wsStatus = 'connected',
   latencyMs = 28,
+  onOpenDocs,
 }) => {
   const isDark = theme === 'dark';
   const isId = lang === 'id';
@@ -461,16 +464,45 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span>{isId ? 'Ke Grafik Utama' : 'Go to Main Chart'}</span>
                 </button>
               )}
+
+              {/* Documentation Quick Button */}
+              {onOpenDocs && (
+                <button
+                  type="button"
+                  onClick={onOpenDocs}
+                  className={`w-full py-1.5 px-2 rounded-lg border text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    isDark
+                      ? 'bg-slate-900/90 border-slate-800 text-slate-300 hover:text-pink-300 hover:border-pink-500/40'
+                      : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600 hover:border-pink-400'
+                  }`}
+                  title={isId ? 'Dokumentasi & Panduan API (Mintlify)' : 'Documentation & API Guide (Mintlify)'}
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-pink-400" />
+                  <span>{isId ? 'Dokumentasi (Doc)' : 'Documentation (Doc)'}</span>
+                </button>
+              )}
             </div>
           ) : (
-            <div
-              className="flex flex-col items-center justify-center py-1.5 cursor-pointer transition-colors hover:bg-slate-800/30 rounded-lg"
-              title={`Live Feed: ${wsStatus} (${latencyMs}ms) - Klik untuk membuka sidebar`}
-              onClick={onToggleOpen}
-            >
-              <span className="text-[10px] font-mono text-slate-400 font-bold tracking-tighter">
-                {latencyMs}ms
-              </span>
+            <div className="flex flex-col items-center gap-1">
+              {onOpenDocs && (
+                <button
+                  type="button"
+                  onClick={onOpenDocs}
+                  className="p-1 rounded-md text-slate-400 hover:text-pink-400 hover:bg-slate-800/40 transition-colors cursor-pointer"
+                  title={isId ? 'Dokumentasi (Doc)' : 'Documentation (Doc)'}
+                >
+                  <BookOpen className="w-4 h-4 text-pink-400" />
+                </button>
+              )}
+              <div
+                className="flex flex-col items-center justify-center py-1 cursor-pointer transition-colors hover:bg-slate-800/30 rounded-lg"
+                title={`Live Feed: ${wsStatus} (${latencyMs}ms) - Klik untuk membuka sidebar`}
+                onClick={onToggleOpen}
+              >
+                <span className="text-[10px] font-mono text-slate-400 font-bold tracking-tighter">
+                  {latencyMs}ms
+                </span>
+              </div>
             </div>
           )}
         </div>

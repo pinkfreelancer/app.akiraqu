@@ -35,6 +35,7 @@ import { OutputPage } from './pages/OutputPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
+import { DocsPage } from './pages/DocsPage';
 
 // Newly structured Terminal Views
 import { MarketHeatmapView } from './components/market/MarketHeatmapView';
@@ -61,6 +62,7 @@ function TerminalApp() {
     navigateToLanding,
     navigateToLogin,
     navigateToTerminal,
+    navigateToDocs,
     selectStage,
     openBacktest,
 
@@ -203,6 +205,7 @@ function TerminalApp() {
         onToggleTheme={toggleTheme}
         onNavigateToTerminal={navigateToTerminal}
         onNavigateToLogin={navigateToLogin}
+        onOpenDocs={navigateToDocs}
       />
     );
   }
@@ -214,6 +217,20 @@ function TerminalApp() {
         lang={lang}
         theme={binaryTheme}
         onNavigateToTerminal={() => navigateToTerminal()}
+        onNavigateToLanding={navigateToLanding}
+      />
+    );
+  }
+
+  // If in Docs Mode, render the dedicated Full Documentation Page
+  if (viewMode === 'docs') {
+    return (
+      <DocsPage
+        lang={lang}
+        theme={binaryTheme}
+        onSetLang={toggleLang}
+        onToggleTheme={toggleTheme}
+        onNavigateToTerminal={navigateToTerminal}
         onNavigateToLanding={navigateToLanding}
       />
     );
@@ -263,6 +280,7 @@ function TerminalApp() {
         onToggleWorkbench={toggleTraderWorkbench}
         onOpenCommandBar={() => setIsCommandBarOpen(true)}
         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+        onOpenDocs={navigateToDocs}
         currentStage={currentStage}
         onSelectStage={selectStage}
         isSidebarOpen={isSidebarOpen}
@@ -283,6 +301,7 @@ function TerminalApp() {
           marketBias={evaluation?.marketBias}
           wsStatus={wsStatus}
           latencyMs={latencyMs}
+          onOpenDocs={navigateToDocs}
         />
 
         {/* Scrollable Stage Workspace Content */}
@@ -1254,6 +1273,7 @@ function TerminalApp() {
         onOpenExportModal={() => setIsExportModalOpen(true)}
         onOpenAssuranceModal={() => setIsAssuranceModalOpen(true)}
         onOpenShortcutsModal={() => setIsShortcutsModalOpen(true)}
+        onOpenDocsModal={navigateToDocs}
         lang={lang}
         theme={binaryTheme}
       />

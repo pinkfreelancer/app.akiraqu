@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { StageId, IndicatorKey } from '../types/crypto.types';
 
-export type TerminalViewMode = 'landing' | 'login' | 'terminal';
+export type TerminalViewMode = 'landing' | 'login' | 'terminal' | 'docs';
 
 export interface UseTerminalNavigationReturn {
   viewMode: TerminalViewMode;
@@ -10,6 +10,7 @@ export interface UseTerminalNavigationReturn {
   navigateToLanding: () => void;
   navigateToLogin: () => void;
   navigateToTerminal: (stage?: StageId) => void;
+  navigateToDocs: () => void;
   selectStage: (stage: StageId) => void;
   openBacktest: (indicatorKey?: IndicatorKey) => void;
 }
@@ -17,7 +18,7 @@ export interface UseTerminalNavigationReturn {
 export function useTerminalNavigation(initialStage: StageId = 'ticker'): UseTerminalNavigationReturn {
   const [viewMode, setViewMode] = useState<TerminalViewMode>(() => {
     const saved = localStorage.getItem('imasbtc_view_mode') as TerminalViewMode | null;
-    return saved === 'landing' || saved === 'login' ? saved : 'terminal';
+    return saved === 'landing' || saved === 'login' || saved === 'docs' ? saved : 'terminal';
   });
 
   const [currentStage, setCurrentStage] = useState<StageId>(initialStage);
@@ -31,6 +32,11 @@ export function useTerminalNavigation(initialStage: StageId = 'ticker'): UseTerm
   const navigateToLogin = useCallback(() => {
     setViewMode('login');
     localStorage.setItem('imasbtc_view_mode', 'login');
+  }, []);
+
+  const navigateToDocs = useCallback(() => {
+    setViewMode('docs');
+    localStorage.setItem('imasbtc_view_mode', 'docs');
   }, []);
 
   const navigateToTerminal = useCallback((stage?: StageId) => {
@@ -61,6 +67,7 @@ export function useTerminalNavigation(initialStage: StageId = 'ticker'): UseTerm
     navigateToLanding,
     navigateToLogin,
     navigateToTerminal,
+    navigateToDocs,
     selectStage,
     openBacktest,
   };

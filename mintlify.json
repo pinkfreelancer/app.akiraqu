@@ -1,0 +1,68 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "AkiraQu Quantitative Terminal",
+  "logo": {
+    "dark": "/images/logo-dark.svg",
+    "light": "/images/logo-light.svg",
+    "href": "https://vercel.app"
+  },
+  "favicon": "/favicon.ico",
+  "colors": {
+    "primary": "#f43f5e",
+    "light": "#fb7185",
+    "dark": "#e11d48",
+    "background": {
+      "dark": "#070b14",
+      "light": "#ffffff"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "Landing Page",
+      "url": "https://vercel.app"
+    },
+    {
+      "name": "Dasbor Terminal",
+      "url": "https://vercel.app/terminal"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Buka Terminal",
+    "url": "https://vercel.app"
+  },
+  "navigation": [
+    {
+      "group": "Memulai",
+      "pages": [
+        "introduction",
+        "quickstart"
+      ]
+    },
+    {
+      "group": "Navigasi Terminal Akiraqu",
+      "pages": [
+        "features/chart-analytics",
+        "features/order-book-flow",
+        "features/trading-journal",
+        "features/risk-management",
+        "features/multi-exchange"
+      ]
+    },
+    {
+      "group": "Keamanan & Kredensial",
+      "pages": [
+        "api-security"
+      ]
+    },
+    {
+      "group": "Bantuan & Integrasi",
+      "pages": [
+        "troubleshooting"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com",
+    "x": "https://x.com"
+  }
+}

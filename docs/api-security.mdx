@@ -1,0 +1,127 @@
+---
+title: "Keamanan Kunci API"
+description: "Panduan menghubungkan API Key bursa secara aman dengan prinsip hak akses terbatas (Least Privilege)."
+---
+
+import { Card, CardGroup, Note, Warning, Steps, Step, Accordion, AccordionGroup } from '@mintlify/components';
+
+## Prinsip Keamanan Utama AkiraQu
+
+AkiraQu menerapkan arsitektur **Non-Kustodian**. Terminal tidak pernah menyimpan aset Anda dan tidak memiliki hak memindahkan dana dari akun bursa Anda.
+
+<Warning>
+  **PERINGATAN DANA KRITIS:**  
+  Jangan pernah mengaktifkan izin **Penarikan (Withdrawals)** atau **Transfer Dana** saat membuat API Key di bursa mana pun. AkiraQu **hanya** memerlukan izin Baca (*Read-Only*) dan Perdagangan (*Trade Execution*).
+</Warning>
+
+---
+
+## Matriks Izin Akses Kunci (*Permission Matrix*)
+
+Sebelum memasukkan kredensial API ke dalam terminal, pastikan konfigurasi izin di akun bursa Anda mengikuti standar berikut:
+
+| Jenis Izin | Status di Bursa | Keterangan |
+| :--- | :---: | :--- |
+| **Can Read / Read-Only** | **WAJIB (Diaktifkan)** | Membaca saldo akun, posisi terbuka, dan riwayat pesanan. |
+| **Spot & Margin Trading** | **OPSIONAL** | Hanya aktifkan jika Anda ingin mengeksekusi order Spot langsung dari terminal. |
+| **Futures Trading** | **OPSIONAL** | Hanya aktifkan jika Anda memperdagangkan kontrak derivatif / perpetual. |
+| **Enable Withdrawals** | **DILARANG (Nonaktifkan)** | **Jangan pernah dicentang.** Penarikan dana tidak diperlukan oleh AkiraQu. |
+| **Internal Transfer** | **DILARANG (Nonaktifkan)** | Menolak pemindahan aset antar-dompet atau sub-akun. |
+
+---
+
+## Cara Membuat API Key di Bursa Populer
+
+<AccordionGroup>
+  <Accordion title="Binance (Spot & Futures)" icon="arrows-split-up-and-left">
+    <Steps>
+      <Step title="Buka Manajemen API">
+        Masuk ke akun Binance Anda, klik ikon profil di sudut kanan atas, lalu pilih **API Management**.
+      </Step>
+      <Step title="Buat Kunci Baru">
+        Klik tombol **Create API**, pilih jenis **System generated**, lalu beri label (misalnya: `AkiraQu-Terminal`).
+      </Step>
+      <Step title="Konfigurasi Pembatasan Hak Akses">
+        Centang opsi berikut:
+        - `Can Read` (Aktif secara default)
+        - `Enable Spot & Margin Trading` (Jika trading Spot)
+        - `Enable Futures` (Jika trading Futures)
+        
+        **Pastikan kotak `Enable Withdrawals` tetap KOSONG (tidak dicentang).**
+      </Step>
+      <Step title="Simpan API Key & Secret Key">
+        Salin *API Key* dan *Secret Key* Anda sekarang. Binance menyembunyikan Secret Key secara permanen setelah Anda meninggalkan halaman ini.
+      </Step>
+    </Steps>
+  </Accordion>
+
+  <Accordion title="OKX" icon="circle-dot">
+    <Steps>
+      <Step title="Buka Menu Kredensial API">
+        Masuk ke dasbor OKX, arahkan kursor ke avatar profil, lalu pilih **API Keys**.
+      </Step>
+      <Step title="Buat Kunci V5">
+        Klik **Create V5 API Key**, lalu masukkan nama catatan (contoh: `AkiraQu`). Buat pula **Passphrase** khusus untuk kunci ini.
+      </Step>
+      <Step title="Pilih Izin Akses Terbatas">
+        Di kolom *Permissions*, pilih **Read** dan **Trade**. **Jangan centang izin Withdraw.**
+      </Step>
+      <Step title="Verifikasi Keamanan">
+        Selesaikan verifikasi 2FA (Google Authenticator / SMS) dan simpan `API Key`, `Secret Key`, serta `Passphrase`.
+      </Step>
+    </Steps>
+  </Accordion>
+
+  <Accordion title="Bybit" icon="coins">
+    <Steps>
+      <Step title="Akses Manajemen API Bybit">
+        Buka menu akun di kanan atas dan pilih **API Management** -> **Create New Key**.
+      </Step>
+      <Step title="Pilih Jenis Kunci">
+        Pilih opsi **System-generated API Keys** dan tentukan mode **API Transaction**.
+      </Step>
+      <Step title="Atur Hak Akses">
+        Pilih jenis izin **Read-Write**, lalu centang hanya kategori:
+        - `Standard Account` / `Unified Trading Account` (Orders & Positions).
+        
+        **Tolak izin penarikan (Block Withdrawal permissions).**
+      </Step>
+    </Steps>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## 4 Lapisan Perlindungan Data di AkiraQu
+
+<CardGroup cols={2}>
+  <Card title="Enkripsi Sisi Klien (Local-First)" icon="shield-check" color="#10b981">
+    Kredensial API Anda dienkripsi secara langsung di peramban pengguna sebelum diproses. Server tidak pernah menerima kunci dalam teks terbuka (*plain text*).
+  </Card>
+  <Card title="Pencegahan Akses Penarikan" icon="ban" color="#ef4444">
+    Mesin gateway CCXT AkiraQu menolak secara otomatis panggilan fungsi yang mengandung metode `withdraw()`, `transfer()`, atau `createWithdrawal()`.
+  </Card>
+  <Card title="Koneksi TLS 1.3 Terenkripsi" icon="lock" color="#38bdf8">
+    Seluruh komunikasi antara browser Anda dan bursa kripto menggunakan kanal aman TLS 1.3 berkecepatan tinggi dengan sertifikat SSL terverifikasi.
+  </Card>
+  <Card title="Isolasi Firestore Berbasis Akun" icon="database" color="#f43f5e">
+    Sinkronisasi cloud dikunci oleh aturan keamanan Google Firestore (`firestore.rules`), memastikan hanya akun Gmail Anda yang dapat mengakses data pribadi Anda.
+  </Card>
+</CardGroup>
+
+---
+
+## Rekomendasi Praktik Terbaik
+
+1. **Gunakan Kunci Khusus (*Dedicated API Key*)**  
+   Buat API Key baru khusus untuk AkiraQu. Jangan berbagi kunci yang sama dengan bot atau aplikasi pihak ketiga lainnya.
+
+2. **Rotasi Kunci Secara Berkala**  
+   Hapus dan perbarui API Key Anda setiap 60 hingga 90 hari melalui dasbor bursa.
+
+3. **Uji Coba dengan Modal Kecil Terlebih Dahulu**  
+   Lakukan uji coba order minimum sebelum melakukan transaksi dengan volume penuh untuk memastikan pasangan pasar dan toleransi selip harga (*slippage*) telah sesuai.
+
+<Note>
+  Jika Anda mencurigai kunci API Anda telah disusupi, segera hapus (*revoke*) kunci tersebut langsung melalui halaman manajemen API bursa Anda.
+</Note>

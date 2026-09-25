@@ -8,7 +8,6 @@ interface AuthContextType {
   loading: boolean;
   loginWithGoogle: () => Promise<UserProfile>;
   logout: () => Promise<void>;
-  loginAsGuest: (customEmail?: string) => void;
   isAuthenticated: boolean;
 }
 
@@ -19,7 +18,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const saved = localStorage.getItem('imasbtc_user_session');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        // Only restore genuine verified Google accounts; prune any legacy demo sessions
+        if (parsed && !parsed.isAnonymous && !parsed.uid?.startsWith('demo_')) {
+          return parsed;
+        }
+        localStorage.removeItem('imasbtc_user_session');
       } catch (e) {
         return null;
       }
@@ -61,22 +65,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
         } else {
-          // If not in Firebase auth, check if user was manually logged in demo session
-          const saved = localStorage.getItem('imasbtc_user_session');
-          if (saved) {
-            try {
-              const parsed = JSON.parse(saved);
-              if (parsed.isAnonymous) {
-                setUser(parsed);
-              } else {
-                setUser(null);
-              }
-            } catch {
-              setUser(null);
-            }
-          } else {
-            setUser(null);
-          }
+          // If signed out of Firebase Auth, clear session
+          localStorage.removeItem('imasbtc_user_session');
+          setUser(null);
         }
         setLoading(false);
       });
@@ -115,19 +106,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   };
 
-  const loginAsGuest = (customEmail?: string) => {
-    const guestUser: UserProfile = {
-      uid: 'demo_' + Math.random().toString(36).substring(2, 9),
-      email: customEmail || 'trader.demo@gmail.com',
-      displayName: customEmail ? customEmail.split('@')[0] : 'Pro Demo Trader',
-      photoURL: null,
-      lastLoginAt: new Date().toISOString(),
-      isAnonymous: true,
-    };
-    setUser(guestUser);
-    localStorage.setItem('imasbtc_user_session', JSON.stringify(guestUser));
-  };
-
   return (
     <AuthContext.Provider
       value={{
@@ -135,8 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading,
         loginWithGoogle: handleGoogleLogin,
         logout: handleLogout,
-        loginAsGuest,
-        isAuthenticated: !!user,
+        isAuthenticated: !!user && !user.isAnonymous && !user.uid?.startsWith('demo_'),
       }}
     >
       {children}
