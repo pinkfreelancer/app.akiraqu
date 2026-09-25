@@ -43,10 +43,17 @@ export function computeOrderBookDepthAndDelta(
     const body = c.close - c.open;
     const priceChange = c.close - prevC.close;
 
-    // Estimate buy vs sell aggressor volume fraction based on candle close relative to range
-    const buyFraction = Math.max(0.08, Math.min(0.92, 0.5 + 0.5 * (body / range)));
-    const buyVolume = c.volume * buyFraction;
-    const sellVolume = c.volume * (1 - buyFraction);
+    // Use true exchange taker buy volume if available, otherwise compute aggressor fraction from candle body/range
+    let buyVolume: number;
+    let sellVolume: number;
+    if (typeof c.takerBuyVolume === 'number' && c.takerBuyVolume >= 0) {
+      buyVolume = c.takerBuyVolume;
+      sellVolume = Math.max(0, c.volume - buyVolume);
+    } else {
+      const buyFraction = Math.max(0.08, Math.min(0.92, 0.5 + 0.5 * (body / range)));
+      buyVolume = c.volume * buyFraction;
+      sellVolume = c.volume * (1 - buyFraction);
+    }
     const delta = buyVolume - sellVolume;
 
     runningCvd += delta;
@@ -90,7 +97,11 @@ export function computeOrderBookDepthAndDelta(
     const distPct = 0.25 * i; // 0.25%, 0.5%, 0.75%, etc.
     const bidPrice = Number((safePrice * (1 - distPct / 100)).toFixed(dec));
     const isSpoofBid = i === 4 && bidPercent > 60; // large fake wall placed 1% away
-    const bidAmount = Number(((Math.random() * 4 + 1.2) * (isSpoofBid ? 4.5 : 1) * baseAssetMult).toFixed(2));
+
+    // Deterministic harmonic depth profiling (decay with distance + CVD harmonic)
+    const depthCurve = Math.max(0.8, 2.5 - Math.log(i + 1) * 0.7);
+    const harmonicBid = 1 + Math.sin(i * 1.84 + Math.abs(runningCvd % 10)) * 0.25;
+    const bidAmount = Number(((depthCurve * harmonicBid + 1.2) * (isSpoofBid ? 4.5 : 1) * baseAssetMult).toFixed(2));
     const bidVolUsd = Math.round(bidPrice * bidAmount);
     totalBidVol += bidAmount;
 
@@ -105,7 +116,8 @@ export function computeOrderBookDepthAndDelta(
 
     const askPrice = Number((safePrice * (1 + distPct / 100)).toFixed(dec));
     const isSpoofAsk = i === 3 && askPercent > 60;
-    const askAmount = Number(((Math.random() * 4 + 1.2) * (isSpoofAsk ? 4.8 : 1) * baseAssetMult).toFixed(2));
+    const harmonicAsk = 1 + Math.cos(i * 1.84 + Math.abs(runningCvd % 10)) * 0.25;
+    const askAmount = Number(((depthCurve * harmonicAsk + 1.2) * (isSpoofAsk ? 4.8 : 1) * baseAssetMult).toFixed(2));
     const askVolUsd = Math.round(askPrice * askAmount);
     totalAskVol += askAmount;
 

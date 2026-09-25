@@ -322,10 +322,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         </div>
 
         {/* Security & Disclaimer Footer */}
-        <div className={`mt-4 text-center text-[10px] font-mono leading-relaxed ${
+        <div className={`mt-4 text-center text-[10px] font-mono leading-relaxed space-y-2 ${
           isDark ? 'text-slate-500' : 'text-slate-400'
         }`}>
-          <div className="flex items-center justify-center gap-1.5 mb-1">
+          <div className="flex items-center justify-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
             <span>256-bit SSL & Google OAuth 2.0 Protocol</span>
           </div>
@@ -334,6 +334,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               ? 'Akiraqu tidak pernah meminta private key atau dana Anda. Kami hanya mengakses profil publik Google untuk sinkronisasi preferensi analitik.'
               : 'Akiraqu never requests private keys or funds. We only request basic Google public profile for preferences synchronization.'}
           </p>
+          <div className={`pt-2 border-t flex items-start justify-center gap-1.5 text-left ${
+            isDark ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-500'
+          }`}>
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+            <p>
+              <strong className="text-amber-400 font-semibold mr-1">Disclaimer: Penafian</strong>
+              Segala informasi yang terdapat di halaman ini tidak boleh dianggap sebagai nasihat keuangan. Anda harus melakukan riset sendiri sebelum mengambil keputusan apa pun.
+            </p>
+          </div>
         </div>
       </div>
     </div>

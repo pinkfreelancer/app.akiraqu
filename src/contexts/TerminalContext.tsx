@@ -49,6 +49,9 @@ export interface TerminalContextValue {
   workspaceMode: 'classic' | 'split' | 'launchpad';
   toggleWorkspaceMode: () => void;
   setWorkspaceModeDirect: (mode: 'classic' | 'split' | 'launchpad') => void;
+  isTraderWorkbenchVisible: boolean;
+  toggleTraderWorkbench: () => void;
+  setTraderWorkbenchVisible: (visible: boolean) => void;
   isFullWidth: boolean;
   toggleFullWidth: () => void;
   isFullscreen: boolean;
@@ -138,6 +141,32 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const saved = localStorage.getItem('nexus_workspace_mode') as 'classic' | 'split' | 'launchpad' | null;
     return saved === 'launchpad' || saved === 'split' ? saved : 'classic';
   });
+
+  // Meja Kerja Trader visibility state (persistent)
+  const [isTraderWorkbenchVisible, setIsTraderWorkbenchVisible] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('akiraqu_trader_workbench_visible');
+      if (saved !== null) return saved === 'true';
+    } catch {}
+    return true;
+  });
+
+  const toggleTraderWorkbench = useCallback(() => {
+    setIsTraderWorkbenchVisible((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('akiraqu_trader_workbench_visible', String(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  const setTraderWorkbenchVisible = useCallback((visible: boolean) => {
+    setIsTraderWorkbenchVisible(visible);
+    try {
+      localStorage.setItem('akiraqu_trader_workbench_visible', String(visible));
+    } catch {}
+  }, []);
 
   // Trading parameters
   const [selectedSymbol, setSelectedSymbol] = useState<string>('BTC/USDT');
@@ -415,6 +444,7 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     },
     onTimeframeChange: handleTimeframeChange,
     onToggleWorkspaceMode: toggleWorkspaceMode,
+    onToggleWorkbench: toggleTraderWorkbench,
     onTriggerAnalyze: runCurrentAnalysis,
     onPrevSymbol: handlePrevSymbol,
     onNextSymbol: handleNextSymbol,
@@ -445,6 +475,9 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     workspaceMode,
     toggleWorkspaceMode,
     setWorkspaceModeDirect,
+    isTraderWorkbenchVisible,
+    toggleTraderWorkbench,
+    setTraderWorkbenchVisible,
     isFullWidth,
     toggleFullWidth,
     isFullscreen,

@@ -12,18 +12,35 @@ let lastSymbolsFetchTime = 0;
  */
 export async function fetchLiveSymbolsCatalog(): Promise<CryptoSymbolInfo[]> {
   const now = Date.now();
-  // Cache for 10 seconds to prevent excessive API requests
-  if (now - lastSymbolsFetchTime < 10000 && cachedSymbols.length > 0) {
+  // Cache for 6 seconds to prevent excessive API requests
+  if (now - lastSymbolsFetchTime < 6000 && cachedSymbols.length > 0) {
     return cachedSymbols;
   }
 
+  // 1. Try server-side proxy first (bypasses any client ISP blocks & CORS)
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const res = await fetch('/api/v1/symbols', { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (res.ok) {
+      const json = await res.json();
+      if (json.status === 'success' && Array.isArray(json.data) && json.data.length > 0) {
+        cachedSymbols = json.data;
+        lastSymbolsFetchTime = now;
+        return json.data;
+      }
+    }
+  } catch (_e) {}
+
+  // 2. Fallback to Binance Vision and standard Binance API
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 4500);
 
-    const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr`, {
+    const res = await fetch(`https://data-api.binance.vision/api/v3/ticker/24hr`, {
       signal: controller.signal,
-    });
+    }).catch(() => fetch(`https://api.binance.com/api/v3/ticker/24hr`, { signal: controller.signal }));
     clearTimeout(timeoutId);
 
     if (res.ok) {
@@ -71,7 +88,7 @@ export async function fetchLiveSymbolsCatalog(): Promise<CryptoSymbolInfo[]> {
 /**
  * Fetch live OHLCV candles from public Binance API or generate deterministic institutional candles
  */
-export async function fetchOHLCV(symbol: string, timeframe: Timeframe, count: number = 75): Promise<OHLCVCandle[]> {
+export async function fetchOHLCV(symbol: string, timeframe: Timeframe, count: number = 150): Promise<OHLCVCandle[]> {
   const cleanSymbol = symbol.replace('/', '').toUpperCase();
   const tfMap: Record<Timeframe, string> = {
     '1m': '1m',
@@ -83,13 +100,33 @@ export async function fetchOHLCV(symbol: string, timeframe: Timeframe, count: nu
     '1W': '1w',
   };
 
+  // 1. Try server-side on-demand candle proxy first
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const res = await fetch(
+      `/api/v1/candles?symbol=${encodeURIComponent(symbol)}&timeframe=${timeframe}&exchange=BINANCE&marketType=SPOT&limit=${count}`,
+      { signal: controller.signal }
+    );
+    clearTimeout(timeoutId);
+    if (res.ok) {
+      const json = await res.json();
+      if (Array.isArray(json.data) && json.data.length > 0) {
+        return json.data;
+      }
+    }
+  } catch (_e) {}
 
-    const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${cleanSymbol}&interval=${tfMap[timeframe]}&limit=${count}`, {
+  // 2. Direct client fetch with Binance Vision fallback
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4500);
+
+    const res = await fetch(`https://data-api.binance.vision/api/v3/klines?symbol=${cleanSymbol}&interval=${tfMap[timeframe]}&limit=${count}`, {
       signal: controller.signal,
-    });
+    }).catch(() => fetch(`https://api.binance.com/api/v3/klines?symbol=${cleanSymbol}&interval=${tfMap[timeframe]}&limit=${count}`, {
+      signal: controller.signal,
+    }));
     clearTimeout(timeoutId);
 
     if (res.ok) {
@@ -102,6 +139,9 @@ export async function fetchOHLCV(symbol: string, timeframe: Timeframe, count: nu
           low: parseFloat(item[3]),
           close: parseFloat(item[4]),
           volume: parseFloat(item[5]),
+          quoteVolume: item[7] ? parseFloat(item[7]) : undefined,
+          takerBuyVolume: item[9] ? parseFloat(item[9]) : undefined,
+          isSimulated: false,
         }));
       }
     }
@@ -113,7 +153,7 @@ export async function fetchOHLCV(symbol: string, timeframe: Timeframe, count: nu
   return generateDeterministicCandles(symbol, timeframe, count);
 }
 
-export function generateInstantCandlesForPrice(currentPrice: number, symbol: string, timeframe: Timeframe, count: number = 85): OHLCVCandle[] {
+export function generateInstantCandlesForPrice(currentPrice: number, symbol: string, timeframe: Timeframe, count: number = 150): OHLCVCandle[] {
   const norm = symbol.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   const match = cachedSymbols.find((s) => s.symbol.replace(/[^A-Za-z0-9]/g, '').toUpperCase() === norm) ||
     SUPPORTED_SYMBOLS.find((s) => s.symbol.replace(/[^A-Za-z0-9]/g, '').toUpperCase() === norm);
@@ -161,6 +201,7 @@ export function generateInstantCandlesForPrice(currentPrice: number, symbol: str
       low: Number(low.toFixed(decimals)),
       close: Number(close.toFixed(decimals)),
       volume: Math.round(volume),
+      isSimulated: true,
     });
 
     price = close;
@@ -193,13 +234,13 @@ export async function fetchFastCandles(
   timeframe: Timeframe,
   exchange: SupportedExchange = 'BINANCE',
   marketType: MarketType = 'SPOT',
-  count: number = 85
+  count: number = 150
 ): Promise<OHLCVCandle[]> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3500);
     const res = await fetch(
-      `/api/v1/candles?symbol=${encodeURIComponent(symbol)}&timeframe=${timeframe}&exchange=${exchange}&marketType=${marketType}`,
+      `/api/v1/candles?symbol=${encodeURIComponent(symbol)}&timeframe=${timeframe}&exchange=${exchange}&marketType=${marketType}&limit=${count}`,
       { signal: controller.signal }
     );
     clearTimeout(timeoutId);

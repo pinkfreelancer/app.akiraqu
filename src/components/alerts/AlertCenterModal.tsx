@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useAlerts } from '../../contexts/AlertContext';
 import { AlertCategory, MarketAlertItem } from '../../types/alert.types';
 import {
@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { Language } from '../../i18n/translations';
 import { formatCryptoPrice } from '../../utils/formatters';
+import { resolveSignalMetrics } from '../../utils/alertUtils';
 
 interface AlertCenterModalProps {
   lang?: Language;
@@ -97,97 +98,134 @@ export const AlertCenterModal: React.FC<AlertCenterModalProps> = ({
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isAlertCenterOpen) {
+        closeAlertCenter();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isAlertCenterOpen, closeAlertCenter]);
+
   if (!isAlertCenterOpen) return null;
 
   return (
-    <div
-      id="modal-alert-center"
-      className="fixed inset-0 z-[9990] flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
-    >
+    <>
+      {/* Dim overlay: allows clicking outside to close sidebar */}
       <div
-        className={`relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-2xl shadow-2xl border overflow-hidden transition-all ${
+        id="backdrop-alert-sidebar"
+        onClick={closeAlertCenter}
+        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] transition-opacity duration-200"
+        aria-hidden="true"
+      />
+
+      {/* Right Sidebar Drawer: Full height (top-0 to bottom-0) */}
+      <aside
+        id="sidebar-alert-center"
+        aria-label={isId ? 'Pusat Alert & Notifikasi' : 'Market Alert Center'}
+        className={`fixed inset-y-0 right-0 w-full sm:w-[460px] md:w-[500px] lg:w-[520px] z-50 flex flex-col border-l shadow-2xl transition-all duration-300 ease-out animate-in slide-in-from-right ${
           isDark
-            ? 'bg-[#0B0F19] border-slate-800 text-slate-100'
-            : 'bg-white border-slate-200 text-slate-900'
+            ? 'bg-[#090d16] border-[#1e293b] text-slate-100 shadow-black/80'
+            : 'bg-white border-slate-200 text-slate-900 shadow-slate-400/40'
         }`}
       >
-        {/* Modal Header */}
+        {/* Sidebar Header: Reaches all the way to top edge */}
         <div
-          className={`flex items-center justify-between px-4 sm:px-6 py-4 border-b ${
-            isDark ? 'border-slate-800 bg-[#0F172A]' : 'border-slate-200 bg-slate-50'
+          className={`flex items-center justify-between px-3.5 sm:px-4 py-3 border-b shrink-0 min-h-[52px] ${
+            isDark ? 'border-[#1e293b] bg-[#0b0f19]' : 'border-slate-200 bg-slate-50'
           }`}
         >
-          <div className="flex items-center gap-3">
-            <div className="relative p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
-              <BellRing className="w-5 h-5" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-4 w-4 bg-amber-500 text-[10px] font-bold text-white items-center justify-center">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Top Alert Button: provides identical active alert control at top edge */}
+            <button
+              onClick={closeAlertCenter}
+              className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] border text-xs font-mono font-bold transition-all cursor-pointer ${
+                isDark
+                  ? 'bg-pink-600/25 border-pink-500 text-pink-300 ring-1 ring-pink-500/50 hover:bg-pink-600/35'
+                  : 'bg-pink-50 border-pink-400 text-pink-700 ring-1 ring-pink-400/50 hover:bg-pink-100'
+              }`}
+              title={isId ? 'Klik untuk menutup sidebar alert' : 'Click to close alert sidebar'}
+            >
+              <div className="relative flex items-center justify-center">
+                {unreadCount > 0 ? (
+                  <BellRing className="w-3.5 h-3.5 text-pink-400 animate-pulse" />
+                ) : (
+                  <Bell className="w-3.5 h-3.5 text-pink-400" />
+                )}
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-2 flex h-3.5 min-w-[14px] px-0.5 rounded-full bg-pink-600 text-white text-[9px] font-bold font-mono items-center justify-center shadow-xs">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
-                </span>
-              )}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base sm:text-lg font-bold font-mono tracking-tight">
-                  {isId ? 'Pusat Alert & Notifikasi Terpadu' : 'Unified Market Alert Center'}
+                )}
+              </div>
+              <span className="font-bold">Alert</span>
+            </button>
+
+            <div className="min-w-0 pl-1">
+              <div className="flex items-center gap-1.5">
+                <h3 className="text-sm font-bold font-mono tracking-tight truncate">
+                  {isId ? 'Pusat Notifikasi' : 'Alert Center'}
                 </h3>
-                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  LIVE PIPELINE
+                  LIVE
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-mono">
+              <p className="text-[11px] text-slate-400 font-mono truncate hidden sm:block">
                 {isId
-                  ? 'Pantau real-time: Sinyal Trading, Penyaring Koin, & Berita Sentimen'
-                  : 'Real-time feed: Trading Signals, Coin Screener, & Sentiment News'}
+                  ? 'Sinyal Trading • Screener • Sentimen'
+                  : 'Trading Signals • Screener • Sentiment'}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 shrink-0">
             {/* Audio Toggle */}
             <button
               onClick={() => updatePreferences({ soundEnabled: !preferences.soundEnabled })}
-              className={`p-2 rounded-lg border transition-colors cursor-pointer ${
+              className={`p-1.5 rounded-[2px] border transition-colors cursor-pointer ${
                 preferences.soundEnabled
                   ? isDark
-                    ? 'bg-amber-500/20 border-amber-500/40 text-amber-400'
-                    : 'bg-amber-100 border-amber-300 text-amber-800'
+                    ? 'bg-pink-500/20 border-pink-500/40 text-pink-400'
+                    : 'bg-pink-100 border-pink-300 text-pink-700'
                   : isDark
                   ? 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
                   : 'bg-slate-100 border-slate-300 text-slate-500'
               }`}
               title={preferences.soundEnabled ? (isId ? 'Suara Aktif' : 'Sound On') : (isId ? 'Suara Hening' : 'Sound Off')}
             >
-              {preferences.soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+              {preferences.soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
             </button>
 
             {/* Toggle View: Alerts vs Settings */}
             <button
               onClick={() => setActiveView(activeView === 'ALERTS' ? 'SETTINGS' : 'ALERTS')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-mono transition-colors cursor-pointer ${
+              className={`flex items-center gap-1 px-2 py-1.5 rounded-[2px] border text-xs font-mono transition-colors cursor-pointer ${
                 activeView === 'SETTINGS'
-                  ? 'bg-cyan-600 text-white border-cyan-500'
+                  ? 'bg-pink-600 text-white border-pink-500'
                   : isDark
-                  ? 'bg-slate-800 border-slate-700 text-slate-300 hover:text-cyan-400'
-                  : 'bg-slate-100 border-slate-300 text-slate-700 hover:text-cyan-700'
+                  ? 'bg-slate-800 border-slate-700 text-slate-300 hover:text-pink-400'
+                  : 'bg-slate-100 border-slate-300 text-slate-700 hover:text-pink-700'
               }`}
             >
               <Settings className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{activeView === 'SETTINGS' ? (isId ? 'Kembali ke Feed' : 'Back to Feed') : (isId ? 'Pengaturan' : 'Settings')}</span>
+              <span className="hidden sm:inline">{activeView === 'SETTINGS' ? (isId ? 'Feed' : 'Feed') : (isId ? 'Opsi' : 'Prefs')}</span>
             </button>
 
-            {/* Close Modal */}
+            {/* Close Sidebar */}
             <button
+              id="btn-close-alert-sidebar"
               onClick={closeAlertCenter}
-              className={`p-2 rounded-lg transition-colors cursor-pointer ${
-                isDark ? 'hover:bg-slate-800 text-slate-400 hover:text-slate-200' : 'hover:bg-slate-100 text-slate-500'
+              className={`p-1.5 rounded-[2px] border transition-colors cursor-pointer ${
+                isDark
+                  ? 'bg-slate-800/80 hover:bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
+                  : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-600 hover:text-black'
               }`}
+              title={isId ? 'Tutup Sidebar Alert' : 'Close Alert Sidebar'}
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -196,8 +234,8 @@ export const AlertCenterModal: React.FC<AlertCenterModalProps> = ({
           <>
             {/* Category Tabs */}
             <div
-              className={`flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-3 border-b overflow-x-auto ${
-                isDark ? 'border-slate-800 bg-[#0B0F19]' : 'border-slate-200 bg-white'
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 border-b overflow-x-auto shrink-0 scrollbar-none ${
+                isDark ? 'border-[#1e293b] bg-[#090d16]' : 'border-slate-200 bg-white'
               }`}
             >
               {/* Tab: Semua */}
@@ -404,7 +442,7 @@ export const AlertCenterModal: React.FC<AlertCenterModalProps> = ({
             </div>
 
             {/* Alert List Container */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 min-h-[320px] max-h-[58vh]">
+            <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 space-y-2.5 min-h-0">
               {filteredAlerts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-center text-slate-400">
                   <div className="p-4 rounded-full bg-slate-800/50 mb-3 text-slate-500">
@@ -428,9 +466,10 @@ export const AlertCenterModal: React.FC<AlertCenterModalProps> = ({
                 </div>
               ) : (
                 filteredAlerts.map((alert) => {
-                  const isSignal = alert.category === 'SIGNAL';
-                  const isScreener = alert.category === 'SCREENER';
-                  const isSentiment = alert.category === 'SENTIMENT';
+                  const isSignal = alert.category === 'SIGNAL' || alert.actionStage === 'signal';
+                  const isScreener = alert.category === 'SCREENER' || alert.actionStage === 'screening';
+                  const isSentiment = alert.category === 'SENTIMENT' || alert.actionStage === 'sentiment';
+                  const signalMetrics = isSignal ? resolveSignalMetrics(alert) : null;
 
                   return (
                     <div
@@ -559,29 +598,36 @@ export const AlertCenterModal: React.FC<AlertCenterModalProps> = ({
                       </p>
 
                       {/* Domain-specific Detailed Metric Strip */}
-                      {isSignal && alert.data && (
+                      {isSignal && signalMetrics && (
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px] font-mono mb-3">
                           <div>
                             <span className="text-slate-500 block">Entry Valid</span>
                             <span className="text-slate-200 font-bold">
-                              {alert.data.entryPrice ? formatCryptoPrice(alert.data.entryPrice) : '-'}
+                              ${formatCryptoPrice(signalMetrics.entryPrice)}
                             </span>
                           </div>
                           <div>
                             <span className="text-slate-500 block">Target TP1</span>
                             <span className="text-emerald-400 font-bold">
-                              {alert.data.targetPrice ? formatCryptoPrice(alert.data.targetPrice) : '-'}
+                              ${formatCryptoPrice(signalMetrics.targetPrice)}
                             </span>
                           </div>
                           <div>
                             <span className="text-slate-500 block">Proteksi SL</span>
                             <span className="text-rose-400 font-bold">
-                              {alert.data.stopLoss ? formatCryptoPrice(alert.data.stopLoss) : '-'}
+                              ${formatCryptoPrice(signalMetrics.stopLoss)}
                             </span>
                           </div>
                           <div>
                             <span className="text-slate-500 block">Timeframe</span>
-                            <span className="text-slate-300 font-bold">{alert.data.timeframe || '15m'}</span>
+                            <span className="text-slate-300 font-bold">
+                              {signalMetrics.timeframe}
+                              {signalMetrics.riskRewardRatio ? (
+                                <span className="text-slate-500 text-[10px] ml-1 font-normal">
+                                  (1:{signalMetrics.riskRewardRatio})
+                                </span>
+                              ) : null}
+                            </span>
                           </div>
                         </div>
                       )}
@@ -809,27 +855,41 @@ export const AlertCenterModal: React.FC<AlertCenterModalProps> = ({
           </div>
         )}
 
-        {/* Modal Footer */}
+        {/* Sidebar Footer */}
         <div
-          className={`flex items-center justify-between px-4 sm:px-6 py-3 border-t text-xs font-mono ${
-            isDark ? 'border-slate-800 bg-[#0F172A]' : 'border-slate-200 bg-slate-50'
+          className={`flex items-center justify-between px-3.5 sm:px-4 py-2.5 border-t text-xs font-mono shrink-0 ${
+            isDark ? 'border-[#1e293b] bg-[#0b0f19]' : 'border-slate-200 bg-slate-50'
           }`}
         >
-          <div className="flex items-center gap-2 text-slate-400">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>
-              {isId ? 'Audit Feed Real-Time CCXT & MarketOwl Logic' : 'CCXT & Institutional Confluence Stream'}
+          <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="truncate max-w-[180px] sm:max-w-none">
+              {isId ? 'CCXT & MarketOwl Stream' : 'CCXT & Confluence'}
             </span>
           </div>
 
-          <button
-            onClick={closeAlertCenter}
-            className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold cursor-pointer transition-colors"
-          >
-            {isId ? 'Tutup' : 'Close'}
-          </button>
+          <div className="flex items-center gap-2">
+            {unreadCount > 0 && (
+              <button
+                onClick={() => markAllAsRead(selectedCategoryTab === 'ALL' ? undefined : selectedCategoryTab)}
+                className="text-[11px] text-pink-400 hover:text-pink-300 transition-colors cursor-pointer font-semibold"
+              >
+                {isId ? 'Baca Semua' : 'Read All'}
+              </button>
+            )}
+            <button
+              onClick={closeAlertCenter}
+              className={`px-3 py-1 rounded-[2px] border text-xs font-mono font-semibold cursor-pointer transition-colors ${
+                isDark
+                  ? 'bg-[#0f172a] hover:bg-slate-800 text-slate-300 border-[#1e293b]'
+                  : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+              }`}
+            >
+              {isId ? 'Tutup' : 'Close'}
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
+      </aside>
+    </>
   );
 };

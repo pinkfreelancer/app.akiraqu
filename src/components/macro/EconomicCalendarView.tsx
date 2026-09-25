@@ -28,45 +28,24 @@ export const EconomicCalendarView: React.FC<EconomicCalendarViewProps> = ({
 
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'HIGH' | 'MACRO' | 'CRYPTO'>('ALL');
 
-  const events: CalendarEvent[] = [
+  const getDynamicCountdown = (targetDate: string, isId: boolean) => {
+    const now = Date.now();
+    const target = new Date(`${targetDate}T12:00:00Z`).getTime();
+    const diff = target - now;
+    if (diff <= 0) {
+      return isId ? 'Telah Dirilis / Selesai' : 'Released / Completed';
+    }
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    if (days > 0) {
+      return isId ? `${days} Hari ${hours} Jam` : `${days}d ${hours}h`;
+    }
+    return isId ? `${hours} Jam lagi` : `${hours}h remaining`;
+  };
+
+  const rawEvents: Array<Omit<CalendarEvent, 'countdown'>> = [
     {
       id: '1',
-      title: 'US Consumer Price Index (CPI) YoY',
-      category: 'CPI_INFLATION',
-      date: '2026-09-24',
-      time: '19:30 WIB / 12:30 UTC',
-      impact: 'HIGH',
-      consensus: '2.4%',
-      previous: '2.6%',
-      countdown: '3 Hari 14 Jam',
-      description: isId ? 'Data inflasi AS penting penentu arah suku bunga The Fed.' : 'US Inflation print directly impacting Fed rate decisions and risk assets.',
-    },
-    {
-      id: '2',
-      title: 'FOMC Interest Rate Decision & Press Conference',
-      category: 'MACRO_FED',
-      date: '2026-09-28',
-      time: '01:00 WIB / 18:00 UTC',
-      impact: 'HIGH',
-      consensus: '4.25% (-25 bps cut)',
-      previous: '4.50%',
-      countdown: '7 Hari 18 Jam',
-      description: isId ? 'Keputusan suku bunga acuan The Fed dan pidato proyeksi Jerome Powell.' : 'Federal Reserve benchmark rate cut decision and monetary policy speech.',
-    },
-    {
-      id: '3',
-      title: 'Solana (SOL) Mainnet Performance Upgrade v2.1',
-      category: 'TECH_UPGRADE',
-      date: '2026-09-25',
-      time: '15:00 WIB / 08:00 UTC',
-      impact: 'MEDIUM',
-      consensus: 'N/A',
-      previous: 'N/A',
-      countdown: '4 Hari 9 Jam',
-      description: isId ? 'Hardfork optimasi throughput Firedancer validator client.' : 'Consensus protocol update introducing validator scheduling optimizations.',
-    },
-    {
-      id: '4',
       title: 'Celestia (TIA) Major Cliff Token Unlock ($140M)',
       category: 'CRYPTO_UNLOCK',
       date: '2026-09-30',
@@ -74,22 +53,58 @@ export const EconomicCalendarView: React.FC<EconomicCalendarViewProps> = ({
       impact: 'HIGH',
       consensus: '8.4% Circulating',
       previous: 'N/A',
-      countdown: '9 Hari 21 Jam',
       description: isId ? 'Pelepasan token tim dan investor awal berpotensi menambah tekanan jual jangka pendek.' : 'Scheduled token unlock introducing potential supply volatility.',
     },
     {
-      id: '5',
-      title: 'US Non-Farm Payrolls (NFP) Employment',
+      id: '2',
+      title: 'US Non-Farm Payrolls (NFP) Employment Report',
       category: 'MACRO_FED',
       date: '2026-10-02',
       time: '19:30 WIB / 12:30 UTC',
       impact: 'HIGH',
       consensus: '155K',
       previous: '142K',
-      countdown: '12 Hari',
       description: isId ? 'Kesehatan pasar tenaga kerja AS yang menjadi indikator ketahanan ekonomi makro.' : 'US jobs creation report determining liquidity policy easing speed.',
     },
+    {
+      id: '3',
+      title: 'Solana (SOL) Mainnet Throughput Optimization v2.2',
+      category: 'TECH_UPGRADE',
+      date: '2026-10-06',
+      time: '15:00 WIB / 08:00 UTC',
+      impact: 'MEDIUM',
+      consensus: 'N/A',
+      previous: 'N/A',
+      description: isId ? 'Hardfork optimasi throughput Firedancer validator client.' : 'Consensus protocol update introducing validator scheduling optimizations.',
+    },
+    {
+      id: '4',
+      title: 'US Consumer Price Index (CPI) Inflation YoY',
+      category: 'CPI_INFLATION',
+      date: '2026-10-14',
+      time: '19:30 WIB / 12:30 UTC',
+      impact: 'HIGH',
+      consensus: '2.5%',
+      previous: '2.6%',
+      description: isId ? 'Data inflasi bulanan AS penting penentu arah suku bunga The Fed.' : 'US Inflation print directly impacting Fed rate decisions and risk assets.',
+    },
+    {
+      id: '5',
+      title: 'FOMC Interest Rate Decision & Press Conference',
+      category: 'MACRO_FED',
+      date: '2026-11-05',
+      time: '01:00 WIB / 18:00 UTC',
+      impact: 'HIGH',
+      consensus: '4.25% (-25 bps cut)',
+      previous: '4.50%',
+      description: isId ? 'Keputusan suku bunga acuan The Fed dan pidato proyeksi Jerome Powell.' : 'Federal Reserve benchmark rate cut decision and monetary policy speech.',
+    },
   ];
+
+  const events: CalendarEvent[] = rawEvents.map((e) => ({
+    ...e,
+    countdown: getDynamicCountdown(e.date, isId),
+  }));
 
   const filteredEvents = events.filter((ev) => {
     if (activeFilter === 'HIGH') return ev.impact === 'HIGH';

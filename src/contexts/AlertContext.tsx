@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { MarketAlertItem, AlertCategory, AlertFilterPreferences } from '../types/alert.types';
 import { StageId } from '../types/market.types';
+import { resolveSignalMetrics, getBenchmarkPriceForSymbol } from '../utils/alertUtils';
+import { getCryptoPrecision } from '../utils/formatters';
 
 interface AlertContextValue {
   alerts: MarketAlertItem[];
@@ -11,6 +13,7 @@ interface AlertContextValue {
   isAlertCenterOpen: boolean;
   openAlertCenter: (category?: AlertCategory) => void;
   closeAlertCenter: () => void;
+  toggleAlertCenter: (category?: AlertCategory) => void;
   selectedCategoryTab: 'ALL' | AlertCategory;
   setSelectedCategoryTab: (cat: 'ALL' | AlertCategory) => void;
   addAlert: (alert: Omit<MarketAlertItem, 'id' | 'createdAtMs' | 'isRead'>) => void;
@@ -171,7 +174,26 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const saved = localStorage.getItem('akiraqu_market_alerts');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Hydrate and sanitize any signal alerts that lack entryPrice / targetPrice / stopLoss
+          return parsed.map((item: MarketAlertItem) => {
+            if (item.category === 'SIGNAL' || item.actionStage === 'signal') {
+              const resolved = resolveSignalMetrics(item);
+              return {
+                ...item,
+                data: {
+                  ...item.data,
+                  direction: resolved.direction,
+                  timeframe: resolved.timeframe,
+                  entryPrice: resolved.entryPrice,
+                  targetPrice: resolved.targetPrice,
+                  stopLoss: resolved.stopLoss,
+                },
+              };
+            }
+            return item;
+          });
+        }
       }
     } catch {
       // fallback
@@ -270,8 +292,21 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (newAlertData.category === 'SCREENER' && !preferences.enableScreenerAlerts) return;
     if (newAlertData.category === 'SENTIMENT' && !preferences.enableSentimentAlerts) return;
 
+    let alertPayload = { ...newAlertData };
+    if (newAlertData.category === 'SIGNAL' || newAlertData.actionStage === 'signal') {
+      const resolved = resolveSignalMetrics(newAlertData);
+      alertPayload.data = {
+        ...newAlertData.data,
+        direction: resolved.direction,
+        timeframe: resolved.timeframe,
+        entryPrice: resolved.entryPrice,
+        targetPrice: resolved.targetPrice,
+        stopLoss: resolved.stopLoss,
+      };
+    }
+
     const fullAlert: MarketAlertItem = {
-      ...newAlertData,
+      ...alertPayload,
       id: `ALT-${newAlertData.category}-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
       createdAtMs: Date.now(),
       isRead: false,
@@ -310,6 +345,15 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const closeAlertCenter = useCallback(() => {
     setIsAlertCenterOpen(false);
+  }, []);
+
+  const toggleAlertCenter = useCallback((category?: AlertCategory) => {
+    setIsAlertCenterOpen((prev) => {
+      if (!prev && category) {
+        setSelectedCategoryTab(category);
+      }
+      return !prev;
+    });
   }, []);
 
   const markAsRead = useCallback((id: string) => {
@@ -370,6 +414,12 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ];
       const trigger = triggers[Math.floor(Math.random() * triggers.length)];
 
+      const basePrice = getBenchmarkPriceForSymbol(sym);
+      const precision = getCryptoPrecision(basePrice);
+      const entryPrice = basePrice;
+      const targetPrice = Number((isLong ? entryPrice * 1.045 : entryPrice * 0.955).toFixed(precision));
+      const stopLoss = Number((isLong ? entryPrice * 0.978 : entryPrice * 1.022).toFixed(precision));
+
       addAlert({
         category: 'SIGNAL',
         title: `Sinyal Baru: ${sym} (${isLong ? 'LONG' : 'SHORT'})`,
@@ -382,6 +432,9 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         data: {
           direction: isLong ? 'LONG' : 'SHORT',
           timeframe: '15m',
+          entryPrice,
+          targetPrice,
+          stopLoss,
           confluenceScore: score,
           signalStatus: 'ACTIVE',
           strategyName: trigger,
@@ -477,6 +530,7 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       isAlertCenterOpen,
       openAlertCenter,
       closeAlertCenter,
+      toggleAlertCenter,
       selectedCategoryTab,
       setSelectedCategoryTab,
       addAlert,
@@ -499,6 +553,7 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       isAlertCenterOpen,
       openAlertCenter,
       closeAlertCenter,
+      toggleAlertCenter,
       selectedCategoryTab,
       addAlert,
       markAsRead,

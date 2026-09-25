@@ -2,6 +2,8 @@ import React from 'react';
 import { useAlerts } from '../../contexts/AlertContext';
 import { Zap, SlidersHorizontal, Newspaper, X, ArrowUpRight, BellRing } from 'lucide-react';
 import { Language, getTranslation } from '../../i18n/translations';
+import { formatCryptoPrice } from '../../utils/formatters';
+import { resolveSignalMetrics } from '../../utils/alertUtils';
 
 interface AlertToastContainerProps {
   lang?: Language;
@@ -87,9 +89,29 @@ export const AlertToastContainer: React.FC<AlertToastContainerProps> = ({
               {activeToast.title}
             </h4>
 
-            <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-3">
+            <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-2">
               {activeToast.message}
             </p>
+
+            {activeToast.category === 'SIGNAL' && (() => {
+              const metrics = resolveSignalMetrics(activeToast);
+              return (
+                <div className="flex items-center justify-between gap-2 p-1.5 mb-2.5 rounded bg-slate-900/90 border border-slate-800 text-[10px] font-mono">
+                  <span>
+                    <strong className="text-slate-400">Entry: </strong>
+                    <span className="text-slate-200 font-bold">${formatCryptoPrice(metrics.entryPrice)}</span>
+                  </span>
+                  <span>
+                    <strong className="text-emerald-500">TP1: </strong>
+                    <span className="text-emerald-400 font-bold">${formatCryptoPrice(metrics.targetPrice)}</span>
+                  </span>
+                  <span>
+                    <strong className="text-rose-500">SL: </strong>
+                    <span className="text-rose-400 font-bold">${formatCryptoPrice(metrics.stopLoss)}</span>
+                  </span>
+                </div>
+              );
+            })()}
 
             <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-700/40">
               <span className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400">

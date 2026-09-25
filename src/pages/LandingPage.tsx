@@ -4,6 +4,7 @@ import { AkiraQuLogo } from '../components/AkiraQuLogo';
 import { 
   ArrowRight, 
   ShieldCheck, 
+  AlertTriangle,
   Cpu, 
   Activity, 
   Zap, 
@@ -812,6 +813,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <p>© {new Date().getFullYear()} Akiraqu Analytics. All rights reserved.</p>
               <p className="text-pink-400/80 mt-0.5">Guided by Cybernetic Intelligence.</p>
             </div>
+          </div>
+
+          {/* Regulatory & Financial Disclaimer Notice */}
+          <div className={`mt-8 pt-6 border-t text-[11px] font-mono leading-relaxed flex items-start gap-2.5 ${
+            isDark ? 'border-slate-800/80 text-slate-400' : 'border-slate-200 text-slate-600'
+          }`}>
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <p>
+              <strong className="text-amber-400 font-semibold mr-1.5">Disclaimer: Penafian</strong>
+              Segala informasi yang terdapat di halaman ini tidak boleh dianggap sebagai nasihat keuangan. Anda harus melakukan riset sendiri sebelum mengambil keputusan apa pun.
+            </p>
           </div>
         </div>
       </footer>

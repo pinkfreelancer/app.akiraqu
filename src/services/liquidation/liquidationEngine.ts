@@ -33,7 +33,7 @@ export function computeLiquidationHeatmap(
   }
 
   const currentPrice = currentPriceOverride || candles[candles.length - 1].close;
-  const recentCandles = candles.slice(-75); // focus on recent 75 bars for active open interest
+  const recentCandles = candles.slice(-120); // expanded lookback of 120 bars for deeper institutional open interest clustering
   const avgVolume = recentCandles.reduce((sum, c) => sum + c.volume, 0) / recentCandles.length || 1;
 
   // Base nominal volume scaler in $ millions based on symbol

@@ -58,8 +58,10 @@ export async function fetchTickersParallelCCXT(): Promise<{
     const timeoutId = setTimeout(() => controller.abort(), 4500);
 
     const [spotRes, futRes] = await Promise.allSettled([
-      fetch('https://api.binance.com/api/v3/ticker/24hr', { signal: controller.signal }),
-      fetch('https://fapi.binance.com/fapi/v1/ticker/24hr', { signal: controller.signal }),
+      fetch('https://data-api.binance.vision/api/v3/ticker/24hr', { signal: controller.signal })
+        .catch(() => fetch('https://api.binance.com/api/v3/ticker/24hr', { signal: controller.signal })),
+      fetch('https://fapi.binance.com/fapi/v1/ticker/24hr', { signal: controller.signal })
+        .catch(() => fetch('https://api.binance.com/api/v3/ticker/24hr', { signal: controller.signal })),
     ]);
     clearTimeout(timeoutId);
 
@@ -163,7 +165,7 @@ export async function fetchTickersParallelCCXT(): Promise<{
 export async function fetchOHLCVOnDemandCCXT(
   symbol: string,
   timeframe: Timeframe,
-  limit: number = 85,
+  limit: number = 150,
   exchange: SupportedExchange = 'BINANCE',
   marketType: MarketType = 'SPOT'
 ): Promise<OHLCVCandle[]> {
@@ -212,6 +214,9 @@ export async function fetchOHLCVOnDemandCCXT(
           low: parseFloat(item[3]),
           close: parseFloat(item[4]),
           volume: parseFloat(item[5]),
+          quoteVolume: item[7] ? parseFloat(item[7]) : undefined,
+          takerBuyVolume: item[9] ? parseFloat(item[9]) : undefined,
+          isSimulated: false,
         }));
       }
     }
@@ -240,6 +245,9 @@ export async function fetchOHLCVOnDemandCCXT(
           low: parseFloat(item[3]),
           close: parseFloat(item[4]),
           volume: parseFloat(item[5]),
+          quoteVolume: item[7] ? parseFloat(item[7]) : undefined,
+          takerBuyVolume: item[9] ? parseFloat(item[9]) : undefined,
+          isSimulated: false,
         }));
       }
     }
@@ -321,6 +329,7 @@ export function generateDeterministicCandles(symbol: string, timeframe: Timefram
       low: Number(low.toFixed(decimals)),
       close: Number(close.toFixed(decimals)),
       volume: Math.round(volume),
+      isSimulated: true,
     });
 
     price = close;

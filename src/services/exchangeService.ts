@@ -121,6 +121,12 @@ export function formatExchangeSymbol(
     case 'BITUNIX':
       return `${base}${quote}`; // e.g. BTCUSDT
 
+    case 'BYBIT':
+      return `${base}${quote}`; // e.g. BTCUSDT
+
+    case 'BITGET':
+      return `${base}${quote}`; // e.g. BTCUSDT
+
     default:
       return `${base}${quote}`;
   }
@@ -154,6 +160,30 @@ export function mapTimeframeToExchange(timeframe: Timeframe, exchange: Supported
         '1W': '1W',
       };
       return okxMap[timeframe] || '1H';
+
+    case 'BYBIT':
+      const bybitMap: Record<Timeframe, string> = {
+        '1m': '1',
+        '5m': '5',
+        '15m': '15',
+        '1H': '60',
+        '4H': '240',
+        '1D': 'D',
+        '1W': 'W',
+      };
+      return bybitMap[timeframe] || '60';
+
+    case 'BITGET':
+      const bitgetMap: Record<Timeframe, string> = {
+        '1m': '1m',
+        '5m': '5m',
+        '15m': '15m',
+        '1H': '1h',
+        '4H': '4h',
+        '1D': '1day',
+        '1W': '1week',
+      };
+      return bitgetMap[timeframe] || '1h';
 
     case 'KUCOIN':
       const kcsMap: Record<Timeframe, string> = {
@@ -202,7 +232,7 @@ export function mapTimeframeToExchange(timeframe: Timeframe, exchange: Supported
 export async function fetchMultiExchangeOHLCV(
   symbol: string,
   timeframe: Timeframe,
-  limit: number = 85,
+  limit: number = 150,
   exchange: SupportedExchange = 'BINANCE',
   marketType: MarketType = 'SPOT'
 ): Promise<{ candles: OHLCVCandle[]; sourceExchange: SupportedExchange; sourceMarket: MarketType; latencyMs: number }> {
@@ -348,6 +378,7 @@ export async function fetchMultiExchangeOHLCV(
             low: parseFloat(item.low || item[3]),
             close: parseFloat(item.close || item[4]),
             volume: parseFloat(item.vol || item.volume || item[5]),
+            isSimulated: false,
           }));
 
           return {
@@ -363,22 +394,116 @@ export async function fetchMultiExchangeOHLCV(
     }
   }
 
-  // 5. Binance Primary / Ultimate Ultra-Fast Gateway (Spot or Futures)
+  // 5. Bybit Route (V5 API)
+  if (exchange === 'BYBIT') {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const cat = marketType === 'FUTURES' ? 'linear' : 'spot';
+      const url = `https://api.bybit.com/v5/market/kline?category=${cat}&symbol=${formattedPair}&interval=${tfParam}&limit=${limit}`;
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.retCode === 0 && json.result?.list && Array.isArray(json.result.list) && json.result.list.length > 0) {
+          // Bybit returns newest first: [startTime, openPrice, highPrice, lowPrice, closePrice, volume, turnover]
+          const candles: OHLCVCandle[] = json.result.list
+            .map((item: string[]) => ({
+              time: Number(item[0]),
+              open: parseFloat(item[1]),
+              high: parseFloat(item[2]),
+              low: parseFloat(item[3]),
+              close: parseFloat(item[4]),
+              volume: parseFloat(item[5]),
+              quoteVolume: parseFloat(item[6]),
+              isSimulated: false,
+            }))
+            .reverse();
+
+          return {
+            candles,
+            sourceExchange: 'BYBIT',
+            sourceMarket: marketType,
+            latencyMs: Date.now() - startTime,
+          };
+        }
+      }
+    } catch (_bybitErr) {
+      // Fall through
+    }
+  }
+
+  // 6. Bitget Route (V2 API)
+  if (exchange === 'BITGET') {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const url = marketType === 'FUTURES'
+        ? `https://api.bitget.com/api/v2/mix/market/candles?symbol=${formattedPair}&granularity=${tfParam}&productType=USDT-FUTURES&limit=${limit}`
+        : `https://api.bitget.com/api/v2/spot/market/candles?symbol=${formattedPair}&granularity=${tfParam}&limit=${limit}`;
+
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const json = await res.json();
+        if ((json.code === '00000' || json.code === '0') && Array.isArray(json.data) && json.data.length > 0) {
+          // Bitget returns [ts, open, high, low, close, baseVol, quoteVol]
+          const candles: OHLCVCandle[] = json.data
+            .map((item: any[]) => ({
+              time: Number(item[0]),
+              open: parseFloat(item[1]),
+              high: parseFloat(item[2]),
+              low: parseFloat(item[3]),
+              close: parseFloat(item[4]),
+              volume: parseFloat(item[5]),
+              quoteVolume: item[6] ? parseFloat(item[6]) : undefined,
+              isSimulated: false,
+            }))
+            .sort((a: OHLCVCandle, b: OHLCVCandle) => a.time - b.time);
+
+          return {
+            candles,
+            sourceExchange: 'BITGET',
+            sourceMarket: marketType,
+            latencyMs: Date.now() - startTime,
+          };
+        }
+      }
+    } catch (_bitgetErr) {
+      // Fall through
+    }
+  }
+
+  // 7. Binance Primary / Ultimate Ultra-Fast Gateway (Spot or Futures)
   const bnPair = symbol.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   const bnTf = mapTimeframeToExchange(timeframe, 'BINANCE');
 
   try {
     const isFut = marketType === 'FUTURES' || ['KASUSDT', 'AKTUSDT', 'POPCATUSDT', 'BRETTUSDT', 'MEWUSDT'].includes(bnPair);
-    const bnUrl = isFut
-      ? `https://fapi.binance.com/fapi/v1/klines?symbol=${bnPair}&interval=${bnTf}&limit=${limit}`
-      : `https://api.binance.com/api/v3/klines?symbol=${bnPair}&interval=${bnTf}&limit=${limit}`;
+    const candidateUrls = isFut
+      ? [`https://fapi.binance.com/fapi/v1/klines?symbol=${bnPair}&interval=${bnTf}&limit=${limit}`]
+      : [
+          `https://data-api.binance.vision/api/v3/klines?symbol=${bnPair}&interval=${bnTf}&limit=${limit}`,
+          `https://api.binance.com/api/v3/klines?symbol=${bnPair}&interval=${bnTf}&limit=${limit}`,
+        ];
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
-    const res = await fetch(bnUrl, { signal: controller.signal });
-    clearTimeout(timeoutId);
+    let res: Response | null = null;
+    for (const url of candidateUrls) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const r = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (r.ok) {
+          res = r;
+          break;
+        }
+      } catch (_e) {}
+    }
 
-    if (res.ok) {
+    if (res && res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
         const candles: OHLCVCandle[] = data.map((item: any[]) => ({
@@ -388,11 +513,14 @@ export async function fetchMultiExchangeOHLCV(
           low: parseFloat(item[3]),
           close: parseFloat(item[4]),
           volume: parseFloat(item[5]),
+          quoteVolume: item[7] ? parseFloat(item[7]) : undefined,
+          takerBuyVolume: item[9] ? parseFloat(item[9]) : undefined,
+          isSimulated: false,
         }));
 
         return {
           candles,
-          sourceExchange: exchange,
+          sourceExchange: exchange === 'BINANCE' ? 'BINANCE' : exchange,
           sourceMarket: marketType,
           latencyMs: Date.now() - startTime,
         };

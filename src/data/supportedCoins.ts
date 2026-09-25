@@ -5,8 +5,8 @@ export const SUPPORTED_SYMBOLS: CryptoSymbolInfo[] = [
     "symbol": "BTC/USDT",
     "name": "Bitcoin",
     "category": "Layer 1",
-    "basePrice": 77230,
-    "change24h": 0.11,
+    "basePrice": 84469,
+    "change24h": 0.92,
     "volume24h": "$1.5B",
     "volatility": 0.022
   },
@@ -14,8 +14,8 @@ export const SUPPORTED_SYMBOLS: CryptoSymbolInfo[] = [
     "symbol": "ETH/USDT",
     "name": "Ethereum",
     "category": "Layer 1",
-    "basePrice": 2511,
-    "change24h": 2.01,
+    "basePrice": 2691.95,
+    "change24h": 2.15,
     "volume24h": "$1.5B",
     "volatility": 0.028
   },
@@ -23,7 +23,7 @@ export const SUPPORTED_SYMBOLS: CryptoSymbolInfo[] = [
     "symbol": "SOL/USDT",
     "name": "Solana",
     "category": "Layer 1",
-    "basePrice": 101.51,
+    "basePrice": 117.35,
     "change24h": 1.71,
     "volume24h": "$321M",
     "volatility": 0.045
@@ -32,7 +32,7 @@ export const SUPPORTED_SYMBOLS: CryptoSymbolInfo[] = [
     "symbol": "BNB/USDT",
     "name": "BNB",
     "category": "Layer 1",
-    "basePrice": 734.87,
+    "basePrice": 775.33,
     "change24h": 2.58,
     "volume24h": "$125M",
     "volatility": 0.018
@@ -41,7 +41,7 @@ export const SUPPORTED_SYMBOLS: CryptoSymbolInfo[] = [
     "symbol": "XRP/USDT",
     "name": "XRP",
     "category": "Layer 1",
-    "basePrice": 1.362,
+    "basePrice": 1.5445,
     "change24h": 0.95,
     "volume24h": "$226M",
     "volatility": 0.031

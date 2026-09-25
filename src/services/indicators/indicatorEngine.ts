@@ -678,7 +678,7 @@ function calculateTDSequential(candles: OHLCVCandle[]): TDSequentialIndicator {
 
 // 11. Order Flow (CVD & Volume Delta)
 function calculateOrderFlow(candles: OHLCVCandle[]): OrderFlowIndicator {
-  const lookbackBars = Math.min(candles.length, 25);
+  const lookbackBars = Math.min(candles.length, 45); // enhanced 45-period horizon for institutional cumulative delta
   const recentCandles = candles.slice(-lookbackBars);
   
   let totalBuyVolume = 0;
@@ -690,12 +690,22 @@ function calculateOrderFlow(candles: OHLCVCandle[]): OrderFlowIndicator {
   let maxVol = -Infinity;
 
   for (const c of recentCandles) {
-    const range = (c.high - c.low) || (c.close * 0.001);
-    const body = c.close - c.open;
-    // Estimate aggressive buyer vs seller pressure from candle spread and close positioning
-    const buyFraction = Math.max(0.08, Math.min(0.92, 0.5 + 0.5 * (body / range)));
-    const buyVol = c.volume * buyFraction;
-    const sellVol = c.volume * (1 - buyFraction);
+    let buyVol: number;
+    let sellVol: number;
+
+    // High-Precision Real Taker Volume from Exchange if available
+    if (typeof c.takerBuyVolume === 'number' && c.takerBuyVolume >= 0) {
+      buyVol = c.takerBuyVolume;
+      sellVol = Math.max(0, c.volume - buyVol);
+    } else {
+      const range = (c.high - c.low) || (c.close * 0.001);
+      const body = c.close - c.open;
+      // Estimate aggressive buyer vs seller pressure from candle spread and close positioning
+      const buyFraction = Math.max(0.08, Math.min(0.92, 0.5 + 0.5 * (body / range)));
+      buyVol = c.volume * buyFraction;
+      sellVol = c.volume * (1 - buyFraction);
+    }
+
     const delta = buyVol - sellVol;
 
     totalBuyVolume += buyVol;
@@ -820,7 +830,9 @@ function calculateOptionFlow(candles: OHLCVCandle[]): OptionFlowIndicator {
   } else if (trendRatio < 0.975) {
     putCallRatio = Number((1.18 + (0.975 - trendRatio) * 4).toFixed(2));
   } else {
-    putCallRatio = Number((0.82 + (Math.random() * 0.12 - 0.06)).toFixed(2));
+    // In consolidation range, derive deterministically from momentum slope without Math.random
+    const momentumSpread = (currentPrice - sma20) / sma20;
+    putCallRatio = Number((0.85 - momentumSpread * 2.5).toFixed(2));
   }
   putCallRatio = Math.max(0.48, Math.min(1.55, putCallRatio));
 

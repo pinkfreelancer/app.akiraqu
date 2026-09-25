@@ -37,6 +37,8 @@ import {
   Columns,
   Maximize2,
   RefreshCw,
+  EyeOff,
+  X,
 } from 'lucide-react';
 import { StageId } from '../types/market.types';
 import { Language } from '../i18n/translations';
@@ -74,6 +76,7 @@ interface TraderWorkflowBarProps {
   onSelectWorkspaceMode?: (mode: 'classic' | 'split' | 'launchpad') => void;
   onTriggerAnalyze?: () => void;
   isAnalyzing?: boolean;
+  onClose?: () => void;
 }
 
 export const TraderWorkflowBar: React.FC<TraderWorkflowBarProps> = ({
@@ -87,6 +90,7 @@ export const TraderWorkflowBar: React.FC<TraderWorkflowBarProps> = ({
   onSelectWorkspaceMode,
   onTriggerAnalyze,
   isAnalyzing = false,
+  onClose,
 }) => {
   const isDark = theme === 'dark';
   const isId = lang === 'id';
@@ -485,6 +489,21 @@ export const TraderWorkflowBar: React.FC<TraderWorkflowBarProps> = ({
           >
             {isCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
           </button>
+
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                isDark
+                  ? 'border-slate-700 bg-slate-800/60 text-slate-400 hover:text-rose-400 hover:border-rose-500/40'
+                  : 'border-slate-200 bg-slate-100 text-slate-600 hover:text-rose-600'
+              }`}
+              title={isId ? 'Sembunyikan Meja Kerja Trader (Tekan H atau tombol di Header untuk membuka kembali)' : 'Hide Trader Workbench (Press H or click Header button to reopen)'}
+            >
+              <EyeOff className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
 

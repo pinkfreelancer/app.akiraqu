@@ -38,6 +38,8 @@ import {
   Share2,
   Bell,
   BellRing,
+  Clock,
+  Radio,
 } from 'lucide-react';
 import { useAlerts } from '../contexts/AlertContext';
 
@@ -74,6 +76,10 @@ export const SentimentNewsPage: React.FC<SentimentNewsPageProps> = ({
   const [showSavedOnly, setShowSavedOnly] = useState<boolean>(false);
   const [autoRefreshSec, setAutoRefreshSec] = useState<number>(60);
   const [alertToastItem, setAlertToastItem] = useState<string | null>(null);
+  const [lastMacroSyncTime, setLastMacroSyncTime] = useState<string>(() =>
+    new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  );
+  const [isRefreshingMacro, setIsRefreshingMacro] = useState<boolean>(false);
 
   const { addAlert, openAlertCenter, unreadCountByCategory, triggerSimulatedUpdate } = useAlerts();
 
@@ -106,34 +112,46 @@ export const SentimentNewsPage: React.FC<SentimentNewsPageProps> = ({
   };
 
   // Load news and sentiment data
-  const loadData = async () => {
+  const loadData = async (force: boolean = false) => {
     setIsLoading(true);
     try {
-      // First try backend API endpoint
-      const res = await fetch('/api/v1/news-sentiment');
+      // First try backend API endpoint with force param if requested
+      const url = force ? `/api/v1/news-sentiment?force=true&t=${Date.now()}` : '/api/v1/news-sentiment';
+      const res = await fetch(url);
       if (res.ok) {
         const json = await res.json();
         if (json.data) {
           setMetrics(json.data.metrics);
           setNews(json.data.news);
+          setLastMacroSyncTime(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
           setIsLoading(false);
           return;
         }
       }
       // Fallback to client-side service
-      const clientRes = await fetchLiveComprehensiveNewsAndSentiment();
+      const clientRes = await fetchLiveComprehensiveNewsAndSentiment(force);
       setMetrics(clientRes.metrics);
       setNews(clientRes.news);
+      setLastMacroSyncTime(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
     } catch (err) {
       console.error('Failed to load comprehensive news & sentiment:', err);
       // Fallback to client service
-      const clientRes = await fetchLiveComprehensiveNewsAndSentiment();
+      const clientRes = await fetchLiveComprehensiveNewsAndSentiment(force);
       setMetrics(clientRes.metrics);
       setNews(clientRes.news);
+      setLastMacroSyncTime(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
     } finally {
       setIsLoading(false);
       setAutoRefreshSec(60);
     }
+  };
+
+  const handleRefreshMacro = async () => {
+    setIsRefreshingMacro(true);
+    await loadData(true);
+    setIsRefreshingMacro(false);
+    setAlertToastItem(isId ? 'Pemicu Makroekonomi & Korelasi Pasar Berhasil Diperbarui' : 'Macroeconomic Drivers & Global Correlations Updated');
+    setTimeout(() => setAlertToastItem(null), 3000);
   };
 
   useEffect(() => {
@@ -333,7 +351,7 @@ export const SentimentNewsPage: React.FC<SentimentNewsPageProps> = ({
             </button>
 
             <button
-              onClick={loadData}
+              onClick={() => loadData(true)}
               disabled={isLoading}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-mono text-xs font-semibold transition-all cursor-pointer shadow-xs min-h-[36px] ${
                 isDark
@@ -492,62 +510,175 @@ export const SentimentNewsPage: React.FC<SentimentNewsPageProps> = ({
       {/* Macroeconomic Indicators Matrix (Federal Reserve, CPI, DXY, US10Y, Gold, Nasdaq) */}
       {metrics && metrics.macroIndicators && (
         <div className={`p-5 rounded-2xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Landmark className="w-5 h-5 text-amber-400" />
-              <h3 className="text-base font-bold font-mono text-white">
-                {isId ? 'Pemicu Makroekonomi & Korelasi Pasar Global' : 'Macroeconomic Drivers & Global Correlations'}
-              </h3>
-            </div>
-            <span className="text-xs text-slate-400 font-mono hidden sm:inline">
-              {isId ? 'Sumber: The Fed, BLS, Reuters & Bloomberg Financial' : 'Sources: The Fed, BLS, Reuters & Bloomberg'}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {metrics.macroIndicators.map((macro) => (
-              <div
-                key={macro.id}
-                className={`p-3.5 rounded-xl border transition-all ${
-                  isDark ? 'bg-[#070b14] border-[#1e293b] hover:border-cyan-500/30' : 'bg-slate-50 border-slate-200'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-mono font-bold text-slate-300">{macro.name}</span>
-                  <span
-                    className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-bold ${
-                      macro.isBullishForCrypto
-                        ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30'
-                        : 'bg-rose-950 text-rose-300 border border-rose-500/30'
-                    }`}
-                  >
-                    {macro.isBullishForCrypto ? 'Bullish Kripto' : 'Bearish Kripto'}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div className="flex items-start sm:items-center gap-3">
+              <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 shrink-0">
+                <Landmark className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-base font-bold font-mono text-white">
+                    {isId ? 'Pemicu Makroekonomi & Korelasi Pasar Global' : 'Macroeconomic Drivers & Global Correlations'}
+                  </h3>
+                  <span className="flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    {isId ? 'Live Feed Terhubung' : 'Live Feeds Active'}
                   </span>
                 </div>
-
-                <div className="flex items-baseline gap-2 font-mono my-1.5">
-                  <span className="text-xl font-bold text-white">{macro.currentValue}</span>
-                  <span className={`text-xs ${macro.isBullishForCrypto ? 'text-emerald-400' : 'text-slate-400'}`}>
-                    {macro.change24hOrPeriod}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 pt-2 border-t border-slate-800">
-                  <span>Korelasi BTC:</span>
-                  <span
-                    className={`font-bold ${
-                      macro.correlationWithBtc > 0 ? 'text-cyan-400' : 'text-amber-400'
-                    }`}
-                  >
-                    {macro.correlationWithBtc > 0 ? `+${macro.correlationWithBtc}` : `${macro.correlationWithBtc}`}
-                  </span>
-                </div>
-
-                <p className="text-[11px] text-slate-400 mt-1.5 leading-snug line-clamp-2">
-                  {macro.impactSummary}
+                <p className="text-xs text-slate-400 font-mono mt-0.5">
+                  {isId
+                    ? 'Feed otomatis: Spot Gold PAXG 24/7, FX DXY Basket, FOMC Easing Cycle & BLS Inflation'
+                    : 'Automated feeds: Spot Gold PAXG 24/7, FX DXY Basket, FOMC Easing Cycle & BLS Inflation'}
                 </p>
               </div>
-            ))}
+            </div>
+
+            <div className="flex items-center gap-2 self-end sm:self-auto">
+              <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400 px-2.5 py-1 rounded-lg bg-slate-900/60 border border-slate-800">
+                <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                <span>{isId ? 'Sinkron:' : 'Synced:'} {lastMacroSyncTime}</span>
+              </div>
+              <button
+                onClick={handleRefreshMacro}
+                disabled={isRefreshingMacro || isLoading}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border font-mono text-xs font-semibold transition cursor-pointer ${
+                  isDark
+                    ? 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30'
+                    : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300'
+                }`}
+                title={isId ? 'Segarkan feed makroekonomi live' : 'Refresh live macro feeds'}
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshingMacro || isLoading ? 'animate-spin text-amber-400' : ''}`} />
+                <span>{isRefreshingMacro ? (isId ? 'Memperbarui...' : 'Syncing...') : (isId ? 'Segarkan Makro' : 'Sync Macro')}</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            {metrics.macroIndicators.map((macro) => {
+              const isPositiveChange = String(macro.change24hOrPeriod).startsWith('+');
+              const isNeutralChange = String(macro.change24hOrPeriod).includes('Hold') || String(macro.change24hOrPeriod).includes('0.00%');
+
+              // Source attribution label
+              const sourceLabel =
+                macro.code === 'XAUUSD'
+                  ? 'Binance PAXG 24/7 Spot'
+                  : macro.code === 'DXY'
+                  ? 'FX Currency Basket Proxy'
+                  : macro.code === 'FEDFUNDS'
+                  ? 'Federal Reserve FOMC'
+                  : macro.code === 'CPI_YOY'
+                  ? 'US Bureau of Labor Statistics'
+                  : macro.code === 'US10Y'
+                  ? 'US Treasury 10Y Benchmark'
+                  : 'Nasdaq 100 Index';
+
+              // Category badge label
+              const categoryLabel =
+                macro.category === 'FED_RATES'
+                  ? isId ? 'Suku Bunga & Moneter' : 'Monetary Policy'
+                  : macro.category === 'INFLATION'
+                  ? isId ? 'Metrik Inflasi' : 'Inflation Metric'
+                  : isId ? 'Aset Global & Komoditas' : 'Global Asset & FX';
+
+              // Correlation textual explanation
+              const correlationExplanation =
+                macro.correlationWithBtc < -0.6
+                  ? isId ? 'Korelasi Terbalik Kuat (Invers)' : 'Strong Inverse Correlation'
+                  : macro.correlationWithBtc > 0.6
+                  ? isId ? 'Korelasi Searah Kuat (Simultan)' : 'Strong Positive Correlation'
+                  : isId ? 'Korelasi Moderat' : 'Moderate Correlation';
+
+              return (
+                <div
+                  key={macro.id}
+                  className={`p-4 rounded-xl border flex flex-col justify-between transition-all ${
+                    isDark ? 'bg-[#070b14] border-[#1e293b] hover:border-amber-500/30' : 'bg-slate-50 border-slate-200 shadow-xs'
+                  }`}
+                >
+                  <div>
+                    {/* Card Top: Code, Category & Bullish/Bearish Tag */}
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700">
+                          {macro.code}
+                        </span>
+                        <span className="text-[10px] font-mono text-slate-400">
+                          {categoryLabel}
+                        </span>
+                      </div>
+                      <span
+                        className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
+                          macro.isBullishForCrypto
+                            ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30'
+                            : 'bg-rose-950/80 text-rose-300 border border-rose-500/30'
+                        }`}
+                      >
+                        {macro.isBullishForCrypto ? (isId ? 'Bullish Kripto' : 'Crypto Bullish') : (isId ? 'Bearish Kripto' : 'Crypto Bearish')}
+                      </span>
+                    </div>
+
+                    <h4 className="text-xs font-mono font-bold text-slate-200 line-clamp-1 mb-1.5" title={macro.name}>
+                      {macro.name}
+                    </h4>
+
+                    {/* Value and 24h Delta */}
+                    <div className="flex items-baseline gap-2.5 font-mono my-2">
+                      <span className="text-2xl font-bold text-white tracking-tight">{macro.currentValue}</span>
+                      <span
+                        className={`text-xs font-semibold flex items-center gap-0.5 ${
+                          isNeutralChange
+                            ? 'text-slate-400'
+                            : isPositiveChange
+                            ? 'text-emerald-400'
+                            : 'text-rose-400'
+                        }`}
+                      >
+                        {isPositiveChange ? (
+                          <TrendingUp className="w-3.5 h-3.5 shrink-0" />
+                        ) : !isNeutralChange ? (
+                          <TrendingDown className="w-3.5 h-3.5 shrink-0" />
+                        ) : null}
+                        {macro.change24hOrPeriod}
+                      </span>
+                    </div>
+
+                    {/* Correlation with BTC Box */}
+                    <div className="p-2 rounded-lg bg-slate-900/70 border border-slate-800/80 my-2.5">
+                      <div className="flex items-center justify-between text-[11px] font-mono">
+                        <span className="text-slate-400">{isId ? 'Korelasi dengan BTC:' : 'Correlation with BTC:'}</span>
+                        <span
+                          className={`font-bold ${
+                            macro.correlationWithBtc > 0 ? 'text-cyan-400' : 'text-amber-400'
+                          }`}
+                        >
+                          {macro.correlationWithBtc > 0 ? `+${macro.correlationWithBtc}` : `${macro.correlationWithBtc}`}
+                        </span>
+                      </div>
+                      <div className="text-[10px] font-mono text-slate-400 mt-1 flex items-center justify-between">
+                        <span>{correlationExplanation}</span>
+                      </div>
+                    </div>
+
+                    {/* Impact Summary */}
+                    <p className="text-[11px] text-slate-300/90 leading-relaxed line-clamp-3 mb-3">
+                      {macro.impactSummary}
+                    </p>
+                  </div>
+
+                  {/* Card Footer: Source & Last Updated */}
+                  <div className="pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono text-slate-400">
+                    <span className="truncate max-w-[150px]" title={sourceLabel}>
+                      {sourceLabel}
+                    </span>
+                    <span className="flex items-center gap-1 text-slate-400 shrink-0">
+                      <Clock className="w-3 h-3 text-cyan-400/80" />
+                      <span>{macro.lastUpdated}</span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

@@ -65,6 +65,11 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
     return computeLiquidationHeatmap(candles, symbol);
   }, [candles, symbol]);
 
+  // Check data fidelity status across candles
+  const isDataSimulated = useMemo(() => {
+    return candles.some((c) => c.isSimulated);
+  }, [candles]);
+
   // Compute Multi-Anchor Anchored VWAP (Daily Session, Weekly, Swing High/Low)
   const avwapSummary = useMemo(() => {
     const lastPrice = candles.length > 0 ? candles[candles.length - 1].close : 0;
@@ -230,6 +235,23 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
           <div className="text-slate-400 hidden sm:inline-block">
             Vol: {activeCandle.volume.toLocaleString()}
           </div>
+          {isDataSimulated ? (
+            <span
+              className="px-2 py-0.5 rounded-[2px] text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 cursor-help"
+              title={lang === 'id' ? 'Umpan data offline estimasi matematis. Rekoneksi bursa aktif berlangsung otomatis.' : 'Offline simulated data feed. Automatic exchange reconnection active.'}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              {lang === 'id' ? 'SIMULASI OFFLINE' : 'SIMULATED DATA'}
+            </span>
+          ) : (
+            <span
+              className="px-2 py-0.5 rounded-[2px] text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1"
+              title={`${selectedExchange} ${selectedMarketType} Tier-1 Feed (${candles.length} Bar)`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              LIVE {selectedExchange}
+            </span>
+          )}
         </div>
 
         {/* Toggle Overlays and Maximize Controls */}
@@ -892,14 +914,16 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
 
       {/* Footer Notes */}
       <div className="flex items-center justify-between pt-2 border-t border-[#1e293b]/60 text-xs text-slate-400 font-mono">
-        <span>
-          {lang === 'id'
-            ? `Menampilkan ${candles.length} periode • Sumber: Umpan Bursa Langsung (Binance) + Cache Algoritma`
-            : `Displaying ${candles.length} periods • Source: Live Exchange Feed + Algo Cache`}
+        <span className="flex items-center gap-2">
+          <span>
+            {lang === 'id'
+              ? `Menampilkan ${candles.length} periode • Sumber: ${isDataSimulated ? 'Cache Algoritma (Simulasi Offline)' : `Umpan Langsung ${selectedExchange} (${selectedMarketType})`}`
+              : `Displaying ${candles.length} periods • Source: ${isDataSimulated ? 'Algo Cache (Offline Simulation)' : `Live ${selectedExchange} Feed (${selectedMarketType})`}`}
+          </span>
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
-          {lang === 'id' ? 'Garis Silang Interaktif Aktif' : 'Interactive Crosshair Active'}
+          <span className={`w-1.5 h-1.5 rounded-full ${isDataSimulated ? 'bg-amber-400' : 'bg-emerald-400'}`} />
+          {lang === 'id' ? (isDataSimulated ? 'Modus Estimasi' : 'Presisi 150-Bar Aktif') : (isDataSimulated ? 'Estimated Mode' : '150-Bar Precision Active')}
         </span>
       </div>
     </div>

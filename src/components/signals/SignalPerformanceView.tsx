@@ -42,14 +42,15 @@ export const SignalPerformanceView: React.FC<SignalPerformanceViewProps> = ({
   const isId = lang === 'id';
   const [filterModel, setFilterModel] = useState<string>('ALL');
 
-  // Compute exact metrics according to AKIRAQU formula
-  const perf: SignalPerformanceMetrics = computeInstitutionalPerformance(
+  const filteredSignals =
     filterModel === 'ALL'
       ? signals
-      : signals.filter((s) => (s.modelCategory || 'CLASSIC') === filterModel)
-  );
+      : signals.filter((s) => (s.modelCategory || 'CLASSIC') === filterModel);
 
-  const closedSignals = signals.filter(
+  // Compute exact metrics according to AKIRAQU formula
+  const perf: SignalPerformanceMetrics = computeInstitutionalPerformance(filteredSignals);
+
+  const closedSignals = filteredSignals.filter(
     (s) =>
       s.outcomeResult === 'WIN' ||
       s.outcomeResult === 'LOSS' ||
@@ -306,7 +307,16 @@ export const SignalPerformanceView: React.FC<SignalPerformanceViewProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/70 bg-[#090d16]/40">
-              {closedSignals.map((sig) => {
+              {closedSignals.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-slate-500 font-mono text-xs">
+                    {isId
+                      ? `Tidak ada riwayat sinyal selesai untuk model ${filterModel}. Sinyal aktif saat ini sedang berjalan (In-Progress).`
+                      : `No completed historical signals found for model ${filterModel}. Active signals are currently in-progress.`}
+                  </td>
+                </tr>
+              ) : (
+                closedSignals.map((sig) => {
                 const isWin =
                   sig.outcomeResult === 'WIN' ||
                   sig.lifecycleStatus === 'TAKEPROFIT' ||
@@ -371,7 +381,7 @@ export const SignalPerformanceView: React.FC<SignalPerformanceViewProps> = ({
                     </td>
                   </tr>
                 );
-              })}
+              }))}
             </tbody>
           </table>
         </div>

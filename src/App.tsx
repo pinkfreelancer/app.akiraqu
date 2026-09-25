@@ -8,7 +8,7 @@ import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
 import { TerminalStatusBar } from './components/TerminalStatusBar';
 import { LaunchpadWorkspace } from './components/LaunchpadWorkspace';
 import { PendingAnalysisCard } from './components/PendingAnalysisCard';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AkiraQuLogo } from './components/AkiraQuLogo';
 import { TerminalProvider, useTerminal } from './contexts/TerminalContext';
@@ -79,6 +79,8 @@ function TerminalApp() {
     workspaceMode,
     toggleWorkspaceMode,
     setWorkspaceModeDirect,
+    isTraderWorkbenchVisible,
+    toggleTraderWorkbench,
     isFullWidth,
     toggleFullWidth,
     isFullscreen,
@@ -257,6 +259,8 @@ function TerminalApp() {
         workspaceMode={workspaceMode}
         onToggleWorkspaceMode={toggleWorkspaceMode}
         onSelectWorkspaceMode={setWorkspaceModeDirect}
+        isWorkbenchVisible={isTraderWorkbenchVisible}
+        onToggleWorkbench={toggleTraderWorkbench}
         onOpenCommandBar={() => setIsCommandBarOpen(true)}
         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
         currentStage={currentStage}
@@ -285,18 +289,21 @@ function TerminalApp() {
         <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
           <main className="flex-1 w-full mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 transition-all duration-200 max-w-none">
             {/* Meja Kerja Trader Workflow Bar (Siklus Harian & Personalisasi) */}
-            <TraderWorkflowBar
-              currentStage={currentStage}
-              onSelectStage={selectStage}
-              lang={lang}
-              theme={binaryTheme}
-              activePersona={traderPersona}
-              onPersonaChange={handlePersonaChange}
-              workspaceMode={workspaceMode}
-              onSelectWorkspaceMode={setWorkspaceModeDirect}
-              onTriggerAnalyze={runCurrentAnalysis}
-              isAnalyzing={isLoading}
-            />
+            {isTraderWorkbenchVisible && (
+              <TraderWorkflowBar
+                currentStage={currentStage}
+                onSelectStage={selectStage}
+                lang={lang}
+                theme={binaryTheme}
+                activePersona={traderPersona}
+                onPersonaChange={handlePersonaChange}
+                workspaceMode={workspaceMode}
+                onSelectWorkspaceMode={setWorkspaceModeDirect}
+                onTriggerAnalyze={runCurrentAnalysis}
+                isAnalyzing={isLoading}
+                onClose={toggleTraderWorkbench}
+              />
+            )}
 
             {/* Workspace Mode: Launchpad Quad-Grid, Split Master Anchor, or Classic Single Stage */}
             {workspaceMode === 'launchpad' ? (
@@ -1153,41 +1160,56 @@ function TerminalApp() {
       <footer className={`w-full border-t py-3 text-xs font-mono transition-colors duration-200 ${
         isDark ? 'border-[#1e293b] bg-[#0b0f19] text-slate-400' : 'border-slate-200 bg-slate-100 text-slate-700'
       }`}>
-        <div className="w-full mx-auto px-3 sm:px-4 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <AkiraQuLogo size={20} theme={binaryTheme} variant="symbol" />
-            <span className={`font-bold tracking-wider ${isDark ? 'text-[#F89DB5]' : 'text-[#21242B]'}`}>
-              AKIRAQU
-            </span>
-            <span className={isDark ? 'text-slate-600' : 'text-slate-400'}>•</span>
-            <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Analytic Quantitative Crypto Tools</span>
+        <div className="w-full mx-auto px-3 sm:px-4 lg:px-8 space-y-2.5">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <AkiraQuLogo size={20} theme={binaryTheme} variant="symbol" />
+              <span className={`font-bold tracking-wider ${isDark ? 'text-[#F89DB5]' : 'text-[#21242B]'}`}>
+                AKIRAQU
+              </span>
+              <span className={isDark ? 'text-slate-600' : 'text-slate-400'}>•</span>
+              <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Analytic Quantitative Crypto Tools</span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button
+                onClick={navigateToLanding}
+                className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
+              >
+                {lang === 'id' ? 'Halaman Depan (Landing)' : 'Landing Page'}
+              </button>
+              <button
+                onClick={navigateToLogin}
+                className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
+              >
+                {lang === 'id' ? 'Akun Gmail' : 'Gmail Account'}
+              </button>
+              <button
+                onClick={() => setIsAssuranceModalOpen(true)}
+                className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
+              >
+                {t.footer.assuranceLink}
+              </button>
+              <button
+                onClick={() => setIsExportModalOpen(true)}
+                className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
+              >
+                {t.footer.privacyLink}
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <button
-              onClick={navigateToLanding}
-              className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
-            >
-              {lang === 'id' ? 'Halaman Depan (Landing)' : 'Landing Page'}
-            </button>
-            <button
-              onClick={navigateToLogin}
-              className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
-            >
-              {lang === 'id' ? 'Akun Gmail' : 'Gmail Account'}
-            </button>
-            <button
-              onClick={() => setIsAssuranceModalOpen(true)}
-              className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
-            >
-              {t.footer.assuranceLink}
-            </button>
-            <button
-              onClick={() => setIsExportModalOpen(true)}
-              className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
-            >
-              {t.footer.privacyLink}
-            </button>
+          {/* Disclaimer: Penafian */}
+          <div className={`pt-2.5 border-t text-[11px] leading-relaxed flex items-start sm:items-center gap-2 ${
+            isDark ? 'border-[#1e293b]/70 text-slate-400' : 'border-slate-200 text-slate-600'
+          }`}>
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
+            <p className="font-mono">
+              <span className="font-bold text-amber-400 mr-1.5">Disclaimer: Penafian</span>
+              <span>
+                Segala informasi yang terdapat di halaman ini tidak boleh dianggap sebagai nasihat keuangan. Anda harus melakukan riset sendiri sebelum mengambil keputusan apa pun.
+              </span>
+            </p>
           </div>
         </div>
       </footer>

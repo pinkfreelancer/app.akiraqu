@@ -78,6 +78,9 @@ export interface OHLCVCandle {
   low: number;
   close: number;
   volume: number;
+  takerBuyVolume?: number;
+  quoteVolume?: number;
+  isSimulated?: boolean;
 }
 
 export type CryptoCategory =

@@ -7,6 +7,7 @@ export interface UseTerminalKeyboardShortcutsOptions {
   onCloseModals: () => void;
   onTimeframeChange: (tf: Timeframe) => void;
   onToggleWorkspaceMode: () => void;
+  onToggleWorkbench?: () => void;
   onTriggerAnalyze: () => void;
   onPrevSymbol: () => void;
   onNextSymbol: () => void;
@@ -18,6 +19,7 @@ export function useTerminalKeyboardShortcuts({
   onCloseModals,
   onTimeframeChange,
   onToggleWorkspaceMode,
+  onToggleWorkbench,
   onTriggerAnalyze,
   onPrevSymbol,
   onNextSymbol,
@@ -72,6 +74,9 @@ export function useTerminalKeyboardShortcuts({
       } else if (e.key.toLowerCase() === 'w') {
         e.preventDefault();
         onToggleWorkspaceMode();
+      } else if (e.key.toLowerCase() === 'h' && onToggleWorkbench) {
+        e.preventDefault();
+        onToggleWorkbench();
       } else if (e.key.toLowerCase() === 'r') {
         e.preventDefault();
         onTriggerAnalyze();
@@ -94,6 +99,7 @@ export function useTerminalKeyboardShortcuts({
     onCloseModals,
     onTimeframeChange,
     onToggleWorkspaceMode,
+    onToggleWorkbench,
     onTriggerAnalyze,
     onPrevSymbol,
     onNextSymbol,

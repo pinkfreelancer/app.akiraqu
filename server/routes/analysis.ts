@@ -45,8 +45,10 @@ analysisRouter.post('/analyze', async (req: Request, res: Response) => {
   const validation = AnalysisSchema.safeParse(payloadToValidate);
 
   if (!validation.success) {
+    console.error('[Analysis API] Schema Validation Failed:', validation.error.format());
     res.status(400).json({
       error: 'Schema Validation Failed',
+      message: validation.error.issues.map((i) => `${i.path.join('.') || 'root'}: ${i.message}`).join('; '),
       issues: validation.error.issues,
     });
     return;
@@ -90,7 +92,7 @@ analysisRouter.post('/analyze', async (req: Request, res: Response) => {
   }
 
   try {
-    const candles = await fetchOHLCVOnDemandCCXT(symbol, timeframe, 85, exchange, marketType);
+    const candles = await fetchOHLCVOnDemandCCXT(symbol, timeframe, 150, exchange, marketType);
     const indicators = calculateAllIndicators(candles);
 
     const weights = [

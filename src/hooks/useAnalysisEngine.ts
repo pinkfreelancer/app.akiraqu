@@ -5,9 +5,14 @@ import {
   Timeframe,
   SupportedExchange,
   MarketType,
+  MarketBias,
 } from '../types/crypto.types';
 import { Language } from '../i18n/translations';
 import { generateInstantCandlesForPrice } from '../services/marketData';
+import { fetchOHLCVOnDemandCCXT } from '../services/ccxtService';
+import { calculateAllIndicators } from '../services/indicators/indicatorEngine';
+import { evaluateConfluence } from '../services/confluence/confluenceEngine';
+import { calculateRiskPlan } from '../services/risk/riskCalculator';
 
 export interface UseAnalysisEngineReturn {
   evaluation: ConfluenceEvaluation | null;
@@ -157,6 +162,81 @@ export function useAnalysisEngine(currentLang: Language = 'id'): UseAnalysisEngi
         ) {
           return;
         }
+
+        // Resilient fallback: Run institutional engine calculation client-side
+        try {
+          console.warn('[useAnalysisEngine] Server API error, running local institutional engine fallback:', err);
+          const localCandles = await fetchOHLCVOnDemandCCXT(sym, tf, 150, targetExchange, targetMarketType);
+          const localIndicators = calculateAllIndicators(localCandles);
+          const localLastClose = localCandles[localCandles.length - 1].close;
+
+          let weightedScoreSum = 0;
+          const weights = [
+            { weight: 0.12, signal: localIndicators.priceAction.signal, confidence: localIndicators.priceAction.confidence },
+            { weight: 0.12, signal: localIndicators.smc.signal, confidence: localIndicators.smc.confidence },
+            { weight: 0.11, signal: localIndicators.orderFlow.signal, confidence: localIndicators.orderFlow.confidence },
+            { weight: 0.10, signal: localIndicators.ict.signal, confidence: localIndicators.ict.confidence },
+            { weight: 0.09, signal: localIndicators.optionFlow.signal, confidence: localIndicators.optionFlow.confidence },
+            { weight: 0.08, signal: localIndicators.rsi.signal, confidence: localIndicators.rsi.confidence },
+            { weight: 0.08, signal: localIndicators.vwap.signal, confidence: localIndicators.vwap.confidence },
+            { weight: 0.08, signal: localIndicators.fibonacci.signal, confidence: localIndicators.fibonacci.confidence },
+            { weight: 0.08, signal: localIndicators.macd.signal, confidence: localIndicators.macd.confidence },
+            { weight: 0.06, signal: localIndicators.ichimoku.signal, confidence: localIndicators.ichimoku.confidence },
+            { weight: 0.04, signal: localIndicators.tdSequential.signal, confidence: localIndicators.tdSequential.confidence },
+            { weight: 0.04, signal: localIndicators.elliottWave.signal, confidence: localIndicators.elliottWave.confidence },
+          ];
+
+          for (const item of weights) {
+            if (item.signal === 'BULLISH') {
+              weightedScoreSum += item.weight * (50 + (item.confidence / 100) * 50);
+            } else if (item.signal === 'BEARISH') {
+              weightedScoreSum += item.weight * (50 - (item.confidence / 100) * 50);
+            } else {
+              weightedScoreSum += item.weight * 50;
+            }
+          }
+
+          const consensusScore = Math.max(5, Math.min(96, Math.round(weightedScoreSum)));
+          let weightedBias: MarketBias = 'Neutral';
+          if (consensusScore >= 78) weightedBias = 'Strong Bullish';
+          else if (consensusScore >= 58) weightedBias = 'Bullish';
+          else if (consensusScore <= 22) weightedBias = 'Strong Bearish';
+          else if (consensusScore <= 42) weightedBias = 'Bearish';
+
+          const localRiskPlan = calculateRiskPlan({
+            currentPrice: localLastClose,
+            bias: weightedBias,
+            keySupport: localIndicators.priceAction.keySupport,
+            keyResistance: localIndicators.priceAction.keyResistance,
+            accountBalance: 10000,
+            riskPercentage: 1.5,
+          });
+
+          const localEval = await evaluateConfluence({
+            symbol: sym,
+            timeframe: tf,
+            indicators: localIndicators,
+            riskPlan: localRiskPlan,
+            idempotencyKey,
+            useAI: false,
+            language: targetLang,
+          });
+
+          setEvaluation(localEval);
+          if (onSuccessCandles && localCandles.length > 0) {
+            onSuccessCandles(localCandles);
+          }
+          analysisCacheRef.current.set(cacheKey, {
+            evaluation: localEval,
+            candles: localCandles,
+            timestamp: Date.now(),
+          });
+          setErrorNotice(null);
+          return;
+        } catch (fallbackErr) {
+          console.error('[useAnalysisEngine] Local fallback failure:', fallbackErr);
+        }
+
         if (!cached) {
           setErrorNotice(
             err.message ||

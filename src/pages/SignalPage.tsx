@@ -230,7 +230,10 @@ export const SignalPage: React.FC<SignalPageProps> = ({
             data: {
               signalId: newSignal.id,
               direction: newSignal.direction,
+              timeframe: newSignal.timeframe || '15m',
               entryPrice: newSignal.entryPrice,
+              targetPrice: newSignal.targetPrice1,
+              stopLoss: newSignal.stopLoss,
               confluenceScore: newSignal.confluenceScore,
             },
           });

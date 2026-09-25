@@ -49,7 +49,7 @@ export class CcxtExchangeAdapter implements IExchangeAdapter {
   async fetchOHLCV(
     symbol: string,
     timeframe: Timeframe,
-    limit: number = 85,
+    limit: number = 150,
     marketType: MarketType = 'SPOT'
   ): Promise<OHLCVCandle[]> {
     try {

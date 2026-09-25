@@ -464,9 +464,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             <button
               onClick={() => handleExecuteBacktest()}
               disabled={isLoading}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-[2px] text-xs font-bold transition-all cursor-pointer shadow-xs min-h-[38px] ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold transition-all cursor-pointer shadow-xs min-h-[40px] ${
                 isLoading
-                  ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                  ? 'bg-slate-700 text-slate-300 cursor-not-allowed'
                   : 'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white active:scale-98 font-bold'
               }`}
             >
@@ -477,7 +477,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             <button
               onClick={handleTriggerAILearning}
               disabled={isAILearning || !result}
-              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border min-h-[38px] ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold transition-all cursor-pointer border min-h-[40px] ${
                 isAILearning
                   ? 'bg-purple-950/40 border-purple-500/50 text-purple-300 animate-pulse cursor-not-allowed'
                   : isDark
@@ -493,9 +493,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               onClick={handleExportCSV}
               disabled={!result || result.trades.length === 0}
               title={isId ? 'Ekspor riwayat trade sebagai CSV' : 'Export trade logs as CSV'}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-mono font-bold transition cursor-pointer min-h-[38px] ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-md border text-xs font-mono font-bold transition-colors duration-150 cursor-pointer min-h-[40px] ${
                 isDark
-                  ? 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800'
+                  ? 'bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800'
                   : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
               }`}
             >
@@ -506,9 +506,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             <button
               onClick={handleResetToVerified}
               title={isId ? 'Kembalikan parameter ke default terverifikasi' : 'Reset to verified defaults'}
-              className={`p-2 rounded-xl border transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center ${
+              className={`p-2 rounded-md border transition-colors duration-150 cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center ${
                 isDark
-                  ? 'border-slate-700 hover:bg-slate-800 text-slate-300'
+                  ? 'border-slate-700 hover:bg-slate-800 text-slate-200'
                   : 'border-slate-200 hover:bg-slate-100 text-slate-600'
               }`}
             >
@@ -520,10 +520,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               <button
                 onClick={onToggleFullscreen}
                 title={isFullscreen ? (isId ? 'Keluar Layar Penuh' : 'Exit Fullscreen') : (isId ? 'Layar Penuh (F11)' : 'Fullscreen (F11)')}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-mono font-bold transition cursor-pointer min-h-[38px] ${
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-md border text-xs font-mono font-bold transition-colors duration-150 cursor-pointer min-h-[40px] ${
                   isFullscreen
                     ? (isDark ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300' : 'bg-cyan-50 border-cyan-300 text-cyan-700')
-                    : (isDark ? 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800' : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200')
+                    : (isDark ? 'bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800' : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200')
                 }`}
               >
                 {isFullscreen ? <Minimize className="w-3.5 h-3.5 text-cyan-400" /> : <Maximize className="w-3.5 h-3.5" />}
@@ -537,7 +537,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       {/* Notification Toast if AI Params Applied */}
       {appliedNotification && (
         <div className="w-full mx-auto px-3 sm:px-4 lg:px-8 mt-3">
-          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium animate-fadeIn">
+          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium animate-fadeIn">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{appliedNotification}</span>
           </div>
@@ -547,7 +547,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       {/* Main Workspace Layout */}
       <div className="w-full mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 space-y-6">
         {/* Section 1: Data Source Selector */}
-        <div className={`p-5 rounded-2xl border transition-all ${
+        <div className={`p-5 rounded-xl border transition-colors duration-150 ${
           isDark ? 'bg-[#0f1528]/90 border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'
         }`}>
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-4 border-b border-slate-700/30">
@@ -556,7 +556,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 <Database className="w-4 h-4" />
                 <span>{isId ? 'Pilihan Sumber Data Backtest' : 'Backtest Data Source Selection'}</span>
               </h2>
-              <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                 {isId
                   ? 'Tentukan sumber data candle historis: Umpan Live API Bursa, Skenario Terkurasi Offline, atau Unggah File Anda.'
                   : 'Select candle source: Live Exchange API, Curated Historical Scenarios, or Custom File Upload.'}
@@ -564,15 +564,15 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             </div>
 
             {/* Source Mode Toggle Pills */}
-            <div className={`flex items-center p-1 rounded-xl border ${
+            <div className={`flex items-center p-1 rounded-lg border ${
               isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-100 border-slate-200'
             }`}>
               <button
                 onClick={() => setDataSource('api')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-bold min-h-[36px] transition-colors duration-150 cursor-pointer ${
                   dataSource === 'api'
-                    ? 'bg-cyan-500 text-slate-950 shadow-xs'
-                    : isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-cyan-500 text-slate-950 font-black shadow-xs'
+                    : isDark ? 'text-slate-300 hover:text-white hover:bg-slate-800/40' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
                 }`}
               >
                 <Wifi className="w-3.5 h-3.5" />
@@ -581,10 +581,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
               <button
                 onClick={() => setDataSource('offline_preset')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-bold min-h-[36px] transition-colors duration-150 cursor-pointer ${
                   dataSource === 'offline_preset'
-                    ? 'bg-cyan-500 text-slate-950 shadow-xs'
-                    : isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-cyan-500 text-slate-950 font-black shadow-xs'
+                    : isDark ? 'text-slate-300 hover:text-white hover:bg-slate-800/40' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
                 }`}
               >
                 <WifiOff className="w-3.5 h-3.5" />
@@ -593,10 +593,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
               <button
                 onClick={() => setDataSource('custom_upload')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-bold min-h-[36px] transition-colors duration-150 cursor-pointer ${
                   dataSource === 'custom_upload'
-                    ? 'bg-cyan-500 text-slate-950 shadow-xs'
-                    : isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-cyan-500 text-slate-950 font-black shadow-xs'
+                    : isDark ? 'text-slate-300 hover:text-white hover:bg-slate-800/40' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
                 }`}
               >
                 <UploadCloud className="w-3.5 h-3.5" />
@@ -792,13 +792,13 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         </div>
 
         {/* Section 2: Strategy Selector & Parameter Controls */}
-        <div className={`p-5 rounded-2xl border transition-all ${
+        <div className={`p-5 rounded-xl border transition-colors duration-150 ${
           isDark ? 'bg-[#0f1528]/90 border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'
         }`}>
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-700/30">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
                   {isId ? 'Pilihan Strategi / Indikator yang Diuji' : 'Target Strategy / Indicator'}
                 </h3>
                 {selectedIndicator === 'confluence' && (
@@ -810,7 +810,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               <p className="text-sm font-black text-cyan-400 mt-0.5">
                 {selectedMeta.name} ({selectedMeta.shortName})
               </p>
-              <p className="text-xs text-slate-400 mt-0.5 max-w-2xl">
+              <p className="text-xs text-slate-300 mt-0.5 max-w-2xl">
                 {selectedMeta.description}
               </p>
             </div>
@@ -822,11 +822,11 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                   setSelectedIndicator('confluence');
                   handleExecuteBacktest('confluence', params, config);
                 }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer border ${
+                className={`px-3.5 py-2 rounded-md text-xs font-bold whitespace-nowrap min-h-[36px] transition-colors duration-150 cursor-pointer border ${
                   selectedIndicator === 'confluence'
                     ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 border-cyan-400 font-black shadow-xs ring-2 ring-cyan-400/30'
                     : isDark
-                    ? 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700'
+                    ? 'bg-slate-900 border-slate-800 text-slate-200 hover:text-white hover:border-slate-700'
                     : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
                 }`}
               >
@@ -840,11 +840,11 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                     setSelectedIndicator(ind.key);
                     handleExecuteBacktest(ind.key, params, config);
                   }}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all cursor-pointer border ${
+                  className={`px-3 py-2 rounded-md text-xs whitespace-nowrap min-h-[36px] transition-colors duration-150 cursor-pointer border ${
                     selectedIndicator === ind.key
                       ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 font-bold shadow-xs'
                       : isDark
-                      ? 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                      ? 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white'
                       : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
@@ -855,16 +855,16 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           </div>
 
           {/* Parameter Calibration Panel for Selected Indicator */}
-          <div className={`p-4 rounded-xl border my-4 ${
+          <div className={`p-4 rounded-lg border my-4 ${
             isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-slate-50/80 border-slate-200'
           }`}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-700/20">
               <div className="flex items-center gap-2">
                 <Sliders className="w-4 h-4 text-cyan-400" />
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
                   {isId ? `Kalibrasi Parameter: ${selectedMeta.shortName}` : `Parameter Calibration: ${selectedMeta.shortName}`}
                 </span>
-                <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">
+                <span className="text-[10px] text-slate-300 font-mono hidden sm:inline">
                   • {selectedMeta.verificationSource}
                 </span>
               </div>
@@ -880,7 +880,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                     setParams(updated);
                     handleExecuteBacktest(selectedIndicator, updated, config);
                   }}
-                  className="text-[11px] text-cyan-400 hover:text-cyan-300 underline font-medium cursor-pointer"
+                  className="text-xs text-cyan-400 hover:text-cyan-300 underline font-medium cursor-pointer"
                 >
                   {isId ? 'Kembalikan Default' : 'Restore Defaults'}
                 </button>
@@ -888,7 +888,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 <button
                   onClick={() => handleExecuteBacktest(selectedIndicator, params, config)}
                   disabled={isLoading}
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md min-h-[36px] bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-black transition-colors duration-150 cursor-pointer"
                 >
                   <Play className="w-3 h-3 fill-current" />
                   <span>{isId ? 'Terapkan & Uji' : 'Apply & Test'}</span>
@@ -912,7 +912,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                           : (isId ? '🗳️ Voting Mayoritas' : '🗳️ Majority Voting')}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-400 mb-2.5">
+                    <p className="text-xs text-slate-300 mb-2.5">
                       {isId
                         ? 'Mode "Bobot Institusional" menggunakan bobot kontinu 12-indikator (12%/12%/11%/.../4%) identik dengan sinyal Live Terminal.'
                         : 'Mode "Institutional Weighted" uses calibrated continuous 12-indicator weights (12%/12%/11%/.../4%) matching Live Terminal.'}
@@ -926,19 +926,19 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                             confluence: { ...prev.confluence, strategyMode: 'weighted' },
                           }));
                         }}
-                        className={`p-2.5 rounded-lg text-xs font-bold border transition-all cursor-pointer text-left ${
+                        className={`p-3 rounded-md text-xs font-bold border min-h-[48px] transition-colors duration-150 cursor-pointer text-left ${
                           (params.confluence?.strategyMode ?? 'weighted') === 'weighted'
                             ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 shadow-xs'
                             : isDark
-                            ? 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
-                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
+                            ? 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700'
+                            : 'bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900'
                         }`}
                       >
                         <div className="flex items-center gap-1.5">
                           <span className="w-2 h-2 rounded-full bg-cyan-400" />
                           <span>{isId ? 'Bobot Kontinu (Standar Live)' : 'Institutional Weighted (Live)'}</span>
                         </div>
-                        <p className="text-[10px] text-slate-400 mt-1 font-normal">
+                        <p className="text-[11px] text-slate-300 mt-1 font-normal">
                           {isId ? 'Menghitung bobot diferensial per model matematis' : 'Calculates differential model confidence weights'}
                         </p>
                       </button>
@@ -951,19 +951,19 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                             confluence: { ...prev.confluence, strategyMode: 'majority_vote' },
                           }));
                         }}
-                        className={`p-2.5 rounded-lg text-xs font-bold border transition-all cursor-pointer text-left ${
+                        className={`p-3 rounded-md text-xs font-bold border min-h-[48px] transition-colors duration-150 cursor-pointer text-left ${
                           params.confluence?.strategyMode === 'majority_vote'
                             ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 shadow-xs'
                             : isDark
-                            ? 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
-                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
+                            ? 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700'
+                            : 'bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900'
                         }`}
                       >
                         <div className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-slate-500" />
+                          <span className="w-2 h-2 rounded-full bg-slate-400" />
                           <span>{isId ? 'Voting Mayoritas Sederhana' : 'Majority Vote Model'}</span>
                         </div>
-                        <p className="text-[10px] text-slate-400 mt-1 font-normal">
+                        <p className="text-[11px] text-slate-300 mt-1 font-normal">
                           {isId ? 'Berdasarkan ambang kuorum indikator yang sepakat' : 'Based on minimum agreed indicator count threshold'}
                         </p>
                       </button>
@@ -971,16 +971,16 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                   </div>
 
                   {/* Min Score Threshold */}
-                  <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950/60 border-slate-800/80' : 'bg-white border-slate-200'}`}>
+                  <div className={`p-3.5 rounded-lg border ${isDark ? 'bg-slate-950/60 border-slate-800/80' : 'bg-white border-slate-200'}`}>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-bold text-slate-200">
+                      <label className="text-xs font-bold text-slate-100">
                         {isId ? 'Skor Ambang Minimal (Threshold)' : 'Min Confluence Score'}
                       </label>
                       <span className="text-xs font-mono font-bold text-cyan-400">
                         {params.confluence?.minScoreThreshold ?? 60} pts
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-400 mb-2">
+                    <p className="text-xs text-slate-300 mb-2">
                       {isId
                         ? 'Skor konfluensi voting minimum yang dibutuhkan untuk memicu open posisi Long atau Short (50 - 85).'
                         : 'Minimum confluence consensus score required to trigger a trade entry (50 - 85).'}
@@ -999,7 +999,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                             confluence: { ...prev.confluence, minScoreThreshold: val },
                           }));
                         }}
-                        className="w-full accent-cyan-400 cursor-pointer h-1.5 bg-slate-700 rounded-lg"
+                        className="w-full accent-cyan-400 cursor-pointer h-2 bg-slate-700 rounded-lg"
                       />
                       <input
                         type="number"
@@ -1014,7 +1014,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                             confluence: { ...prev.confluence, minScoreThreshold: val },
                           }));
                         }}
-                        className={`w-16 px-2 py-1 rounded text-xs font-mono font-bold text-center border ${
+                        className={`w-16 px-2 py-1.5 rounded-md text-xs font-mono font-bold text-center border ${
                           isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                         }`}
                       />
@@ -1022,16 +1022,16 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                   </div>
 
                   {/* Min Agreed Indicators */}
-                  <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950/60 border-slate-800/80' : 'bg-white border-slate-200'}`}>
+                  <div className={`p-3.5 rounded-lg border ${isDark ? 'bg-slate-950/60 border-slate-800/80' : 'bg-white border-slate-200'}`}>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-bold text-slate-200">
+                      <label className="text-xs font-bold text-slate-100">
                         {isId ? 'Konsensus Minimal Indikator' : 'Min Agreed Indicators'}
                       </label>
                       <span className="text-xs font-mono font-bold text-cyan-400">
                         {params.confluence?.minAgreedIndicators ?? 7} / 12
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-400 mb-2">
+                    <p className="text-xs text-slate-300 mb-2">
                       {isId
                         ? 'Jumlah minimum dari 12 indikator teknikal yang wajib sepakat searah (Bullish/Bearish).'
                         : 'Minimum number of the 12 models that must confirm the same direction.'}
@@ -1050,7 +1050,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                             confluence: { ...prev.confluence, minAgreedIndicators: val },
                           }));
                         }}
-                        className="w-full accent-cyan-400 cursor-pointer h-1.5 bg-slate-700 rounded-lg"
+                        className="w-full accent-cyan-400 cursor-pointer h-2 bg-slate-700 rounded-lg"
                       />
                       <input
                         type="number"
@@ -1065,7 +1065,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                             confluence: { ...prev.confluence, minAgreedIndicators: val },
                           }));
                         }}
-                        className={`w-16 px-2 py-1 rounded text-xs font-mono font-bold text-center border ${
+                        className={`w-16 px-2 py-1.5 rounded-md text-xs font-mono font-bold text-center border ${
                           isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                         }`}
                       />
@@ -1076,10 +1076,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 {/* 12 Indicators Included in Consensus */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300">
                       {isId ? 'Matriks 12 Indikator Kuantitatif dalam Mesin Konsensus:' : '12 Constituent Indicators in Consensus Matrix:'}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-mono">
+                    <span className="text-[11px] text-slate-300 font-mono">
                       {isId ? 'Klik salah satu indikator di bawah untuk menguji parameternya secara terpisah' : 'Select an indicator below to test individually'}
                     </span>
                   </div>
@@ -1104,20 +1104,20 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                           setSelectedIndicator(item.key as IndicatorKey);
                           handleExecuteBacktest(item.key as IndicatorKey, params, config);
                         }}
-                        className={`p-2.5 rounded-lg border transition-all cursor-pointer hover:border-cyan-500/50 ${
-                          isDark ? 'bg-slate-950/40 border-slate-800' : 'bg-white border-slate-200'
+                        className={`p-2.5 rounded-lg border transition-colors duration-150 ease-out cursor-pointer hover:border-cyan-400 min-h-[58px] flex flex-col justify-between ${
+                          isDark ? 'bg-slate-950/60 border-slate-800' : 'bg-white border-slate-200'
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-slate-200 text-[11px] truncate">{idx + 1}. {item.name}</span>
-                          <span className="text-[10px] font-mono font-bold text-cyan-400 bg-cyan-950/50 px-1 rounded shrink-0">
+                          <span className="text-[10px] font-mono font-bold text-cyan-400 bg-cyan-950/60 px-1.5 py-0.5 rounded shrink-0">
                             {item.weight}
                           </span>
                         </div>
                         <div className="flex items-center justify-between gap-1 mt-1">
-                          <p className="text-[10px] text-slate-400 truncate">{item.sub}</p>
+                          <p className="text-[10px] text-slate-300 truncate">{item.sub}</p>
                           {item.isSimulated && (
-                            <span className="text-[8px] font-bold px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-amber-950/70 text-amber-200 border border-amber-500/60 shadow-xs shrink-0">
                               Simulasi
                             </span>
                           )}
@@ -1131,13 +1131,13 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               /* If individual indicator is selected: render simulation warning if applicable and parameters dynamically */
               <div className="space-y-4">
                 {(selectedIndicator === 'optionFlow' || selectedIndicator === 'elliottWave') && (
-                  <div className="p-3 rounded-lg border border-amber-500/40 bg-amber-500/10 flex items-start gap-3">
-                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div className="p-3.5 rounded-lg border border-amber-500/60 bg-amber-950/40 flex items-start gap-3">
+                    <AlertTriangle className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
                     <div className="text-xs">
-                      <strong className="text-amber-300 font-bold block mb-0.5">
+                      <strong className="text-amber-200 font-bold block mb-0.5">
                         {isId ? 'Perhatian: Model Berbasis Estimasi Simulasi' : 'Notice: Simulated / Algorithmic Data Model'}
                       </strong>
-                      <p className="text-amber-200/80 leading-relaxed text-[11px]">
+                      <p className="text-amber-100/90 leading-relaxed text-xs">
                         {selectedIndicator === 'optionFlow'
                           ? (isId
                               ? 'Option Flow (PCR) saat ini menggunakan estimasi derivatif sintetis dari pergerakan OHLCV sampai feed data deribit options terintegrasi langsung. Uji backtest mandiri ditujukan untuk eksplorasi konseptual.'
@@ -1217,16 +1217,16 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           {/* Execution Settings Grid */}
           <div className="pt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
             <div>
-              <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+              <label className="block text-[11px] font-bold uppercase text-slate-300 mb-1">
                 {isId ? 'Modal Awal' : 'Initial Capital'}
               </label>
               <div className="relative">
-                <DollarSign className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-500" />
+                <DollarSign className="w-3.5 h-3.5 absolute left-2.5 top-3 text-slate-400" />
                 <input
                   type="number"
                   value={config.initialCapital}
                   onChange={(e) => setConfig({ ...config, initialCapital: Math.max(100, Number(e.target.value)) })}
-                  className={`w-full pl-7 pr-2.5 py-1.5 rounded-lg text-xs font-mono font-bold border ${
+                  className={`w-full pl-7 pr-2.5 py-2 rounded-md text-xs font-mono font-bold border min-h-[38px] ${
                     isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                   }`}
                 />
@@ -1234,7 +1234,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+              <label className="block text-[11px] font-bold uppercase text-slate-300 mb-1">
                 {isId ? 'Risiko / Trade (%)' : 'Risk / Trade (%)'}
               </label>
               <input
@@ -1244,14 +1244,14 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 max="10"
                 value={config.riskPerTradePercent}
                 onChange={(e) => setConfig({ ...config, riskPerTradePercent: Number(e.target.value) })}
-                className={`w-full px-3 py-1.5 rounded-lg text-xs font-mono font-bold border ${
+                className={`w-full px-3 py-2 rounded-md text-xs font-mono font-bold border min-h-[38px] ${
                   isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                 }`}
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+              <label className="block text-[11px] font-bold uppercase text-slate-300 mb-1">
                 Take Profit RRR
               </label>
               <input
@@ -1261,14 +1261,14 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 max="6.0"
                 value={config.takeProfitRRR}
                 onChange={(e) => setConfig({ ...config, takeProfitRRR: Number(e.target.value) })}
-                className={`w-full px-3 py-1.5 rounded-lg text-xs font-mono font-bold border ${
+                className={`w-full px-3 py-2 rounded-md text-xs font-mono font-bold border min-h-[38px] ${
                   isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                 }`}
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+              <label className="block text-[11px] font-bold uppercase text-slate-300 mb-1">
                 Stop Loss (%)
               </label>
               <input
@@ -1278,14 +1278,14 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 max="8.0"
                 value={config.stopLossPercent}
                 onChange={(e) => setConfig({ ...config, stopLossPercent: Number(e.target.value) })}
-                className={`w-full px-3 py-1.5 rounded-lg text-xs font-mono font-bold border ${
+                className={`w-full px-3 py-2 rounded-md text-xs font-mono font-bold border min-h-[38px] ${
                   isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                 }`}
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+              <label className="block text-[11px] font-bold uppercase text-slate-300 mb-1">
                 {isId ? 'Slippage Realistis (%)' : 'Slippage (%)'}
               </label>
               <input
@@ -1295,14 +1295,14 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 max="0.50"
                 value={config.slippagePercent}
                 onChange={(e) => setConfig({ ...config, slippagePercent: Number(e.target.value) })}
-                className={`w-full px-3 py-1.5 rounded-lg text-xs font-mono font-bold border ${
+                className={`w-full px-3 py-2 rounded-md text-xs font-mono font-bold border min-h-[38px] ${
                   isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                 }`}
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+              <label className="block text-[11px] font-bold uppercase text-slate-300 mb-1">
                 {isId ? 'Biaya Bursa (%)' : 'Taker Fee (%)'}
               </label>
               <input
@@ -1312,7 +1312,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 max="0.25"
                 value={config.feePercent}
                 onChange={(e) => setConfig({ ...config, feePercent: Number(e.target.value) })}
-                className={`w-full px-3 py-1.5 rounded-lg text-xs font-mono font-bold border ${
+                className={`w-full px-3 py-2 rounded-md text-xs font-mono font-bold border min-h-[38px] ${
                   isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                 }`}
               />
@@ -1326,9 +1326,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 type="checkbox"
                 checked={config.usePartialTakeProfit}
                 onChange={(e) => setConfig({ ...config, usePartialTakeProfit: e.target.checked })}
-                className="w-3.5 h-3.5 rounded text-cyan-500 focus:ring-0"
+                className="w-4 h-4 rounded text-cyan-500 focus:ring-0"
               />
-              <span className="font-medium">
+              <span className="font-semibold text-slate-200">
                 {isId ? 'Partial TP (50% pada 1.5R + Geser SL ke Breakeven)' : 'Partial TP (50% at 1.5R + Breakeven SL)'}
               </span>
             </label>
@@ -1338,9 +1338,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 type="checkbox"
                 checked={config.useTrailingStop}
                 onChange={(e) => setConfig({ ...config, useTrailingStop: e.target.checked })}
-                className="w-3.5 h-3.5 rounded text-cyan-500 focus:ring-0"
+                className="w-4 h-4 rounded text-cyan-500 focus:ring-0"
               />
-              <span className="font-medium">
+              <span className="font-semibold text-slate-200">
                 {isId ? 'Trailing Stop Dinamis' : 'Dynamic Trailing Stop'}
               </span>
             </label>
@@ -1350,85 +1350,103 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 type="checkbox"
                 checked={config.allowShorting}
                 onChange={(e) => setConfig({ ...config, allowShorting: e.target.checked })}
-                className="w-3.5 h-3.5 rounded text-cyan-500 focus:ring-0"
+                className="w-4 h-4 rounded text-cyan-500 focus:ring-0"
               />
-              <span className="font-medium">
+              <span className="font-semibold text-slate-200">
                 {isId ? 'Izinkan Posisi Short' : 'Allow Short Positions'}
               </span>
             </label>
           </div>
         </div>
 
+        {/* Loading Skeleton during Backtest execution (Zero Layout Shift) */}
+        {isLoading && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 animate-pulse">
+            {[1, 2, 3, 4, 5, 6].map((idx) => (
+              <div
+                key={idx}
+                className={`p-4 rounded-lg border ${
+                  isDark ? 'bg-[#0f1528] border-[#1e293b]' : 'bg-white border-slate-200'
+                }`}
+              >
+                <div className="h-3 w-20 bg-slate-700/60 rounded mb-3" />
+                <div className="h-6 w-28 bg-slate-700/80 rounded mb-2.5" />
+                <div className="h-3 w-24 bg-slate-800 rounded" />
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Section 3: Primary Performance Summary Metric Cards */}
-        {result && (
+        {result && !isLoading && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            <div className={`p-4 rounded-2xl border transition-all ${
+            <div className={`p-4 rounded-lg border transition-colors duration-150 ${
               isDark ? 'bg-[#0f1528] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'
             }`}>
-              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
+              <span className="text-[11px] uppercase font-bold text-slate-300 block mb-1">
                 {isId ? 'Hasil Bersih (Net Profit)' : 'Net Profit'}
               </span>
               <div className="flex items-baseline gap-1.5">
-                <span className={`text-lg font-mono font-black ${
+                <span className={`text-lg font-mono font-black tabular-nums ${
                   result.netProfitUsd >= 0 ? 'text-emerald-400' : 'text-rose-400'
                 }`}>
                   {result.netProfitUsd >= 0 ? '+' : ''}${result.netProfitUsd.toLocaleString()}
                 </span>
-                <span className={`text-xs font-mono font-bold ${
+                <span className={`text-xs font-mono font-bold tabular-nums ${
                   result.netProfitPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'
                 }`}>
                   ({result.netProfitPercent >= 0 ? '+' : ''}{result.netProfitPercent}%)
                 </span>
               </div>
-              <span className="text-[10px] text-slate-500 block mt-1">
+              <span className="text-[11px] text-slate-300 font-mono block mt-1">
                 ${result.initialBalance.toLocaleString()} → ${result.finalBalance.toLocaleString()}
               </span>
             </div>
 
-            <div className={`p-4 rounded-2xl border transition-all ${
+            <div className={`p-4 rounded-lg border transition-colors duration-150 ${
               isDark ? 'bg-[#0f1528] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'
             }`}>
-              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
+              <span className="text-[11px] uppercase font-bold text-slate-300 block mb-1">
                 Win Rate (%)
               </span>
               <div className="flex items-baseline gap-1.5">
-                <span className={`text-lg font-mono font-black ${
+                <span className={`text-lg font-mono font-black tabular-nums ${
                   result.winRate >= 55 ? 'text-cyan-400' : result.winRate >= 45 ? 'text-amber-400' : 'text-rose-400'
                 }`}>
                   {result.winRate}%
                 </span>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-slate-300 font-mono tabular-nums">
                   ({result.winningTrades}W / {result.losingTrades}L)
                 </span>
               </div>
-              <span className="text-[10px] text-slate-500 block mt-1">
+              <span className="text-[11px] text-slate-300 font-mono block mt-1">
                 {result.totalTrades} {isId ? 'total transaksi' : 'total trades'}
               </span>
             </div>
 
-            <div className={`p-4 rounded-2xl border transition-all ${
+            <div className={`p-4 rounded-lg border transition-colors duration-150 ${
               isDark ? 'bg-[#0f1528] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'
             }`}>
-              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
+              <span className="text-[11px] uppercase font-bold text-slate-300 block mb-1">
                 Profit Factor
               </span>
-              <span className={`text-lg font-mono font-black ${
+              <span className={`text-lg font-mono font-black tabular-nums ${
                 result.profitFactor >= 1.5 ? 'text-emerald-400' : result.profitFactor >= 1.0 ? 'text-amber-400' : 'text-rose-400'
               }`}>
                 {result.profitFactor}
               </span>
-              <span className="text-[10px] text-slate-500 block mt-1">
+              <span className="text-[11px] text-slate-300 font-mono block mt-1">
                 {result.totalTrades < 30
                   ? (isId ? 'Sampel Belum Cukup (<30)' : 'Insufficient Sample (<30)')
                   : (result.profitFactor >= 1.5 ? 'Institutional Grade' : 'Sub-Optimal')}
               </span>
             </div>
 
-            <div className={`p-4 rounded-2xl border transition-all ${
+            <div className={`p-4 rounded-lg border transition-colors duration-150 ${
               isDark ? 'bg-[#0f1528] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'
             }`}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                <span className="text-[11px] uppercase font-bold text-slate-300 block">
                   Max Drawdown
                 </span>
                 <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase ${
@@ -1445,42 +1463,42 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                     : (isId ? 'Tinggi' : 'High Risk')}
                 </span>
               </div>
-              <span className={`text-lg font-mono font-black ${
+              <span className={`text-lg font-mono font-black tabular-nums ${
                 result.maxDrawdownPercent <= 10 ? 'text-emerald-400' : result.maxDrawdownPercent <= 20 ? 'text-amber-400' : 'text-rose-400'
               }`}>
                 -{result.maxDrawdownPercent}%
               </span>
-              <span className="text-[10px] text-slate-500 block mt-1">
+              <span className="text-[11px] text-slate-300 font-mono block mt-1">
                 -${result.maxDrawdownUsd.toLocaleString()} peak-to-trough
               </span>
             </div>
 
-            <div className={`p-4 rounded-2xl border transition-all ${
+            <div className={`p-4 rounded-lg border transition-colors duration-150 ${
               isDark ? 'bg-[#0f1528] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'
             }`}>
-              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
+              <span className="text-[11px] uppercase font-bold text-slate-300 block mb-1">
                 Expected Payoff
               </span>
-              <span className={`text-lg font-mono font-black ${
+              <span className={`text-lg font-mono font-black tabular-nums ${
                 (result.expectancyUsd || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'
               }`}>
                 ${result.expectancyUsd || '0.00'}
               </span>
-              <span className="text-[10px] text-slate-500 block mt-1 font-mono">
+              <span className="text-[11px] text-slate-300 block mt-1 font-mono">
                 {result.expectancyR || '0.0'}R per trade
               </span>
             </div>
 
-            <div className={`p-4 rounded-2xl border transition-all ${
+            <div className={`p-4 rounded-lg border transition-colors duration-150 ${
               isDark ? 'bg-[#0f1528] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'
             }`}>
-              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
+              <span className="text-[11px] uppercase font-bold text-slate-300 block mb-1">
                 Sharpe / Sortino
               </span>
-              <span className="text-lg font-mono font-black text-cyan-400">
+              <span className="text-lg font-mono font-black text-cyan-400 tabular-nums">
                 {result.sharpeRatio} / {result.sortinoRatio || '-'}
               </span>
-              <span className="text-[10px] text-slate-500 block mt-1">
+              <span className="text-[11px] text-slate-300 block mt-1 font-mono">
                 Calmar: {result.calmarRatio || '-'}
               </span>
             </div>
@@ -1488,7 +1506,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         )}
 
         {/* Section 4: Detailed Interactive Tabs */}
-        <div className={`rounded-2xl border overflow-hidden transition-all ${
+        <div className={`rounded-xl border overflow-hidden transition-colors duration-150 ${
           isDark ? 'bg-[#0f1528]/90 border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'
         }`}>
           {/* Navigation Bar inside Workbench */}
@@ -1497,10 +1515,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           }`}>
             <button
               onClick={() => setActiveTab('overview')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold min-h-[40px] transition-colors duration-150 cursor-pointer ${
                 activeTab === 'overview'
                   ? 'bg-cyan-500 text-slate-950 shadow-xs font-black'
-                  : isDark ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  : isDark ? 'text-slate-200 hover:text-white hover:bg-slate-800/60' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
               }`}
             >
               <BarChart3 className="w-3.5 h-3.5" />
@@ -1509,16 +1527,16 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
             <button
               onClick={() => setActiveTab('monte_carlo')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold min-h-[40px] transition-colors duration-150 cursor-pointer ${
                 activeTab === 'monte_carlo'
                   ? 'bg-cyan-500 text-slate-950 shadow-xs font-black'
-                  : isDark ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  : isDark ? 'text-slate-200 hover:text-white hover:bg-slate-800/60' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
               }`}
             >
               <Dice5 className="w-3.5 h-3.5" />
               <span>{isId ? 'Simulasi Monte Carlo (500x)' : 'Monte Carlo Stress Test'}</span>
               {mcResult && (
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-950/40 font-mono font-bold">
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-950/60 font-mono font-bold text-slate-200">
                   {mcResult.confidenceInterval95.medianEndingCapital ? `$${mcResult.confidenceInterval95.medianEndingCapital.toLocaleString()}` : ''}
                 </span>
               )}
@@ -1526,25 +1544,28 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
             <button
               onClick={() => setActiveTab('ai_learner')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold min-h-[40px] transition-colors duration-150 cursor-pointer ${
                 activeTab === 'ai_learner'
                   ? 'bg-cyan-500 text-slate-950 shadow-xs font-black'
-                  : isDark ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  : isDark ? 'text-slate-200 hover:text-white hover:bg-slate-800/60' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
               }`}
             >
               <BrainCircuit className="w-3.5 h-3.5" />
               <span>{isId ? 'AI Pattern Learner' : 'AI Pattern Learner'}</span>
               {aiInsight && (
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
               )}
             </button>
 
             <button
               onClick={() => setActiveTab('trades')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold min-h-[40px] transition-colors duration-150 cursor-pointer ${
                 activeTab === 'trades'
                   ? 'bg-cyan-500 text-slate-950 shadow-xs font-black'
-                  : isDark ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  : isDark ? 'text-slate-200 hover:text-white hover:bg-slate-800/60' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
@@ -1553,10 +1574,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
             <button
               onClick={() => setActiveTab('parameters')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold min-h-[40px] transition-colors duration-150 cursor-pointer ${
                 activeTab === 'parameters'
                   ? 'bg-cyan-500 text-slate-950 shadow-xs font-black'
-                  : isDark ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  : isDark ? 'text-slate-200 hover:text-white hover:bg-slate-800/60' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
               }`}
             >
               <Sliders className="w-3.5 h-3.5" />
@@ -1569,15 +1590,15 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             {activeTab === 'overview' && result && equitySvgData && (
               <div className="space-y-6">
                 {/* Equity Curve SVG Chart */}
-                <div className={`p-4 rounded-xl border relative ${
+                <div className={`p-4 rounded-lg border relative ${
                   isDark ? 'bg-slate-950/70 border-slate-800' : 'bg-slate-50 border-slate-200'
                 }`}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                       <TrendingUp className="w-3.5 h-3.5 text-cyan-400" />
                       <span>{isId ? 'Kurva Pertumbuhan Ekuitas Modal ($)' : 'Capital Growth Equity Curve ($)'}</span>
                     </span>
-                    <span className="text-xs font-mono font-bold text-emerald-400">
+                    <span className="text-xs font-mono font-bold text-emerald-400 tabular-nums">
                       ${result.finalBalance.toLocaleString()} ({result.netProfitPercent >= 0 ? '+' : ''}{result.netProfitPercent}%)
                     </span>
                   </div>
@@ -1649,7 +1670,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                         style={{ left: Math.min(hoveredPoint.x, 650), top: Math.max(hoveredPoint.y - 45, 10) }}
                       >
                         <span className="font-bold text-cyan-400">${hoveredPoint.equity.toLocaleString()}</span>
-                        <span className="block text-[10px] text-slate-400">
+                        <span className="block text-[10px] text-slate-300">
                           {hoveredPoint.date} • DD: -{hoveredPoint.dd}%
                         </span>
                       </div>
@@ -1659,24 +1680,24 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
                 {/* Sub-Metrics Breakdown Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                  <div className={`p-4 rounded-xl border ${
+                  <div className={`p-4 rounded-lg border ${
                     isDark ? 'bg-slate-900/40 border-slate-800' : 'bg-slate-50 border-slate-200'
                   }`}>
-                    <h4 className="font-bold uppercase text-slate-400 mb-2">
+                    <h4 className="font-bold uppercase text-slate-300 mb-2">
                       {isId ? 'Karakteristik Transaksi' : 'Trade Characteristics'}
                     </h4>
                     <div className="space-y-1.5 font-mono">
                       <div className="flex justify-between">
-                        <span className="text-slate-400">{isId ? 'Rata-rata Gain (Menang):' : 'Avg Win:'}</span>
-                        <span className="font-bold text-emerald-400">+{result.averageWinPercent}%</span>
+                        <span className="text-slate-300">{isId ? 'Rata-rata Gain (Menang):' : 'Avg Win:'}</span>
+                        <span className="font-bold text-emerald-400 tabular-nums">+{result.averageWinPercent}%</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">{isId ? 'Rata-rata Loss (Kalah):' : 'Avg Loss:'}</span>
-                        <span className="font-bold text-rose-400">-{result.averageLossPercent}%</span>
+                        <span className="text-slate-300">{isId ? 'Rata-rata Loss (Kalah):' : 'Avg Loss:'}</span>
+                        <span className="font-bold text-rose-400 tabular-nums">-{result.averageLossPercent}%</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">{isId ? 'Rasio Rata-rata Win/Loss:' : 'Win/Loss Ratio:'}</span>
-                        <span className="font-bold">
+                        <span className="text-slate-300">{isId ? 'Rasio Rata-rata Win/Loss:' : 'Win/Loss Ratio:'}</span>
+                        <span className="font-bold text-slate-100 tabular-nums">
                           {result.averageLossPercent > 0
                             ? (result.averageWinPercent / result.averageLossPercent).toFixed(2)
                             : 'N/A'}x
@@ -1685,46 +1706,46 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                     </div>
                   </div>
 
-                  <div className={`p-4 rounded-xl border ${
+                  <div className={`p-4 rounded-lg border ${
                     isDark ? 'bg-slate-900/40 border-slate-800' : 'bg-slate-50 border-slate-200'
                   }`}>
-                    <h4 className="font-bold uppercase text-slate-400 mb-2">
+                    <h4 className="font-bold uppercase text-slate-300 mb-2">
                       {isId ? 'Ketahanan & Rekor Streak' : 'Streak Endurance'}
                     </h4>
                     <div className="space-y-1.5 font-mono">
                       <div className="flex justify-between">
-                        <span className="text-slate-400">{isId ? 'Kemenangan Beruntun Maks:' : 'Max Consecutive Wins:'}</span>
-                        <span className="font-bold text-emerald-400">{result.maxConsecutiveWins || 0}</span>
+                        <span className="text-slate-300">{isId ? 'Kemenangan Beruntun Maks:' : 'Max Consecutive Wins:'}</span>
+                        <span className="font-bold text-emerald-400 tabular-nums">{result.maxConsecutiveWins || 0}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">{isId ? 'Kekalahan Beruntun Maks:' : 'Max Consecutive Losses:'}</span>
-                        <span className="font-bold text-rose-400">{result.maxConsecutiveLosses || 0}</span>
+                        <span className="text-slate-300">{isId ? 'Kekalahan Beruntun Maks:' : 'Max Consecutive Losses:'}</span>
+                        <span className="font-bold text-rose-400 tabular-nums">{result.maxConsecutiveLosses || 0}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">{isId ? 'Transaksi Impas (BE):' : 'Breakeven Trades:'}</span>
-                        <span className="font-bold">{result.breakevenTrades || 0}</span>
+                        <span className="text-slate-300">{isId ? 'Transaksi Impas (BE):' : 'Breakeven Trades:'}</span>
+                        <span className="font-bold text-slate-100 tabular-nums">{result.breakevenTrades || 0}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className={`p-4 rounded-xl border ${
+                  <div className={`p-4 rounded-lg border ${
                     isDark ? 'bg-slate-900/40 border-slate-800' : 'bg-slate-50 border-slate-200'
                   }`}>
-                    <h4 className="font-bold uppercase text-slate-400 mb-2">
+                    <h4 className="font-bold uppercase text-slate-300 mb-2">
                       {isId ? 'Eksekusi & Friksi Bursa' : 'Friction & Slippage'}
                     </h4>
                     <div className="space-y-1.5 font-mono">
                       <div className="flex justify-between">
-                        <span className="text-slate-400">{isId ? 'Model Slippage:' : 'Slippage Model:'}</span>
-                        <span className="font-bold text-cyan-400">{config.slippagePercent}% per fill</span>
+                        <span className="text-slate-300">{isId ? 'Model Slippage:' : 'Slippage Model:'}</span>
+                        <span className="font-bold text-cyan-400 tabular-nums">{config.slippagePercent}% per fill</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">{isId ? 'Biaya Taker (Roundtrip):' : 'Roundtrip Fees:'}</span>
-                        <span className="font-bold">{(config.feePercent * 2).toFixed(2)}%</span>
+                        <span className="text-slate-300">{isId ? 'Biaya Taker (Roundtrip):' : 'Roundtrip Fees:'}</span>
+                        <span className="font-bold text-slate-100 tabular-nums">{(config.feePercent * 2).toFixed(2)}%</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">{isId ? 'Status Partial TP:' : 'Partial TP Status:'}</span>
-                        <span className={`font-bold ${config.usePartialTakeProfit ? 'text-emerald-400' : 'text-slate-500'}`}>
+                        <span className="text-slate-300">{isId ? 'Status Partial TP:' : 'Partial TP Status:'}</span>
+                        <span className={`font-bold ${config.usePartialTakeProfit ? 'text-emerald-400' : 'text-slate-400'}`}>
                           {config.usePartialTakeProfit ? (isId ? 'Aktif (1.5R + BE)' : 'Active (1.5R + BE)') : 'Disabled'}
                         </span>
                       </div>
@@ -1737,19 +1758,19 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             {/* TAB 2: Monte Carlo Simulation Stress Test */}
             {activeTab === 'monte_carlo' && (
               <div className="space-y-6">
-                <div className={`p-5 rounded-2xl border ${
+                <div className={`p-5 rounded-xl border ${
                   isDark ? 'bg-gradient-to-r from-amber-950/30 via-slate-900/90 to-slate-950 border-amber-500/30' : 'bg-amber-50/50 border-amber-200 shadow-xs'
                 }`}>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-amber-500/20">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
                         <Dice5 className="w-5 h-5" />
                       </div>
                       <div>
                         <h4 className="text-sm font-bold text-amber-300">
                           {isId ? 'Simulasi Bootstrap Monte Carlo (Stress Test Risiko Urutan)' : 'Monte Carlo Bootstrap Resampling (Sequence Risk)'}
                         </h4>
-                        <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                        <p className={`text-xs mt-0.5 leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                           {isId
                             ? 'Mengacak urutan hasil trade secara berulang (500x iterasi) untuk menguji ketahanan strategi terhadap skenario terburuk dan risiko kebangkrutan.'
                             : 'Bootstrap reshuffling of actual trade PnL across 500+ iterations to evaluate sequence-of-returns risk and probability of ruin.'}
@@ -1757,11 +1778,11 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 shrink-0">
                       <select
                         value={mcIterations}
                         onChange={(e) => setMcIterations(Number(e.target.value))}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold border ${
+                        className={`px-3 py-2 rounded-md text-xs font-mono font-bold border min-h-[40px] cursor-pointer ${
                           isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-300 text-slate-900'
                         }`}
                       >
@@ -1773,7 +1794,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                       <button
                         onClick={handleReRunMonteCarlo}
                         disabled={isSimulatingMC || !result || result.trades.length < 3}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 text-xs font-bold hover:brightness-110 active:scale-98 transition-all cursor-pointer shadow-sm shadow-amber-500/20 font-black"
+                        className="flex items-center gap-2 px-4 py-2 rounded-md min-h-[40px] bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-400 transition-colors duration-150 cursor-pointer shadow-sm shadow-amber-500/20 font-black disabled:opacity-50"
                       >
                         <RefreshCw className={`w-3.5 h-3.5 ${isSimulatingMC ? 'animate-spin' : ''}`} />
                         <span>{isSimulatingMC ? (isId ? 'Mengacak...' : 'Shuffling...') : (isId ? 'Acak Ulang' : 'Reshuffle')}</span>
@@ -1785,67 +1806,67 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                     <div className="mt-5 space-y-6">
                       {/* Monte Carlo 4 Key Stat Cards */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-                        <div className={`p-3.5 rounded-xl border ${
+                        <div className={`p-4 rounded-lg border ${
                           isDark ? 'bg-slate-950/70 border-slate-800' : 'bg-white border-slate-200'
                         }`}>
-                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
+                          <span className="text-[11px] uppercase font-bold text-slate-300 block mb-1">
                             {isId ? 'Rentang Ekuitas Akhir (95% CI)' : '95% Confidence Final Balance'}
                           </span>
-                          <span className="text-sm font-mono font-bold text-amber-300 block">
+                          <span className="text-sm font-mono font-bold text-amber-300 block tabular-nums">
                             ${mcResult.confidenceInterval95.minEndingCapital.toLocaleString()} - ${mcResult.confidenceInterval95.maxEndingCapital.toLocaleString()}
                           </span>
-                          <span className="text-[10px] text-slate-500 font-mono mt-1 block">
+                          <span className="text-[11px] text-slate-300 font-mono mt-1 block tabular-nums">
                             {isId ? 'Median:' : 'Median:'} ${mcResult.confidenceInterval95.medianEndingCapital.toLocaleString()}
                           </span>
                         </div>
 
-                        <div className={`p-3.5 rounded-xl border ${
+                        <div className={`p-4 rounded-lg border ${
                           isDark ? 'bg-slate-950/70 border-slate-800' : 'bg-white border-slate-200'
                         }`}>
-                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
+                          <span className="text-[11px] uppercase font-bold text-slate-300 block mb-1">
                             {isId ? 'Median Drawdown (P50)' : 'Median Drawdown (P50)'}
                           </span>
-                          <span className="text-sm font-mono font-bold text-cyan-400 block">
+                          <span className="text-sm font-mono font-bold text-cyan-400 block tabular-nums">
                             -{mcResult.maxDrawdownDistribution.p50}%
                           </span>
-                          <span className="text-[10px] text-slate-500 font-mono mt-1 block">
+                          <span className="text-[11px] text-slate-300 font-mono mt-1 block tabular-nums">
                             P10: -{mcResult.maxDrawdownDistribution.p10}%
                           </span>
                         </div>
 
-                        <div className={`p-3.5 rounded-xl border ${
+                        <div className={`p-4 rounded-lg border ${
                           isDark ? 'bg-slate-950/70 border-slate-800' : 'bg-white border-slate-200'
                         }`}>
-                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
+                          <span className="text-[11px] uppercase font-bold text-slate-300 block mb-1">
                             {isId ? 'Skenario Terburuk (P99 Drawdown)' : 'Worst Case Tail Risk (P99 DD)'}
                           </span>
-                          <span className={`text-sm font-mono font-bold block ${
+                          <span className={`text-sm font-mono font-bold block tabular-nums ${
                             mcResult.maxDrawdownDistribution.p99 <= 20 ? 'text-emerald-400' : mcResult.maxDrawdownDistribution.p99 <= 35 ? 'text-amber-400' : 'text-rose-400'
                           }`}>
                             -{mcResult.maxDrawdownDistribution.p99}%
                           </span>
-                          <span className="text-[10px] text-slate-500 font-mono mt-1 block">
+                          <span className="text-[11px] text-slate-300 font-mono mt-1 block tabular-nums">
                             P90: -{mcResult.maxDrawdownDistribution.p90}%
                           </span>
                         </div>
 
-                        <div className={`p-3.5 rounded-xl border ${
+                        <div className={`p-4 rounded-lg border ${
                           isDark ? 'bg-slate-950/70 border-slate-800' : 'bg-white border-slate-200'
                         }`}>
-                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
+                          <span className="text-[11px] uppercase font-bold text-slate-300 block mb-1">
                             {isId ? 'Probabilitas Kehancuran (Ruin)' : 'Probability of Ruin (50% DD)'}
                           </span>
                           <div className="flex items-center gap-1.5">
-                            <span className={`text-sm font-mono font-bold ${
+                            <span className={`text-sm font-mono font-bold tabular-nums ${
                               mcResult.probabilityOfRuinPercent === 0 ? 'text-emerald-400' : mcResult.probabilityOfRuinPercent < 2 ? 'text-amber-400' : 'text-rose-400'
                             }`}>
                               {mcResult.probabilityOfRuinPercent}%
                             </span>
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-bold uppercase">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-bold uppercase">
                               {mcResult.probabilityOfRuinPercent < 1 ? (isId ? 'Sangat Aman' : 'Robust') : (isId ? 'Waspada' : 'Caution')}
                             </span>
                           </div>
-                          <span className="text-[10px] text-slate-500 mt-1 block">
+                          <span className="text-[11px] text-slate-300 mt-1 block">
                             {isId ? 'Peluang modal menyusut 50%' : 'Chance of account cutting 50%'}
                           </span>
                         </div>
@@ -1853,10 +1874,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
                       {/* Monte Carlo Visual Simulation Paths Overlay SVG */}
                       {mcResult.simulatedPaths.length > 0 && (
-                        <div className={`p-4 rounded-xl border ${
+                        <div className={`p-4 rounded-lg border ${
                           isDark ? 'bg-slate-950/80 border-slate-800' : 'bg-white border-slate-200'
                         }`}>
-                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">
+                          <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-2">
                             {isId ? 'Hamparan 12 Jalur Simulasi Acak (Simulated Trajectories)' : 'Sampled 12 Random Trajectories Overlay'}
                           </span>
                           <svg viewBox="0 0 800 160" className="w-full h-40 overflow-visible">
@@ -1881,7 +1902,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                               );
                             })}
                           </svg>
-                          <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono mt-1">
+                          <div className="flex items-center justify-between text-[11px] text-slate-300 font-mono mt-1">
                             <span>{isId ? 'Awal: ' : 'Start: '}${result.initialBalance.toLocaleString()}</span>
                             <span>{isId ? 'Selesai: ' : 'End: '}{result.trades.length} {isId ? 'transaksi' : 'trades'}</span>
                           </div>
@@ -1897,34 +1918,34 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             {activeTab === 'ai_learner' && aiInsight && (
               <div className="space-y-6">
                 {/* AI Executive Card */}
-                <div className={`p-5 rounded-2xl border relative overflow-hidden ${
+                <div className={`p-5 rounded-xl border relative overflow-hidden ${
                   isDark
                     ? 'bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-slate-900/80 border-purple-500/30'
                     : 'bg-gradient-to-r from-purple-50 via-indigo-50/50 to-white border-purple-200 shadow-xs'
                 }`}>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-purple-500/20">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
                         <BrainCircuit className="w-4 h-4" />
                       </div>
                       <div>
                         <h4 className="text-sm font-bold text-purple-300">
                           {isId ? 'Sintesis Pola Kuantitatif oleh AI' : 'AI Quantitative Pattern Synthesis'}
                         </h4>
-                        <span className="text-[10px] font-mono text-slate-400">
+                        <span className="text-[11px] font-mono text-slate-300">
                           Engine: {aiInsight.aiEngine}
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                      <span className="text-xs font-bold px-3 py-1 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/40">
                         {aiInsight.marketRegimeDetected}
                       </span>
                     </div>
                   </div>
 
-                  <p className={`text-xs mt-3 leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                  <p className={`text-xs mt-3 leading-relaxed ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                     {aiInsight.summary}
                   </p>
 
@@ -1932,16 +1953,16 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                   {aiInsight.optimizedParameters && (
                     <div className="mt-4 pt-3 border-t border-purple-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
-                        <span className="text-[11px] font-bold text-emerald-400 block">
+                        <span className="text-xs font-bold text-emerald-400 block">
                           ★ {isId ? 'Rekomendasi Parameter Optimal:' : 'Recommended Optimal Parameters:'}
                         </span>
-                        <span className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                        <span className={`text-xs mt-0.5 block ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                           {aiInsight.optimizedParameters.explanation}
                         </span>
                       </div>
                       <button
                         onClick={handleApplyAIOptimizations}
-                        className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold flex items-center gap-1.5 hover:brightness-110 active:scale-98 transition-all cursor-pointer whitespace-nowrap shadow-md shadow-emerald-500/20"
+                        className="px-4 py-2.5 rounded-md min-h-[40px] bg-emerald-500 text-slate-950 text-xs font-bold flex items-center gap-2 hover:bg-emerald-400 transition-colors duration-150 cursor-pointer whitespace-nowrap shadow-md shadow-emerald-500/20 shrink-0 font-black"
                       >
                         <Zap className="w-3.5 h-3.5 fill-current" />
                         <span>{isId ? 'Terapkan Parameter AI & Uji Ulang' : 'Apply AI Settings & Re-Test'}</span>
@@ -1952,7 +1973,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
                 {/* Grid: Learned Rules (If-Then) */}
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3 flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 text-cyan-400" />
                     <span>{isId ? 'Aturan Pola Teridentifikasi (Learned Rules)' : 'Learned Pattern Rules'}</span>
                   </h4>
@@ -1960,37 +1981,37 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                     {aiInsight.learnedRules.map((rule) => (
                       <div
                         key={rule.id}
-                        className={`p-4 rounded-xl border flex flex-col justify-between ${
+                        className={`p-4 rounded-lg border flex flex-col justify-between ${
                           isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200'
                         }`}
                       >
                         <div>
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-400">
+                            <span className="text-[11px] font-bold font-mono px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
                               {rule.id} • {rule.type}
                             </span>
-                            <span className="text-[10px] font-bold text-emerald-400 font-mono">
+                            <span className="text-xs font-bold text-emerald-400 font-mono tabular-nums">
                               {rule.winRateImpact}
                             </span>
                           </div>
-                          <h5 className="text-xs font-bold text-slate-200 mb-1.5">
+                          <h5 className="text-xs font-bold text-slate-100 mb-2">
                             {rule.title}
                           </h5>
-                          <div className="text-[11px] space-y-1">
-                            <p className="text-amber-400/90 font-medium">
-                              <span className="text-slate-500 uppercase text-[9px] block">KONDISI (IF):</span>
-                              {rule.condition}
-                            </p>
-                            <p className="text-cyan-300 font-medium pt-1">
-                              <span className="text-slate-500 uppercase text-[9px] block">TINDAKAN (THEN):</span>
-                              {rule.action}
-                            </p>
+                          <div className="text-xs space-y-1.5">
+                            <div className="p-2 rounded bg-slate-950/40 border border-slate-800">
+                              <span className="text-slate-400 uppercase text-[10px] font-bold block mb-0.5">KONDISI (IF):</span>
+                              <p className="text-amber-300 font-medium">{rule.condition}</p>
+                            </div>
+                            <div className="p-2 rounded bg-slate-950/40 border border-slate-800">
+                              <span className="text-slate-400 uppercase text-[10px] font-bold block mb-0.5">TINDAKAN (THEN):</span>
+                              <p className="text-cyan-300 font-medium">{rule.action}</p>
+                            </div>
                           </div>
                         </div>
 
-                        <div className="mt-3 pt-2 border-t border-slate-800/40 text-[10px] text-slate-500 flex justify-between">
+                        <div className="mt-3 pt-2.5 border-t border-slate-800/60 text-xs text-slate-300 flex justify-between">
                           <span>Keyakinan Mesin</span>
-                          <span className="font-mono text-cyan-400 font-bold">{rule.confidence}%</span>
+                          <span className="font-mono text-cyan-400 font-bold tabular-nums">{rule.confidence}%</span>
                         </div>
                       </div>
                     ))}
@@ -2000,43 +2021,43 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 {/* Indicator Synergy Matrix */}
                 {aiInsight.synergyMatrix && aiInsight.synergyMatrix.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3 flex items-center gap-1.5">
                       <Layers className="w-4 h-4 text-purple-400" />
                       <span>{isId ? 'Matriks Sinergi Kombinasi Indikator' : 'Indicator Synergy Matrix'}</span>
                     </h4>
-                    <div className="overflow-x-auto rounded-xl border border-slate-800/60">
+                    <div className="overflow-x-auto rounded-lg border border-slate-800/60">
                       <table className="w-full text-xs text-left">
-                        <thead className={`text-[10px] uppercase font-mono ${
-                          isDark ? 'bg-slate-900 text-slate-400' : 'bg-slate-100 text-slate-600'
+                        <thead className={`text-[11px] uppercase font-mono ${
+                          isDark ? 'bg-slate-900 text-slate-300' : 'bg-slate-100 text-slate-700'
                         }`}>
                           <tr>
                             <th className="px-4 py-2.5">{isId ? 'Kombinasi Indikator' : 'Indicator Combo'}</th>
-                            <th className="px-4 py-2.5">Win Rate (%)</th>
-                            <th className="px-4 py-2.5">Profit Factor</th>
-                            <th className="px-4 py-2.5">{isId ? 'Jumlah Trade' : 'Sample Size'}</th>
-                            <th className="px-4 py-2.5">{isId ? 'Kategori Sinergi' : 'Synergy Grade'}</th>
+                            <th className="px-4 py-2.5 text-right">Win Rate (%)</th>
+                            <th className="px-4 py-2.5 text-right">Profit Factor</th>
+                            <th className="px-4 py-2.5 text-right">{isId ? 'Jumlah Trade' : 'Sample Size'}</th>
+                            <th className="px-4 py-2.5 text-center">{isId ? 'Kategori Sinergi' : 'Synergy Grade'}</th>
                           </tr>
                         </thead>
                         <tbody className={`divide-y font-mono ${
-                          isDark ? 'divide-slate-800 text-slate-300' : 'divide-slate-200 text-slate-700'
+                          isDark ? 'divide-slate-800 text-slate-200' : 'divide-slate-200 text-slate-800'
                         }`}>
                           {aiInsight.synergyMatrix.map((item, i) => (
                             <tr key={i} className={isDark ? 'hover:bg-slate-800/30' : 'hover:bg-slate-50'}>
-                              <td className="px-4 py-2.5 font-sans font-bold text-slate-200">
+                              <td className="px-4 py-2.5 font-sans font-bold text-slate-100">
                                 {item.indicators}
                               </td>
-                              <td className={`px-4 py-2.5 font-bold ${
+                              <td className={`px-4 py-2.5 font-bold text-right tabular-nums ${
                                 item.winRate >= 70 ? 'text-emerald-400' : item.winRate >= 55 ? 'text-cyan-400' : 'text-rose-400'
                               }`}>
                                 {item.winRate}%
                               </td>
-                              <td className="px-4 py-2.5 font-bold">
+                              <td className="px-4 py-2.5 font-bold text-right tabular-nums text-slate-100">
                                 {item.profitFactor}x
                               </td>
-                              <td className="px-4 py-2.5 text-slate-400">
+                              <td className="px-4 py-2.5 text-right tabular-nums text-slate-300">
                                 {item.tradesCount} trades
                               </td>
-                              <td className="px-4 py-2.5">
+                              <td className="px-4 py-2.5 text-center">
                                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                                   item.status === 'EXCELLENT'
                                     ? 'bg-emerald-500/20 text-emerald-400'
@@ -2057,35 +2078,35 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
                 {/* Leaks & Edge Discovered */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className={`p-4 rounded-xl border ${
+                  <div className={`p-4 rounded-lg border ${
                     isDark ? 'bg-rose-950/20 border-rose-500/30' : 'bg-rose-50/60 border-rose-200'
                   }`}>
-                    <h4 className="text-xs font-bold text-rose-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                      <AlertCircle className="w-3.5 h-3.5" />
+                    <h4 className="text-xs font-bold text-rose-300 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                      <AlertCircle className="w-4 h-4 text-rose-400" />
                       <span>{isId ? 'Titik Kebocoran Risiko (Risk Leaks)' : 'Identified Risk Leaks'}</span>
                     </h4>
-                    <ul className="space-y-1.5 text-xs">
+                    <ul className="space-y-2 text-xs">
                       {aiInsight.riskLeaks.map((leak, idx) => (
                         <li key={idx} className="flex items-start gap-2">
-                          <span className="text-rose-400 font-bold">•</span>
-                          <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>{leak}</span>
+                          <span className="text-rose-400 font-bold mt-0.5">•</span>
+                          <span className={isDark ? 'text-slate-200' : 'text-slate-800'}>{leak}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className={`p-4 rounded-xl border ${
+                  <div className={`p-4 rounded-lg border ${
                     isDark ? 'bg-emerald-950/20 border-emerald-500/30' : 'bg-emerald-50/60 border-emerald-200'
                   }`}>
-                    <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
+                    <h4 className="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                       <span>{isId ? 'Peluang Keunggulan Pasar (Edge Discovery)' : 'Edge Discoveries'}</span>
                     </h4>
-                    <ul className="space-y-1.5 text-xs">
+                    <ul className="space-y-2 text-xs">
                       {aiInsight.edgeDiscovery.map((edge, idx) => (
                         <li key={idx} className="flex items-start gap-2">
-                          <span className="text-emerald-400 font-bold">•</span>
-                          <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>{edge}</span>
+                          <span className="text-emerald-400 font-bold mt-0.5">•</span>
+                          <span className={isDark ? 'text-slate-200' : 'text-slate-800'}>{edge}</span>
                         </li>
                       ))}
                     </ul>
@@ -2098,17 +2119,17 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             {activeTab === 'trades' && result && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     {(['ALL', 'WIN', 'LOSS'] as const).map((filter) => (
                       <button
                         key={filter}
                         onClick={() => setTradeFilter(filter)}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                        className={`px-3.5 py-1.5 rounded-md min-h-[38px] text-xs font-bold border transition-colors duration-150 cursor-pointer ${
                           tradeFilter === filter
-                            ? 'bg-cyan-500 text-slate-950 border-cyan-400 font-black'
+                            ? 'bg-cyan-500 text-slate-950 border-cyan-400 font-black shadow-xs'
                             : isDark
-                            ? 'bg-slate-900 border-slate-800 text-slate-400'
-                            : 'bg-slate-100 border-slate-200 text-slate-600'
+                            ? 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700'
+                            : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-950'
                         }`}
                       >
                         {filter} ({filter === 'ALL' ? result.trades.length : result.trades.filter((t) => t.result === filter).length})
@@ -2116,68 +2137,68 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                     ))}
                   </div>
 
-                  <span className="text-xs text-slate-400 font-mono">
+                  <span className="text-xs text-slate-300 font-mono">
                     {filteredTrades.length} {isId ? 'transaksi ditampilkan' : 'trades shown'}
                   </span>
                 </div>
 
-                <div className="overflow-x-auto rounded-xl border border-slate-800/60">
+                <div className="overflow-x-auto rounded-lg border border-slate-800/60">
                   <table className="w-full text-xs text-left">
-                    <thead className={`text-[10px] uppercase font-mono ${
-                      isDark ? 'bg-slate-900 text-slate-400' : 'bg-slate-100 text-slate-600'
+                    <thead className={`text-[11px] uppercase font-mono ${
+                      isDark ? 'bg-slate-900 text-slate-300' : 'bg-slate-100 text-slate-700'
                     }`}>
                       <tr>
                         <th className="px-3 py-2.5">ID</th>
                         <th className="px-3 py-2.5">{isId ? 'Arah' : 'Side'}</th>
-                        <th className="px-3 py-2.5">{isId ? 'Harga Masuk' : 'Entry'}</th>
-                        <th className="px-3 py-2.5">{isId ? 'Harga Keluar' : 'Exit'}</th>
-                        <th className="px-3 py-2.5">Net PnL ($)</th>
-                        <th className="px-3 py-2.5">PnL (%)</th>
-                        <th className="px-3 py-2.5">{isId ? 'Alasan Keluar' : 'Exit Reason'}</th>
-                        <th className="px-3 py-2.5">{isId ? 'Durasi' : 'Duration'}</th>
-                        <th className="px-3 py-2.5">{isId ? 'Friksi' : 'Friction'}</th>
+                        <th className="px-3 py-2.5 text-right">{isId ? 'Harga Masuk' : 'Entry'}</th>
+                        <th className="px-3 py-2.5 text-right">{isId ? 'Harga Keluar' : 'Exit'}</th>
+                        <th className="px-3 py-2.5 text-right">Net PnL ($)</th>
+                        <th className="px-3 py-2.5 text-right">PnL (%)</th>
+                        <th className="px-3 py-2.5 text-center">{isId ? 'Alasan Keluar' : 'Exit Reason'}</th>
+                        <th className="px-3 py-2.5 text-right">{isId ? 'Durasi' : 'Duration'}</th>
+                        <th className="px-3 py-2.5 text-right">{isId ? 'Friksi' : 'Friction'}</th>
                       </tr>
                     </thead>
                     <tbody className={`divide-y font-mono ${
-                      isDark ? 'divide-slate-800 text-slate-300' : 'divide-slate-200 text-slate-700'
+                      isDark ? 'divide-slate-800 text-slate-200' : 'divide-slate-200 text-slate-800'
                     }`}>
                       {filteredTrades.map((t) => (
                         <tr key={t.id} className={isDark ? 'hover:bg-slate-800/30' : 'hover:bg-slate-50'}>
-                          <td className="px-3 py-2.5 font-bold text-slate-400">{t.id}</td>
+                          <td className="px-3 py-2.5 font-bold text-slate-300">{t.id}</td>
                           <td className="px-3 py-2.5">
-                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                              t.direction === 'LONG' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              t.direction === 'LONG' ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
                             }`}>
                               {t.direction}
                             </span>
                           </td>
-                          <td className="px-3 py-2.5 font-bold">${formatCryptoPrice(t.entryPrice)}</td>
-                          <td className="px-3 py-2.5 font-bold">${formatCryptoPrice(t.exitPrice)}</td>
-                          <td className={`px-3 py-2.5 font-bold ${
-                            t.pnlUsd > 0 ? 'text-emerald-400' : t.pnlUsd < 0 ? 'text-rose-400' : 'text-slate-400'
+                          <td className="px-3 py-2.5 font-bold text-right tabular-nums text-slate-100">${formatCryptoPrice(t.entryPrice)}</td>
+                          <td className="px-3 py-2.5 font-bold text-right tabular-nums text-slate-100">${formatCryptoPrice(t.exitPrice)}</td>
+                          <td className={`px-3 py-2.5 font-bold text-right tabular-nums ${
+                            t.pnlUsd > 0 ? 'text-emerald-400' : t.pnlUsd < 0 ? 'text-rose-400' : 'text-slate-300'
                           }`}>
                             {t.pnlUsd > 0 ? '+' : ''}${t.pnlUsd.toFixed(2)}
                           </td>
-                          <td className={`px-3 py-2.5 font-bold ${
-                            t.pnlPercent > 0 ? 'text-emerald-400' : t.pnlPercent < 0 ? 'text-rose-400' : 'text-slate-400'
+                          <td className={`px-3 py-2.5 font-bold text-right tabular-nums ${
+                            t.pnlPercent > 0 ? 'text-emerald-400' : t.pnlPercent < 0 ? 'text-rose-400' : 'text-slate-300'
                           }`}>
                             {t.pnlPercent > 0 ? '+' : ''}{t.pnlPercent}%
                           </td>
-                          <td className="px-3 py-2.5">
-                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                          <td className="px-3 py-2.5 text-center">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                               t.exitReason === 'TAKE_PROFIT' || t.exitReason === 'PARTIAL_TP'
-                                ? 'bg-emerald-500/15 text-emerald-400'
+                                ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
                                 : t.exitReason === 'STOP_LOSS'
-                                ? 'bg-rose-500/15 text-rose-400'
-                                : 'bg-slate-500/15 text-slate-400'
+                                ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
+                                : 'bg-slate-500/15 text-slate-300 border border-slate-500/30'
                             }`}>
                               {t.exitReason}
                             </span>
                           </td>
-                          <td className="px-3 py-2.5 text-slate-400">
+                          <td className="px-3 py-2.5 text-right tabular-nums text-slate-300">
                             {t.holdingBars} {isId ? 'lilin' : 'bars'}
                           </td>
-                          <td className="px-3 py-2.5 text-slate-400 text-[10px]">
+                          <td className="px-3 py-2.5 text-right tabular-nums text-slate-300 text-[11px]">
                             {t.feeDeductionUsd ? `-$${t.feeDeductionUsd}` : '-'}
                           </td>
                         </tr>
@@ -2192,7 +2213,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             {activeTab === 'parameters' && (
               <div className="space-y-6">
                 {/* Header & Source Verification */}
-                <div className={`p-4 rounded-xl border ${
+                <div className={`p-4 rounded-lg border ${
                   isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200'
                 }`}>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
@@ -2201,7 +2222,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                         <Sliders className="w-4 h-4 text-cyan-400" />
                         <span>{isId ? `Parameter Aktif: ${selectedMeta.name}` : `Active Parameters: ${selectedMeta.name}`}</span>
                       </h4>
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p className="text-xs text-slate-300 mt-1">
                         {selectedMeta.description}
                       </p>
                     </div>
@@ -2219,18 +2240,18 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                       return (
                         <div
                           key={p.key}
-                          className={`p-3 rounded-lg border ${
+                          className={`p-3.5 rounded-lg border ${
                             isDark ? 'bg-slate-950/70 border-slate-800' : 'bg-white border-slate-200'
                           }`}
                         >
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs font-bold text-slate-300">{p.label}</span>
-                            <span className="text-xs font-mono font-bold text-cyan-400">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs font-bold text-slate-200">{p.label}</span>
+                            <span className="text-xs font-mono font-bold text-cyan-400 tabular-nums">
                               {currentVal} {p.unit || ''}
                             </span>
                           </div>
-                          <p className="text-[10px] text-slate-400 line-clamp-2">{p.description}</p>
-                          <div className="mt-2 text-[10px] font-mono text-slate-500">
+                          <p className="text-xs text-slate-300 line-clamp-2">{p.description}</p>
+                          <div className="mt-2 text-[11px] font-mono text-slate-300">
                             Default: {p.defaultValue} | Min: {p.min} | Max: {p.max}
                           </div>
                         </div>
@@ -2240,7 +2261,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 </div>
 
                 {/* Execution & Friction Audit */}
-                <div className={`p-4 rounded-xl border ${
+                <div className={`p-4 rounded-lg border ${
                   isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200'
                 }`}>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3 flex items-center gap-2">
@@ -2248,56 +2269,56 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                     <span>{isId ? 'Audit Konfigurasi Risiko & Friksi Eksekusi' : 'Risk & Execution Friction Configuration'}</span>
                   </h4>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-xs">
-                    <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                    <div className={`p-3.5 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
+                      <span className="text-[11px] uppercase font-bold text-slate-300 block mb-1">
                         {isId ? 'Modal Awal' : 'Initial Capital'}
                       </span>
-                      <span className="text-sm font-mono font-bold text-slate-200">
+                      <span className="text-sm font-mono font-bold text-slate-100 tabular-nums">
                         ${config.initialCapital.toLocaleString()}
                       </span>
                     </div>
 
-                    <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                    <div className={`p-3.5 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
+                      <span className="text-[11px] uppercase font-bold text-slate-300 block mb-1">
                         {isId ? 'Risiko per Transaksi' : 'Risk per Trade'}
                       </span>
-                      <span className="text-sm font-mono font-bold text-slate-200">
+                      <span className="text-sm font-mono font-bold text-slate-100 tabular-nums">
                         {config.riskPerTradePercent}%
                       </span>
                     </div>
 
-                    <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                    <div className={`p-3.5 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
+                      <span className="text-[11px] uppercase font-bold text-slate-300 block mb-1">
                         Stop Loss
                       </span>
-                      <span className="text-sm font-mono font-bold text-rose-400">
+                      <span className="text-sm font-mono font-bold text-rose-400 tabular-nums">
                         {config.stopLossPercent}%
                       </span>
                     </div>
 
-                    <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                    <div className={`p-3.5 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
+                      <span className="text-[11px] uppercase font-bold text-slate-300 block mb-1">
                         Take Profit (R:R)
                       </span>
-                      <span className="text-sm font-mono font-bold text-emerald-400">
+                      <span className="text-sm font-mono font-bold text-emerald-400 tabular-nums">
                         1 : {config.takeProfitRRR}
                       </span>
                     </div>
 
-                    <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                    <div className={`p-3.5 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
+                      <span className="text-[11px] uppercase font-bold text-slate-300 block mb-1">
                         Slippage Model
                       </span>
-                      <span className="text-sm font-mono font-bold text-amber-400">
+                      <span className="text-sm font-mono font-bold text-amber-300 tabular-nums">
                         {config.slippagePercent}%
                       </span>
                     </div>
 
-                    <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                    <div className={`p-3.5 rounded-lg border ${isDark ? 'bg-slate-950/50 border-slate-800' : 'bg-white border-slate-200'}`}>
+                      <span className="text-[11px] uppercase font-bold text-slate-300 block mb-1">
                         Maker / Taker Fee
                       </span>
-                      <span className="text-sm font-mono font-bold text-amber-400">
+                      <span className="text-sm font-mono font-bold text-amber-300 tabular-nums">
                         {config.feePercent}%
                       </span>
                     </div>

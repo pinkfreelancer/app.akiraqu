@@ -28,7 +28,7 @@ export class MockExchangeAdapter implements IExchangeAdapter {
     }));
   }
 
-  async fetchOHLCV(symbol: string, timeframe: Timeframe, limit: number = 85): Promise<OHLCVCandle[]> {
+  async fetchOHLCV(symbol: string, timeframe: Timeframe, limit: number = 150): Promise<OHLCVCandle[]> {
     return generateDeterministicCandles(symbol, timeframe, limit);
   }
 

@@ -39,6 +39,8 @@ import {
   Sliders,
   Terminal as TerminalIcon,
   Columns,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { CryptoSymbolInfo, Timeframe, WebSocketSyncMetrics, StageId } from '../types/crypto.types';
 import { Language, getTranslation } from '../i18n/translations';
@@ -84,6 +86,8 @@ interface HeaderProps {
   workspaceMode?: 'classic' | 'split' | 'launchpad';
   onToggleWorkspaceMode?: () => void;
   onSelectWorkspaceMode?: (mode: 'classic' | 'split' | 'launchpad') => void;
+  isWorkbenchVisible?: boolean;
+  onToggleWorkbench?: () => void;
   onOpenCommandBar?: () => void;
   onOpenShortcuts?: () => void;
   currentStage?: StageId;
@@ -130,6 +134,8 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleFullWidth,
   workspaceMode = 'classic',
   onToggleWorkspaceMode,
+  isWorkbenchVisible = true,
+  onToggleWorkbench,
   onOpenCommandBar,
   onOpenShortcuts,
   currentStage = 'ticker',
@@ -138,7 +144,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleSidebar,
 }) => {
   const { user, isAuthenticated } = useAuth();
-  const { unreadCount, openAlertCenter } = useAlerts();
+  const { unreadCount, isAlertCenterOpen, openAlertCenter, closeAlertCenter, toggleAlertCenter } = useAlerts();
   const t = getTranslation(lang);
   const normalizedTheme = normalizeEngineTheme(theme);
   const isDark = normalizedTheme !== 'theme-light';
@@ -219,7 +225,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header
-      className={`sticky top-0 z-40 w-full border-b transition-colors duration-200 ${
+      className={`sticky top-0 z-50 w-full border-b transition-colors duration-200 ${
         isDark ? 'border-[#1e293b] bg-[#090d16]/95' : 'border-slate-200 bg-white/95'
       } backdrop-blur-md`}
     >
@@ -258,8 +264,50 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Right Top Bar Controls: Settings & Mobile Toggle */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Right Top Bar Controls: Alert, Settings & Mobile Toggle */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
+          {/* Unified Alert Center Toggle Button (Beside Settings) */}
+          <button
+            id="btn-header-alert-toggle"
+            onClick={() => {
+              if (toggleAlertCenter) {
+                toggleAlertCenter();
+              } else if (isAlertCenterOpen) {
+                closeAlertCenter();
+              } else {
+                openAlertCenter();
+              }
+            }}
+            className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] border text-xs font-mono font-bold transition-all cursor-pointer min-h-[30px] ${
+              isAlertCenterOpen
+                ? 'bg-pink-600/25 border-pink-500 text-pink-300 ring-1 ring-pink-500/50 shadow-xs'
+                : unreadCount > 0
+                ? 'bg-pink-600/15 hover:bg-pink-600/25 border-pink-500/50 text-pink-400'
+                : isDark
+                ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-pink-300 hover:border-pink-500/30'
+                : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600 hover:border-pink-500/30'
+            }`}
+            title={
+              isId
+                ? `Pusat Alert: ${unreadCount} pembaruan (${isAlertCenterOpen ? 'Klik untuk menutup sidebar kanan' : 'Buka di sidebar kanan'})`
+                : `Alert Center: ${unreadCount} updates (${isAlertCenterOpen ? 'Click to close right sidebar' : 'Open in right sidebar'})`
+            }
+          >
+            <div className="relative flex items-center justify-center">
+              {unreadCount > 0 ? (
+                <BellRing className="w-3.5 h-3.5 text-pink-400 animate-pulse" />
+              ) : (
+                <Bell className="w-3.5 h-3.5 text-slate-400 group-hover:text-pink-400" />
+              )}
+              {unreadCount > 0 && (
+                <span className="absolute -top-1.5 -right-2 flex h-3.5 min-w-[14px] px-0.5 rounded-full bg-pink-600 text-white text-[9px] font-bold font-mono items-center justify-center shadow-xs">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </div>
+            <span className="hidden sm:inline">Alert</span>
+          </button>
+
           {/* Combined Settings Dropdown (Theme, Language, Fullscreen) */}
           <div className="relative" ref={dropdownRef}>
             <button
@@ -581,40 +629,8 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
-        {/* Right Side: Simple Alert Icon & Workspace Switch */}
+        {/* Right Side: Workspace Mode Switcher */}
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Unified Alert Center: Sinyal Trading, Penyaring Koin, & Berita Sentimen */}
-          <button
-            id="btn-header-alert-center"
-            onClick={() => openAlertCenter()}
-            className={`relative flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-[2px] text-xs font-mono font-medium transition-all cursor-pointer min-h-[38px] border ${
-              unreadCount > 0
-                ? 'bg-pink-600/20 hover:bg-pink-600/30 border-pink-500/60 text-pink-400 font-semibold shadow-xs'
-                : isDark
-                ? 'bg-[#0f172a] hover:bg-pink-950/40 border-[#1e293b] hover:border-pink-500/40 text-slate-300 hover:text-pink-400'
-                : 'bg-white hover:bg-pink-50 border-slate-200 hover:border-pink-300 text-slate-700 hover:text-pink-700'
-            }`}
-            title={
-              isId
-                ? `Pusat Alert: ${unreadCount} pembaruan terbaru (Sinyal Trading, Penyaring Koin, Berita Sentimen)`
-                : `Alert Center: ${unreadCount} new updates (Trading Signals, Screener, Sentiment News)`
-            }
-          >
-            <div className="relative">
-              {unreadCount > 0 ? (
-                <BellRing className="w-4 h-4 text-pink-400 animate-pulse" />
-              ) : (
-                <Bell className="w-4 h-4" />
-              )}
-              {unreadCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 px-1 rounded-full bg-pink-600 text-white text-[11px] font-bold font-mono items-center justify-center">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </div>
-            <span className="hidden sm:inline font-bold">Alert</span>
-          </button>
-
           {/* Workspace Mode Switcher (Compact 3-state: Fokus, Split, Grid) */}
           {onToggleWorkspaceMode && (
             <button
@@ -649,6 +665,49 @@ export const Header: React.FC<HeaderProps> = ({
                 <>
                   <Layers className="w-3.5 h-3.5 text-slate-400" />
                   <span className="hidden xl:inline">{isId ? 'Fokus' : 'Focus'}</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {/* Tombol Meja Kerja Trader (Hide/Show Workbench) */}
+          {onToggleWorkbench && (
+            <button
+              id="btn-header-toggle-workbench"
+              type="button"
+              onClick={onToggleWorkbench}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 border rounded-[2px] text-xs font-mono font-bold transition-all cursor-pointer min-h-[38px] ${
+                isWorkbenchVisible
+                  ? isDark
+                    ? 'bg-pink-500/15 border-pink-500/40 text-pink-300 hover:bg-pink-500/25'
+                    : 'bg-pink-50 border-pink-300 text-pink-700 hover:bg-pink-100'
+                  : isDark
+                  ? 'bg-[#0f172a] border-[#1e293b] text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                  : 'bg-slate-100 border-slate-200 text-slate-500 hover:text-slate-800'
+              }`}
+              title={
+                isId
+                  ? (isWorkbenchVisible
+                      ? 'Sembunyikan Meja Kerja Trader (Maksimalkan Ruang Kerja) (Tekan H)'
+                      : 'Tampilkan Meja Kerja Trader (7 Tahap & Personalisasi) (Tekan H)')
+                  : (isWorkbenchVisible
+                      ? 'Hide Trader Workbench (Maximize Screen) (Key: H)'
+                      : 'Show Trader Workbench (7 Steps & Persona) (Key: H)')
+              }
+            >
+              {isWorkbenchVisible ? (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 text-pink-400 shrink-0" />
+                  <span className="hidden xl:inline">{isId ? 'Meja Kerja' : 'Workbench'}</span>
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 ml-0.5 animate-pulse" title={isId ? 'Aktif' : 'Active'} />
+                </>
+              ) : (
+                <>
+                  <EyeOff className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span className="hidden xl:inline">{isId ? 'Meja Kerja' : 'Workbench'}</span>
+                  <span className="px-1 py-0.2 rounded-xs text-[9px] bg-slate-800 text-slate-400 border border-slate-700 font-normal">
+                    {isId ? 'Sembunyi' : 'Hidden'}
+                  </span>
                 </>
               )}
             </button>

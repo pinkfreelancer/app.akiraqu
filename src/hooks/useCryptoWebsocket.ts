@@ -199,20 +199,20 @@ export function useCryptoWebsocket(
 
     for (let i = 1; i <= 6; i++) {
       const bPrice = targetPrice - spread - i * spread * 0.8;
-      const bAmt = Math.random() * (12 / i) + 0.1;
+      const bAmt = Number(((1 + Math.sin(targetPrice * 0.05 + i * 1.5) * 0.35) * (8 / i) + 0.1).toFixed(4));
       bTot += bAmt;
       bids.push({
         price: Number(bPrice.toFixed(dec)),
-        amount: Number(bAmt.toFixed(4)),
+        amount: bAmt,
         total: Number(bTot.toFixed(4)),
       });
 
       const aPrice = targetPrice + spread + i * spread * 0.8;
-      const aAmt = Math.random() * (12 / i) + 0.1;
+      const aAmt = Number(((1 + Math.cos(targetPrice * 0.05 + i * 1.5) * 0.35) * (8 / i) + 0.1).toFixed(4));
       aTot += aAmt;
       asks.push({
         price: Number(aPrice.toFixed(dec)),
-        amount: Number(aAmt.toFixed(4)),
+        amount: aAmt,
         total: Number(aTot.toFixed(4)),
       });
     }
@@ -235,12 +235,13 @@ export function useCryptoWebsocket(
         minute: '2-digit',
         second: '2-digit',
       });
+      const tAmount = Number(((1 + Math.sin(i * 2.3)) * 0.75 + 0.1).toFixed(4));
       trades.push({
         id: `seed-${now}-${i}`,
         time: tTime,
         timestamp: now - i * 1200,
         price: tPrice,
-        amount: Number((Math.random() * 2.2 + 0.05).toFixed(4)),
+        amount: tAmount,
         isBuy,
       });
     }
@@ -295,25 +296,47 @@ export function useCryptoWebsocket(
     const fetchLiveRestSnapshot = async () => {
       const restStart = Date.now();
       try {
-        let url = '';
+        let urls: string[] = [];
         if (exchange === 'OKX') {
-          url = `https://www.okx.com/api/v5/market/ticker?instId=${formattedPair}`;
+          urls = [`https://www.okx.com/api/v5/market/ticker?instId=${formattedPair}`];
         } else if (exchange === 'KUCOIN') {
-          url = marketType === 'FUTURES'
-            ? `https://api-futures.kucoin.com/api/v1/ticker?symbol=${formattedPair}`
-            : `https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=${formattedPair}`;
+          urls = [
+            marketType === 'FUTURES'
+              ? `https://api-futures.kucoin.com/api/v1/ticker?symbol=${formattedPair}`
+              : `https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=${formattedPair}`
+          ];
         } else if (exchange === 'CRYPTO_COM') {
-          url = `https://api.crypto.com/exchange/v1/public/get-ticker?instrument_name=${formattedPair}`;
+          urls = [`https://api.crypto.com/exchange/v1/public/get-ticker?instrument_name=${formattedPair}`];
         } else {
           // Binance (Spot / Futures)
           const isFut = marketType === 'FUTURES';
-          url = isFut
-            ? `https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${cleanPair.toUpperCase()}`
-            : `https://api.binance.com/api/v3/ticker/24hr?symbol=${cleanPair.toUpperCase()}`;
+          urls = isFut
+            ? [
+                `https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${cleanPair.toUpperCase()}`,
+                `/api/v1/ticker?symbol=${encodeURIComponent(symbol)}&marketType=FUTURES`,
+              ]
+            : [
+                `https://data-api.binance.vision/api/v3/ticker/24hr?symbol=${cleanPair.toUpperCase()}`,
+                `/api/v1/ticker?symbol=${encodeURIComponent(symbol)}&marketType=SPOT`,
+                `https://api.binance.com/api/v3/ticker/24hr?symbol=${cleanPair.toUpperCase()}`,
+              ];
         }
 
-        const res = await fetch(url);
-        if (res.ok && isSubscribed) {
+        let res: Response | null = null;
+        for (const targetUrl of urls) {
+          try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 3500);
+            const r = await fetch(targetUrl, { signal: controller.signal });
+            clearTimeout(timeout);
+            if (r.ok) {
+              res = r;
+              break;
+            }
+          } catch (_e) {}
+        }
+
+        if (res && res.ok && isSubscribed) {
           const d = await res.json();
           let p = NaN;
           let c = NaN;
@@ -321,7 +344,14 @@ export function useCryptoWebsocket(
           let l = NaN;
           let v = NaN;
 
-          if (exchange === 'OKX' && d.data?.[0]) {
+          if (d.status === 'success' && d.price !== undefined) {
+            // Our server proxy format
+            p = parseFloat(d.price);
+            c = parseFloat(d.priceChangePercent);
+            h = parseFloat(d.high);
+            l = parseFloat(d.low);
+            v = parseFloat(d.volume);
+          } else if (exchange === 'OKX' && d.data?.[0]) {
             const t = d.data[0];
             p = parseFloat(t.last);
             h = parseFloat(t.high24h);
@@ -699,12 +729,13 @@ export function useCryptoWebsocket(
       const current = bufferRef.current.lastPrice || fallbackBasePrice;
       if (current && (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN)) {
         const dec = getCryptoPrecision(current);
-        const isBuy = Math.random() > 0.48;
-        const delta = (Math.random() - 0.5) * 0.0003 * current;
-        const newPrice = Number((current + delta).toFixed(dec));
         const now = Date.now();
+        const sec = Math.floor(now / 1000);
+        const isBuy = Math.sin(sec * 0.45) >= 0;
+        const delta = Math.sin(sec * 0.85) * 0.00015 * current;
+        const newPrice = Number((current + delta).toFixed(dec));
         const newTrade: LiveTradeTick = {
-          id: `sim-${now}-${Math.random().toString(36).substring(2, 6)}`,
+          id: `sim-${now}-${sec % 1000}`,
           time: new Date(now).toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
@@ -712,7 +743,7 @@ export function useCryptoWebsocket(
           }),
           timestamp: now,
           price: newPrice,
-          amount: Number((Math.random() * 1.5 + 0.02).toFixed(4)),
+          amount: Number(((Math.cos(sec * 0.7) + 1.2) * 0.65 + 0.05).toFixed(4)),
           isBuy,
         };
         bufferRef.current.tradesBuffer = [newTrade, ...bufferRef.current.tradesBuffer.slice(0, 14)];
