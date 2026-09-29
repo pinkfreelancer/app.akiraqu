@@ -18,6 +18,21 @@ export interface UseTerminalNavigationReturn {
 export function useTerminalNavigation(initialStage: StageId = 'ticker'): UseTerminalNavigationReturn {
   const [viewMode, setViewMode] = useState<TerminalViewMode>(() => {
     const saved = localStorage.getItem('imasbtc_view_mode') as TerminalViewMode | null;
+    const session = localStorage.getItem('imasbtc_user_session');
+    let hasValidSession = false;
+    if (session) {
+      try {
+        const parsed = JSON.parse(session);
+        if (parsed && parsed.email && !parsed.isAnonymous && !parsed.uid?.startsWith('demo_')) {
+          hasValidSession = true;
+        }
+      } catch (e) {}
+    }
+    
+    // If not authenticated, default to landing or login
+    if (!hasValidSession) {
+      return saved === 'login' || saved === 'docs' ? saved : 'landing';
+    }
     return saved === 'landing' || saved === 'login' || saved === 'docs' ? saved : 'terminal';
   });
 

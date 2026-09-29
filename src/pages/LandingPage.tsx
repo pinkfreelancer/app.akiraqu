@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { Language } from '../i18n/translations';
 import { THEME_OPTIONS, EngineThemeId } from '../types/theme.types';
+import { StageId } from '../types/crypto.types';
 
 interface LandingPageProps {
   lang: Language;
@@ -55,6 +56,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const { user, isAuthenticated, logout } = useAuth();
   const isDark = theme === 'dark';
   const isId = lang === 'id';
+
+  // Protected navigation handler: Requires Google authentication before entering terminal
+  const handleProtectedAction = (stage?: StageId) => {
+    if (isAuthenticated && user) {
+      onNavigateToTerminal(stage);
+    } else {
+      onNavigateToLogin();
+    }
+  };
 
   // Active persona tab preview in Bento Grid
   const [activePersona, setActivePersona] = useState<'basic' | 'pro' | 'whales'>('basic');
@@ -153,7 +163,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           {/* Logo dengan sentuhan Cyborg Soft Pink Glow */}
           <div 
-            onClick={() => onNavigateToTerminal()}
+            onClick={() => handleProtectedAction()}
             className="flex items-center space-x-3 cursor-pointer group select-none"
           >
             <div className="relative">
@@ -269,7 +279,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             {/* Launch App CTA */}
             <button
-              onClick={() => onNavigateToTerminal()}
+              onClick={() => handleProtectedAction()}
               className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-[2px] bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-mono font-bold text-xs sm:text-sm transition-all duration-200 flex items-center space-x-1.5 sm:space-x-2 cursor-pointer active:scale-95"
             >
               <span className="hidden xs:inline sm:inline">{isId ? 'Buka Terminal' : 'Launch Terminal'}</span>
@@ -381,7 +391,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           {/* Primary & Secondary Action CTAs */}
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5">
             <button 
-              onClick={() => onNavigateToTerminal()} 
+              onClick={() => handleProtectedAction()} 
               className="w-full sm:w-auto px-8 py-4 rounded-[2px] bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-mono font-bold text-sm transition-all flex items-center justify-center space-x-3 cursor-pointer active:scale-98"
             >
               <span>{isId ? 'Jelajahi Akiraqu' : 'Explore Akiraqu'}</span>
@@ -389,7 +399,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </button>
 
             <button 
-              onClick={() => onNavigateToTerminal('ticker')} 
+              onClick={() => handleProtectedAction('ticker')} 
               className={`w-full sm:w-auto px-8 py-4 rounded-[2px] border font-mono font-bold text-sm transition-all flex items-center justify-center space-x-2.5 cursor-pointer active:scale-98 ${
                 isDark 
                   ? 'bg-slate-900/90 hover:bg-slate-800/90 text-slate-200 border-slate-800 hover:border-pink-500/40 shadow-sm shadow-black/40' 
@@ -831,7 +841,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           <div className="mt-12">
             <button
-              onClick={() => onNavigateToTerminal()}
+              onClick={() => handleProtectedAction()}
               className="px-8 py-4 rounded-[2px] bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-mono font-bold text-sm transition-all cursor-pointer inline-flex items-center gap-2"
             >
               <span>{isId ? 'Terapkan Tema & Buka Terminal' : 'Apply Theme & Open Terminal'}</span>
@@ -868,7 +878,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <a href="#personas" className="hover:text-pink-400 transition-colors">Personas</a>
               <a href="#ai-core" className="hover:text-pink-400 transition-colors">Akira AI</a>
               <a href="#themes" className="hover:text-pink-400 transition-colors">Themes</a>
-              <button onClick={() => onNavigateToTerminal()} className="hover:text-pink-400 transition-colors cursor-pointer">Terminal</button>
+              <button onClick={() => handleProtectedAction()} className="hover:text-pink-400 transition-colors cursor-pointer">Terminal</button>
               <button onClick={onOpenDocs} className="hover:text-pink-400 transition-colors cursor-pointer flex items-center gap-1 text-pink-400">
                 <BookOpen className="w-3.5 h-3.5" />
                 <span>Doc</span>

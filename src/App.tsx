@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { AkiraQuLogo } from './components/AkiraQuLogo';
 import { TerminalProvider, useTerminal } from './contexts/TerminalContext';
 import { AlertProvider, useAlerts } from './contexts/AlertContext';
+import { useAuth } from './contexts/AuthContext';
 import { AlertCenterModal } from './components/alerts/AlertCenterModal';
 import { AlertToastContainer } from './components/alerts/AlertToastContainer';
 
@@ -55,6 +56,7 @@ import { TraderWorkflowBar, TraderPersona } from './components/TraderWorkflowBar
 import { MasterAnchorChart } from './components/workspace/MasterAnchorChart';
 
 function TerminalApp() {
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const {
     viewMode,
     currentStage,
@@ -231,6 +233,36 @@ function TerminalApp() {
         onSetLang={toggleLang}
         onToggleTheme={toggleTheme}
         onNavigateToTerminal={navigateToTerminal}
+        onNavigateToLanding={navigateToLanding}
+      />
+    );
+  }
+
+  // AUTHENTICATION GUARD: Terminal Workspace requires valid Google / Gmail login
+  if (!isAuthenticated || !user) {
+    if (authLoading) {
+      return (
+        <div className={`min-h-screen flex flex-col items-center justify-center font-mono ${
+          isDark ? 'bg-[#070b14] text-slate-100' : 'bg-[#f8fafc] text-slate-900'
+        }`}>
+          <div className="flex flex-col items-center gap-4 p-8 rounded-[2px] border border-pink-500/30 bg-slate-900/60 shadow-2xl backdrop-blur-md">
+            <AkiraQuLogo size={48} theme={binaryTheme} variant="symbol" />
+            <div className="flex items-center gap-2 text-pink-400 font-bold text-sm">
+              <RefreshCw className="w-4 h-4 animate-spin" />
+              <span>Memverifikasi Sesi Akun Google...</span>
+            </div>
+            <p className="text-xs text-slate-400">Sinkronisasi Keamanan Firebase & Cloud Firestore</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Direct unauthenticated users to the Login Page with return to terminal upon sign in
+    return (
+      <LoginPage
+        lang={lang}
+        theme={binaryTheme}
+        onNavigateToTerminal={() => navigateToTerminal()}
         onNavigateToLanding={navigateToLanding}
       />
     );
