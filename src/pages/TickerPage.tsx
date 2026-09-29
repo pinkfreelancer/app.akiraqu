@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { InteractiveChart } from '../components/InteractiveChart';
+import { CandleSizeProjectionCard } from '../components/CandleSizeProjectionCard';
 import { LiquidationHeatmapCard } from '../components/LiquidationHeatmapCard';
 import { MMBotTrackerCard } from '../components/MMBotTrackerCard';
 import { MarketMakerPlaybookCard } from '../components/MarketMakerPlaybookCard';
@@ -46,6 +47,10 @@ interface TickerPageProps {
 }
 
 function formatCoinPrice(val: number): string {
+  return formatCryptoPrice(val);
+}
+
+function formatPrice(val: number): string {
   return formatCryptoPrice(val);
 }
 
@@ -145,16 +150,16 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
         </div>
 
         {/* Right Column: Synced Live Depth Order Book & Recent Trade Feed */}
-        <div className={`lg:col-span-4 rounded-xl border p-4 flex flex-col h-full min-h-[550px] transition-colors duration-200 ${
-          isDark ? 'bg-[#0f172a] border-[#1e293b] text-white' : 'bg-white border-slate-200 text-slate-800 shadow-xs'
+        <div className={`lg:col-span-4 rounded-[2px] border p-4 flex flex-col h-full min-h-[550px] transition-colors duration-200 ${
+          isDark ? 'bg-[#0f172a] border-[#1e293b] text-slate-100' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
         }`}>
           {/* Title & Badge */}
           <div className={`flex items-center justify-between border-b pb-3 mb-3 ${
-            isDark ? 'border-[#1e293b]' : 'border-slate-100'
+            isDark ? 'border-slate-800/80' : 'border-slate-200'
           }`}>
             <div className="flex items-center gap-2">
               <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
-              <span className={`text-xs font-mono font-bold tracking-wider uppercase ${isDark ? 'text-white' : 'text-slate-800'}`}>
+              <span className={`text-xs font-mono font-bold tracking-wider uppercase ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
                 {lang === 'id' ? 'Live Order Book & AggTrade' : 'Live Order Book & AggTrade'}
               </span>
             </div>
@@ -165,8 +170,8 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
           </div>
 
           {/* Live Spread Ticker with RAF Buffered Updates */}
-          <div className={`p-2.5 rounded-lg border mb-4 flex items-center justify-between ${
-            isDark ? 'bg-[#0b0f19] border-cyan-500/20' : 'bg-slate-50 border-slate-200'
+          <div className={`p-2.5 rounded-[2px] border mb-4 flex items-center justify-between ${
+            isDark ? 'bg-[#0b0f19] border-slate-800' : 'bg-slate-50 border-slate-200'
           }`}>
             <div className="font-mono">
               <span className={`text-[10px] block uppercase font-bold tracking-wider ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Live Realtime Price</span>
@@ -189,13 +194,13 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
             {/* Bids Column (Greens) */}
             <div className="space-y-1">
               <div className={`flex justify-between font-bold pb-1 text-[10px] border-b ${
-                isDark ? 'text-slate-400 border-[#1e293b]' : 'text-slate-600 border-slate-200'
+                isDark ? 'text-slate-400 border-slate-800' : 'text-slate-600 border-slate-200'
               }`}>
                 <span>Bids (Buy)</span>
                 <span>Size</span>
               </div>
               {displayBids.map((bid, idx) => (
-                <div key={idx} className="relative flex justify-between py-0.5 px-1 rounded overflow-hidden">
+                <div key={idx} className="relative flex justify-between py-0.5 px-1 rounded-[2px] overflow-hidden">
                   <div 
                     className="absolute inset-y-0 left-0 bg-emerald-500/15 transition-all duration-150"
                     style={{ width: `${Math.min(100, (bid.amount / (calculatedBidTotal || 1)) * 180)}%` }}
@@ -209,18 +214,18 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
             {/* Asks Column (Reds) */}
             <div className="space-y-1">
               <div className={`flex justify-between font-bold pb-1 text-[10px] border-b ${
-                isDark ? 'text-slate-400 border-[#1e293b]' : 'text-slate-600 border-slate-200'
+                isDark ? 'text-slate-400 border-slate-800' : 'text-slate-600 border-slate-200'
               }`}>
                 <span>Asks (Sell)</span>
                 <span>Size</span>
               </div>
               {displayAsks.map((ask, idx) => (
-                <div key={idx} className="relative flex justify-between py-0.5 px-1 rounded overflow-hidden">
+                <div key={idx} className="relative flex justify-between py-0.5 px-1 rounded-[2px] overflow-hidden">
                   <div 
                     className="absolute inset-y-0 right-0 bg-rose-500/15 transition-all duration-150"
                     style={{ width: `${Math.min(100, (ask.amount / (calculatedAskTotal || 1)) * 180)}%` }}
                   />
-                  <span className="text-rose-400 font-bold relative z-10 tabular-nums">${formatCoinPrice(ask.price)}</span>
+                  <span className="text-rose-400 font-bold relative z-10 tabular-nums">${formatPrice(ask.price)}</span>
                   <span className={`relative z-10 tabular-nums font-medium ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>{ask.amount}</span>
                 </div>
               ))}
@@ -228,7 +233,7 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
           </div>
 
           {/* Synced aggTrade Feed */}
-          <div className={`mt-4 pt-3 border-t flex-1 ${isDark ? 'border-[#1e293b]' : 'border-slate-100'}`}>
+          <div className={`mt-4 pt-3 border-t flex-1 ${isDark ? 'border-slate-800/80' : 'border-slate-200'}`}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-mono text-slate-400 font-bold block uppercase tracking-wide">
                 {lang === 'id' ? 'Stream Transaksi (@aggTrade)' : 'Live Market Trades (@aggTrade)'}
@@ -237,15 +242,15 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
                 EventTime E Synced
               </span>
             </div>
-            <div className="space-y-1 overflow-y-auto max-h-[140px] pr-1 scrollbar-thin scrollbar-thumb-slate-800">
+            <div className="space-y-1 overflow-y-auto max-h-[140px] pr-1 scrollbar-thin">
               {displayTrades.slice(0, 10).map((trade) => (
-                <div key={trade.id} className={`flex justify-between items-center text-[11px] font-mono py-0.5 px-1 rounded transition-colors ${
+                <div key={trade.id} className={`flex justify-between items-center text-[11px] font-mono py-0.5 px-1 rounded-[2px] transition-colors ${
                   isDark ? 'hover:bg-slate-800/40' : 'hover:bg-slate-100'
                 }`}>
                   <span className="text-slate-500">{trade.time}</span>
                   <span className={`font-bold flex items-center gap-0.5 ${trade.isBuy ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {trade.isBuy ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                    ${formatCoinPrice(trade.price)}
+                    ${formatPrice(trade.price)}
                   </span>
                   <span className={isDark ? 'text-slate-300' : 'text-slate-600'}>{trade.amount}</span>
                 </div>
@@ -254,6 +259,16 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
           </div>
         </div>
       </div>
+
+      {/* Candle Size Projection, Targets & Re-entry Zone Telemetry Module */}
+      <CandleSizeProjectionCard
+        candles={candles}
+        symbol={symbol}
+        timeframe={timeframe}
+        currentPrice={currentPrice}
+        lang={lang}
+        theme={theme}
+      />
 
       {/* Market Maker & Bot Flow Telemetry Module */}
       <MMBotTrackerCard

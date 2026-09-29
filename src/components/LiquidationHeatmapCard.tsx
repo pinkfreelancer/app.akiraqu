@@ -1,21 +1,21 @@
 import React, { useState, useMemo } from 'react';
-import { OHLCVCandle, Timeframe, LeverageTier } from '../types/crypto.types';
+import { OHLCVCandle, Timeframe } from '../types/crypto.types';
 import { computeLiquidationHeatmap } from '../services/liquidation/liquidationEngine';
 import {
   Flame,
-  ShieldAlert,
+  Layers,
   ArrowUpRight,
   ArrowDownRight,
-  Compass,
-  Layers,
-  Info,
+  ShieldAlert,
+  Sliders,
   CheckCircle2,
-  TrendingUp,
   AlertTriangle,
   Copy,
   Check,
-  Sliders,
+  Compass,
   Sparkles,
+  Info,
+  TrendingUp,
 } from 'lucide-react';
 import { Language } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
@@ -41,11 +41,10 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
   const isId = lang === 'id';
 
   const [activeTab, setActiveTab] = useState<'summary' | 'clusters' | 'playbook'>('summary');
-  const [selectedTier, setSelectedTier] = useState<LeverageTier | 'ALL'>('ALL');
-  const [copiedPrice, setCopiedPrice] = useState<string | null>(null);
-
-  const [simLeverage, setSimLeverage] = useState<number>(25);
+  const [selectedTier, setSelectedTier] = useState<'ALL' | '100x' | '50x' | '25x' | '10x'>('ALL');
+  const [simLeverage, setSimLeverage] = useState<number>(50);
   const [simDirection, setSimDirection] = useState<'LONG' | 'SHORT'>('LONG');
+  const [copiedPrice, setCopiedPrice] = useState<string | null>(null);
 
   const summary = useMemo(() => {
     return computeLiquidationHeatmap(candles, symbol, overridePrice);
@@ -96,7 +95,7 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
     <div
       id="liquidation-heatmap-hybrid-card"
       className={`rounded-[2px] border p-5 transition-colors duration-200 ${
-        isDark ? 'bg-[#0f172a] border-[#1e293b] text-white' : 'bg-white border-slate-200 text-slate-800 shadow-xs'
+        isDark ? 'bg-[#0f172a] border-[#1e293b] text-slate-100' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
       }`}
     >
       {/* Toast feedback for price copy */}
@@ -108,7 +107,9 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
       )}
 
       {/* Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800/80">
+      <div className={`flex flex-wrap items-center justify-between gap-3 pb-4 border-b ${
+        isDark ? 'border-slate-800/80' : 'border-slate-200'
+      }`}>
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-[2px] bg-amber-500/10 border border-amber-500/30 text-amber-400">
             <Flame className="w-5 h-5" />
@@ -118,7 +119,9 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
               <h3 className="font-bold text-base tracking-tight">
                 {isId ? 'Peta Panas Likuidasi & Klaster Leverage' : 'Liquidation Heatmap & Leverage Clusters'}
               </h3>
-              <span className="px-2 py-0.5 rounded-[2px] text-xs font-mono font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 uppercase">
+              <span className={`px-2 py-0.5 rounded-[2px] text-xs font-mono font-semibold uppercase border ${
+                isDark ? 'bg-amber-500/15 text-amber-300 border-amber-500/30' : 'bg-amber-50 text-amber-700 border-amber-200'
+              }`}>
                 {isId ? 'Model Hibrida' : 'Hybrid Model'}
               </span>
             </div>
@@ -132,15 +135,17 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
 
         {/* Progressive Disclosure: Mode Switcher */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center rounded-[2px] bg-slate-900/90 p-1 border border-slate-800 text-xs font-mono">
+          <div className={`flex items-center rounded-[2px] p-1 border text-xs font-mono ${
+            isDark ? 'bg-[#0b0f19] border-slate-800' : 'bg-slate-100 border-slate-200'
+          }`}>
             <button
               id="liq-tab-summary"
               type="button"
               onClick={() => setActiveTab('summary')}
               className={`px-3 py-1 rounded-[2px] transition-colors cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'summary'
-                  ? 'bg-slate-800 text-white font-semibold shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? isDark ? 'bg-slate-800 text-white font-semibold shadow-xs' : 'bg-white text-slate-900 font-semibold shadow-xs'
+                  : isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
@@ -152,8 +157,8 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
               onClick={() => setActiveTab('clusters')}
               className={`px-3 py-1 rounded-[2px] transition-colors cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'clusters'
-                  ? 'bg-slate-800 text-white font-semibold shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? isDark ? 'bg-slate-800 text-white font-semibold shadow-xs' : 'bg-white text-slate-900 font-semibold shadow-xs'
+                  : isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <Layers className="w-3.5 h-3.5 text-pink-400" />
@@ -165,8 +170,8 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
               onClick={() => setActiveTab('playbook')}
               className={`px-3 py-1 rounded-[2px] transition-colors cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'playbook'
-                  ? 'bg-slate-800 text-white font-semibold shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? isDark ? 'bg-slate-800 text-white font-semibold shadow-xs' : 'bg-white text-slate-900 font-semibold shadow-xs'
+                  : isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <Compass className="w-3.5 h-3.5 text-indigo-400" />
@@ -176,7 +181,9 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
 
           {/* Leverage Filter Pills (shown in Clusters tab) */}
           {activeTab === 'clusters' && (
-            <div className="flex items-center rounded-[2px] bg-slate-900/90 p-1 border border-slate-800 text-xs font-mono">
+            <div className={`flex items-center rounded-[2px] p-1 border text-xs font-mono ${
+              isDark ? 'bg-[#0b0f19] border-slate-800' : 'bg-slate-100 border-slate-200'
+            }`}>
               {(['ALL', '100x', '50x', '25x', '10x'] as const).map((tier) => (
                 <button
                   key={tier}
@@ -185,8 +192,8 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                   onClick={() => setSelectedTier(tier)}
                   className={`px-2 py-1 rounded-[2px] text-xs transition-colors cursor-pointer ${
                     selectedTier === tier
-                      ? 'bg-slate-700 text-pink-300 font-semibold'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? isDark ? 'bg-slate-800 text-pink-300 font-semibold' : 'bg-white text-pink-700 font-semibold shadow-2xs'
+                      : isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   {tier === 'ALL' ? (isId ? 'Semua' : 'All') : tier}
@@ -200,7 +207,9 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
       {/* Top Metric Bento Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 my-4">
         {/* 1. Squeeze Imbalance Meter */}
-        <div className="p-3.5 rounded-[2px] bg-slate-900/70 border border-slate-800/80 flex flex-col justify-between">
+        <div className={`p-3.5 rounded-[2px] border flex flex-col justify-between ${
+          isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'
+        }`}>
           <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
             <span>{isId ? 'Bias Imbalance Pasar' : 'Market Imbalance Bias'}</span>
             <Flame className="w-3.5 h-3.5 text-amber-400" />
@@ -211,8 +220,8 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                 summary.imbalanceBias === 'SHORT_SQUEEZE_RISK'
                   ? 'text-amber-400'
                   : summary.imbalanceBias === 'LONG_SQUEEZE_RISK'
-                  ? 'text-pink-300'
-                  : 'text-slate-200'
+                  ? isDark ? 'text-pink-300' : 'text-pink-600'
+                  : isDark ? 'text-slate-200' : 'text-slate-800'
               }`}
             >
               {summary.imbalanceBias === 'SHORT_SQUEEZE_RISK'
@@ -228,7 +237,9 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                 : 'Balanced Distribution'}
             </div>
             {/* Visual ratio bar */}
-            <div className="w-full h-2 rounded-[2px] bg-slate-800 overflow-hidden flex mt-2">
+            <div className={`w-full h-2 rounded-[2px] overflow-hidden flex mt-2 ${
+              isDark ? 'bg-slate-800' : 'bg-slate-200'
+            }`}>
               <div
                 className="h-full bg-amber-500 transition-all duration-300"
                 style={{ width: `${summary.shortLiqRatio}%` }}
@@ -243,18 +254,20 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
           </div>
           <div className="flex justify-between text-xs font-mono text-slate-400 mt-1">
             <span className="text-amber-400 font-medium">Shorts: {summary.shortLiqRatio}%</span>
-            <span className="text-pink-300 font-medium">Longs: {summary.longLiqRatio}%</span>
+            <span className={isDark ? 'text-pink-300 font-medium' : 'text-pink-600 font-medium'}>Longs: {summary.longLiqRatio}%</span>
           </div>
         </div>
 
         {/* 2. Major Overhead Magnet (Short Liquidation) */}
         <div
           onClick={() => summary.majorShortMagnet && handleCopyPrice(summary.majorShortMagnet.price, 'Short Magnet')}
-          className="p-3.5 rounded-[2px] bg-slate-900/70 border border-slate-800/80 flex flex-col justify-between cursor-pointer hover:border-amber-500/40 transition-colors group"
+          className={`p-3.5 rounded-[2px] border flex flex-col justify-between cursor-pointer hover:border-amber-500/40 transition-colors group ${
+            isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'
+          }`}
           title={isId ? 'Klik untuk menyalin harga level magnet short' : 'Click to copy short magnet price'}
         >
           <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
-            <span className="text-amber-300 font-semibold flex items-center gap-1">
+            <span className="text-amber-400 font-semibold flex items-center gap-1">
               {isId ? 'Magnet Short Terbesar' : 'Top Short Magnet'}
               <Copy className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-amber-400" />
             </span>
@@ -262,7 +275,7 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
           </div>
           {summary.majorShortMagnet && summary.majorShortMagnet.price > 0 ? (
             <div>
-              <div className="text-base font-extrabold font-mono text-white">
+              <div className={`text-base font-extrabold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 ${formatPrice(summary.majorShortMagnet.price)}
               </div>
               <div className="text-xs font-mono text-amber-400 font-semibold mt-0.5">
@@ -276,7 +289,7 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
           )}
           <div className="text-xs font-mono text-slate-400 mt-1">
             Est. Vol:{' '}
-            <span className="text-amber-300 font-bold">${summary.majorShortMagnet?.estimatedVolumeUsd || 0}M</span> (
+            <span className="text-amber-400 font-bold">${summary.majorShortMagnet?.estimatedVolumeUsd || 0}M</span> (
             {summary.majorShortMagnet?.leverageTier || '50x'})
           </div>
         </div>
@@ -284,11 +297,13 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
         {/* 3. Major Downside Magnet (Long Liquidation) */}
         <div
           onClick={() => summary.majorLongMagnet && handleCopyPrice(summary.majorLongMagnet.price, 'Long Magnet')}
-          className="p-3.5 rounded-[2px] bg-slate-900/70 border border-slate-800/80 flex flex-col justify-between cursor-pointer hover:border-pink-500/40 transition-colors group"
+          className={`p-3.5 rounded-[2px] border flex flex-col justify-between cursor-pointer hover:border-pink-500/40 transition-colors group ${
+            isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'
+          }`}
           title={isId ? 'Klik untuk menyalin harga level magnet long' : 'Click to copy long magnet price'}
         >
           <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
-            <span className="text-pink-300 font-semibold flex items-center gap-1">
+            <span className={`font-semibold flex items-center gap-1 ${isDark ? 'text-pink-300' : 'text-pink-600'}`}>
               {isId ? 'Magnet Long Terbesar' : 'Top Long Magnet'}
               <Copy className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-pink-400" />
             </span>
@@ -296,7 +311,7 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
           </div>
           {summary.majorLongMagnet && summary.majorLongMagnet.price > 0 ? (
             <div>
-              <div className="text-base font-extrabold font-mono text-white">
+              <div className={`text-base font-extrabold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 ${formatPrice(summary.majorLongMagnet.price)}
               </div>
               <div className="text-xs font-mono text-pink-400 font-semibold mt-0.5">
@@ -310,19 +325,21 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
           )}
           <div className="text-xs font-mono text-slate-400 mt-1">
             Est. Vol:{' '}
-            <span className="text-pink-300 font-bold">${summary.majorLongMagnet?.estimatedVolumeUsd || 0}M</span> (
+            <span className={`font-bold ${isDark ? 'text-pink-300' : 'text-pink-600'}`}>${summary.majorLongMagnet?.estimatedVolumeUsd || 0}M</span> (
             {summary.majorLongMagnet?.leverageTier || '50x'})
           </div>
         </div>
 
         {/* 4. Total Liquidity Pool Volume */}
-        <div className="p-3.5 rounded-[2px] bg-slate-900/70 border border-slate-800/80 flex flex-col justify-between">
+        <div className={`p-3.5 rounded-[2px] border flex flex-col justify-between ${
+          isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'
+        }`}>
           <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
             <span>{isId ? 'Total Likuiditas Terlacak' : 'Total Tracked Liquidity'}</span>
             <Layers className="w-3.5 h-3.5 text-indigo-400" />
           </div>
           <div>
-            <div className="text-base font-extrabold font-mono text-white">
+            <div className={`text-base font-extrabold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
               ${(summary.totalShortLiqUsd + summary.totalLongLiqUsd).toFixed(1)}M
             </div>
             <div className="text-xs font-mono text-slate-400 mt-0.5">
@@ -351,34 +368,36 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
           {/* Executive Summary & Tactical Orientation */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Actionable Market Trap Summary */}
-            <div className="p-4 rounded-[2px] bg-slate-900/60 border border-slate-800 space-y-3">
+            <div className={`p-4 rounded-[2px] border space-y-3 ${
+              isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'
+            }`}>
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-[2px] bg-amber-500/10 text-amber-400">
                   <Flame className="w-4 h-4" />
                 </div>
-                <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wide">
+                <h4 className={`text-xs font-bold uppercase tracking-wide ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                   {isId ? 'Diagnosis Perangkap Likuiditas Pasar' : 'Market Liquidity Trap Diagnosis'}
                 </h4>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                 {summary.imbalanceBias === 'SHORT_SQUEEZE_RISK' ? (
                   isId ? (
                     <>
-                      Terdapat akumulasi likuidasi <strong className="text-amber-400">posisi Short sebesar {summary.shortLiqRatio}%</strong> di atas harga pasar. Pembuat pasar (Market Maker) memiliki insentif tinggi untuk memicu lonjakan harga cepat (short squeeze) menuju area <strong className="text-white">${formatPrice(summary.majorShortMagnet?.price || 0)}</strong>.
+                      Terdapat akumulasi likuidasi <strong className="text-amber-400">posisi Short sebesar {summary.shortLiqRatio}%</strong> di atas harga pasar. Pembuat pasar (Market Maker) memiliki insentif tinggi untuk memicu lonjakan harga cepat (short squeeze) menuju area <strong className={isDark ? 'text-white' : 'text-slate-900'}>${formatPrice(summary.majorShortMagnet?.price || 0)}</strong>.
                     </>
                   ) : (
                     <>
-                      Significant accumulation of <strong className="text-amber-400">Short liquidations ({summary.shortLiqRatio}%)</strong> above market price. Market makers have strong incentive to push prices upward toward <strong className="text-white">${formatPrice(summary.majorShortMagnet?.price || 0)}</strong>.
+                      Significant accumulation of <strong className="text-amber-400">Short liquidations ({summary.shortLiqRatio}%)</strong> above market price. Market makers have strong incentive to push prices upward toward <strong className={isDark ? 'text-white' : 'text-slate-900'}>${formatPrice(summary.majorShortMagnet?.price || 0)}</strong>.
                     </>
                   )
                 ) : summary.imbalanceBias === 'LONG_SQUEEZE_RISK' ? (
                   isId ? (
                     <>
-                      Terdapat penumpukan likuidasi <strong className="text-pink-400">posisi Long sebesar {summary.longLiqRatio}%</strong> di bawah harga saat ini. Waspadai penurunan tajam (long cascade) yang membidik kumpulan stop loss di area <strong className="text-white">${formatPrice(summary.majorLongMagnet?.price || 0)}</strong>.
+                      Terdapat penumpukan likuidasi <strong className="text-pink-400">posisi Long sebesar {summary.longLiqRatio}%</strong> di bawah harga saat ini. Waspadai penurunan tajam (long cascade) yang membidik kumpulan stop loss di area <strong className={isDark ? 'text-white' : 'text-slate-900'}>${formatPrice(summary.majorLongMagnet?.price || 0)}</strong>.
                     </>
                   ) : (
                     <>
-                      Heavy concentration of <strong className="text-pink-400">Long liquidations ({summary.longLiqRatio}%)</strong> below market price. Watch out for a downside wick sweep into <strong className="text-white">${formatPrice(summary.majorLongMagnet?.price || 0)}</strong>.
+                      Heavy concentration of <strong className="text-pink-400">Long liquidations ({summary.longLiqRatio}%)</strong> below market price. Watch out for a downside wick sweep into <strong className={isDark ? 'text-white' : 'text-slate-900'}>${formatPrice(summary.majorLongMagnet?.price || 0)}</strong>.
                     </>
                   )
                 ) : (
@@ -395,13 +414,17 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
               </p>
 
               {/* Action Recommendation Badges */}
-              <div className="pt-2 border-t border-slate-800/70 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                <div className="p-2.5 rounded-[2px] bg-emerald-950/30 border border-emerald-500/30 text-emerald-300">
-                  <div className="font-bold flex items-center gap-1.5 mb-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <div className={`pt-2 border-t grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs ${
+                isDark ? 'border-slate-800/80' : 'border-slate-200'
+              }`}>
+                <div className={`p-2.5 rounded-[2px] border ${
+                  isDark ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-300' : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                }`}>
+                  <div className="font-bold flex items-center gap-1.5 mb-1 text-emerald-400">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>{isId ? 'Target Ambil Profit (TP)' : 'Take Profit (TP) Target'}</span>
                   </div>
-                  <p className="text-xs text-slate-300">
+                  <p className={`text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                     {summary.majorShortMagnet
                       ? isId
                         ? `Di batas bawah klaster $${formatPrice(summary.majorShortMagnet.price)} sebelum pembalikan arah.`
@@ -410,12 +433,14 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                   </p>
                 </div>
 
-                <div className="p-2.5 rounded-[2px] bg-rose-950/30 border border-rose-500/30 text-rose-300">
-                  <div className="font-bold flex items-center gap-1.5 mb-1">
-                    <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
+                <div className={`p-2.5 rounded-[2px] border ${
+                  isDark ? 'bg-rose-950/20 border-rose-500/30 text-rose-300' : 'bg-rose-50 border-rose-200 text-rose-800'
+                }`}>
+                  <div className="font-bold flex items-center gap-1.5 mb-1 text-rose-400">
+                    <ShieldAlert className="w-3.5 h-3.5" />
                     <span>{isId ? 'Zona Lindung Stop Loss' : 'Stop Loss Protection'}</span>
                   </div>
-                  <p className="text-xs text-slate-300">
+                  <p className={`text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                     {summary.majorLongMagnet
                       ? isId
                         ? `Beri buffer di luar $${formatPrice(summary.majorLongMagnet.price)}, jangan di dalamnya.`
@@ -427,30 +452,34 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
             </div>
 
             {/* Interactive Leverage Risk Calculator */}
-            <div className="p-4 rounded-[2px] bg-slate-900/60 border border-slate-800 space-y-3">
+            <div className={`p-4 rounded-[2px] border space-y-3 ${
+              isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'
+            }`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-[2px] bg-pink-500/10 text-pink-400">
                     <Sliders className="w-4 h-4" />
                   </div>
-                  <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wide">
+                  <h4 className={`text-xs font-bold uppercase tracking-wide ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                     {isId ? 'Simulator Sensitivitas Leverage' : 'Leverage Sensitivity Simulator'}
                   </h4>
                 </div>
                 <span className="text-xs text-slate-400">
-                  {isId ? 'Harga Acuan:' : 'Ref Price:'} <strong className="text-white">${formatPrice(currentPrice)}</strong>
+                  {isId ? 'Harga Acuan:' : 'Ref Price:'} <strong className={isDark ? 'text-white' : 'text-slate-900'}>${formatPrice(currentPrice)}</strong>
                 </span>
               </div>
 
               {/* Leverage Selector Pills & Direction Toggle */}
               <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                 {/* Direction Toggle */}
-                <div className="flex items-center rounded-[2px] bg-slate-950 p-1 border border-slate-800 text-xs">
+                <div className={`flex items-center rounded-[2px] p-1 border text-xs ${
+                  isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-200/80 border-slate-300'
+                }`}>
                   <button
                     type="button"
                     onClick={() => setSimDirection('LONG')}
                     className={`px-2.5 py-0.5 rounded-[2px] cursor-pointer transition-colors ${
-                      simDirection === 'LONG' ? 'bg-pink-600 text-white font-bold' : 'text-slate-400 hover:text-white'
+                      simDirection === 'LONG' ? 'bg-pink-600 text-white font-bold' : isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     Long
@@ -459,7 +488,7 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                     type="button"
                     onClick={() => setSimDirection('SHORT')}
                     className={`px-2.5 py-0.5 rounded-[2px] cursor-pointer transition-colors ${
-                      simDirection === 'SHORT' ? 'bg-amber-600 text-white font-bold' : 'text-slate-400 hover:text-white'
+                      simDirection === 'SHORT' ? 'bg-amber-600 text-white font-bold' : isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     Short
@@ -475,8 +504,8 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                       onClick={() => setSimLeverage(lev)}
                       className={`px-2 py-0.5 rounded-[2px] text-xs cursor-pointer transition-colors border ${
                         simLeverage === lev
-                          ? 'bg-slate-700 border-pink-400 text-pink-300 font-bold'
-                          : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                          ? isDark ? 'bg-slate-800 border-pink-400 text-pink-300 font-bold' : 'bg-pink-500 border-pink-600 text-white font-bold'
+                          : isDark ? 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
                       }`}
                     >
                       {lev}x
@@ -486,17 +515,19 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
               </div>
 
               {/* Simulation Result Card */}
-              <div className="p-3 rounded-[2px] bg-slate-950/80 border border-slate-800/90 space-y-1.5">
+              <div className={`p-3 rounded-[2px] border space-y-1.5 ${
+                isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-white border-slate-200 shadow-2xs'
+              }`}>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-400">
                     {isId ? `Estimasi Titik Likuidasi (${simLeverage}x ${simDirection}):` : `Estimated Liq Price (${simLeverage}x ${simDirection}):`}
                   </span>
-                  <span className="text-sm font-bold text-white font-mono flex items-center gap-1.5">
+                  <span className={`text-sm font-bold font-mono flex items-center gap-1.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     ${formatPrice(simulatedLiqPrice)}
                     <button
                       type="button"
                       onClick={() => handleCopyPrice(simulatedLiqPrice, 'Est. Liq')}
-                      className="p-1 rounded-[2px] text-slate-400 hover:text-white transition-colors cursor-pointer"
+                      className="p-1 rounded-[2px] text-slate-400 hover:text-pink-400 transition-colors cursor-pointer"
                       title={isId ? 'Salin harga likuidasi ini' : 'Copy this liquidation price'}
                     >
                       <Copy className="w-3 h-3" />
@@ -506,7 +537,9 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
 
                 {/* Proximity / Danger Assessment */}
                 {collisionAlert ? (
-                  <div className="flex items-start gap-1.5 p-2 rounded-[2px] bg-rose-950/40 border border-rose-500/30 text-xs text-rose-300">
+                  <div className={`flex items-start gap-1.5 p-2 rounded-[2px] border text-xs ${
+                    isDark ? 'bg-rose-950/30 border-rose-500/30 text-rose-300' : 'bg-rose-50 border-rose-200 text-rose-800'
+                  }`}>
                     <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
                     <span>
                       {isId
@@ -515,7 +548,9 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                     </span>
                   </div>
                 ) : (
-                  <div className="flex items-start gap-1.5 p-2 rounded-[2px] bg-emerald-950/30 border border-emerald-500/30 text-xs text-emerald-300">
+                  <div className={`flex items-start gap-1.5 p-2 rounded-[2px] border text-xs ${
+                    isDark ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-300' : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                  }`}>
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                     <span>
                       {isId
@@ -542,15 +577,19 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
           {/* Dual-Column / Stacked Cluster Ladder */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Left Box: Short Liquidation Clusters (Overhead Squeeze Magnets) */}
-            <div className="p-4 rounded-[2px] bg-slate-900/50 border border-amber-500/20">
-              <div className="flex items-center justify-between pb-2 mb-3 border-b border-amber-500/20">
+            <div className={`p-4 rounded-[2px] border ${
+              isDark ? 'bg-[#0b0f19] border-amber-500/20' : 'bg-slate-50 border-amber-300/40'
+            }`}>
+              <div className={`flex items-center justify-between pb-2 mb-3 border-b ${
+                isDark ? 'border-amber-500/20' : 'border-amber-200'
+              }`}>
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                   <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wide">
                     {isId ? 'Klaster Likuidasi Short (Di Atas Harga)' : 'Short Liquidation Clusters (Overhead)'}
                   </span>
                 </div>
-                <span className="text-xs font-mono text-amber-300 font-bold">
+                <span className="text-xs font-mono text-amber-400 font-bold">
                   Total: ${summary.totalShortLiqUsd}M
                 </span>
               </div>
@@ -560,14 +599,14 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                   {isId ? 'Tidak ada klaster short pada filter leverage ini' : 'No short clusters at this leverage tier'}
                 </div>
               ) : (
-                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-800">
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
                   {shortClusters.map((cluster) => (
                     <div
                       key={cluster.id}
                       className={`p-2 rounded-[2px] border transition-all ${
                         cluster.isMajorMagnet
-                          ? 'bg-amber-950/40 border-amber-500/50 shadow-xs'
-                          : 'bg-slate-900/60 border-slate-800 hover:border-amber-500/30'
+                          ? isDark ? 'bg-amber-950/30 border-amber-500/50 shadow-xs' : 'bg-amber-50 border-amber-300 shadow-2xs'
+                          : isDark ? 'bg-slate-900/70 border-slate-800 hover:border-amber-500/30' : 'bg-white border-slate-200 hover:border-amber-300 shadow-2xs'
                       }`}
                     >
                       <div className="flex items-center justify-between text-xs font-mono">
@@ -575,17 +614,23 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                           <button
                             type="button"
                             onClick={() => handleCopyPrice(cluster.price, 'Short Liq')}
-                            className="font-bold text-white hover:text-amber-300 flex items-center gap-1 transition-colors cursor-pointer group"
+                            className={`font-bold hover:text-amber-400 flex items-center gap-1 transition-colors cursor-pointer group ${
+                              isDark ? 'text-white' : 'text-slate-900'
+                            }`}
                             title={isId ? 'Klik untuk menyalin harga' : 'Click to copy price'}
                           >
                             <span>${formatPrice(cluster.price)}</span>
                             <Copy className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 text-amber-400 transition-opacity" />
                           </button>
-                          <span className="px-1.5 py-0.5 rounded-[2px] text-xs bg-slate-800 text-amber-300 border border-amber-500/30 font-semibold">
+                          <span className={`px-1.5 py-0.5 rounded-[2px] text-xs font-semibold border ${
+                            isDark ? 'bg-slate-800 text-amber-300 border-amber-500/30' : 'bg-amber-100 text-amber-800 border-amber-200'
+                          }`}>
                             {cluster.leverageTier}
                           </span>
                           {cluster.isMajorMagnet && (
-                            <span className="px-1.5 py-0.5 rounded-[2px] text-xs bg-amber-500/30 text-amber-200 border border-amber-500/50 font-semibold">
+                            <span className={`px-1.5 py-0.5 rounded-[2px] text-xs font-semibold border ${
+                              isDark ? 'bg-amber-500/30 text-amber-200 border-amber-500/50' : 'bg-amber-200 text-amber-900 border-amber-400'
+                            }`}>
                               ★ Magnet
                             </span>
                           )}
@@ -599,7 +644,9 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                       </div>
 
                       {/* Heat Intensity Bar */}
-                      <div className="w-full h-1.5 rounded-[2px] bg-slate-800 mt-2 overflow-hidden">
+                      <div className={`w-full h-1.5 rounded-[2px] mt-2 overflow-hidden ${
+                        isDark ? 'bg-slate-800' : 'bg-slate-200'
+                      }`}>
                         <div
                           className="h-full bg-amber-500"
                           style={{ width: `${cluster.intensity}%` }}
@@ -612,15 +659,19 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
             </div>
 
             {/* Right Box: Long Liquidation Clusters (Downside Cascade Targets) */}
-            <div className="p-4 rounded-[2px] bg-slate-900/50 border border-pink-500/20">
-              <div className="flex items-center justify-between pb-2 mb-3 border-b border-pink-500/20">
+            <div className={`p-4 rounded-[2px] border ${
+              isDark ? 'bg-[#0b0f19] border-pink-500/20' : 'bg-slate-50 border-pink-300/40'
+            }`}>
+              <div className={`flex items-center justify-between pb-2 mb-3 border-b ${
+                isDark ? 'border-pink-500/20' : 'border-pink-200'
+              }`}>
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-pink-500" />
                   <span className="text-xs font-mono font-bold text-pink-400 uppercase tracking-wide">
                     {isId ? 'Klaster Likuidasi Long (Di Bawah Harga)' : 'Long Liquidation Clusters (Downside)'}
                   </span>
                 </div>
-                <span className="text-xs font-mono text-pink-300 font-bold">
+                <span className={`text-xs font-mono font-bold ${isDark ? 'text-pink-300' : 'text-pink-600'}`}>
                   Total: ${summary.totalLongLiqUsd}M
                 </span>
               </div>
@@ -630,14 +681,14 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                   {isId ? 'Tidak ada klaster long pada filter leverage ini' : 'No long clusters at this leverage tier'}
                 </div>
               ) : (
-                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-800">
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
                   {longClusters.map((cluster) => (
                     <div
                       key={cluster.id}
                       className={`p-2 rounded-[2px] border transition-all ${
                         cluster.isMajorMagnet
-                          ? 'bg-pink-950/40 border-pink-500/50 shadow-xs'
-                          : 'bg-slate-900/60 border-slate-800 hover:border-pink-500/30'
+                          ? isDark ? 'bg-pink-950/30 border-pink-500/50 shadow-xs' : 'bg-pink-50 border-pink-300 shadow-2xs'
+                          : isDark ? 'bg-slate-900/70 border-slate-800 hover:border-pink-500/30' : 'bg-white border-slate-200 hover:border-pink-300 shadow-2xs'
                       }`}
                     >
                       <div className="flex items-center justify-between text-xs font-mono">
@@ -645,17 +696,23 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                           <button
                             type="button"
                             onClick={() => handleCopyPrice(cluster.price, 'Long Liq')}
-                            className="font-bold text-white hover:text-pink-300 flex items-center gap-1 transition-colors cursor-pointer group"
+                            className={`font-bold hover:text-pink-400 flex items-center gap-1 transition-colors cursor-pointer group ${
+                              isDark ? 'text-white' : 'text-slate-900'
+                            }`}
                             title={isId ? 'Klik untuk menyalin harga' : 'Click to copy price'}
                           >
                             <span>${formatPrice(cluster.price)}</span>
                             <Copy className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 text-pink-400 transition-opacity" />
                           </button>
-                          <span className="px-1.5 py-0.5 rounded-[2px] text-xs bg-slate-800 text-pink-300 border border-pink-500/30 font-semibold">
+                          <span className={`px-1.5 py-0.5 rounded-[2px] text-xs font-semibold border ${
+                            isDark ? 'bg-slate-800 text-pink-300 border-pink-500/30' : 'bg-pink-100 text-pink-800 border-pink-200'
+                          }`}>
                             {cluster.leverageTier}
                           </span>
                           {cluster.isMajorMagnet && (
-                            <span className="px-1.5 py-0.5 rounded-[2px] text-xs bg-pink-500/30 text-pink-200 border border-pink-500/50 font-semibold">
+                            <span className={`px-1.5 py-0.5 rounded-[2px] text-xs font-semibold border ${
+                              isDark ? 'bg-pink-500/30 text-pink-200 border-pink-500/50' : 'bg-pink-200 text-pink-900 border-pink-400'
+                            }`}>
                               ★ Magnet
                             </span>
                           )}
@@ -669,7 +726,9 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
                       </div>
 
                       {/* Heat Intensity Bar */}
-                      <div className="w-full h-1.5 rounded-[2px] bg-slate-800 mt-2 overflow-hidden">
+                      <div className={`w-full h-1.5 rounded-[2px] mt-2 overflow-hidden ${
+                        isDark ? 'bg-slate-800' : 'bg-slate-200'
+                      }`}>
                         <div
                           className="h-full bg-pink-500"
                           style={{ width: `${cluster.intensity}%` }}
@@ -686,37 +745,43 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
 
       {/* Main Content: Tactical Playbook Tab */}
       {activeTab === 'playbook' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          <div className="p-4 rounded-[2px] bg-slate-900/60 border border-slate-800 space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+          <div className={`p-4 rounded-[2px] border space-y-2 ${
+            isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'
+          }`}>
             <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
               <TrendingUp className="w-4 h-4" />
               <h4>{isId ? '1. Strategi Squeeze Run' : '1. Squeeze Front-Run'}</h4>
             </div>
-            <p className="text-slate-300 leading-relaxed text-xs">
+            <p className={`leading-relaxed text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
               {isId
                 ? 'Ketika terjadi ketidakseimbangan likuidasi Short (>60%), algoritma market maker cenderung mendorong harga ke klaster utama untuk memicu cascading stop-loss. Tempatkan Take-Profit tepat di batas bawah klaster sebelum terjadi pembalikan (reversal).'
                 : 'When short liquidation imbalance exceeds 60%, algorithmic market makers push price into major overhead clusters to trigger cascading buy stops. Place Take-Profit orders right inside the cluster before exhaustion.'}
             </p>
           </div>
 
-          <div className="p-4 rounded-[2px] bg-slate-900/60 border border-slate-800 space-y-2">
+          <div className={`p-4 rounded-[2px] border space-y-2 ${
+            isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'
+          }`}>
             <div className="flex items-center gap-2 text-rose-400 font-bold text-sm">
               <ShieldAlert className="w-4 h-4" />
               <h4>{isId ? '2. Proteksi Stop-Loss' : '2. SL Invalidation Buffer'}</h4>
             </div>
-            <p className="text-slate-300 leading-relaxed text-xs">
+            <p className={`leading-relaxed text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
               {isId
                 ? 'JANGAN meletakkan Stop Loss di dalam klaster padat (misal zona 50x-100x). Area ini adalah target utama sapuan likuiditas (wick sweep). Letakkan SL di luar area likuidasi terluar dengan penyangga ATR minimal 1.5x.'
                 : 'NEVER place your Stop Loss directly inside a dense liquidation cluster (50x-100x zones). These are prime liquidity raid targets. Buffer your SL beyond the outer boundary of the cluster with at least 1.5x ATR.'}
             </p>
           </div>
 
-          <div className="p-4 rounded-[2px] bg-slate-900/60 border border-slate-800 space-y-2">
+          <div className={`p-4 rounded-[2px] border space-y-2 ${
+            isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'
+          }`}>
             <div className="flex items-center gap-2 text-pink-400 font-bold text-sm">
               <Compass className="w-4 h-4" />
               <h4>{isId ? '3. Reversal Absorption' : '3. Reversal Absorption'}</h4>
             </div>
-            <p className="text-slate-300 leading-relaxed text-xs">
+            <p className={`leading-relaxed text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
               {isId
                 ? 'Setelah klaster likuidasi besar tersapu (ditandai dengan lonjakan volume tinggi dan ekor candle panjang), perhatikan Order Flow CVD. Jika delta mulai berbalik, itu sinyal masuk pembalikan arah dengan probabilitas tinggi.'
                 : 'After a major cluster is swept (marked by sudden high volume wicks and delta absorption), observe Order Flow CVD. A delta reversal indicates smart money absorption, offering high RRR mean-reversion entries.'}
@@ -726,7 +791,9 @@ export const LiquidationHeatmapCard: React.FC<LiquidationHeatmapCardProps> = ({
       )}
 
       {/* Footer Note */}
-      <div className="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-xs font-mono text-slate-400">
+      <div className={`mt-4 pt-3 border-t flex flex-wrap items-center justify-between text-xs font-mono text-slate-400 ${
+        isDark ? 'border-slate-800/80' : 'border-slate-200'
+      }`}>
         <span>
           {isId
             ? 'Kalkulasi hibrida: Menggabungkan level visual pada chart candlestick dan metrik kedalaman derivatif'

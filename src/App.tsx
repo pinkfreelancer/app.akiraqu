@@ -238,7 +238,7 @@ function TerminalApp() {
 
   return (
     <div className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${
-      isDark ? 'bg-[#06090e] text-slate-100' : 'bg-slate-50 text-slate-900'
+      isDark ? 'bg-[#070b14] text-slate-100' : 'bg-[#f8fafc] text-slate-900'
     }`}>
       {/* Header */}
       <Header

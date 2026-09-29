@@ -172,7 +172,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     isDark ? 'text-slate-200' : 'text-slate-800'
                   }`}
                 >
-                  {isId ? 'Navigasi Terminal AKIRAQU' : 'AKIRAQU Terminal Nav'}
+                  {isId ? 'Menu' : 'Menu'}
                 </span>
                 <span className="text-[10px] font-mono text-slate-400">30 {isId ? 'Modul Kuantitatif' : 'Quant Modules'}</span>
               </div>

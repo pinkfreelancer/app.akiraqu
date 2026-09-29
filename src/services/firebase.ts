@@ -8,7 +8,7 @@ import {
   onAuthStateChanged, 
   User as FirebaseUser 
 } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, getDocFromServer, collection, serverTimestamp } from 'firebase/firestore';
 import firebaseConfigJson from '../../firebase-applet-config.json';
 
 let appInstance: any = null;
@@ -103,3 +103,18 @@ export async function signInWithGoogle(): Promise<UserProfile> {
 export async function logoutUser(): Promise<void> {
   await firebaseSignOut(auth);
 }
+
+/**
+ * Validate connection to Firestore on boot
+ */
+async function testConnection() {
+  if (!db) return;
+  try {
+    await getDocFromServer(doc(db, 'test', 'connection'));
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('the client is offline')) {
+      console.warn('Firebase connection check notice:', error.message);
+    }
+  }
+}
+testConnection();

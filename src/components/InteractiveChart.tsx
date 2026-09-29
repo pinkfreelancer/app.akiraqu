@@ -47,6 +47,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
   theme = 'dark',
 }) => {
   const t = getTranslation(lang);
+  const isDark = theme === 'dark';
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 750, height: 440 });
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
@@ -187,8 +188,10 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
     .join(' ');
 
   return (
-    <div className={`flex flex-col bg-[#0f172a] rounded-xl border border-[#1e293b] p-3 sm:p-4 shadow-md transition-all duration-200 ${
-      isChartFullscreen ? 'fixed inset-0 z-50 rounded-none border-none p-4 sm:p-6 overflow-y-auto bg-[#090d16]' : 'relative'
+    <div className={`flex flex-col rounded-[2px] border p-3 sm:p-4 transition-all duration-200 ${
+      isDark ? 'bg-[#0f172a] border-[#1e293b] text-slate-100' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
+    } ${
+      isChartFullscreen ? 'fixed inset-0 z-50 rounded-none border-none p-4 sm:p-6 overflow-y-auto ' + (isDark ? 'bg-[#070b14]' : 'bg-[#f8fafc]') : 'relative'
     }`}>
       {/* Optional Top Exchange and Market Type Selector */}
       {onSelectExchange && onSelectMarketType && (
@@ -206,12 +209,16 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
       )}
 
       {/* Chart Top Bar & Overlays Controller */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-[#1e293b]">
+      <div className={`flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b ${
+        isDark ? 'border-slate-800/80' : 'border-slate-200'
+      }`}>
         {/* Active Candle Telemetry */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-mono">
-          <div className="flex items-center gap-1.5 font-bold text-white text-sm">
+          <div className={`flex items-center gap-1.5 font-bold text-sm ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
             <span>{symbol}</span>
-            <span className="px-1.5 py-0.5 rounded-[2px] text-[11px] bg-slate-800 text-pink-400 border border-slate-700">
+            <span className={`px-1.5 py-0.5 rounded-[2px] text-[11px] border ${
+              isDark ? 'bg-slate-800 text-pink-400 border-slate-700' : 'bg-pink-50 text-pink-700 border-pink-200'
+            }`}>
               {timeframe}
             </span>
           </div>
@@ -884,13 +891,15 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
 
       {/* Liquidation Telemetry Bar (Active when Liq Heatmap is toggled) */}
       {showLiqHeatmap && (
-        <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 rounded-lg bg-slate-900/80 border border-amber-500/20 text-[11px] font-mono my-1">
+        <div className={`flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 rounded-[2px] border text-[11px] font-mono my-1 ${
+          isDark ? 'bg-[#0b0f19] border-amber-500/30 text-slate-200' : 'bg-amber-50/80 border-amber-200 text-slate-800'
+        }`}>
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1 text-amber-400 font-semibold">
-              <Flame className="w-3.5 h-3.5 text-amber-400" />
+            <span className="flex items-center gap-1 text-amber-500 font-semibold">
+              <Flame className="w-3.5 h-3.5" />
               {lang === 'id' ? 'Imbalance Likuidasi:' : 'Liquidation Imbalance:'}
             </span>
-            <span className={liqSummary.imbalanceBias === 'SHORT_SQUEEZE_RISK' ? 'text-amber-400 font-bold' : liqSummary.imbalanceBias === 'LONG_SQUEEZE_RISK' ? 'text-cyan-400 font-bold' : 'text-slate-300'}>
+            <span className={liqSummary.imbalanceBias === 'SHORT_SQUEEZE_RISK' ? 'text-amber-500 font-bold' : liqSummary.imbalanceBias === 'LONG_SQUEEZE_RISK' ? (isDark ? 'text-pink-300 font-bold' : 'text-pink-600 font-bold') : (isDark ? 'text-slate-300' : 'text-slate-700')}>
               {liqSummary.imbalanceBias === 'SHORT_SQUEEZE_RISK'
                 ? (lang === 'id' ? `Peluang Short Squeeze (${liqSummary.squeezeProbability}%)` : `Short Squeeze Risk (${liqSummary.squeezeProbability}%)`)
                 : liqSummary.imbalanceBias === 'LONG_SQUEEZE_RISK'
@@ -900,11 +909,11 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
           </div>
 
           <div className="flex items-center gap-3 text-xs">
-            <span className="text-amber-400 flex items-center gap-1">
+            <span className="text-amber-500 flex items-center gap-1">
               <span className="w-2 h-2 rounded-xs bg-amber-500" />
               Shorts: <span className="font-bold">${liqSummary.totalShortLiqUsd}M</span> ({liqSummary.shortLiqRatio}%)
             </span>
-            <span className="text-cyan-400 flex items-center gap-1">
+            <span className={`${isDark ? 'text-cyan-400' : 'text-cyan-700'} flex items-center gap-1`}>
               <span className="w-2 h-2 rounded-xs bg-cyan-500" />
               Longs: <span className="font-bold">${liqSummary.totalLongLiqUsd}M</span> ({liqSummary.longLiqRatio}%)
             </span>
@@ -913,7 +922,9 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
       )}
 
       {/* Footer Notes */}
-      <div className="flex items-center justify-between pt-2 border-t border-[#1e293b]/60 text-xs text-slate-400 font-mono">
+      <div className={`flex items-center justify-between pt-2 border-t text-xs text-slate-400 font-mono ${
+        isDark ? 'border-slate-800/80' : 'border-slate-200'
+      }`}>
         <span className="flex items-center gap-2">
           <span>
             {lang === 'id'
