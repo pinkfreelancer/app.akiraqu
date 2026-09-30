@@ -21,6 +21,7 @@ import {
   HelpCircle,
   Info,
 } from 'lucide-react';
+import { FormField } from './ui/FormField';
 
 interface BotStrategyConfigModalProps {
   isOpen: boolean;
@@ -451,19 +452,24 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
             </div>
 
             <div>
-              <label className="text-xs text-slate-300 uppercase font-bold block mb-1">
-                Leverage ({marketType === 'SPOT' ? 'Terkunci 1x' : `${leverage}x`}):
-              </label>
-              <input
-                type="range"
-                min={1}
-                max={20}
-                step={1}
-                disabled={marketType === 'SPOT'}
-                value={marketType === 'SPOT' ? 1 : leverage}
-                onChange={(e) => setLeverage(Number(e.target.value))}
-                className="w-full accent-cyan-400 cursor-pointer disabled:opacity-30"
-              />
+              <FormField
+                label={`Leverage (${marketType === 'SPOT' ? 'Terkunci 1x' : `${leverage}x`}):`}
+              >
+                <input
+                  type="range"
+                  min={1}
+                  max={20}
+                  step={1}
+                  disabled={marketType === 'SPOT'}
+                  aria-label={`Leverage: ${marketType === 'SPOT' ? '1x Spot' : `${leverage}x`}`}
+                  aria-valuemin={1}
+                  aria-valuemax={20}
+                  aria-valuenow={marketType === 'SPOT' ? 1 : leverage}
+                  value={marketType === 'SPOT' ? 1 : leverage}
+                  onChange={(e) => setLeverage(Number(e.target.value))}
+                  className="w-full accent-cyan-400 cursor-pointer disabled:opacity-30"
+                />
+              </FormField>
               <div className="flex justify-between text-[11px] text-slate-400 mt-1">
                 <span>1x (Spot)</span>
                 <span>5x</span>
@@ -473,18 +479,18 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
             </div>
 
             <div>
-              <label className="text-xs text-slate-300 uppercase font-bold block mb-1">
-                Alokasi Modal (USD):
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-2 text-slate-400 text-xs font-bold">$</span>
-                <input
-                  type="number"
-                  value={allocatedCapitalUsd}
-                  onChange={(e) => setAllocatedCapitalUsd(Number(e.target.value))}
-                  className="w-full pl-7 pr-3 py-2 rounded-lg bg-[#0b101f] border border-slate-700 text-white font-bold text-xs focus:outline-none focus:border-cyan-500 tabular-nums"
-                />
-              </div>
+              <FormField label="Alokasi Modal (USD):">
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-slate-400 text-xs font-bold" aria-hidden="true">$</span>
+                  <input
+                    type="number"
+                    aria-label="Alokasi Modal dalam USD"
+                    value={allocatedCapitalUsd}
+                    onChange={(e) => setAllocatedCapitalUsd(Number(e.target.value))}
+                    className="w-full pl-7 pr-3 py-2 rounded-lg bg-[#0b101f] border border-slate-700 text-white font-bold text-xs focus:outline-none focus:border-cyan-500 tabular-nums"
+                  />
+                </div>
+              </FormField>
             </div>
           </div>
 
@@ -506,40 +512,34 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Batas Bawah Harga ($):
-                  </label>
+                <FormField
+                  label="Batas Bawah Harga ($):"
+                  hint={`-${(((currentPrice - lowerPrice) / currentPrice) * 100).toFixed(1)}% dari harga saat ini`}
+                >
                   <input
                     type="number"
                     value={lowerPrice}
                     onChange={(e) => setLowerPrice(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-emerald-400 font-bold text-xs tabular-nums"
                   />
-                  <span className="text-[11px] text-slate-400 block mt-1">
-                    -{(((currentPrice - lowerPrice) / currentPrice) * 100).toFixed(1)}% dari harga saat ini
-                  </span>
-                </div>
+                </FormField>
 
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Batas Atas Harga ($):
-                  </label>
+                <FormField
+                  label="Batas Atas Harga ($):"
+                  hint={`+${(((upperPrice - currentPrice) / currentPrice) * 100).toFixed(1)}% dari harga saat ini`}
+                >
                   <input
                     type="number"
                     value={upperPrice}
                     onChange={(e) => setUpperPrice(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-rose-400 font-bold text-xs tabular-nums"
                   />
-                  <span className="text-[11px] text-slate-400 block mt-1">
-                    +{(((upperPrice - currentPrice) / currentPrice) * 100).toFixed(1)}% dari harga saat ini
-                  </span>
-                </div>
+                </FormField>
 
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Jumlah Jaring (Grid Quantity):
-                  </label>
+                <FormField
+                  label="Jumlah Jaring (Grid Quantity):"
+                  hint={`Modal/Grid: $${Math.round(allocatedCapitalUsd / gridQuantity)}`}
+                >
                   <input
                     type="number"
                     min={2}
@@ -548,10 +548,7 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
                     onChange={(e) => setGridQuantity(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-cyan-300 font-bold text-xs tabular-nums"
                   />
-                  <span className="text-[11px] text-slate-400 block mt-1">
-                    Modal/Grid: ${Math.round(allocatedCapitalUsd / gridQuantity)}
-                  </span>
-                </div>
+                </FormField>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-2 border-t border-slate-700">
@@ -630,23 +627,19 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Level Base Pivot ($):
-                  </label>
+                <FormField label="Level Base Pivot ($):" hint="Support Terkonfirmasi">
                   <input
                     type="number"
                     value={qflBasePrice}
                     onChange={(e) => setQflBasePrice(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-amber-300 font-bold text-xs tabular-nums"
                   />
-                  <span className="text-[11px] text-slate-400 block mt-1">Support Terkonfirmasi</span>
-                </div>
+                </FormField>
 
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Crack Threshold (%):
-                  </label>
+                <FormField
+                  label="Crack Threshold (%):"
+                  hint={`Trigger: $${formatCryptoPrice(qflBasePrice * (1 - qflCrackPct / 100))}`}
+                >
                   <input
                     type="number"
                     step={0.1}
@@ -654,15 +647,12 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
                     onChange={(e) => setQflCrackPct(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-rose-400 font-bold text-xs tabular-nums"
                   />
-                  <span className="text-[11px] text-slate-400 block mt-1">
-                    Trigger: ${formatCryptoPrice(qflBasePrice * (1 - qflCrackPct / 100))}
-                  </span>
-                </div>
+                </FormField>
 
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Rebound Take Profit (%):
-                  </label>
+                <FormField
+                  label="Rebound Take Profit (%):"
+                  hint={`Target Reversal +${qflReboundTargetPct}%`}
+                >
                   <input
                     type="number"
                     step={0.1}
@@ -670,15 +660,9 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
                     onChange={(e) => setQflReboundTargetPct(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-emerald-400 font-bold text-xs tabular-nums"
                   />
-                  <span className="text-[11px] text-slate-400 block mt-1">
-                    Target Reversal +{qflReboundTargetPct}%
-                  </span>
-                </div>
+                </FormField>
 
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Volume Spike Ratio:
-                  </label>
+                <FormField label="Volume Spike Ratio:" hint={`Min ${qflVolumeSpike}x Vol MA`}>
                   <input
                     type="number"
                     step={0.1}
@@ -686,8 +670,7 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
                     onChange={(e) => setQflVolumeSpike(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-white font-bold text-xs tabular-nums"
                   />
-                  <span className="text-[11px] text-slate-400 block mt-1">Min {qflVolumeSpike}x Vol MA</span>
-                </div>
+                </FormField>
               </div>
             </div>
           )}
@@ -708,36 +691,25 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Base Order (BO $):
-                  </label>
+                <FormField label="Base Order (BO $):" hint="Order Pertama">
                   <input
                     type="number"
                     value={dcaBaseOrderUsd}
                     onChange={(e) => setDcaBaseOrderUsd(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-white font-bold text-xs tabular-nums"
                   />
-                  <span className="text-[11px] text-slate-400 block mt-1">Order Pertama</span>
-                </div>
+                </FormField>
 
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Safety Order (SO#1 $):
-                  </label>
+                <FormField label="Safety Order (SO#1 $):" hint="Order Safety 1">
                   <input
                     type="number"
                     value={dcaSafetyOrderUsd}
                     onChange={(e) => setDcaSafetyOrderUsd(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-white font-bold text-xs tabular-nums"
                   />
-                  <span className="text-[11px] text-slate-400 block mt-1">Order Safety 1</span>
-                </div>
+                </FormField>
 
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Deviasi Harga SO#1 (%):
-                  </label>
+                <FormField label="Deviasi Harga SO#1 (%):" hint="Jarak Drop 1">
                   <input
                     type="number"
                     step={0.1}
@@ -745,13 +717,9 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
                     onChange={(e) => setDcaPriceDeviationPct(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-cyan-300 font-bold text-xs tabular-nums"
                   />
-                  <span className="text-[11px] text-slate-400 block mt-1">Jarak Drop 1</span>
-                </div>
+                </FormField>
 
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Maks Safety Orders:
-                  </label>
+                <FormField label="Maks Safety Orders:" hint={`Maks ${dcaMaxSafetyOrders} Lapisan`}>
                   <input
                     type="number"
                     min={1}
@@ -760,8 +728,7 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
                     onChange={(e) => setDcaMaxSafetyOrders(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-white font-bold text-xs tabular-nums"
                   />
-                  <span className="text-[11px] text-slate-400 block mt-1">Maks {dcaMaxSafetyOrders} Lapisan</span>
-                </div>
+                </FormField>
               </div>
 
               {/* DCA Schedule Table Preview */}
@@ -804,10 +771,7 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Dip Velocity Drop (%):
-                  </label>
+                <FormField label="Dip Velocity Drop (%):" hint="Minimal drop kilat">
                   <input
                     type="number"
                     step={0.1}
@@ -815,13 +779,9 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
                     onChange={(e) => setBtdDipTriggerPct(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-rose-400 font-bold text-xs tabular-nums"
                   />
-                  <span className="text-[11px] text-slate-400 block mt-1">Minimal drop kilat</span>
-                </div>
+                </FormField>
 
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Jendela Waktu Drop:
-                  </label>
+                <FormField label="Jendela Waktu Drop:">
                   <select
                     value={btdDipTimeframe}
                     onChange={(e) => setBtdDipTimeframe(Number(e.target.value))}
@@ -831,25 +791,18 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
                     <option value={15}>15 Menit (Standar)</option>
                     <option value={60}>1 Jam (Macro Dump)</option>
                   </select>
-                </div>
+                </FormField>
 
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Filter RSI Max:
-                  </label>
+                <FormField label="Filter RSI Max:" hint={`RSI < ${btdRsiMax}`}>
                   <input
                     type="number"
                     value={btdRsiMax}
                     onChange={(e) => setBtdRsiMax(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-cyan-300 font-bold text-xs tabular-nums"
                   />
-                  <span className="text-[11px] text-slate-400 block mt-1">RSI &lt; {btdRsiMax}</span>
-                </div>
+                </FormField>
 
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Rebound TP (%):
-                  </label>
+                <FormField label="Rebound TP (%):" hint="Target Rebound">
                   <input
                     type="number"
                     step={0.1}
@@ -857,8 +810,7 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
                     onChange={(e) => setBtdTakeProfitPct(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-emerald-400 font-bold text-xs tabular-nums"
                   />
-                  <span className="text-[11px] text-slate-400 block mt-1">Target Rebound</span>
-                </div>
+                </FormField>
               </div>
             </div>
           )}
@@ -879,10 +831,7 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Arah Siklus:
-                  </label>
+                <FormField label="Arah Siklus:">
                   <select
                     value={loopDirection}
                     onChange={(e) => setLoopDirection(e.target.value as any)}
@@ -893,12 +842,9 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
                     <option value="SHORT_ONLY">Short Only</option>
                     <option value="REVERSE_ON_CLOSE">Flip Direction</option>
                   </select>
-                </div>
+                </FormField>
 
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Target Profit/Siklus (%):
-                  </label>
+                <FormField label="Target Profit/Siklus (%):">
                   <input
                     type="number"
                     step={0.05}
@@ -906,12 +852,9 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
                     onChange={(e) => setLoopProfitPerCyclePct(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-emerald-400 font-bold text-xs tabular-nums"
                   />
-                </div>
+                </FormField>
 
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Auto-Compound (%):
-                  </label>
+                <FormField label="Auto-Compound (%):">
                   <input
                     type="number"
                     min={0}
@@ -920,41 +863,35 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
                     onChange={(e) => setLoopAutoCompoundPct(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-cyan-300 font-bold text-xs tabular-nums"
                   />
-                </div>
+                </FormField>
 
-                <div>
-                  <label className="text-xs text-slate-300 font-bold block mb-1">
-                    Delay Re-Entry (Detik):
-                  </label>
+                <FormField label="Delay Re-Entry (Detik):">
                   <input
                     type="number"
                     value={loopCooldownSec}
                     onChange={(e) => setLoopCooldownSec(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#070b14] border border-slate-700 text-white font-bold text-xs tabular-nums"
                   />
-                </div>
+                </FormField>
               </div>
             </div>
           )}
 
           {/* 4. Strategy Name & Safety Stop Limits */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 p-4 rounded-xl bg-[#070b14] border border-slate-700 text-xs">
-            <div>
-              <label className="text-xs text-slate-300 uppercase font-bold block mb-1">
-                Nama Label Bot:
-              </label>
+            <FormField label="Nama Label Bot:">
               <input
                 type="text"
                 value={botName}
                 onChange={(e) => setBotName(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg bg-[#0b101f] border border-slate-700 text-white font-bold text-xs focus:outline-none focus:border-cyan-500"
               />
-            </div>
+            </FormField>
 
-            <div>
-              <label className="text-xs text-slate-300 uppercase font-bold block mb-1">
-                Emergency Daily Stop Loss (% Portofolio):
-              </label>
+            <FormField
+              label="Emergency Daily Stop Loss (% Portofolio):"
+              hint={`Auto-Halt bot jika rugi ${maxDailyLossPct}%`}
+            >
               <div className="flex items-center gap-2">
                 <input
                   type="number"
@@ -963,9 +900,9 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
                   onChange={(e) => setMaxDailyLossPct(Number(e.target.value))}
                   className="w-full px-3 py-2 rounded-lg bg-[#0b101f] border border-slate-700 text-rose-400 font-bold text-xs focus:outline-none focus:border-rose-500 tabular-nums"
                 />
-                <span className="text-xs text-slate-300 shrink-0 font-medium">Auto-Halt bot jika rugi {maxDailyLossPct}%</span>
+                <span className="text-xs text-slate-300 shrink-0 font-medium" aria-hidden="true">Halt di {maxDailyLossPct}%</span>
               </div>
-            </div>
+            </FormField>
           </div>
         </div>
 

@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect, useRef, useDeferredValue } from 'react';
-import { createPortal } from 'react-dom';
 import { Search, X, Zap, Coins, ArrowUpRight, ArrowDownRight, Sparkles, Clock, Flame, ArrowUpDown, PlusCircle } from 'lucide-react';
 import { CryptoSymbolInfo } from '../types/crypto.types';
 import { Language, getTranslation } from '../i18n/translations';
@@ -67,6 +66,36 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
 
   const inputRef = useRef<HTMLInputElement>(null);
   const listContainerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Click outside & Escape listener for dropdown
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        const triggerBtn = document.getElementById('btn-open-pair-search');
+        if (triggerBtn && triggerBtn.contains(e.target as Node)) {
+          return;
+        }
+        onClose();
+      }
+    };
+
+    const handleWindowKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('keydown', handleWindowKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleWindowKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   // Load recent pairs from localStorage
   useEffect(() => {
@@ -288,23 +317,23 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
   };
 
   const scrollHighlightedIntoView = (index: number) => {
-    if (!listContainerRef.current) return;
-    const items = listContainerRef.current.querySelectorAll('[data-coin-item]');
-    if (items[index]) {
-      items[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    const container = listContainerRef.current;
+    if (!container) return;
+    const items = container.querySelectorAll<HTMLElement>('[data-coin-item]');
+    const item = items[index];
+    if (!item) return;
+
+    const itemTop = item.offsetTop - container.offsetTop;
+    const itemBottom = itemTop + item.offsetHeight;
+    const containerTop = container.scrollTop;
+    const containerBottom = containerTop + container.clientHeight;
+
+    if (itemTop < containerTop) {
+      container.scrollTop = itemTop;
+    } else if (itemBottom > containerBottom) {
+      container.scrollTop = itemBottom - container.clientHeight;
     }
   };
-
-  // Lock body scroll while modal is open
-  useEffect(() => {
-    if (isOpen) {
-      const origOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = origOverflow;
-      };
-    }
-  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -334,66 +363,74 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
   const getCategoryColor = (cat?: string) => {
     switch (cat) {
       case 'Layer 1':
-        return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+        return 'text-blue-300 bg-blue-500/20 border-blue-500/40';
       case 'Layer 2':
-        return 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20';
+        return 'text-indigo-300 bg-indigo-500/20 border-indigo-500/40';
       case 'DeFi':
-        return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+        return 'text-emerald-300 bg-emerald-500/20 border-emerald-500/40';
       case 'AI / Data':
-        return 'text-purple-400 bg-purple-500/10 border-purple-500/20';
+        return 'text-purple-300 bg-purple-500/20 border-purple-500/40';
       case 'Meme':
-        return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+        return 'text-amber-300 bg-amber-500/20 border-amber-500/40';
       case 'RWA / Infra':
-        return 'text-sky-400 bg-sky-500/10 border-sky-500/20';
+        return 'text-sky-300 bg-sky-500/20 border-sky-500/40';
       case 'Gaming':
-        return 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+        return 'text-rose-300 bg-rose-500/20 border-rose-500/40';
       default:
-        return 'text-slate-400 bg-slate-500/10 border-slate-500/20';
+        return 'text-slate-300 bg-slate-700/30 border-slate-600/50';
     }
   };
 
-  const modalContent = (
-    <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 md:p-8 bg-black/80 backdrop-blur-md overflow-y-auto animate-in fade-in duration-150"
-      onClick={onClose}
-    >
+  return (
+    <>
+      {/* Mobile backdrop */}
       <div
-        className="relative w-full max-w-2xl my-auto bg-[#090d16] border border-cyan-500/40 rounded-2xl shadow-2xl shadow-black/95 flex flex-col max-h-[84vh] overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 z-40 bg-black/60 sm:hidden backdrop-blur-xs"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Floating Dropdown attached right beneath the button */}
+      <div
+        ref={dropdownRef}
+        role="dialog"
+        aria-modal="false"
+        id="coin-search-dropdown"
+        aria-label={lang === 'id' ? 'Katalog Pasangan Koin & Pencarian Pasar' : 'Coin Pairs Catalog & Market Search'}
+        className="absolute left-0 top-full mt-1.5 z-50 w-[95vw] sm:w-[540px] md:w-[620px] max-w-[calc(100vw-1rem)] max-h-[75vh] flex flex-col rounded-xl border border-cyan-500/40 bg-[#090d16] text-slate-100 shadow-2xl shadow-black/95 ring-1 ring-cyan-500/30 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
         onKeyDown={handleKeyDown}
       >
-        {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-[#1e293b] flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
-              <Coins className="w-5 h-5" />
+        {/* Dropdown Compact Header */}
+        <div className="shrink-0 px-4 py-2.5 bg-[#0c1322] border-b border-[#1e293b] flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="p-1 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+              <Coins className="w-4 h-4" />
             </div>
-            <div>
-              <h2 className="text-base font-bold text-white font-display flex items-center gap-2">
-                <span>{lang === 'id' ? 'Katalog Pasangan Koin & Pencarian Pasar' : 'Coin Pairs Catalog & Market Search'}</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-                  {symbols.length}+ Pairs
-                </span>
-              </h2>
-              <p className="text-xs text-slate-400">
-                {lang === 'id'
-                  ? 'Ketik simbol atau nama koin. Dukungan input bebas untuk seluruh aset kripto Binance.'
-                  : 'Type symbol or coin name. Full on-demand support for any Binance crypto asset.'}
-              </p>
-            </div>
+            <span className="text-xs font-bold font-mono tracking-wider text-white uppercase">
+              {lang === 'id' ? 'Katalog Pasangan Koin & Pasar' : 'Coin Pairs Catalog & Market'}
+            </span>
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold">
+              {symbols.length}+ Pairs
+            </span>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-            aria-label="Close modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30">
+              {filteredCoins.length} {lang === 'id' ? 'aset' : 'assets'}
+            </span>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 cursor-pointer"
+              aria-label="Tutup"
+            >
+              ESC
+            </button>
+          </div>
         </div>
 
         {/* Search Input Bar & Controls */}
-        <div className="p-4 border-b border-[#1e293b] bg-[#0b0f19] space-y-3">
+        <div className="shrink-0 p-3 bg-[#0c1322]/80 border-b border-[#1e293b] space-y-2.5">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400" />
             <input
@@ -402,7 +439,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={lang === 'id' ? 'Ketik koin apa saja: "SOL", "ENA", "PEPE", "AAVE", "ONDO", "KAS", "DEGEN"...' : 'Search any coin: "SOL", "ENA", "PEPE", "AAVE", "ONDO", "KAS", "DEGEN"...'}
-              className="w-full pl-10 pr-16 py-2.5 bg-[#0f172a] border border-[#1e293b] focus:border-cyan-500 rounded-lg text-sm font-mono text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="w-full pl-10 pr-20 py-2.5 bg-[#080d18] border border-cyan-500/30 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 rounded-lg text-sm font-sans font-medium text-white placeholder:text-slate-400 focus:outline-none transition-all shadow-inner"
             />
             {searchQuery ? (
               <button
@@ -410,12 +447,12 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                   setSearchQuery('');
                   inputRef.current?.focus();
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-300 hover:text-white px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono cursor-pointer"
               >
                 Clear
               </button>
             ) : (
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-500 px-1.5 py-0.5 rounded border border-slate-800 bg-[#090d16]">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400 px-1.5 py-0.5 rounded border border-slate-700 bg-slate-800">
                 ESC
               </span>
             )}
@@ -423,7 +460,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
 
           {/* Quick Access Popular Chips */}
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none text-xs">
-            <span className="flex items-center gap-1 text-[11px] font-mono text-amber-400 shrink-0 mr-1">
+            <span className="flex items-center gap-1 text-[11px] font-mono font-bold text-amber-400 shrink-0 mr-1">
               <Flame className="w-3.5 h-3.5" />
               <span>{lang === 'id' ? 'Tren Hot:' : 'Hot:'}</span>
             </span>
@@ -435,10 +472,10 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                   key={ticker}
                   type="button"
                   onClick={() => handleSelect(ticker)}
-                  className={`flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono transition-all cursor-pointer shrink-0 ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono font-medium transition-all cursor-pointer shrink-0 ${
                     isCurr
-                      ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-500 font-bold'
-                      : 'bg-[#0f172a] border border-[#1e293b] text-slate-300 hover:text-white hover:border-cyan-500/50'
+                      ? 'bg-cyan-500 text-slate-950 font-bold border border-cyan-400 shadow-xs'
+                      : 'bg-slate-900 border border-slate-700 text-slate-200 hover:text-white hover:border-cyan-500/60 hover:bg-slate-800'
                   }`}
                 >
                   <CryptoIcon symbol={ticker} size="xs" />
@@ -451,8 +488,8 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
           {/* Recent Pairs Chips (if any) */}
           {recentPairs.length > 0 && (
             <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none text-xs">
-              <span className="flex items-center gap-1 text-[11px] font-mono text-slate-400 shrink-0 mr-1">
-                <Clock className="w-3 h-3 text-cyan-400" />
+              <span className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-300 shrink-0 mr-1">
+                <Clock className="w-3.5 h-3.5 text-cyan-400" />
                 <span>{lang === 'id' ? 'Terakhir:' : 'Recent:'}</span>
               </span>
               {recentPairs.map((p) => (
@@ -460,7 +497,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                   key={p}
                   type="button"
                   onClick={() => handleSelect(p)}
-                  className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono bg-blue-950/30 border border-blue-800/50 text-blue-300 hover:text-white hover:border-blue-400 transition cursor-pointer shrink-0"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono bg-blue-950/40 border border-blue-700/60 text-blue-200 hover:text-white hover:border-cyan-400 transition cursor-pointer shrink-0 font-medium"
                 >
                   <CryptoIcon symbol={p} size="xs" />
                   <span>{p}</span>
@@ -470,7 +507,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
           )}
 
           {/* Category Filter Pills & Sort Dropdown/Buttons */}
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-800/80">
             <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
               {categories.map((cat) => (
                 <button
@@ -479,8 +516,8 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-2.5 py-1 rounded-md text-xs font-mono whitespace-nowrap transition-all cursor-pointer ${
                     selectedCategory === cat
-                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
-                      : 'bg-[#0f172a] border border-[#1e293b] text-slate-400 hover:text-slate-200'
+                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
+                      : 'bg-slate-900 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800'
                   }`}
                 >
                   {cat === 'ALL' ? (lang === 'id' ? 'Semua' : 'All') : cat}
@@ -490,16 +527,16 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
 
             {/* Sort Toggle Controls */}
             <div className="flex items-center gap-1 text-[11px] font-mono shrink-0">
-              <span className="text-slate-500 hidden sm:inline flex items-center gap-0.5">
+              <span className="text-slate-400 hidden sm:inline flex items-center gap-0.5">
                 <ArrowUpDown className="w-3 h-3" />
               </span>
               <button
                 type="button"
                 onClick={() => setSortOption('relevance')}
-                className={`px-2 py-0.5 rounded transition ${
+                className={`px-2.5 py-1 rounded transition cursor-pointer ${
                   sortOption === 'relevance'
-                    ? 'bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-cyan-500/25 text-cyan-300 font-bold border border-cyan-500/60 shadow-xs'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
                 }`}
               >
                 {lang === 'id' ? 'Relevan' : 'Relevance'}
@@ -507,10 +544,10 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
               <button
                 type="button"
                 onClick={() => setSortOption('volume')}
-                className={`px-2 py-0.5 rounded transition ${
+                className={`px-2.5 py-1 rounded transition cursor-pointer ${
                   sortOption === 'volume'
-                    ? 'bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-cyan-500/25 text-cyan-300 font-bold border border-cyan-500/60 shadow-xs'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
                 }`}
               >
                 Vol
@@ -518,10 +555,10 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
               <button
                 type="button"
                 onClick={() => setSortOption('gainers')}
-                className={`px-2 py-0.5 rounded transition ${
+                className={`px-2.5 py-1 rounded transition cursor-pointer ${
                   sortOption === 'gainers'
-                    ? 'bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-emerald-500/25 text-emerald-300 font-bold border border-emerald-500/60 shadow-xs'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
                 }`}
               >
                 +Gainers
@@ -531,7 +568,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
         </div>
 
         {/* Speed & Dynamic Pair Notice Banner */}
-        <div className="px-4 py-2 bg-emerald-950/20 border-b border-emerald-500/20 flex items-center justify-between text-[11px] font-mono text-emerald-300">
+        <div className="shrink-0 px-4 py-2 bg-emerald-950/30 border-b border-emerald-500/30 flex items-center justify-between text-xs font-mono text-emerald-300">
           <div className="flex items-center gap-2">
             <Sparkles className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
             <span>
@@ -540,21 +577,21 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                 : 'Fast & Flexible Search: 90+ indexed assets + Instant support for custom crypto pairs.'}
             </span>
           </div>
-          <span className="hidden sm:inline px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] uppercase font-bold">
-            Live Feed
+          <span className="hidden sm:inline px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] uppercase font-bold border border-emerald-500/30">
+            Live CCXT Feed
           </span>
         </div>
 
         {/* Coin List & Custom Candidate */}
         <div
           ref={listContainerRef}
-          className="p-3 overflow-y-auto flex-1 min-h-[160px] divide-y divide-[#1e293b]/50"
+          className="p-3 overflow-y-auto flex-1 min-h-0 divide-y divide-slate-800/60 font-mono space-y-1"
         >
           {/* Custom Dynamic Pair Prompt Card (if user typed a valid ticker not at the top) */}
           {customPairCandidate && (
-            <div className="mb-2 p-3 rounded-lg bg-gradient-to-r from-cyan-950/40 via-blue-950/30 to-slate-900 border border-cyan-500/40 flex items-center justify-between">
+            <div className="mb-2 p-3 rounded-lg bg-gradient-to-r from-cyan-950/50 via-blue-950/40 to-slate-900 border border-cyan-500/50 flex items-center justify-between shadow-xs">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-md bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                <div className="p-2 rounded-md bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
                   <PlusCircle className="w-4 h-4" />
                 </div>
                 <div>
@@ -562,11 +599,11 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                     <span className="font-mono font-bold text-white text-sm">
                       {customPairCandidate}
                     </span>
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold">
                       {lang === 'id' ? 'Aset Bebas On-Demand' : 'On-Demand Asset'}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-300 mt-0.5">
                     {lang === 'id'
                       ? 'Analisis instan pair ini langsung dari mesin CCXT bursa'
                       : 'Instantly analyze this pair directly from CCXT exchange engine'}
@@ -586,8 +623,8 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
 
           {filteredCoins.length === 0 && !customPairCandidate ? (
             <div className="py-12 text-center text-slate-400 text-sm font-mono space-y-2">
-              <div>{lang === 'id' ? 'Tidak ada pasangan kripto yang cocok dengan pencarian Anda.' : 'No crypto pairs match your search.'}</div>
-              <div className="text-xs text-slate-500">
+              <div className="text-white font-semibold">{lang === 'id' ? 'Tidak ada pasangan kripto yang cocok dengan pencarian Anda.' : 'No crypto pairs match your search.'}</div>
+              <div className="text-xs text-slate-400">
                 {lang === 'id' ? 'Coba cari simbol lain seperti "SUI", "ENA", "ONDO", "AAVE", "TAO", dll.' : 'Try searching "SUI", "ENA", "ONDO", "AAVE", "TAO", etc.'}
               </div>
             </div>
@@ -605,51 +642,51 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                   onClick={() => handleSelect(coin.symbol)}
                   className={`w-full p-3 rounded-lg flex items-center justify-between text-left transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-cyan-500/15 border border-cyan-500/50 shadow-xs'
+                      ? 'bg-cyan-500/20 border border-cyan-400/60 shadow-sm text-white'
                       : isHighlighted
-                      ? 'bg-slate-800/80 border border-slate-700'
-                      : 'hover:bg-[#0f172a] hover:border-slate-800 border border-transparent'
+                      ? 'bg-slate-800/90 border border-slate-600 shadow-xs text-white'
+                      : 'bg-[#080d18]/60 border border-slate-800/80 text-slate-200 hover:bg-slate-800/60 hover:border-slate-700 hover:text-white'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <CryptoIcon symbol={coin.symbol} size="lg" className="rounded-lg shadow-xs shrink-0" />
-                    <div>
-                      <div className="flex items-center gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-mono font-bold text-white text-sm">
                           {renderHighlightedText(coin.symbol, searchQuery)}
                         </span>
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono border ${getCategoryColor(coin.category)}`}>
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono border font-semibold ${getCategoryColor(coin.category)}`}>
                           {coin.category}
                         </span>
                         {isSelected && (
-                          <span className="text-[10px] font-mono text-cyan-400 font-bold bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-500/40">
+                          <span className="text-[10px] font-mono text-cyan-300 font-bold bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-400/50 shadow-xs">
                             ✓ Aktif
                           </span>
                         )}
                         {isHighlighted && !isSelected && (
-                          <span className="text-[10px] font-mono text-slate-400 hidden sm:inline">
+                          <span className="text-[10px] font-mono text-cyan-400 font-semibold hidden sm:inline">
                             [Enter ↵]
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-slate-300 block truncate mt-0.5 font-sans">
                         {renderHighlightedText(coin.name, searchQuery)}
                       </span>
                     </div>
                   </div>
 
-                  <div className="text-right font-mono">
+                  <div className="text-right font-mono shrink-0 ml-3">
                     <div className="font-bold text-white text-sm">
                       ${formatPrice(coin.basePrice)}
                     </div>
                     <div
-                      className={`text-xs flex items-center justify-end gap-0.5 ${
+                      className={`text-xs font-bold flex items-center justify-end gap-0.5 ${
                         isPositive ? 'text-emerald-400' : 'text-rose-400'
                       }`}
                     >
-                      {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                      {isPositive ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
                       <span>{isPositive ? '+' : ''}{coin.change24h}%</span>
-                      <span className="text-slate-500 text-[10px] ml-1.5 hidden sm:inline">
+                      <span className="text-slate-400 text-[10px] ml-1.5 hidden sm:inline font-normal">
                         Vol: {coin.volume24h}
                       </span>
                     </div>
@@ -660,22 +697,25 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
           )}
         </div>
 
-        {/* Footer info */}
-        <div className="p-3 bg-[#0b0f19] border-t border-[#1e293b] flex items-center justify-between text-xs font-mono text-slate-400">
-          <div className="flex items-center gap-2">
-            <Zap className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden sm:inline">Navigasi: [↑/↓] jelajah, [Enter] pilih, [ESC] tutup</span>
-            <span className="sm:hidden">CCXT Live Catalog</span>
+        {/* Dropdown Footer */}
+        <div className="shrink-0 px-3.5 py-2 border-t border-[#1e293b] bg-[#0c1322] flex items-center justify-between text-xs font-mono text-slate-400">
+          <div className="flex items-center gap-3">
+            <span>
+              <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 text-slate-300 rounded mr-1">↑↓</kbd> Jelajah
+            </span>
+            <span>
+              <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 text-slate-300 rounded mr-1">↵</kbd> Pilih
+            </span>
+            <span>
+              <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 text-slate-300 rounded mr-1">ESC</kbd> Tutup
+            </span>
           </div>
-          <span className="text-[11px] text-slate-400 font-semibold">
-            {filteredCoins.length} / {symbols.length} Pilihan Aset
+          <span className="text-cyan-400 font-bold hidden sm:inline">
+            CCXT Live Feed
           </span>
         </div>
       </div>
-    </div>
+    </>
   );
-
-  if (typeof document === 'undefined') return null;
-  return createPortal(modalContent, document.body);
 };
 

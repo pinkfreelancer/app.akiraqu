@@ -43,7 +43,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       onNavigateToTerminal();
     } catch (err: any) {
       console.error('Google login error:', err);
-      if (err?.code === 'auth/popup-blocked' || err?.message?.includes('popup')) {
+      if (err?.code === 'auth/unauthorized-domain' || err?.message?.includes('unauthorized domain') || err?.message?.includes('unauthorized-domain')) {
+        const currentDomain = typeof window !== 'undefined' ? window.location.hostname : 'domain-anda.vercel.app';
+        setError(
+          lang === 'id'
+            ? `Domain "${currentDomain}" belum terdaftar di Authorized Domains Firebase Authentication. Solusi: Buka Firebase Console > Authentication > Settings > Authorized domains > Add domain, lalu tambahkan "${currentDomain}".`
+            : `Domain "${currentDomain}" is not authorized in Firebase Authentication. Solution: Go to Firebase Console > Authentication > Settings > Authorized domains > Add domain, and add "${currentDomain}".`
+        );
+      } else if (err?.code === 'auth/popup-blocked' || err?.message?.includes('popup')) {
         setError(
           lang === 'id'
             ? 'Jendela popup Google diblokir oleh peramban. Harap izinkan popup di peramban Anda untuk menyelesaikan login Gmail.'

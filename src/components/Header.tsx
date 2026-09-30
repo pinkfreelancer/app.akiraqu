@@ -752,44 +752,58 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Left Side: Coin Selector, Timeframe, & Run Analysis */}
         <div className="flex flex-wrap items-center gap-2">          
 
-          {/* Unified Clean Asset Selector Button (Widened) */}
-          <button
-            id="btn-open-pair-search"
-            type="button"
-            onClick={() => setIsSearchOpen(true)}
-            className={`flex items-center justify-between gap-2 px-3.5 py-1.5 border rounded-[2px] text-xs font-mono transition-all cursor-pointer shadow-xs group min-h-[38px] w-56 sm:w-64 md:w-72 lg:w-80 ${
-              isDark
-                ? 'bg-[#0f172a] border-[#1e293b] text-slate-200 hover:border-pink-500/50 hover:bg-slate-800/80'
-                : 'bg-white border-slate-200 text-slate-800 hover:border-pink-400 hover:bg-slate-50'
-            }`}
-            title={`${t.header.searchModalTitle} (Shortcut: Ctrl+K atau /)`}
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <CryptoIcon symbol={selectedSymbol} size="sm" className="rounded-full shadow-xs shrink-0" />
-              <span className={`font-bold text-xs sm:text-sm truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                {selectedSymbol}
-              </span>
-              <span className={`text-xs font-semibold shrink-0 ${isDark ? 'text-pink-300' : 'text-pink-700'}`}>
-                ${formatPrice(displayPrice)}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1.5 shrink-0">
-              {currentCoin && (
-                <span
-                  className={`text-[11px] font-bold px-1.5 py-0.5 rounded-[2px] ${
-                    currentCoin.change24h >= 0
-                      ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
-                  }`}
-                >
-                  {currentCoin.change24h >= 0 ? '+' : ''}
-                  {currentCoin.change24h}%
+          {/* Unified Clean Asset Selector Dropdown Anchor */}
+          <div className="relative">
+            <button
+              id="btn-open-pair-search"
+              type="button"
+              onClick={() => setIsSearchOpen((prev) => !prev)}
+              aria-haspopup="listbox"
+              aria-expanded={isSearchOpen}
+              className={`flex items-center justify-between gap-2 px-3.5 py-1.5 border rounded-[2px] text-xs font-mono transition-all cursor-pointer shadow-xs group min-h-[38px] w-56 sm:w-64 md:w-72 lg:w-80 ${
+                isDark
+                  ? 'bg-[#0f172a] border-[#1e293b] text-slate-200 hover:border-cyan-500/50 hover:bg-slate-800/80'
+                  : 'bg-white border-slate-200 text-slate-800 hover:border-cyan-400 hover:bg-slate-50'
+              } ${isSearchOpen ? (isDark ? 'border-cyan-500 ring-1 ring-cyan-500/50' : 'border-cyan-500 ring-1 ring-cyan-500/40') : ''}`}
+              title={`${t.header.searchModalTitle} (Shortcut: /)`}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <CryptoIcon symbol={selectedSymbol} size="sm" className="rounded-full shadow-xs shrink-0" />
+                <span className={`font-bold text-xs sm:text-sm truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  {selectedSymbol}
                 </span>
-              )}
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-pink-400" />
-            </div>
-          </button>
+                <span className={`text-xs font-semibold shrink-0 ${isDark ? 'text-cyan-300' : 'text-cyan-700'}`}>
+                  ${formatPrice(displayPrice)}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1.5 shrink-0">
+                {currentCoin && (
+                  <span
+                    className={`text-[11px] font-bold px-1.5 py-0.5 rounded-[2px] ${
+                      currentCoin.change24h >= 0
+                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                        : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                    }`}
+                  >
+                    {currentCoin.change24h >= 0 ? '+' : ''}
+                    {currentCoin.change24h}%
+                  </span>
+                )}
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-400 transition-transform duration-200 ${isSearchOpen ? 'rotate-180 text-cyan-400' : ''}`} />
+              </div>
+            </button>
+
+            {/* Quick Search Dropdown Menu */}
+            <SearchCoinModal
+              isOpen={isSearchOpen}
+              onClose={() => setIsSearchOpen(false)}
+              symbols={symbols}
+              selectedSymbol={selectedSymbol}
+              onSelectSymbol={onSelectSymbol}
+              lang={lang}
+            />
+          </div>
 
           {/* Segmented Timeframe Buttons */}
           <div
@@ -1088,16 +1102,6 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       )}
-
-      {/* Quick Search Modal */}
-      <SearchCoinModal
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-        symbols={symbols}
-        selectedSymbol={selectedSymbol}
-        onSelectSymbol={onSelectSymbol}
-        lang={lang}
-      />
     </header>
   );
 };

@@ -19,6 +19,9 @@ export interface ModalWrapperProps {
   ariaLabel?: string;
   initialFocusRef?: RefObject<HTMLElement | null>;
   closeOnBackdrop?: boolean;
+  alignTop?: boolean;
+  hideCloseButton?: boolean;
+  noPadding?: boolean;
 }
 
 export const ModalWrapper: React.FC<ModalWrapperProps> = ({
@@ -38,6 +41,9 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({
   ariaLabel,
   initialFocusRef,
   closeOnBackdrop = true,
+  alignTop = false,
+  hideCloseButton = false,
+  noPadding = false,
 }) => {
   const baseId = useId();
   const titleId = `${baseId}-title`;
@@ -89,25 +95,27 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({
         }
         mouseDownOnBackdropRef.current = false;
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150"
+      className={`fixed inset-0 z-50 flex ${alignTop ? 'items-start pt-16 sm:pt-24' : 'items-center'} justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150`}
     >
       <div
         ref={containerRef}
-        className={`relative w-full ${maxWidth} rounded-[var(--radius-cards,2px)] border p-5 sm:p-6 shadow-2xl overflow-y-auto max-h-[90vh] transition-colors duration-200 bg-[var(--card-color)] border-[var(--border-color)] text-[var(--text-main)] ${className}`}
+        className={`relative w-full ${maxWidth} rounded-[var(--radius-cards,2px)] border shadow-2xl flex flex-col max-h-[88vh] overflow-hidden transition-colors duration-200 bg-[var(--card-color)] border-[var(--border-color)] text-[var(--text-main)] ${className}`}
       >
         {/* Accessible Close Button */}
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Tutup / Close"
-          className="absolute right-3 top-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[var(--radius-buttons,2px)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--accent-subtle)] transition-colors cursor-pointer"
-        >
-          <X className="w-5 h-5" aria-hidden="true" />
-        </button>
+        {!hideCloseButton && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Tutup / Close"
+            className="absolute right-3 top-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[var(--radius-buttons,2px)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--accent-subtle)] transition-colors cursor-pointer z-10"
+          >
+            <X className="w-5 h-5" aria-hidden="true" />
+          </button>
+        )}
 
-        {/* Optional Header */}
+        {/* Optional Header (Pinned, never scrolls away) */}
         {(title || Icon) && (
-          <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[var(--border-color)]">
+          <div className={`shrink-0 flex items-center gap-3 border-b border-[var(--border-color)] ${noPadding ? 'p-4 sm:p-5 pb-3.5' : 'p-5 sm:p-6 pb-3.5'}`}>
             {Icon && (
               <div
                 className={`flex items-center justify-center w-10 h-10 rounded-[var(--radius-buttons,2px)] border shrink-0 ${
@@ -117,16 +125,16 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({
                 <Icon className={`w-5 h-5 ${iconClassName}`} />
               </div>
             )}
-            <div className="flex-1 pr-8">
+            <div className="flex-1 pr-10 min-w-0">
               {isTitleString ? (
-                <h2 id={titleId} className="text-base sm:text-lg font-bold font-display text-[var(--text-main)]">
+                <h2 id={titleId} className="text-base sm:text-lg font-bold font-display text-[var(--text-main)] truncate">
                   {title}
                 </h2>
               ) : (
                 title
               )}
               {subtitle && (
-                <p id={descId} className="text-xs mt-0.5 text-[var(--text-muted)]">
+                <p id={descId} className="text-xs mt-0.5 text-[var(--text-muted)] truncate">
                   {subtitle}
                 </p>
               )}
@@ -134,12 +142,14 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({
           </div>
         )}
 
-        {/* Modal Body */}
-        <div>{children}</div>
+        {/* Modal Body (Scrollable interior or flex column when noPadding) */}
+        <div className={`flex-1 min-h-0 ${noPadding ? 'flex flex-col overflow-hidden' : 'overflow-y-auto p-5 sm:p-6'}`}>
+          {children}
+        </div>
 
-        {/* Optional Footer */}
+        {/* Optional Footer (Pinned, never scrolls away) */}
         {footer && (
-          <div className="mt-4 pt-3 border-t border-[var(--border-color)] text-[11px] font-mono flex items-center justify-between text-[var(--text-muted)]">
+          <div className={`shrink-0 border-t border-[var(--border-color)] text-[11px] font-mono flex items-center justify-between text-[var(--text-muted)] ${noPadding ? 'p-3 sm:px-5 sm:py-3' : 'px-5 sm:px-6 py-3.5'}`}>
             {footer}
           </div>
         )}

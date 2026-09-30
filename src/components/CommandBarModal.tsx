@@ -29,6 +29,7 @@ import {
 import { CryptoSymbolInfo, Timeframe, SupportedExchange, MarketType, StageId } from '../types/crypto.types';
 import { Language } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
+import { ModalWrapper } from './ui/ModalWrapper';
 
 interface CommandItem {
   id: string;
@@ -88,6 +89,7 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
 }) => {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState<'ALL' | 'stage' | 'symbol' | 'timeframe' | 'exchange' | 'action'>('ALL');
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -98,6 +100,7 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
     if (isOpen) {
       setQuery('');
       setSelectedIndex(0);
+      setSelectedCategory('ALL');
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isOpen]);
@@ -335,15 +338,23 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
     onClose,
   ]);
 
-  // Filter commands by search query
+  // Filter commands by search query and category
   const filteredCommands = useMemo(() => {
+    let pool = allCommands;
+    if (selectedCategory !== 'ALL') {
+      if (selectedCategory === 'action') {
+        pool = pool.filter((c) => c.type === 'action' || c.type === 'workspace');
+      } else {
+        pool = pool.filter((c) => c.type === selectedCategory);
+      }
+    }
+
     if (!query.trim()) {
-      // Default: show top recommended actions, workspaces, timeframes, and top 8 symbols
-      return allCommands.slice(0, 18);
+      return pool.slice(0, 28);
     }
 
     const q = query.toLowerCase().trim();
-    return allCommands
+    return pool
       .filter((cmd) => {
         return (
           cmd.title.toLowerCase().includes(q) ||
@@ -352,13 +363,13 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
           (cmd.badge && cmd.badge.toLowerCase().includes(q))
         );
       })
-      .slice(0, 24);
-  }, [allCommands, query]);
+      .slice(0, 30);
+  }, [allCommands, query, selectedCategory]);
 
-  // Reset selected index when query changes
+  // Reset selected index when query or category changes
   useEffect(() => {
     setSelectedIndex(0);
-  }, [query]);
+  }, [query, selectedCategory]);
 
   // Keyboard navigation inside omnibar
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -385,26 +396,93 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
     if (!listEl) return;
     const activeEl = listEl.querySelector(`[data-index="${selectedIndex}"]`) as HTMLElement;
     if (activeEl) {
-      activeEl.scrollIntoView({ block: 'nearest' });
+      const itemTop = activeEl.offsetTop - listEl.offsetTop;
+      const itemBottom = itemTop + activeEl.offsetHeight;
+      const containerTop = listEl.scrollTop;
+      const containerBottom = containerTop + listEl.clientHeight;
+
+      if (itemTop < containerTop) {
+        listEl.scrollTop = itemTop;
+      } else if (itemBottom > containerBottom) {
+        listEl.scrollTop = itemBottom - listEl.clientHeight;
+      }
     }
   }, [selectedIndex]);
 
   if (!isOpen) return null;
 
+  const CATEGORY_TABS = [
+    { id: 'ALL', label: lang === 'id' ? 'Semua' : 'All' },
+    { id: 'stage', label: lang === 'id' ? 'Tahap Modul' : 'Stages' },
+    { id: 'symbol', label: lang === 'id' ? 'Koin / Pasangan' : 'Coins / Pairs' },
+    { id: 'timeframe', label: 'Timeframe' },
+    { id: 'exchange', label: lang === 'id' ? 'Bursa Data' : 'Exchanges' },
+    { id: 'action', label: lang === 'id' ? 'Aksi & Layout' : 'Actions & Layout' },
+  ];
+
+  const getTypeBadge = (type: CommandItem['type']) => {
+    switch (type) {
+      case 'stage':
+        return { label: 'TAHAP', cls: 'bg-purple-500/20 text-purple-300 border-purple-500/40' };
+      case 'symbol':
+        return { label: 'KOIN', cls: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' };
+      case 'timeframe':
+        return { label: 'TIMEFRAME', cls: 'bg-amber-500/20 text-amber-300 border-amber-500/40' };
+      case 'exchange':
+        return { label: 'BURSA', cls: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' };
+      case 'workspace':
+        return { label: 'LAYOUT', cls: 'bg-blue-500/20 text-blue-300 border-blue-500/40' };
+      case 'action':
+        return { label: 'AKSI', cls: 'bg-slate-700/60 text-slate-300 border-slate-600' };
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 bg-black/75 backdrop-blur-xs">
-      <div
-        className={`w-full max-w-2xl rounded-xl border shadow-2xl overflow-hidden transition-all duration-200 animate-in fade-in zoom-in-95 ${
-          isDark ? 'bg-[#0b0f19] border-[#1e293b] text-slate-200' : 'bg-white border-slate-200 text-slate-800'
-        }`}
-      >
-        {/* Search Input Bar */}
-        <div
-          className={`flex items-center gap-3 px-4 py-3.5 border-b ${
-            isDark ? 'border-[#1e293b] bg-[#090d16]' : 'border-slate-200 bg-slate-50'
-          }`}
-        >
-          <div className="p-1 rounded-md bg-cyan-500/10 text-cyan-400 font-mono text-xs font-bold shrink-0">
+    <ModalWrapper
+      isOpen={isOpen}
+      onClose={onClose}
+      role="dialog"
+      ariaLabel={lang === 'id' ? 'Kotak Perintah & Pencarian Cepat' : 'Quick Search & Command Bar'}
+      maxWidth="max-w-2xl"
+      alignTop={false}
+      hideCloseButton={true}
+      noPadding={true}
+      initialFocusRef={inputRef}
+      className="border border-cyan-500/40 shadow-2xl shadow-black/95 ring-1 ring-cyan-500/20 bg-[#090d16] text-slate-100"
+    >
+      {/* Top Header & Search Bar (Fixed at top, High Contrast) */}
+      <div className="shrink-0 border-b border-[#1e293b] bg-[#0c1322]">
+        {/* Quick Header */}
+        <div className="px-4 pt-3.5 pb-2.5 flex items-center justify-between border-b border-slate-800/80">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-md bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-xs">
+              <Command className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold font-mono tracking-wider text-white uppercase">
+                {lang === 'id' ? 'Kotak Perintah & Navigasi Cepat' : 'Terminal Command Palette'}
+              </h3>
+              <p className="text-[10px] text-slate-400 font-mono">
+                {lang === 'id' ? 'Akses instan koin, modul, timeframe, bursa & tata letak' : 'Instant access to coins, modules, timeframes & layout'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30">
+              {filteredCommands.length} {lang === 'id' ? 'opsi' : 'options'}
+            </span>
+            <button
+              onClick={onClose}
+              className="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 cursor-pointer"
+            >
+              ESC
+            </button>
+          </div>
+        </div>
+
+        {/* Search Input Row */}
+        <div className="flex items-center gap-3 px-4 py-3 bg-[#090d16]">
+          <div className="p-1 rounded bg-cyan-500/10 text-cyan-400 font-mono text-xs font-bold shrink-0">
             &gt;_
           </div>
           <input
@@ -413,139 +491,165 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
+            role="combobox"
+            aria-expanded={filteredCommands.length > 0}
+            aria-controls="command-bar-list"
+            aria-label={
+              lang === 'id'
+                ? 'Ketik nama koin, stage, timeframe, atau tindakan'
+                : 'Search symbol, stage, timeframe, or command'
+            }
             placeholder={
               lang === 'id'
-                ? 'Ketik nama koin (BTC, ETH), stage (/risk, /scan), timeframe (15m, 1h), atau tindakan...'
-                : 'Type pair (BTC, ETH), stage (/risk, /scan), timeframe (15m, 1h), or command...'
+                ? 'Cari koin (BTC, ETH), stage (/risk, /scan), timeframe (15m, 1h), bursa...'
+                : 'Search coin (BTC, ETH), stage (/risk, /scan), timeframe (15m, 1h), exchange...'
             }
-            className={`w-full bg-transparent text-sm font-mono placeholder-slate-500 focus:outline-hidden ${
-              isDark ? 'text-white' : 'text-slate-900'
-            }`}
+            className="w-full bg-transparent text-sm font-sans font-medium text-white placeholder:text-slate-400 focus:outline-none"
           />
-          <kbd
-            className={`px-1.5 py-0.5 rounded text-[10px] font-mono border uppercase tracking-wider shrink-0 ${
-              isDark ? 'bg-slate-800 border-slate-700 text-slate-400' : 'bg-slate-200 border-slate-300 text-slate-600'
-            }`}
-          >
-            ESC
-          </kbd>
-        </div>
-
-        {/* Command Items List */}
-        <div ref={listRef} className="max-h-[60vh] overflow-y-auto p-2 divide-y divide-transparent font-mono text-xs">
-          {filteredCommands.length === 0 ? (
-            <div className="py-12 text-center text-slate-500">
-              <Search className="w-8 h-8 mx-auto mb-2 opacity-40 text-cyan-400" />
-              <p>{lang === 'id' ? 'Tidak ada perintah atau simbol yang cocok' : 'No matching command or symbol found'}</p>
-              <p className="text-[11px] text-slate-600 mt-1">
-                {lang === 'id' ? 'Coba cari "BTC", "Multi-Panel", "1H", atau "Risk"' : 'Try searching "BTC", "Multi-Panel", "1H", or "Risk"'}
-              </p>
-            </div>
-          ) : (
-            filteredCommands.map((cmd, idx) => {
-              const isSelected = idx === selectedIndex;
-              const Icon = cmd.icon;
-
-              return (
-                <div
-                  key={cmd.id}
-                  data-index={idx}
-                  onClick={() => cmd.action()}
-                  onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${
-                    isSelected
-                      ? isDark
-                        ? 'bg-cyan-500/15 text-white border border-cyan-500/30'
-                        : 'bg-cyan-50 text-cyan-900 border border-cyan-200'
-                      : isDark
-                      ? 'hover:bg-slate-800/60 text-slate-300 border border-transparent'
-                      : 'hover:bg-slate-100 text-slate-700 border border-transparent'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <div
-                      className={`p-1.5 rounded-md shrink-0 ${
-                        isSelected
-                          ? 'bg-cyan-500 text-slate-950 font-bold'
-                          : isDark
-                          ? 'bg-slate-800 text-cyan-400'
-                          : 'bg-slate-100 text-slate-600'
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div className="overflow-hidden">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-xs truncate">{cmd.title}</span>
-                        {cmd.badge && (
-                          <span
-                            className={`px-1.5 py-0.2 rounded text-[10px] font-bold shrink-0 ${
-                              cmd.badge === 'AKTIF'
-                                ? isDark
-                                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                  : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                                : cmd.badge.startsWith('+')
-                                ? isDark
-                                  ? 'bg-emerald-500/10 text-emerald-400'
-                                  : 'bg-emerald-100 text-emerald-800'
-                                : cmd.badge.startsWith('-')
-                                ? isDark
-                                  ? 'bg-rose-500/10 text-rose-400'
-                                  : 'bg-rose-100 text-rose-800'
-                                : isDark
-                                ? 'bg-slate-800 text-slate-300'
-                                : 'bg-slate-200 text-slate-800'
-                            }`}
-                          >
-                            {cmd.badge}
-                          </span>
-                        )}
-                      </div>
-                      {cmd.subtitle && (
-                        <p className={`text-[11px] truncate mt-0.5 ${
-                          isDark ? 'text-slate-400' : 'text-slate-600'
-                        }`}>{cmd.subtitle}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    {cmd.shortcut && (
-                      <kbd
-                        className={`px-1.5 py-0.5 rounded text-[10px] border ${
-                          isDark
-                            ? 'bg-slate-800 border-slate-700 text-cyan-300'
-                            : 'bg-white border-slate-300 text-slate-800'
-                        }`}
-                      >
-                        {cmd.shortcut}
-                      </kbd>
-                    )}
-                    {isSelected && <ArrowRight className={`w-3.5 h-3.5 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`} />}
-                  </div>
-                </div>
-              );
-            })
+          {query && (
+            <button
+              onClick={() => {
+                setQuery('');
+                inputRef.current?.focus();
+              }}
+              className="text-xs text-slate-300 hover:text-white px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono cursor-pointer shrink-0"
+            >
+              Clear
+            </button>
           )}
         </div>
 
-        {/* Footer Quick Keys */}
-        <div
-          className={`flex items-center justify-between px-4 py-2 border-t text-[11px] font-mono ${
-            isDark ? 'border-[#1e293b] bg-[#090d16] text-slate-500' : 'border-slate-200 bg-slate-50 text-slate-600'
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <span>
-              <kbd className="px-1 bg-slate-800 text-slate-300 rounded mr-1">↑↓</kbd> Navigasi
-            </span>
-            <span>
-              <kbd className="px-1 bg-slate-800 text-slate-300 rounded mr-1">↵</kbd> Eksekusi
-            </span>
-          </div>
-          <span className="text-cyan-400 font-semibold">{lang === 'id' ? 'Pencarian & Perintah Cepat • Meja Kerja Trading' : 'Quick Search & Commands • Trading Workspace'}</span>
+        {/* Category Filter Tabs */}
+        <div className="flex items-center gap-1.5 px-4 py-2 bg-[#080c14] border-t border-slate-800/80 overflow-x-auto scrollbar-none text-xs">
+          {CATEGORY_TABS.map((cat) => {
+            const isTabActive = selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setSelectedCategory(cat.id as any)}
+                className={`px-2.5 py-1 rounded text-xs font-mono font-medium transition-all cursor-pointer shrink-0 ${
+                  isTabActive
+                    ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/60 font-bold shadow-xs'
+                    : 'bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
         </div>
       </div>
-    </div>
+
+      {/* Command Items List */}
+      <div
+        id="command-bar-list"
+        role="listbox"
+        aria-label={lang === 'id' ? 'Daftar Perintah & Hasil Pencarian' : 'Command list & search results'}
+        ref={listRef}
+        className="flex-1 min-h-0 max-h-[55vh] overflow-y-auto p-2 divide-y divide-slate-800/50 font-mono text-xs"
+      >
+        {filteredCommands.length === 0 ? (
+          <div className="py-12 text-center text-slate-400">
+            <Search className="w-8 h-8 mx-auto mb-2 text-cyan-400/60" />
+            <p className="text-sm font-semibold text-slate-200">
+              {lang === 'id' ? 'Tidak ada perintah atau simbol yang cocok' : 'No matching command or symbol found'}
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              {lang === 'id' ? 'Coba cari "BTC", "Multi-Panel", "1H", atau "Risk"' : 'Try searching "BTC", "Multi-Panel", "1H", or "Risk"'}
+            </p>
+          </div>
+        ) : (
+          filteredCommands.map((cmd, idx) => {
+            const isSelected = idx === selectedIndex;
+            const Icon = cmd.icon;
+            const typeBadge = getTypeBadge(cmd.type);
+
+            return (
+              <div
+                key={cmd.id}
+                role="option"
+                aria-selected={isSelected}
+                data-index={idx}
+                onClick={() => cmd.action()}
+                onMouseEnter={() => setSelectedIndex(idx)}
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg cursor-pointer transition-all ${
+                  isSelected
+                    ? 'bg-cyan-500/20 text-white border border-cyan-400/50 shadow-sm'
+                    : 'text-slate-200 border border-transparent hover:bg-slate-800/80 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-3 overflow-hidden min-w-0">
+                  <div
+                    className={`p-2 rounded-md shrink-0 border ${
+                      isSelected
+                        ? 'bg-cyan-500 text-slate-950 border-cyan-400 font-bold'
+                        : 'bg-slate-800/90 text-cyan-400 border-slate-700'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="overflow-hidden min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-sm text-white truncate">{cmd.title}</span>
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border shrink-0 ${typeBadge.cls}`}>
+                        {typeBadge.label}
+                      </span>
+                      {cmd.badge && (
+                        <span
+                          className={`px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 border ${
+                            cmd.badge === 'AKTIF'
+                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                              : cmd.badge.startsWith('+')
+                              ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                              : cmd.badge.startsWith('-')
+                              ? 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+                              : 'bg-slate-800 text-slate-300 border-slate-700'
+                          }`}
+                        >
+                          {cmd.badge}
+                        </span>
+                      )}
+                    </div>
+                    {cmd.subtitle && (
+                      <p className="text-xs text-slate-400 truncate mt-0.5 font-mono">
+                        {cmd.subtitle}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0 ml-3">
+                  {cmd.shortcut && (
+                    <kbd className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-slate-800 border border-slate-700 text-cyan-300 shadow-xs">
+                      {cmd.shortcut}
+                    </kbd>
+                  )}
+                  {isSelected && <ArrowRight className="w-4 h-4 text-cyan-400" />}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Footer Quick Keys */}
+      <div className="shrink-0 flex items-center justify-between px-4 py-2.5 border-t border-[#1e293b] bg-[#0c1322] text-xs font-mono text-slate-400">
+        <div className="flex items-center gap-3">
+          <span>
+            <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 text-slate-300 rounded mr-1">↑↓</kbd> Navigasi
+          </span>
+          <span>
+            <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 text-slate-300 rounded mr-1">↵</kbd> Eksekusi
+          </span>
+          <span>
+            <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 text-slate-300 rounded mr-1">ESC</kbd> Tutup
+          </span>
+        </div>
+        <span className="text-cyan-400 font-semibold hidden sm:inline">
+          {lang === 'id' ? 'Pencarian & Perintah Cepat • AKIRA.QU' : 'Trading Workspace • AKIRA.QU'}
+        </span>
+      </div>
+    </ModalWrapper>
   );
 };
