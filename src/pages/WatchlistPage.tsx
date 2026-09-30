@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { formatCryptoPrice } from '../utils/formatters';
 import { Language } from '../i18n/translations';
+import { CryptoIcon } from '../components/ui/CryptoIcon';
 
 interface WatchlistPageProps {
   currentSymbol?: string;
@@ -494,13 +495,18 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
                     <tr key={item.id} className="hover:bg-slate-800/30 transition-colors">
                       {/* Asset & Name */}
                       <td className="py-3">
-                        <div className="font-bold text-white text-sm flex items-center gap-1.5">
-                          <span>{item.symbol}</span>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">
-                            {item.category}
-                          </span>
+                        <div className="flex items-center gap-2.5">
+                          <CryptoIcon symbol={item.symbol} size="sm" className="rounded-full shadow-xs shrink-0" />
+                          <div>
+                            <div className="font-bold text-white text-sm flex items-center gap-1.5">
+                              <span>{item.symbol}</span>
+                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">
+                                {item.category}
+                              </span>
+                            </div>
+                            <div className="text-[10px] text-slate-400">{item.name}</div>
+                          </div>
                         </div>
-                        <div className="text-[10px] text-slate-400">{item.name}</div>
                       </td>
 
                       {/* Price */}
@@ -657,9 +663,12 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
                   key={c.symbol}
                   className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between hover:border-slate-700"
                 >
-                  <div>
-                    <div className="font-bold text-white text-xs">{c.symbol}</div>
-                    <div className="text-[10px] text-slate-400">{c.name} • {c.category}</div>
+                  <div className="flex items-center gap-2.5">
+                    <CryptoIcon symbol={c.symbol} size="sm" className="rounded-full shadow-xs shrink-0" />
+                    <div>
+                      <div className="font-bold text-white text-xs">{c.symbol}</div>
+                      <div className="text-[10px] text-slate-400">{c.name} • {c.category}</div>
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="text-right">

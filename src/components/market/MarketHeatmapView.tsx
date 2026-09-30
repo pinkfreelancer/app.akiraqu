@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Flame, Filter, ArrowUpRight, ArrowDownRight, Layers, Sparkles } from 'lucide-react';
 import { formatCryptoPrice } from '../../utils/formatters';
+import { CryptoIcon } from '../ui/CryptoIcon';
 
 interface MarketHeatmapViewProps {
   onSelectCoin?: (symbol: string) => void;
@@ -115,11 +116,14 @@ export const MarketHeatmapView: React.FC<MarketHeatmapViewProps> = ({
               } ${getTileBg(tile.change24h)}`}
             >
               <div className="flex items-start justify-between">
-                <div>
-                  <div className="font-bold font-mono text-sm sm:text-base leading-tight">
-                    {tile.symbol.replace('/USDT', '')}
+                <div className="flex items-center gap-2">
+                  <CryptoIcon symbol={tile.symbol} size="sm" className="rounded-full shadow-xs shrink-0" />
+                  <div>
+                    <div className="font-bold font-mono text-sm sm:text-base leading-tight">
+                      {tile.symbol.replace('/USDT', '')}
+                    </div>
+                    <div className="text-[10px] opacity-80 truncate">{tile.name}</div>
                   </div>
-                  <div className="text-[10px] opacity-80 truncate">{tile.name}</div>
                 </div>
                 <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-black/30 backdrop-blur-xs">
                   {tile.category}

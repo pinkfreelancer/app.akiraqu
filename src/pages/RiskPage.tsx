@@ -43,7 +43,7 @@ export const RiskPage: React.FC<RiskPageProps> = React.memo(({
       />
 
       {/* Institutional Risk Discipline Reference (Non-Conflicting Educational Protocol) */}
-      <div className={`rounded-xl border p-4 sm:p-5 transition-colors duration-200 ${
+      <div className={`rounded-[2px] border p-4 sm:p-5 transition-colors duration-200 ${
         isDark ? 'bg-[#0b101d] border-[#1e293b] text-white' : 'bg-slate-50 border-slate-200 text-slate-800 shadow-xs'
       }`}>
         <div className={`flex items-center justify-between border-b pb-3 mb-4 ${isDark ? 'border-[#1e293b]' : 'border-slate-200'}`}>
@@ -53,7 +53,7 @@ export const RiskPage: React.FC<RiskPageProps> = React.memo(({
               {lang === 'id' ? 'Protokol Disiplin Risiko Institusional' : 'Institutional Risk Discipline Protocol'}
             </span>
           </div>
-          <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-[2px] border ${
             isDark ? 'text-emerald-400 bg-emerald-950/40 border-emerald-500/30' : 'text-emerald-700 bg-emerald-50 border-emerald-200'
           }`}>
             Anti-Liquidation
@@ -61,7 +61,7 @@ export const RiskPage: React.FC<RiskPageProps> = React.memo(({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs font-mono">
-          <div className={`p-3 rounded-lg border ${
+          <div className={`p-3 rounded-[2px] border ${
             isDark ? 'bg-[#080d1a] border-[#1e293b]/60 text-slate-300' : 'bg-white border-slate-200 text-slate-700'
           }`}>
             <div className="flex items-center gap-1.5 text-cyan-400 font-bold mb-1">
@@ -75,7 +75,7 @@ export const RiskPage: React.FC<RiskPageProps> = React.memo(({
             </p>
           </div>
 
-          <div className={`p-3 rounded-lg border ${
+          <div className={`p-3 rounded-[2px] border ${
             isDark ? 'bg-[#080d1a] border-[#1e293b]/60 text-slate-300' : 'bg-white border-slate-200 text-slate-700'
           }`}>
             <div className="flex items-center gap-1.5 text-amber-400 font-bold mb-1">
@@ -89,7 +89,7 @@ export const RiskPage: React.FC<RiskPageProps> = React.memo(({
             </p>
           </div>
 
-          <div className={`p-3 rounded-lg border ${
+          <div className={`p-3 rounded-[2px] border ${
             isDark ? 'bg-[#080d1a] border-[#1e293b]/60 text-slate-300' : 'bg-white border-slate-200 text-slate-700'
           }`}>
             <div className="flex items-center gap-1.5 text-emerald-400 font-bold mb-1">
@@ -103,7 +103,7 @@ export const RiskPage: React.FC<RiskPageProps> = React.memo(({
             </p>
           </div>
 
-          <div className={`p-3 rounded-lg border ${
+          <div className={`p-3 rounded-[2px] border ${
             isDark ? 'bg-[#080d1a] border-[#1e293b]/60 text-slate-300' : 'bg-white border-slate-200 text-slate-700'
           }`}>
             <div className="flex items-center gap-1.5 text-purple-400 font-bold mb-1">

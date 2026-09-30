@@ -4,6 +4,7 @@ import { Search, X, Zap, Coins, ArrowUpRight, ArrowDownRight, Sparkles, Clock, F
 import { CryptoSymbolInfo } from '../types/crypto.types';
 import { Language, getTranslation } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
+import { CryptoIcon } from './ui/CryptoIcon';
 
 interface SearchCoinModalProps {
   isOpen: boolean;
@@ -434,13 +435,14 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                   key={ticker}
                   type="button"
                   onClick={() => handleSelect(ticker)}
-                  className={`px-2 py-0.5 rounded text-[11px] font-mono transition-all cursor-pointer shrink-0 ${
+                  className={`flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono transition-all cursor-pointer shrink-0 ${
                     isCurr
                       ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-500 font-bold'
                       : 'bg-[#0f172a] border border-[#1e293b] text-slate-300 hover:text-white hover:border-cyan-500/50'
                   }`}
                 >
-                  {base}
+                  <CryptoIcon symbol={ticker} size="xs" />
+                  <span>{base}</span>
                 </button>
               );
             })}
@@ -458,9 +460,10 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                   key={p}
                   type="button"
                   onClick={() => handleSelect(p)}
-                  className="px-2 py-0.5 rounded text-[11px] font-mono bg-blue-950/30 border border-blue-800/50 text-blue-300 hover:text-white hover:border-blue-400 transition cursor-pointer shrink-0"
+                  className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono bg-blue-950/30 border border-blue-800/50 text-blue-300 hover:text-white hover:border-blue-400 transition cursor-pointer shrink-0"
                 >
-                  {p}
+                  <CryptoIcon symbol={p} size="xs" />
+                  <span>{p}</span>
                 </button>
               ))}
             </div>
@@ -609,15 +612,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div
-                      className={`w-9 h-9 rounded-lg flex items-center justify-center font-mono font-bold text-xs ${
-                        isSelected
-                          ? 'bg-cyan-500 text-slate-950 shadow-sm'
-                          : 'bg-[#0b0f19] border border-[#1e293b] text-cyan-400'
-                      }`}
-                    >
-                      {coin.symbol.split('/')[0].slice(0, 4)}
-                    </div>
+                    <CryptoIcon symbol={coin.symbol} size="lg" className="rounded-lg shadow-xs shrink-0" />
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-mono font-bold text-white text-sm">

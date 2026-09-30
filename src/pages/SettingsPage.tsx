@@ -44,6 +44,7 @@ import { Language, getTranslation } from '../i18n/translations';
 import {
   EngineThemeId,
   normalizeEngineTheme,
+  isDarkEngineTheme,
   PRESET_CUSTOM_COLORS,
   SOFT_PINK_SHADES,
   PRESET_BACKGROUND_CONTRASTS,
@@ -126,7 +127,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const { user, isAuthenticated, logout, loading: authLoading } = useAuth();
   const t = getTranslation(lang);
   const normalizedTheme = normalizeEngineTheme(theme);
-  const isDark = normalizedTheme !== 'theme-light';
+  const isDark = isDarkEngineTheme(normalizedTheme, customThemeBg);
   const isId = lang === 'id';
 
   // Master Settings State
@@ -967,13 +968,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             <div className="space-y-3 mb-6">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider block">
-                  {isId ? 'Pilihan Tema Engine Visual (4 Pilihan Engine)' : 'Visual Engine Theme (4 Engine Presets)'}
+                  {isId ? 'Pilihan Tema Engine Visual (5 Pilihan Engine)' : 'Visual Engine Theme (5 Engine Presets)'}
                 </label>
                 <span className="text-xs font-mono text-pink-400 font-semibold">
-                  {normalizedTheme === 'theme-light' && '☀️ Light Theme (Aktif)'}
-                  {normalizedTheme === 'theme-dark' && '🌙 Dark Theme - Default (Aktif)'}
-                  {normalizedTheme === 'theme-terminal' && '💻 Terminal Theme (Aktif)'}
-                  {normalizedTheme === 'theme-custom' && '🎨 Custom Theme (Aktif)'}
+                  {normalizedTheme === 'theme-glassnode' && 'Glassnode Research (Aktif)'}
+                  {normalizedTheme === 'theme-light' && 'Light Theme (Aktif)'}
+                  {normalizedTheme === 'theme-dark' && 'Dark Theme - Default (Aktif)'}
+                  {normalizedTheme === 'theme-terminal' && 'Terminal Theme (Aktif)'}
+                  {normalizedTheme === 'theme-custom' && 'Custom Theme (Aktif)'}
                 </span>
               </div>
 
@@ -1213,14 +1215,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
             {/* Custom Theme Mini Color Picker & Contrast Controls */}
             {normalizedTheme === 'theme-custom' && (
-              <div className={`p-5 rounded-2xl border mb-6 ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[#1e293b]/70">
+              <div className={`p-5 rounded-[2px] border mb-6 ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
+                <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b ${isDark ? 'border-[#1e293b]/70' : 'border-slate-200'}`}>
                   <div>
-                    <h4 className="text-sm font-bold font-mono text-white flex items-center gap-2">
+                    <h4 className={`text-sm font-bold font-mono flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       <Sparkles className="w-4 h-4 text-pink-400" />
                       <span>{isId ? 'Color Picker Mini: Saturasi Soft Pink & Kontras Background' : 'Mini Color Picker: Soft Pink Saturation & Background Contrast'}</span>
                     </h4>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                       {isId
                         ? 'Atur saturasi warna aksen Soft Pink dan tingkat kegelapan/kontras latar belakang agar mata tetap nyaman saat trading maraton.'
                         : 'Customize Soft Pink accent saturation and background contrast level for comfortable trading sessions.'}
@@ -1228,7 +1230,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   </div>
                   {/* WCAG AA Compliance Badge */}
                   <div
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl font-mono text-xs font-bold border shrink-0"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-[2px] font-mono text-xs font-bold border shrink-0"
                     style={{
                       backgroundColor: customThemeColor,
                       color: getContrastTextColor(customThemeColor),
@@ -1241,12 +1243,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Left Column: Soft Pink Saturation & Accent Hue */}
-                  <div className="space-y-4 p-4 rounded-xl bg-[#0B0F19] border border-[#1e293b]">
+                  <div className={`space-y-4 p-4 rounded-[2px] border ${isDark ? 'bg-[#0B0F19] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
                     <div>
-                      <label className="text-xs font-mono font-bold text-pink-300 uppercase tracking-wider block mb-1">
+                      <label className="text-xs font-mono font-bold text-pink-500 uppercase tracking-wider block mb-1">
                         {isId ? '1. Saturasi & Pilihan Aksen Soft Pink' : '1. Soft Pink Saturation & Accent'}
                       </label>
-                      <p className="text-[11px] text-slate-400">
+                      <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                         {isId ? 'Pilih tingkat kelembutan atau gunakan color picker kustom.' : 'Pick a Soft Pink tone or use the native color picker.'}
                       </p>
                     </div>
@@ -1260,11 +1262,13 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                           onUpdateCustomColor?.(val);
                           onSelectTheme?.('theme-custom', val, customThemeBg);
                         }}
-                        className="w-12 h-12 rounded-xl border border-[#334155] cursor-pointer bg-transparent shrink-0"
+                        className="w-12 h-12 rounded-[2px] border border-[#334155] cursor-pointer bg-transparent shrink-0"
                         aria-label="Soft Pink Accent Color Picker"
                       />
                       <div className="flex-1 space-y-1">
-                        <div className="flex items-center rounded-xl border border-[#334155] bg-[#070b14] px-3 py-2 text-xs font-mono">
+                        <div className={`flex items-center rounded-[2px] border px-3 py-2 text-xs font-mono ${
+                          isDark ? 'border-[#334155] bg-[#070b14]' : 'border-slate-300 bg-white'
+                        }`}>
                           <span className="text-slate-500 mr-2">ACCENT HEX:</span>
                           <input
                             type="text"
@@ -1278,10 +1282,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                             }}
                             placeholder="#EC4899"
                             maxLength={7}
-                            className="w-full bg-transparent font-bold text-white focus:outline-none uppercase"
+                            className={`w-full bg-transparent font-bold focus:outline-none uppercase ${
+                              isDark ? 'text-white' : 'text-slate-900'
+                            }`}
                           />
                         </div>
-                        <span className="text-[10px] text-slate-400 block">
+                        <span className={`text-[10px] block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                           Format: #RRGGBB (misal: #F472B6, #EC4899, #FF007A)
                         </span>
                       </div>
@@ -1289,7 +1295,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
                     {/* Preset Soft Pink Saturation Chips */}
                     <div className="space-y-1.5 pt-1">
-                      <span className="text-[11px] font-mono text-slate-400 block">
+                      <span className={`text-[11px] font-mono block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                         {isId ? 'Pilihan Cepat Soft Pink:' : 'Quick Soft Pink Presets:'}
                       </span>
                       <div className="flex flex-wrap gap-2">
@@ -1301,14 +1307,16 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                               onUpdateCustomColor?.(preset.hex);
                               onSelectTheme?.('theme-custom', preset.hex, customThemeBg);
                             }}
-                            className={`flex items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-mono transition-all cursor-pointer ${
+                            className={`flex items-center gap-2 px-2.5 py-1 rounded-[2px] border text-xs font-mono transition-all cursor-pointer ${
                               customThemeColor.toLowerCase() === preset.hex.toLowerCase()
                                 ? 'bg-pink-950/60 border-pink-400 text-pink-200 ring-1 ring-pink-400/40'
-                                : 'bg-[#070b14] border-[#1e293b] text-slate-300 hover:border-slate-600'
+                                : isDark
+                                ? 'bg-[#070b14] border-[#1e293b] text-slate-300 hover:border-slate-600'
+                                : 'bg-white border-slate-200 text-slate-700 hover:border-slate-400'
                             }`}
                           >
                             <span
-                              className="w-3 h-3 rounded-full border border-black/40 shrink-0"
+                              className="w-3 h-3 rounded-[2px] border border-black/40 shrink-0"
                               style={{ backgroundColor: preset.hex }}
                             />
                             <span>{preset.name}</span>
@@ -1319,12 +1327,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   </div>
 
                   {/* Right Column: Background Contrast Control */}
-                  <div className="space-y-4 p-4 rounded-xl bg-[#0B0F19] border border-[#1e293b]">
+                  <div className={`space-y-4 p-4 rounded-[2px] border ${isDark ? 'bg-[#0B0F19] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
                     <div>
-                      <label className="text-xs font-mono font-bold text-cyan-300 uppercase tracking-wider block mb-1">
+                      <label className="text-xs font-mono font-bold text-cyan-500 uppercase tracking-wider block mb-1">
                         {isId ? '2. Kontras Background & Surface' : '2. Background & Surface Contrast'}
                       </label>
-                      <p className="text-[11px] text-slate-400">
+                      <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                         {isId ? 'Atur kegelapan canvas untuk ergonomi pandangan mata Anda.' : 'Calibrate canvas dark level for optimal viewing comfort.'}
                       </p>
                     </div>
@@ -1338,11 +1346,13 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                           onUpdateCustomBg?.(val);
                           onSelectTheme?.('theme-custom', customThemeColor, val);
                         }}
-                        className="w-12 h-12 rounded-xl border border-[#334155] cursor-pointer bg-transparent shrink-0"
+                        className="w-12 h-12 rounded-[2px] border border-[#334155] cursor-pointer bg-transparent shrink-0"
                         aria-label="Background Contrast Color Picker"
                       />
                       <div className="flex-1 space-y-1">
-                        <div className="flex items-center rounded-xl border border-[#334155] bg-[#070b14] px-3 py-2 text-xs font-mono">
+                        <div className={`flex items-center rounded-[2px] border px-3 py-2 text-xs font-mono ${
+                          isDark ? 'border-[#334155] bg-[#070b14]' : 'border-slate-300 bg-white'
+                        }`}>
                           <span className="text-slate-500 mr-2">BG HEX:</span>
                           <input
                             type="text"
@@ -1356,10 +1366,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                             }}
                             placeholder="#0B0F19"
                             maxLength={7}
-                            className="w-full bg-transparent font-bold text-white focus:outline-none uppercase"
+                            className={`w-full bg-transparent font-bold focus:outline-none uppercase ${
+                              isDark ? 'text-white' : 'text-slate-900'
+                            }`}
                           />
                         </div>
-                        <span className="text-[10px] text-slate-400 block">
+                        <span className={`text-[10px] block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                           Format: #0B0F19 (Navy) / #030712 (Black) / #F8FAFC (Light)
                         </span>
                       </div>
@@ -1367,7 +1379,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
                     {/* Preset Background Contras Chips */}
                     <div className="space-y-1.5 pt-1">
-                      <span className="text-[11px] font-mono text-slate-400 block">
+                      <span className={`text-[11px] font-mono block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                         {isId ? 'Pilihan Kontras Background Populer:' : 'Popular Background Presets:'}
                       </span>
                       <div className="flex flex-wrap gap-2">
@@ -1379,14 +1391,16 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                               onUpdateCustomBg?.(bgPreset.hex);
                               onSelectTheme?.('theme-custom', customThemeColor, bgPreset.hex);
                             }}
-                            className={`flex items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-mono transition-all cursor-pointer ${
+                            className={`flex items-center gap-2 px-2.5 py-1 rounded-[2px] border text-xs font-mono transition-all cursor-pointer ${
                               customThemeBg.toLowerCase() === bgPreset.hex.toLowerCase()
                                 ? 'bg-slate-800 border-cyan-400 text-cyan-200 ring-1 ring-cyan-400/40'
-                                : 'bg-[#070b14] border-[#1e293b] text-slate-300 hover:border-slate-600'
+                                : isDark
+                                ? 'bg-[#070b14] border-[#1e293b] text-slate-300 hover:border-slate-600'
+                                : 'bg-white border-slate-200 text-slate-700 hover:border-slate-400'
                             }`}
                           >
                             <span
-                              className="w-3 h-3 rounded-full border border-slate-600 shrink-0"
+                              className="w-3 h-3 rounded-[2px] border border-slate-600 shrink-0"
                               style={{ backgroundColor: bgPreset.hex }}
                             />
                             <span>{bgPreset.name}</span>

@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useId, RefObject } from 'react';
 import { X } from 'lucide-react';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 export interface ModalWrapperProps {
   isOpen: boolean;
@@ -14,6 +15,10 @@ export interface ModalWrapperProps {
   maxWidth?: string;
   theme?: 'light' | 'dark';
   className?: string;
+  role?: 'dialog' | 'alertdialog';
+  ariaLabel?: string;
+  initialFocusRef?: RefObject<HTMLElement | null>;
+  closeOnBackdrop?: boolean;
 }
 
 export const ModalWrapper: React.FC<ModalWrapperProps> = ({
@@ -22,22 +27,31 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({
   title,
   subtitle,
   icon: Icon,
-  iconClassName = 'text-cyan-400',
+  iconClassName = 'text-[var(--accent-color,#ec4899)]',
   iconBgClassName,
   children,
   footer,
   maxWidth = 'max-w-3xl',
-  theme = 'dark',
+  theme: _theme,
   className = '',
+  role = 'dialog',
+  ariaLabel,
+  initialFocusRef,
+  closeOnBackdrop = true,
 }) => {
-  const isDark = theme === 'dark';
-  const modalRef = useRef<HTMLDivElement>(null);
+  const baseId = useId();
+  const titleId = `${baseId}-title`;
+  const descId = `${baseId}-desc`;
+
+  const containerRef = useFocusTrap<HTMLDivElement>(isOpen, initialFocusRef);
+  const mouseDownOnBackdropRef = useRef(false);
 
   // Close on Escape key
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        e.preventDefault();
         onClose();
       }
     };
@@ -45,67 +59,74 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Lock body scroll while modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
+
+  const isTitleString = typeof title === 'string';
 
   return (
     <div
-      role="dialog"
+      role={role}
       aria-modal="true"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
+      aria-labelledby={isTitleString ? titleId : undefined}
+      aria-label={!isTitleString ? ariaLabel : undefined}
+      aria-describedby={subtitle ? descId : undefined}
+      onMouseDown={(e) => {
+        mouseDownOnBackdropRef.current = e.target === e.currentTarget;
+      }}
+      onMouseUp={(e) => {
+        if (closeOnBackdrop && mouseDownOnBackdropRef.current && e.target === e.currentTarget) {
           onClose();
         }
+        mouseDownOnBackdropRef.current = false;
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150"
     >
       <div
-        ref={modalRef}
-        className={`relative w-full ${maxWidth} rounded-2xl border p-5 sm:p-6 shadow-2xl overflow-y-auto max-h-[90vh] transition-colors duration-200 ${
-          isDark
-            ? 'bg-[#0f172a] border-[#1e293b] text-slate-100'
-            : 'bg-white border-slate-200 text-slate-900 shadow-xl'
-        } ${className}`}
+        ref={containerRef}
+        className={`relative w-full ${maxWidth} rounded-[var(--radius-cards,2px)] border p-5 sm:p-6 shadow-2xl overflow-y-auto max-h-[90vh] transition-colors duration-200 bg-[var(--card-color)] border-[var(--border-color)] text-[var(--text-main)] ${className}`}
       >
-        {/* Close Button */}
+        {/* Accessible Close Button */}
         <button
+          type="button"
           onClick={onClose}
-          aria-label="Close modal"
-          className={`absolute right-4 top-4 p-1.5 rounded-lg transition-colors cursor-pointer ${
-            isDark
-              ? 'text-slate-400 hover:text-white hover:bg-slate-800'
-              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-          }`}
+          aria-label="Tutup / Close"
+          className="absolute right-3 top-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[var(--radius-buttons,2px)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--accent-subtle)] transition-colors cursor-pointer"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
 
         {/* Optional Header */}
         {(title || Icon) && (
-          <div className={`flex items-center gap-3 mb-4 pb-3 border-b ${
-            isDark ? 'border-[#1e293b]' : 'border-slate-100'
-          }`}>
+          <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[var(--border-color)]">
             {Icon && (
               <div
-                className={`flex items-center justify-center w-10 h-10 rounded-xl border shrink-0 ${
-                  iconBgClassName ||
-                  (isDark
-                    ? 'bg-cyan-500/10 border-cyan-500/30'
-                    : 'bg-cyan-50 border-cyan-200')
+                className={`flex items-center justify-center w-10 h-10 rounded-[var(--radius-buttons,2px)] border shrink-0 ${
+                  iconBgClassName || 'bg-[var(--accent-subtle)] border-[var(--border-color)]'
                 }`}
               >
                 <Icon className={`w-5 h-5 ${iconClassName}`} />
               </div>
             )}
-            <div className="flex-1 pr-6">
-              {typeof title === 'string' ? (
-                <h2 className={`text-base sm:text-lg font-bold font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <div className="flex-1 pr-8">
+              {isTitleString ? (
+                <h2 id={titleId} className="text-base sm:text-lg font-bold font-display text-[var(--text-main)]">
                   {title}
                 </h2>
               ) : (
                 title
               )}
               {subtitle && (
-                <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                <p id={descId} className="text-xs mt-0.5 text-[var(--text-muted)]">
                   {subtitle}
                 </p>
               )}
@@ -118,13 +139,7 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({
 
         {/* Optional Footer */}
         {footer && (
-          <div
-            className={`mt-4 pt-3 border-t text-[11px] font-mono flex items-center justify-between ${
-              isDark
-                ? 'border-[#1e293b] text-slate-500'
-                : 'border-slate-100 text-slate-600'
-            }`}
-          >
+          <div className="mt-4 pt-3 border-t border-[var(--border-color)] text-[11px] font-mono flex items-center justify-between text-[var(--text-muted)]">
             {footer}
           </div>
         )}

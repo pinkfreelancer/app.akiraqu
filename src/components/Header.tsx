@@ -51,6 +51,7 @@ import { Language, getTranslation } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
 import { SearchCoinModal } from './SearchCoinModal';
 import { AkiraQuLogo } from './AkiraQuLogo';
+import { CryptoIcon } from './ui/CryptoIcon';
 import { EngineThemeId, normalizeEngineTheme } from '../types/theme.types';
 import { useAuth } from '../contexts/AuthContext';
 import { useAlerts } from '../contexts/AlertContext';
@@ -258,20 +259,13 @@ export const Header: React.FC<HeaderProps> = ({
               theme={isDark ? 'dark' : 'light'}
               className="shrink-0 group-hover:scale-105 transition-transform"
             />
-            <div className="flex items-center gap-2">
-              <span
-                className={`text-xs sm:text-sm font-extrabold tracking-wider font-display leading-tight flex items-center transition-colors ${
-                  isDark ? 'text-[#F89DB5]' : 'text-[#21242B]'
-                }`}
-              >
-                AKIRAQU
-              </span>
-              <span className={`hidden lg:inline text-[11px] font-sans font-medium transition-colors ${
-                isDark ? 'text-slate-400' : 'text-slate-500'
-              }`}>
-                | Analytic Quantitative Crypto Tools
-              </span>
-            </div>
+            <span
+              className={`text-xs sm:text-sm font-extrabold tracking-wider font-display leading-tight flex items-center transition-colors ${
+                isDark ? 'text-[#F89DB5]' : 'text-[#21242B]'
+              }`}
+            >
+              AKIRAQU
+            </span>
           </div>
         </div>
 
@@ -387,7 +381,9 @@ export const Header: React.FC<HeaderProps> = ({
                         className={`col-span-2 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-[2px] text-[11px] font-bold transition-all cursor-pointer ${
                           normalizedTheme === 'theme-glassnode'
                             ? 'bg-white text-[#DB2777] shadow-xs border border-[#FBCFE8]'
-                            : 'text-slate-400 hover:text-slate-200 bg-[#070b14]'
+                            : isDark
+                            ? 'text-slate-400 hover:text-slate-200 bg-[#070b14]'
+                            : 'text-slate-600 hover:text-slate-900 bg-white/60 hover:bg-white'
                         }`}
                         title="Glassnode Research Console (Soft Pink)"
                       >
@@ -401,7 +397,9 @@ export const Header: React.FC<HeaderProps> = ({
                         className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-[2px] text-[11px] font-bold transition-all cursor-pointer ${
                           normalizedTheme === 'theme-light'
                             ? 'bg-white text-pink-600 shadow-xs border border-pink-200'
-                            : 'text-slate-400 hover:text-slate-200'
+                            : isDark
+                            ? 'text-slate-400 hover:text-slate-200'
+                            : 'text-slate-600 hover:text-slate-900'
                         }`}
                         title="Light Theme"
                       >
@@ -415,7 +413,9 @@ export const Header: React.FC<HeaderProps> = ({
                         className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-[2px] text-[11px] font-bold transition-all cursor-pointer ${
                           normalizedTheme === 'theme-dark'
                             ? 'bg-pink-500/20 text-pink-300 shadow-xs border border-pink-500/40'
-                            : 'text-slate-400 hover:text-slate-200'
+                            : isDark
+                            ? 'text-slate-400 hover:text-slate-200'
+                            : 'text-slate-600 hover:text-slate-900'
                         }`}
                         title="Dark Theme"
                       >
@@ -429,7 +429,9 @@ export const Header: React.FC<HeaderProps> = ({
                         className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-[2px] text-[11px] font-bold transition-all cursor-pointer ${
                           normalizedTheme === 'theme-terminal'
                             ? 'bg-[#030712] text-[#FF007A] shadow-xs border border-emerald-500/40'
-                            : 'text-slate-400 hover:text-slate-200'
+                            : isDark
+                            ? 'text-slate-400 hover:text-slate-200'
+                            : 'text-slate-600 hover:text-slate-900'
                         }`}
                         title="Terminal Theme"
                       >
@@ -443,7 +445,9 @@ export const Header: React.FC<HeaderProps> = ({
                         className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-[2px] text-[11px] font-bold transition-all cursor-pointer ${
                           normalizedTheme === 'theme-custom'
                             ? 'bg-pink-950/60 text-pink-300 shadow-xs border border-pink-500/40'
-                            : 'text-slate-400 hover:text-slate-200'
+                            : isDark
+                            ? 'text-slate-400 hover:text-slate-200'
+                            : 'text-slate-600 hover:text-slate-900'
                         }`}
                         title="Custom Theme"
                       >
@@ -761,11 +765,7 @@ export const Header: React.FC<HeaderProps> = ({
             title={`${t.header.searchModalTitle} (Shortcut: Ctrl+K atau /)`}
           >
             <div className="flex items-center gap-2 min-w-0">
-              <Search
-                className={`w-3.5 h-3.5 shrink-0 group-hover:scale-110 transition-transform ${
-                  isDark ? 'text-pink-400' : 'text-pink-600'
-                }`}
-              />
+              <CryptoIcon symbol={selectedSymbol} size="sm" className="rounded-full shadow-xs shrink-0" />
               <span className={`font-bold text-xs sm:text-sm truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {selectedSymbol}
               </span>

@@ -61,7 +61,7 @@ export const ConfluenceBiasGuidelines: React.FC<ConfluenceBiasGuidelinesProps> =
   }, [bias, lang, isDark]);
 
   return (
-    <div className={`p-4 rounded-xl border ${biasGuidelines.color}`}>
+    <div className={`p-4 rounded-[2px] border ${biasGuidelines.color}`}>
       <div className="flex items-center gap-1.5 font-mono text-xs font-bold mb-3">
         <FileText className="w-4 h-4" />
         <span>

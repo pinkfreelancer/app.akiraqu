@@ -22,6 +22,7 @@ import {
   ArrowDownRight,
 } from 'lucide-react';
 import { formatCryptoPrice, getCryptoPrecision } from '../utils/formatters';
+import { CryptoIcon } from '../components/ui/CryptoIcon';
 
 interface TickerPageProps {
   candles: OHLCVCandle[];
@@ -158,13 +159,13 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
             isDark ? 'border-slate-800/80' : 'border-slate-200'
           }`}>
             <div className="flex items-center gap-2">
-              <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
+              <CryptoIcon symbol={symbol} size="sm" className="rounded-full shadow-xs shrink-0" />
               <span className={`text-xs font-mono font-bold tracking-wider uppercase ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
-                {lang === 'id' ? 'Live Order Book & AggTrade' : 'Live Order Book & AggTrade'}
+                {symbol} {lang === 'id' ? 'Live Order Book' : 'Live Order Book'}
               </span>
             </div>
-            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-mono">
-              <BarChart3 className="w-3.5 h-3.5 text-cyan-500" />
+            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="font-semibold text-cyan-400">{selectedExchange} {selectedMarketType}</span>
             </div>
           </div>

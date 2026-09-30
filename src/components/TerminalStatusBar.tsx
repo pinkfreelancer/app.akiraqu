@@ -183,14 +183,13 @@ export const TerminalStatusBar: React.FC<TerminalStatusBarProps> = ({
             <span className={`font-semibold ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>{utcTime}</span>
           </div>
 
-          <div
-            className={`px-2 py-0.5 rounded text-xs font-semibold tracking-wide ${
-              isDark
-                ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/30'
-                : 'bg-emerald-50 text-emerald-800 border border-emerald-300'
-            }`}
-          >
-            {lang === 'id' ? 'L1/L2 TERVERIFIKASI' : 'L1/L2 VERIFIED'}
+          <span className={`text-slate-600 ${isDark ? 'text-slate-700' : 'text-slate-300'}`}>·</span>
+
+          <div className="flex items-center gap-1.5 text-[11px] font-mono font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className={isDark ? 'text-emerald-400' : 'text-emerald-700'}>
+              {lang === 'id' ? 'L1/L2 Terverifikasi' : 'L1/L2 Verified'}
+            </span>
           </div>
         </div>
       </div>

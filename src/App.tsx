@@ -338,7 +338,7 @@ function TerminalApp() {
 
         {/* Scrollable Stage Workspace Content */}
         <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-          <main className="flex-1 w-full mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 transition-all duration-200 max-w-none">
+          <main id="main-content" tabIndex={-1} className="flex-1 w-full mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 transition-all duration-200 max-w-none focus:outline-none">
             {/* Meja Kerja Trader Workflow Bar (Siklus Harian & Personalisasi) */}
             {isTraderWorkbenchVisible && (
               <TraderWorkflowBar

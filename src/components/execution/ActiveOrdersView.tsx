@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Zap, XCircle, CheckCircle2, Clock, Filter, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { formatCryptoPrice } from '../../utils/formatters';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 interface ActiveOrdersViewProps {
   onNavigateToTrade?: (symbol: string) => void;
@@ -82,14 +83,21 @@ export const ActiveOrdersView: React.FC<ActiveOrdersViewProps> = ({
     },
   ]);
 
+  const [isCancelAllDialogOpen, setIsCancelAllDialogOpen] = useState(false);
+
+  const totalValue = orders.reduce((sum, o) => sum + o.totalUsd, 0);
+
   const handleCancelOrder = (id: string) => {
     setOrders((prev) => prev.filter((o) => o.id !== id));
   };
 
   const handleCancelAll = () => {
-    if (window.confirm(isId ? 'Batalkan semua open orders?' : 'Cancel all active orders?')) {
-      setOrders([]);
-    }
+    setIsCancelAllDialogOpen(true);
+  };
+
+  const confirmCancelAll = () => {
+    setOrders([]);
+    setIsCancelAllDialogOpen(false);
   };
 
   return (
@@ -189,6 +197,22 @@ export const ActiveOrdersView: React.FC<ActiveOrdersViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* Cancel All Orders Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={isCancelAllDialogOpen}
+        title={isId ? 'Konfirmasi Pembatalan Semua Order' : 'Confirm Cancel All Orders'}
+        description={
+          isId
+            ? `Apakah Anda yakin ingin membatalkan seluruh ${orders.length} order aktif terbuka dengan total estimasi nilai $${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}? Seluruh order tertunda akan ditarik dari antrean bursa.`
+            : `Are you sure you want to cancel all ${orders.length} active open orders with a total estimated value of $${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}? All pending orders will be withdrawn from exchange order queues.`
+        }
+        confirmLabel={isId ? `Batalkan ${orders.length} order` : `Cancel ${orders.length} orders`}
+        cancelLabel={isId ? 'Kembali' : 'Keep orders'}
+        onConfirm={confirmCancelAll}
+        onCancel={() => setIsCancelAllDialogOpen(false)}
+        destructive={true}
+      />
     </div>
   );
 };

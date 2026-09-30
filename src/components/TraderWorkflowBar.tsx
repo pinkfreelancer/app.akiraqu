@@ -117,8 +117,8 @@ export const TraderWorkflowBar: React.FC<TraderWorkflowBarProps> = ({
       {
         stepId: 1,
         key: 'macro',
-        name: { id: '1. BUKA SESI', en: '1. SESSION OPEN' },
-        categoryLabel: { id: '🌐 Data Makro & Konteks', en: '🌐 Macro & Context Data' },
+        name: { id: '01. Buka Sesi', en: '01. Session Open' },
+        categoryLabel: { id: 'Data Makro & Konteks', en: 'Macro & Context Data' },
         question: {
           id: '"Apa yang terjadi di pasar hari ini?"',
           en: '"What is happening in the global market today?"',
@@ -141,8 +141,8 @@ export const TraderWorkflowBar: React.FC<TraderWorkflowBarProps> = ({
       {
         stepId: 2,
         key: 'market',
-        name: { id: '2. CARI PELUANG', en: '2. FIND OPPORTUNITIES' },
-        categoryLabel: { id: '📊 Pasar & Screening', en: '📊 Market & Screening' },
+        name: { id: '02. Cari Peluang', en: '02. Find Opportunities' },
+        categoryLabel: { id: 'Pasar & Screening', en: 'Market & Screening' },
         question: {
           id: '"Koin apa yang menarik hari ini?"',
           en: '"Which crypto assets look compelling today?"',
@@ -166,8 +166,8 @@ export const TraderWorkflowBar: React.FC<TraderWorkflowBarProps> = ({
       {
         stepId: 3,
         key: 'technical',
-        name: { id: '3. VALIDASI SINYAL', en: '3. VALIDATE SIGNALS' },
-        categoryLabel: { id: '🔍 Indikator & Teknikal', en: '🔍 Technical & Indicators' },
+        name: { id: '03. Validasi Sinyal', en: '03. Validate Signals' },
+        categoryLabel: { id: 'Indikator & Teknikal', en: 'Technical & Indicators' },
         question: {
           id: '"Apakah sinyal teknikal & konfluensinya kuat?"',
           en: '"Is the technical signal & confluence strong enough?"',
@@ -193,8 +193,8 @@ export const TraderWorkflowBar: React.FC<TraderWorkflowBarProps> = ({
       {
         stepId: 4,
         key: 'research',
-        name: { id: '4. HITUNG RISIKO', en: '4. CALCULATE RISK' },
-        categoryLabel: { id: '🧪 Riset & Strategi', en: '🧪 Research & Strategy' },
+        name: { id: '04. Hitung Risiko', en: '04. Calculate Risk' },
+        categoryLabel: { id: 'Riset & Strategi', en: 'Research & Strategy' },
         question: {
           id: '"Berapa besar posisi yang aman dan terukur?"',
           en: '"What is the mathematically sound position size?"',
@@ -217,8 +217,8 @@ export const TraderWorkflowBar: React.FC<TraderWorkflowBarProps> = ({
       {
         stepId: 5,
         key: 'execution',
-        name: { id: '5. EKSEKUSI', en: '5. EXECUTE TRADES' },
-        categoryLabel: { id: '⚡ Eksekusi Aktif', en: '⚡ Active Execution' },
+        name: { id: '05. Eksekusi', en: '05. Execute Trades' },
+        categoryLabel: { id: 'Eksekusi Aktif', en: 'Active Execution' },
         question: {
           id: '"Masuk posisi sesuai strategi"',
           en: '"Deploy capital into active positions"',
@@ -241,8 +241,8 @@ export const TraderWorkflowBar: React.FC<TraderWorkflowBarProps> = ({
       {
         stepId: 6,
         key: 'connection',
-        name: { id: '6. PANTAU', en: '6. MONITOR & ALERTS' },
-        categoryLabel: { id: '🔧 Koneksi & Alert', en: '🔧 Connections & Alerts' },
+        name: { id: '06. Pantau', en: '06. Monitor & Alerts' },
+        categoryLabel: { id: 'Koneksi & Alert', en: 'Connections & Alerts' },
         question: {
           id: '"Set alert & pantau posisi berjalan"',
           en: '"Set smart triggers and monitor open PnL"',
@@ -264,8 +264,8 @@ export const TraderWorkflowBar: React.FC<TraderWorkflowBarProps> = ({
       {
         stepId: 7,
         key: 'evaluation',
-        name: { id: '7. EVALUASI', en: '7. EVALUATE & LOG' },
-        categoryLabel: { id: '📈 Evaluasi & Riwayat', en: '📈 Review & Analytics' },
+        name: { id: '07. Evaluasi', en: '07. Evaluate & Log' },
+        categoryLabel: { id: 'Evaluasi & Riwayat', en: 'Review & Analytics' },
         question: {
           id: '"Bagaimana hasilnya, apa yang bisa diperbaiki?"',
           en: '"What were the results and actionable improvements?"',

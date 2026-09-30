@@ -1,4 +1,4 @@
-# ASSURANCE REGISTER: AKIRAQU / NexusTrade AI
+# ASSURANCE REGISTER: AKIRAQU
 
 ## 1. Compliance
 - [x] GDPR/CCPA Data Export API endpoint (`/api/v1/privacy/export`) verified.

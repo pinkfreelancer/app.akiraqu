@@ -61,7 +61,7 @@ export const ConfluencePage: React.FC<ConfluencePageProps> = React.memo(({
       </div>
 
       {/* Right Column: Detailed Confluence Factors & Checklist Guidance */}
-      <div className={`lg:col-span-8 rounded-xl border p-4 sm:p-5 flex flex-col justify-between space-y-5 transition-colors duration-200 ${
+      <div className={`lg:col-span-8 rounded-[2px] border p-4 sm:p-5 flex flex-col justify-between space-y-5 transition-colors duration-200 ${
         isDark ? 'bg-[#0f172a] border-[#1e293b] text-white' : 'bg-white border-slate-200 text-slate-800 shadow-xs'
       }`}>
         {/* Title */}
@@ -72,7 +72,7 @@ export const ConfluencePage: React.FC<ConfluencePageProps> = React.memo(({
               {lang === 'id' ? 'Detail Parameter Verifikasi Bias' : 'Confluence Factor Verification'}
             </span>
           </div>
-          <span className={`text-[10px] font-mono px-2.5 py-1 rounded-lg border ${
+          <span className={`text-[10px] font-mono tabular-nums px-2.5 py-1 rounded-[2px] border ${
             isDark ? 'text-slate-400 bg-[#0b0f19] border-[#1e293b]' : 'text-slate-600 bg-slate-50 border-slate-200'
           }`}>
             {`${bullishCount} Bullish | ${bearishCount} Bearish`}

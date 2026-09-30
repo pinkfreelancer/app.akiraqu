@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TrendingUp, TrendingDown, Zap, BarChart2, ArrowUpRight, ArrowDownRight, Compass } from 'lucide-react';
 import { formatCryptoPrice } from '../../utils/formatters';
+import { CryptoIcon } from '../ui/CryptoIcon';
 
 interface GainersLosersViewProps {
   onSelectCoin?: (symbol: string) => void;
@@ -116,13 +117,18 @@ export const GainersLosersView: React.FC<GainersLosersViewProps> = ({
                 <tr key={item.symbol} className="hover:bg-slate-800/30 transition-colors">
                   <td className="py-3 px-3 font-bold text-slate-400">#{item.rank}</td>
                   <td className="py-3 px-3">
-                    <div className="font-bold text-white flex items-center gap-1.5">
-                      <span>{item.symbol}</span>
-                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 font-normal">
-                        {item.category}
-                      </span>
+                    <div className="flex items-center gap-2.5">
+                      <CryptoIcon symbol={item.symbol} size="sm" className="rounded-full shadow-xs shrink-0" />
+                      <div>
+                        <div className="font-bold text-white flex items-center gap-1.5">
+                          <span>{item.symbol}</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 font-normal">
+                            {item.category}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-slate-400">{item.name}</div>
+                      </div>
                     </div>
-                    <div className="text-[10px] text-slate-400">{item.name}</div>
                   </td>
                   <td className="py-3 px-3 font-bold text-white">
                     ${formatCryptoPrice(item.price)}

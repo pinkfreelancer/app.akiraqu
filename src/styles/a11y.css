@@ -1,0 +1,62 @@
+/* Accessible focus indicator with token fallback */
+:focus-visible {
+  outline: 2px solid var(--focus-ring, #f9a8d4);
+  outline-offset: 2px;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline-offset: 0;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Accessible skip-to-content link */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 9999;
+  background-color: var(--accent-color, #ec4899);
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-inter, sans-serif);
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: var(--radius-buttons, 2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 0.5rem;
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Dark mode accessible text contrast (WCAG AA) */
+:root:not([data-theme="theme-light"]):not([data-theme="theme-glassnode"]):not([data-theme="glassnode"]) .text-slate-500,
+:root:not([data-theme="theme-light"]):not([data-theme="theme-glassnode"]):not([data-theme="glassnode"]) .text-slate-600 {
+  color: #8b9ab0;
+}
+
+/* Touch target minimum sizes for touch/coarse devices */
+@media (pointer: coarse) {
+  button:not([data-compact]),
+  [role="tab"],
+  select {
+    min-height: 44px;
+  }
+}

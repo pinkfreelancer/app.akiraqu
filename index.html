@@ -1,19 +1,72 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0B0F19" />
     <title>AKIRAQU - Analytic Quantitative Crypto Tools</title>
     <meta name="description" content="AKIRAQU - Analytic Quantitative Crypto Tools" />
     <meta property="og:title" content="AKIRAQU - Analytic Quantitative Crypto Tools" />
     <meta property="og:description" content="AKIRAQU - Analytic Quantitative Crypto Tools" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/favicon-dark.svg" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/svg+xml" href="/favicon-light.svg" media="(prefers-color-scheme: light)" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+      // Immediate pre-render theme synchronization to eliminate first-frame flash
+      (function() {
+        try {
+          var t = localStorage.getItem('akira_theme_engine') || localStorage.getItem('nexus_theme') || 'theme-dark';
+          var isDark = true;
+          var customBg = localStorage.getItem('akira_custom_theme_bg') || '#0B0F19';
+          var customColor = localStorage.getItem('akira_custom_theme_color') || '#EC4899';
+
+          if (t === 'theme-glassnode' || t === 'glassnode' || t === 'theme-light' || t === 'modern-pink-light' || t === 'light') {
+            isDark = false;
+            t = (t === 'theme-glassnode' || t === 'glassnode') ? 'theme-glassnode' : 'theme-light';
+          } else if (t === 'theme-terminal' || t === 'classic-terminal' || t === 'terminal') {
+            t = 'theme-terminal';
+            isDark = true;
+          } else if (t === 'theme-custom' || t === 'custom') {
+            t = 'theme-custom';
+            var cleanBg = customBg.replace('#', '').trim();
+            if (cleanBg.length === 3) cleanBg = cleanBg[0] + cleanBg[0] + cleanBg[1] + cleanBg[1] + cleanBg[2] + cleanBg[2];
+            if (cleanBg.length === 6) {
+              var r = parseInt(cleanBg.substring(0, 2), 16);
+              var g = parseInt(cleanBg.substring(2, 4), 16);
+              var b = parseInt(cleanBg.substring(4, 6), 16);
+              var lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+              if (lum > 0.5) isDark = false;
+            }
+          } else {
+            t = 'theme-dark';
+            isDark = true;
+          }
+
+          var d = document.documentElement;
+          d.setAttribute('data-theme', t);
+          d.setAttribute('data-theme-light', String(!isDark));
+          d.classList.add(t);
+          d.classList.add(isDark ? 'dark' : 'light');
+          d.style.colorScheme = isDark ? 'dark' : 'light';
+
+          if (t === 'theme-custom') {
+            d.style.setProperty('--custom-bg-hex', customBg);
+            d.style.setProperty('--custom-accent-hex', customColor);
+            d.style.setProperty('--custom-surface-hex', isDark ? '#1E293B' : '#FFFFFF');
+            d.style.setProperty('--custom-border-hex', isDark ? 'rgba(51, 65, 85, 0.7)' : '#E2E8F0');
+            d.style.setProperty('--custom-text-main', isDark ? '#F8FAFC' : '#0F172A');
+            d.style.setProperty('--custom-text-muted', isDark ? '#94A3B8' : '#5A5A5A');
+          }
+        } catch(e) {}
+      })();
+    </script>
     <script>
       // Protect against wallet browser extensions throwing "Cannot redefine property: ethereum"
       (function() {
@@ -40,7 +93,8 @@
       })();
     </script>
   </head>
-  <body class="bg-[#090d16] text-[#f8fafc] antialiased selection:bg-cyan-500/20 selection:text-cyan-300">
+  <body class="bg-[var(--bg-color)] text-[var(--text-main)] antialiased selection:bg-[var(--accent-subtle)] selection:text-[var(--text-main)]">
+    <a href="#main-content" class="skip-link">Lewati ke konten utama</a>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

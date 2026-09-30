@@ -13,7 +13,14 @@ import {
   StageId,
 } from '../types/crypto.types';
 import { Language, getTranslation, Translations } from '../i18n/translations';
-import { EngineThemeId, normalizeEngineTheme, isDarkEngineTheme, applyThemeToDocument } from '../types/theme.types';
+import {
+  EngineThemeId,
+  normalizeEngineTheme,
+  isDarkEngineTheme,
+  applyThemeToDocument,
+  safeGetLocalStorage,
+  safeSetLocalStorage,
+} from '../types/theme.types';
 import { useTerminalSystem, TerminalHealthStatus } from '../hooks/useTerminalSystem';
 import { useAnalysisEngine } from '../hooks/useAnalysisEngine';
 import { useMarketData } from '../hooks/useMarketData';
@@ -188,55 +195,85 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isAssuranceModalOpen, setIsAssuranceModalOpen] = useState(false);
 
-  // Theme state supporting 4 visual engines with Soft Pink accents
+  // Theme state supporting 5 visual engines with Soft Pink accents
   const [theme, setThemeState] = useState<EngineThemeId>(() => {
-    const saved = localStorage.getItem('akira_theme_engine') || localStorage.getItem('nexus_theme');
+    const saved = safeGetLocalStorage('akira_theme_engine') || safeGetLocalStorage('nexus_theme');
     return normalizeEngineTheme(saved);
   });
 
   const [customThemeColor, setCustomThemeColorState] = useState<string>(() => {
-    return localStorage.getItem('akira_custom_theme_color') || '#EC4899';
+    return safeGetLocalStorage('akira_custom_theme_color') || '#EC4899';
   });
 
   const [customThemeBg, setCustomThemeBgState] = useState<string>(() => {
-    return localStorage.getItem('akira_custom_theme_bg') || '#0B0F19';
+    return safeGetLocalStorage('akira_custom_theme_bg') || '#0B0F19';
   });
 
-  const isDark = isDarkEngineTheme(theme);
+  // Track user's preferred light and dark themes to preserve choices on toggle
+  const [preferredLightTheme, setPreferredLightTheme] = useState<EngineThemeId>(() => {
+    const saved = safeGetLocalStorage('akira_preferred_light');
+    return saved === 'theme-glassnode' ? 'theme-glassnode' : 'theme-light';
+  });
+
+  const [preferredDarkTheme, setPreferredDarkTheme] = useState<EngineThemeId>(() => {
+    const saved = safeGetLocalStorage('akira_preferred_dark');
+    return saved === 'theme-terminal' || saved === 'theme-custom' ? (saved as EngineThemeId) : 'theme-dark';
+  });
+
+  // Evaluate isDark synchronously passing customThemeBg
+  const isDark = isDarkEngineTheme(theme, customThemeBg);
 
   const setEngineTheme = useCallback((newTheme: EngineThemeId, customColor?: string, customBg?: string) => {
     const normalized = normalizeEngineTheme(newTheme);
+    const effectiveBg = customBg !== undefined ? customBg : customThemeBg;
+    const effectiveColor = customColor !== undefined ? customColor : customThemeColor;
+    const themeIsDark = isDarkEngineTheme(normalized, effectiveBg);
+
     setThemeState(normalized);
-    localStorage.setItem('akira_theme_engine', normalized);
-    localStorage.setItem('nexus_theme', isDarkEngineTheme(normalized) ? 'dark' : 'light');
+    safeSetLocalStorage('akira_theme_engine', normalized);
+    safeSetLocalStorage('nexus_theme', themeIsDark ? 'dark' : 'light');
+
+    if (themeIsDark) {
+      setPreferredDarkTheme(normalized);
+      safeSetLocalStorage('akira_preferred_dark', normalized);
+    } else {
+      setPreferredLightTheme(normalized);
+      safeSetLocalStorage('akira_preferred_light', normalized);
+    }
 
     if (customColor) {
       setCustomThemeColorState(customColor);
-      localStorage.setItem('akira_custom_theme_color', customColor);
+      safeSetLocalStorage('akira_custom_theme_color', customColor);
     }
     if (customBg) {
       setCustomThemeBgState(customBg);
-      localStorage.setItem('akira_custom_theme_bg', customBg);
+      safeSetLocalStorage('akira_custom_theme_bg', customBg);
     }
-  }, []);
+
+    applyThemeToDocument(normalized, effectiveColor, effectiveBg);
+  }, [customThemeBg, customThemeColor]);
 
   const setCustomThemeColor = useCallback((color: string) => {
     setCustomThemeColorState(color);
-    localStorage.setItem('akira_custom_theme_color', color);
-    applyThemeToDocument('theme-custom', color, customThemeBg);
-  }, [customThemeBg]);
+    safeSetLocalStorage('akira_custom_theme_color', color);
+    applyThemeToDocument(theme, color, customThemeBg);
+  }, [theme, customThemeBg]);
 
   const setCustomThemeBg = useCallback((bg: string) => {
     setCustomThemeBgState(bg);
-    localStorage.setItem('akira_custom_theme_bg', bg);
-    applyThemeToDocument('theme-custom', customThemeColor, bg);
-  }, [customThemeColor]);
+    safeSetLocalStorage('akira_custom_theme_bg', bg);
+    applyThemeToDocument(theme, customThemeColor, bg);
+  }, [theme, customThemeColor]);
 
   const toggleTheme = useCallback(() => {
-    setEngineTheme(isDark ? 'theme-light' : 'theme-dark');
-  }, [isDark, setEngineTheme]);
+    if (isDark) {
+      setEngineTheme(preferredLightTheme);
+    } else {
+      setEngineTheme(preferredDarkTheme);
+    }
+  }, [isDark, preferredLightTheme, preferredDarkTheme, setEngineTheme]);
 
-  // Sync theme to DOM & localStorage
+  // Sync theme to DOM & localStorage exactly once per state transition
   useEffect(() => {
     applyThemeToDocument(theme, customThemeColor, customThemeBg);
   }, [theme, customThemeColor, customThemeBg]);

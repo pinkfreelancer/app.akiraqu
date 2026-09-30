@@ -129,6 +129,25 @@ export const PRESET_CUSTOM_COLORS = [
 ];
 
 /**
+ * Safe localStorage access wrappers to protect against sandboxed or private browsing environments
+ */
+export function safeGetLocalStorage(key: string): string | null {
+  try {
+    return typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function safeSetLocalStorage(key: string, value: string): void {
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(key, value);
+    }
+  } catch {}
+}
+
+/**
  * Parses Hex color to RGB
  */
 export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
@@ -158,20 +177,46 @@ export function getRelativeLuminance(r: number, g: number, b: number): number {
   return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
 }
 
-/**
- * Automatically calculates readable text contrast color (WCAG AA)
- * Returns dark text for bright backgrounds and white text for dark backgrounds.
- */
-export function getContrastTextColor(hexColor: string): string {
-  const rgb = hexToRgb(hexColor);
-  if (!rgb) return '#ffffff';
-  const luminance = getRelativeLuminance(rgb.r, rgb.g, rgb.b);
-  return luminance > 0.45 ? '#0f172a' : '#ffffff';
+export function getLuminance(hex: string): number {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return 0;
+  return getRelativeLuminance(rgb.r, rgb.g, rgb.b);
 }
 
 /**
- * Normalizes theme strings to the 4 canonical Engine Theme IDs:
- * theme-light | theme-dark (default) | theme-terminal | theme-custom
+ * Calculates WCAG 2.1 contrast ratio between two hex colors
+ */
+export function getContrastRatio(hexA: string, hexB: string): number {
+  const lumA = getLuminance(hexA);
+  const lumB = getLuminance(hexB);
+  const [hi, lo] = [lumA, lumB].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/**
+ * Returns either pure white (#ffffff) or dark slate (#0f172a), picking whichever provides higher contrast
+ */
+export function pickFg(bg: string): string {
+  return getContrastRatio(bg, '#ffffff') >= getContrastRatio(bg, '#0f172a') ? '#ffffff' : '#0f172a';
+}
+
+/**
+ * Determines whether a background hex is dark according to standard WCAG contrast
+ */
+export function isDarkBg(bg: string): boolean {
+  return pickFg(bg) === '#ffffff';
+}
+
+/**
+ * Automatically calculates readable text contrast color (WCAG AA)
+ */
+export function getContrastTextColor(hexColor: string): string {
+  return pickFg(hexColor);
+}
+
+/**
+ * Normalizes theme strings to the 5 canonical Engine Theme IDs:
+ * theme-glassnode | theme-light | theme-dark (default) | theme-terminal | theme-custom
  */
 export function normalizeEngineTheme(theme: string | null | undefined): EngineThemeId {
   if (!theme) return 'theme-dark';
@@ -184,25 +229,31 @@ export function normalizeEngineTheme(theme: string | null | undefined): EngineTh
 }
 
 /**
- * Checks if a given theme ID is dark
+ * Checks if a given theme ID is dark, accepting customBg parameter to prevent stale DOM read
  */
-export function isDarkEngineTheme(theme: EngineThemeId): boolean {
+export function isDarkEngineTheme(theme: EngineThemeId, customBg?: string): boolean {
   const norm = normalizeEngineTheme(theme);
   if (norm === 'theme-light' || norm === 'theme-glassnode') return false;
-  if (norm === 'theme-custom' && typeof window !== 'undefined') {
-    const customBg = document.documentElement.style.getPropertyValue('--custom-bg-hex');
+  if (norm === 'theme-terminal' || norm === 'theme-dark') return true;
+  if (norm === 'theme-custom') {
     if (customBg) {
-      const rgb = hexToRgb(customBg);
-      if (rgb) {
-        return getRelativeLuminance(rgb.r, rgb.g, rgb.b) <= 0.45;
-      }
+      return isDarkBg(customBg);
     }
+    const storedBg = safeGetLocalStorage('akira_custom_theme_bg');
+    if (storedBg) {
+      return isDarkBg(storedBg);
+    }
+    if (typeof window !== 'undefined') {
+      const domBg = document.documentElement.style.getPropertyValue('--custom-bg-hex');
+      if (domBg) return isDarkBg(domBg.trim());
+    }
+    return true;
   }
   return true;
 }
 
 /**
- * Applies CSS custom properties and classes to document root for the chosen theme
+ * Applies CSS custom properties, color-scheme, and classes to document root for the chosen theme
  */
 export function applyThemeToDocument(
   theme: EngineThemeId,
@@ -213,10 +264,15 @@ export function applyThemeToDocument(
 
   const root = document.documentElement;
   const norm = normalizeEngineTheme(theme);
-  const isDark = isDarkEngineTheme(norm);
+  // Calculate isDark immediately using customBg argument, preventing stale evaluation
+  const isDark = isDarkEngineTheme(norm, customBg);
 
   // Set canonical data-theme attribute
   root.setAttribute('data-theme', norm);
+  root.setAttribute('data-theme-light', String(!isDark));
+
+  // Set native browser color-scheme for correct native scrollbars & controls
+  root.style.colorScheme = isDark ? 'dark' : 'light';
 
   // Clear previous theme classes to prevent style clashes
   const allThemeClasses = [
@@ -228,24 +284,13 @@ export function applyThemeToDocument(
     'theme-modern-pink-light',
     'theme-cyber-pink-dark',
     'theme-classic-terminal',
-    'modern-pink-light',
-    'cyber-pink-dark',
-    'classic-terminal',
-    'glassnode',
-    'custom',
   ];
   root.classList.remove(...allThemeClasses);
 
   // Add active theme class
   root.classList.add(norm);
-  // Add legacy class alias for any CSS selectors expecting legacy class names
-  if (norm === 'theme-glassnode') root.classList.add('theme-glassnode');
-  if (norm === 'theme-light') root.classList.add('theme-modern-pink-light');
-  if (norm === 'theme-dark') root.classList.add('theme-cyber-pink-dark');
-  if (norm === 'theme-terminal') root.classList.add('theme-classic-terminal');
-  if (norm === 'theme-custom') root.classList.add('theme-custom');
 
-  // Set dark / light class for standard Tailwind utility compatibility
+  // Set dark / light class for Tailwind utility compatibility
   if (isDark) {
     root.classList.add('dark');
     root.classList.remove('light');
@@ -255,31 +300,32 @@ export function applyThemeToDocument(
   }
 
   // Synchronize browser tab favicon with active theme
-  const faviconLink = document.querySelector("link[rel='icon']") as HTMLLinkElement | null;
-  if (faviconLink) {
-    faviconLink.href = isDark ? '/favicon-dark.svg' : '/favicon-light.svg';
-  }
-  const appleTouchLink = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement | null;
-  if (appleTouchLink) {
-    appleTouchLink.href = isDark ? '/favicon-dark.svg' : '/favicon-light.svg';
-  }
+  try {
+    const faviconLink = document.querySelector("link[rel='icon']") as HTMLLinkElement | null;
+    if (faviconLink) {
+      faviconLink.href = isDark ? '/favicon-dark.svg' : '/favicon-light.svg';
+    }
+    const appleTouchLink = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement | null;
+    if (appleTouchLink) {
+      appleTouchLink.href = isDark ? '/favicon-dark.svg' : '/favicon-light.svg';
+    }
+  } catch {}
 
   // Handle custom color variables for theme-custom
   if (norm === 'theme-custom') {
     const accentRgb = hexToRgb(customHex) || { r: 236, g: 72, b: 153 };
     const bgRgb = hexToRgb(customBg) || { r: 11, g: 15, b: 25 };
-    const contrastText = getContrastTextColor(customHex);
-    const bgLuminance = getRelativeLuminance(bgRgb.r, bgRgb.g, bgRgb.b);
-    const isCustomBgDark = bgLuminance <= 0.45;
+    const contrastText = pickFg(customHex);
 
-    // Calculate harmonious surface and border colors based on bg contrast
-    const surfaceHex = isCustomBgDark
-      ? bgLuminance < 0.05
-        ? '#0B0F19'
-        : '#1E293B'
-      : '#FFFFFF';
-    const borderHex = isCustomBgDark ? 'rgba(51, 65, 85, 0.7)' : '#E2E8F0';
-    const textMainHex = isCustomBgDark ? '#F8FAFC' : '#0F172A';
+    // Look up if customBg matches a preset with an intentional surfaceHex
+    const presetMatch = PRESET_BACKGROUND_CONTRASTS.find(
+      (p) => p.hex.toLowerCase() === customBg.toLowerCase()
+    );
+    const surfaceHex = presetMatch ? presetMatch.surfaceHex : isDark ? '#1E293B' : '#FFFFFF';
+    const borderHex = isDark ? 'rgba(51, 65, 85, 0.7)' : '#E2E8F0';
+    const textMainHex = isDark ? '#F8FAFC' : '#0F172A';
+    // Dynamic text-muted based on light/dark background to guarantee >= 4.5:1 contrast
+    const textMutedHex = isDark ? '#94A3B8' : '#5A5A5A';
 
     root.style.setProperty('--custom-accent-hex', customHex);
     root.style.setProperty('--custom-accent-rgb', `${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}`);
@@ -292,6 +338,7 @@ export function applyThemeToDocument(
     root.style.setProperty('--custom-surface-hex', surfaceHex);
     root.style.setProperty('--custom-border-hex', borderHex);
     root.style.setProperty('--custom-text-main', textMainHex);
+    root.style.setProperty('--custom-text-muted', textMutedHex);
   } else {
     root.style.removeProperty('--custom-accent-hex');
     root.style.removeProperty('--custom-accent-rgb');
@@ -303,5 +350,6 @@ export function applyThemeToDocument(
     root.style.removeProperty('--custom-surface-hex');
     root.style.removeProperty('--custom-border-hex');
     root.style.removeProperty('--custom-text-main');
+    root.style.removeProperty('--custom-text-muted');
   }
 }

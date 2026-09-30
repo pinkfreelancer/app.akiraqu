@@ -163,11 +163,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           {/* Logo dengan sentuhan Cyborg Soft Pink Glow */}
           <div 
+            role="button"
+            tabIndex={0}
+            aria-label="AKIRAQU"
             onClick={() => handleProtectedAction()}
-            className="flex items-center space-x-3 cursor-pointer group select-none"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                if (e.key === ' ') e.preventDefault();
+                handleProtectedAction();
+              }
+            }}
+            className="flex items-center space-x-2 sm:space-x-3 min-w-0 cursor-pointer group select-none"
           >
             <div className="relative">
-              <div className="w-10 h-10 rounded-[2px] bg-pink-500/10 border border-pink-500/40 flex items-center justify-center transition-all">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-[2px] bg-pink-500/10 border border-pink-500/40 flex items-center justify-center transition-all">
                 <AkiraQuLogo size={26} theme={isDark ? 'dark' : 'light'} variant="symbol" />
               </div>
               <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-500 rounded-full pointer-events-none" />
@@ -175,14 +184,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <span className={`text-xl font-black tracking-wider font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <span className={`text-base min-[400px]:text-lg sm:text-xl font-black tracking-normal min-[400px]:tracking-wider font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   AKIRAQU
                 </span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded-[2px] font-mono font-bold bg-pink-500/15 text-pink-400 border border-pink-500/30">
+                <span className="hidden min-[520px]:inline-block px-1.5 py-0.5 rounded-[2px] bg-pink-500/10 border border-pink-500/30 text-[9px] font-mono text-pink-400 font-bold">
                   CYBORG INTELLIGENCE
                 </span>
               </div>
-              <span className={`text-[11px] font-sans -mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              <span className={`text-[11px] font-sans tracking-wide -mt-0.5 hidden sm:block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                 Analytic Quantitative Crypto Tools
               </span>
             </div>
@@ -217,7 +226,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </nav>
 
           {/* Top Actions: Theme, Lang, Mobile Menu & Launch App CTA */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
             {/* Language Toggle */}
             <button
               onClick={() => onSetLang(isId ? 'en' : 'id')}
@@ -232,7 +241,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Dark / Light Toggle */}
             <button
               onClick={onToggleTheme}
-              className={`p-1.5 sm:p-2 rounded-[2px] border transition-colors cursor-pointer ${
+              className={`hidden min-[400px]:inline-flex items-center justify-center p-1.5 sm:p-2 rounded-[2px] border transition-colors cursor-pointer ${
                 isDark ? 'bg-slate-900/80 border-slate-800 text-slate-300 hover:text-pink-400' : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600'
               }`}
               title={isDark ? 'Mode Terang' : 'Dark Mode'}
@@ -259,7 +268,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             ) : (
               <button
                 onClick={onNavigateToLogin}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] border text-xs font-mono font-bold transition-all cursor-pointer ${
+                className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] border text-xs font-mono font-bold transition-all cursor-pointer ${
                   isDark
                     ? 'bg-white hover:bg-slate-100 text-slate-900 border-slate-200'
                     : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-300 shadow-xs'
@@ -361,7 +370,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Main Hero Headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight max-w-5xl mx-auto leading-[1.12] font-display">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight max-w-5xl mx-auto leading-[1.12] font-display [text-wrap:balance]">
             {isId ? (
               <>
                 Menghubungkan Intuisi & Teknologi untuk{' '}
@@ -428,7 +437,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <span className="w-3 h-3 rounded-full bg-amber-500/80" />
                   <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
                   <span className={`ml-2 font-bold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    AKIRA.QU // CYBERNETIC PROTOCOL V2.4
+                    AKIRAQU Institutional Quantitative Workspace
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-pink-400 font-bold">
@@ -495,11 +504,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {trustMetrics.map((metric, idx) => {
               const IconComp = metric.icon;
               return (
-                <div key={idx} className="flex items-center space-x-3.5 group">
+                <div key={idx} className="flex items-center space-x-3.5 group min-w-0">
                   <div className="w-10 h-10 rounded-[2px] bg-pink-500/10 border border-pink-500/25 flex items-center justify-center text-pink-400 shrink-0 group-hover:scale-105 transition-transform">
                     <IconComp className="w-5 h-5" />
                   </div>
-                  <div className="flex flex-col">
+                  <div className="flex flex-col min-w-0">
                     <span className="text-xl sm:text-2xl font-black font-mono tracking-tight text-pink-400">
                       {metric.value}
                     </span>

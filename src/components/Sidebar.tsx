@@ -185,7 +185,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 type="button"
                 onClick={onToggleOpen}
-                className={`md:hidden p-1.5 rounded-lg transition-colors cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center ${
+                className={`md:hidden p-1.5 rounded-[2px] transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center ${
                   isDark
                     ? 'hover:bg-slate-800 text-slate-400 hover:text-white'
                     : 'hover:bg-slate-200 text-slate-600 hover:text-slate-900'
@@ -201,7 +201,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               type="button"
               onClick={onToggleOpen}
-              className={`p-1.5 rounded-lg transition-colors cursor-pointer flex items-center justify-center ${
+              className={`p-1.5 rounded-[2px] transition-colors cursor-pointer flex items-center justify-center min-h-[32px] min-w-[32px] ${
                 isDark
                   ? 'text-slate-400 hover:text-white hover:bg-slate-800/50'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/60'
@@ -233,7 +233,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={isId ? 'Cari modul (30 fitur)...' : 'Search 30 modules...'}
-                className={`w-full pl-8 pr-7 py-1.5 rounded-lg text-xs font-mono transition-all outline-hidden border ${
+                className={`w-full pl-8 pr-7 py-1.5 rounded-[2px] text-xs font-mono transition-all outline-hidden border ${
                   isDark
                     ? 'bg-[#0f172a] border-[#1e293b] text-white placeholder-slate-500 focus:border-pink-500/50'
                     : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-pink-500'
@@ -251,7 +251,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               )}
             </div>
 
-            {/* Category Filter Pills (Ordered by Workflow) */}
+            {/* Category Filter Tabs (Ordered by Workflow) */}
             <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none text-[11px] font-mono font-semibold">
               {CATEGORY_TABS.map((tab) => {
                 const isActive = activeCategory === tab.key;
@@ -260,7 +260,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     key={tab.key}
                     type="button"
                     onClick={() => setActiveCategory(tab.key)}
-                    className={`px-2 py-1 rounded-md transition-colors cursor-pointer shrink-0 ${
+                    className={`px-2 py-1 rounded-[2px] transition-colors cursor-pointer shrink-0 ${
                       isActive
                         ? isDark
                           ? 'bg-pink-500/15 text-pink-300 border border-pink-500/30'
@@ -291,7 +291,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   setSearchQuery('');
                   setActiveCategory('all');
                 }}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-bold rounded-md bg-pink-600 hover:bg-pink-500 text-white cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-bold rounded-[2px] bg-pink-600 hover:bg-pink-500 text-white cursor-pointer"
               >
                 <RotateCcw className="w-3 h-3" />
                 <span>{isId ? 'Reset Filter' : 'Reset Filter'}</span>
@@ -312,7 +312,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           {group.groupName}
                         </span>
                       </div>
-                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800/60 text-slate-400 font-mono">
+                      <span className="text-[10px] px-1.5 py-0.2 rounded-[2px] bg-slate-800/60 text-slate-400 font-mono tabular-nums">
                         {group.items.length}
                       </span>
                     </div>
@@ -330,7 +330,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             key={item.id}
                             type="button"
                             onClick={() => handleItemClick(item.id)}
-                            className={`w-10 h-10 mx-auto rounded-xl flex items-center justify-center transition-all cursor-pointer relative group ${
+                            className={`w-10 h-10 mx-auto rounded-[2px] flex items-center justify-center transition-all cursor-pointer relative group ${
                               isActive
                                 ? isDark
                                   ? 'bg-pink-500/15 text-[#EC4899] shadow-xs'
@@ -357,7 +357,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           key={item.id}
                           type="button"
                           onClick={() => handleItemClick(item.id)}
-                          className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer group min-h-[34px] ${
+                          className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-[2px] text-xs transition-all cursor-pointer group min-h-[34px] ${
                             isActive
                               ? isDark
                                 ? 'bg-pink-500/15 text-pink-100 font-semibold shadow-xs'
@@ -369,7 +369,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           aria-current={isActive ? 'page' : undefined}
                         >
                           <div
-                            className={`shrink-0 p-1 rounded-md transition-colors ${
+                            className={`shrink-0 p-1 rounded-[2px] transition-colors ${
                               isActive
                                 ? isDark
                                   ? 'text-[#EC4899]'
@@ -387,7 +387,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                             {item.badge && (
                               <span
-                                className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-semibold shrink-0 ml-1.5 ${item.badgeColor}`}
+                                className={`text-[10px] px-1.5 py-0.2 rounded-[2px] font-mono font-semibold shrink-0 ml-1.5 ${item.badgeColor}`}
                               >
                                 {item.badge}
                               </span>
@@ -413,7 +413,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="space-y-2">
               {marketBias && (
                 <div
-                  className={`p-2 rounded-xl border flex items-center justify-between text-[11px] font-mono ${
+                  className={`p-2 rounded-[2px] border flex items-center justify-between text-[11px] font-mono ${
                     marketBias === 'BULLISH'
                       ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
                       : marketBias === 'BEARISH'
@@ -430,7 +430,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <span className="font-bold truncate">Bias: {marketBias}</span>
                   </div>
                   {confluenceScore !== undefined && (
-                    <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-black/40 text-slate-200 shrink-0">
+                    <span className="text-xs font-semibold px-1.5 py-0.5 rounded-[2px] bg-black/40 text-slate-200 shrink-0 tabular-nums">
                       {confluenceScore}%
                     </span>
                   )}

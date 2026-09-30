@@ -63,11 +63,11 @@ export interface NavGroupConfig {
 }
 
 export const SIDEBAR_NAV_GROUPS: NavGroupConfig[] = [
-  // 1. 🌐 DATA MAKRO & KONTEKS (Buka Sesi)
+  // 1. Data Makro & Konteks (Buka Sesi)
   {
     key: 'macro',
-    groupNameId: '🌐 1. DATA MAKRO & KONTEKS',
-    groupNameEn: '🌐 1. MACRO & CONTEXT DATA',
+    groupNameId: '01. Data Makro & Konteks',
+    groupNameEn: '01. Macro & Context Data',
     icon: Globe,
     items: [
       {
@@ -107,11 +107,11 @@ export const SIDEBAR_NAV_GROUPS: NavGroupConfig[] = [
     ],
   },
 
-  // 2. 📊 PASAR & SCREENING (Cari Peluang)
+  // 2. Pasar & Screening (Cari Peluang)
   {
     key: 'market',
-    groupNameId: '📊 2. PASAR & SCREENING',
-    groupNameEn: '📊 2. MARKET & SCREENING',
+    groupNameId: '02. Pasar & Screening',
+    groupNameEn: '02. Market & Screening',
     icon: Compass,
     items: [
       {
@@ -161,11 +161,11 @@ export const SIDEBAR_NAV_GROUPS: NavGroupConfig[] = [
     ],
   },
 
-  // 3. 🔍 INDIKATOR & SCREENING TEKNIKAL (Validasi Sinyal)
+  // 3. Indikator & Screening Teknikal (Validasi Sinyal)
   {
     key: 'technical',
-    groupNameId: '🔍 3. INDIKATOR & TEKNIKAL',
-    groupNameEn: '🔍 3. INDICATORS & TECHNICAL',
+    groupNameId: '03. Indikator & Teknikal',
+    groupNameEn: '03. Indicators & Technical',
     icon: Layers,
     items: [
       {
@@ -227,11 +227,11 @@ export const SIDEBAR_NAV_GROUPS: NavGroupConfig[] = [
     ],
   },
 
-  // 4. 🧪 RISET & STRATEGI (Hitung Risiko)
+  // 4. Riset & Strategi (Hitung Risiko)
   {
     key: 'research',
-    groupNameId: '🧪 4. RISET & STRATEGI',
-    groupNameEn: '🧪 4. RESEARCH & STRATEGY',
+    groupNameId: '04. Riset & Strategi',
+    groupNameEn: '04. Research & Strategy',
     icon: FlaskConical,
     items: [
       {
@@ -271,11 +271,11 @@ export const SIDEBAR_NAV_GROUPS: NavGroupConfig[] = [
     ],
   },
 
-  // 5. ⚡ EKSEKUSI AKTIF (Eksekusi)
+  // 5. Eksekusi Aktif (Eksekusi)
   {
     key: 'execution',
-    groupNameId: '⚡ 5. EKSEKUSI AKTIF',
-    groupNameEn: '⚡ 5. ACTIVE EXECUTION',
+    groupNameId: '05. Eksekusi Aktif',
+    groupNameEn: '05. Active Execution',
     icon: Zap,
     items: [
       {
@@ -315,11 +315,11 @@ export const SIDEBAR_NAV_GROUPS: NavGroupConfig[] = [
     ],
   },
 
-  // 6. 🔧 KONEKSI & ALERT (Pantau)
+  // 6. Koneksi & Alert (Pantau)
   {
     key: 'connection',
-    groupNameId: '🔧 6. KONEKSI & ALERT',
-    groupNameEn: '🔧 6. CONNECTIONS & ALERTS',
+    groupNameId: '06. Koneksi & Alert',
+    groupNameEn: '06. Connections & Alerts',
     icon: BellRing,
     items: [
       {
@@ -349,11 +349,11 @@ export const SIDEBAR_NAV_GROUPS: NavGroupConfig[] = [
     ],
   },
 
-  // 7. 📈 EVALUASI & RIWAYAT (Evaluasi)
+  // 7. Evaluasi & Riwayat (Evaluasi)
   {
     key: 'evaluation',
-    groupNameId: '📈 7. EVALUASI & RIWAYAT',
-    groupNameEn: '📈 7. EVALUATION & HISTORY',
+    groupNameId: '07. Evaluasi & Riwayat',
+    groupNameEn: '07. Evaluation & History',
     icon: BookOpen,
     items: [
       {
@@ -377,11 +377,11 @@ export const SIDEBAR_NAV_GROUPS: NavGroupConfig[] = [
     ],
   },
 
-  // 8. ⚙️ SISTEM
+  // 8. Sistem & Pengaturan
   {
     key: 'system',
-    groupNameId: '⚙️ SISTEM',
-    groupNameEn: '⚙️ SYSTEM',
+    groupNameId: '08. Sistem & Pengaturan',
+    groupNameEn: '08. System & Settings',
     icon: SettingsIcon,
     isSystemDivider: true,
     items: [
@@ -406,5 +406,5 @@ export const CATEGORY_TABS: Array<{ key: CategoryKey; labelId: string; labelEn: 
   { key: 'execution', labelId: '5. Eksekusi', labelEn: '5. Execution' },
   { key: 'connection', labelId: '6. Pantau', labelEn: '6. Monitor' },
   { key: 'evaluation', labelId: '7. Evaluasi', labelEn: '7. History' },
-  { key: 'system', labelId: 'Sistem', labelEn: 'System' },
+  { key: 'system', labelId: '8. Sistem', labelEn: '8. System' },
 ];
