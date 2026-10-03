@@ -143,6 +143,18 @@ export class ConnectionManager {
       return;
     }
 
+    // Gateway fallback: if proxy fails on 2nd attempt, switch to direct Binance; if direct fails, switch back to proxy
+    if (this.reconnectAttempts === 2) {
+      if (this.url.includes('/ws/market') || this.url.includes('/ws/binance')) {
+        console.info('[Realtime WS] Switching to direct Binance WebSocket fallback gateway...');
+        this.url = 'wss://stream.binance.com:9443/ws';
+      } else if (typeof window !== 'undefined' && window.location?.host) {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        console.info('[Realtime WS] Switching to server-side WebSocket proxy bypass gateway...');
+        this.url = `${protocol}//${window.location.host}/ws/market`;
+      }
+    }
+
     const baseDelay = Math.min(
       this.config.initialDelayMs * Math.pow(this.config.factor, this.reconnectAttempts),
       this.config.maxDelayMs

@@ -78,7 +78,7 @@ export const PositionSizingView: React.FC<PositionSizingViewProps> = ({
                 setRiskPercent(Number(halfKellyRisk.toFixed(1)));
               }}
               className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                strategyMode === 'HALF_KELLY' ? 'bg-cyan-500 text-slate-950 shadow-xs' : 'text-slate-400 hover:text-white'
+                strategyMode === 'HALF_KELLY' ? 'bg-pink-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
               }`}
             >
               Half-Kelly ({halfKellyRisk.toFixed(1)}%)
@@ -126,7 +126,7 @@ export const PositionSizingView: React.FC<PositionSizingViewProps> = ({
                 type="number"
                 value={leverage}
                 onChange={(e) => setLeverage(Number(e.target.value) || 1)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-cyan-400 font-mono font-bold text-sm outline-hidden focus:border-pink-500"
+                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-pink-400 font-mono font-bold text-sm outline-hidden focus:border-pink-500"
               />
             </div>
           </div>
@@ -169,7 +169,7 @@ export const PositionSizingView: React.FC<PositionSizingViewProps> = ({
               </div>
               <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
                 <span className="text-[10px] font-mono text-slate-400 block">Margin Modal Diperlukan</span>
-                <span className="text-lg font-black font-mono text-cyan-400">${marginRequiredUsd.toFixed(2)}</span>
+                <span className="text-lg font-black font-mono text-pink-400">${marginRequiredUsd.toFixed(2)}</span>
               </div>
               <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
                 <span className="text-[10px] font-mono text-slate-400 block">Kuantitas Koin ({currentSymbol.replace('/USDT', '')})</span>

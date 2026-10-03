@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Download, ShieldCheck, FileJson, FileText, CheckCircle2 } from 'lucide-react';
 import { ConfluenceEvaluation } from '../types/crypto.types';
 import { Language } from '../i18n/translations';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -16,12 +17,19 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   evaluation,
   lang = 'id',
 }) => {
+  const { user } = useAuth();
   const [exportType, setExportType] = useState<'BUNDLE_JSON' | 'MARKDOWN' | 'CSV'>('BUNDLE_JSON');
-  const [gdprEmail, setGdprEmail] = useState('');
+  const [gdprEmail, setGdprEmail] = useState(user?.email || '');
   const [erasureConfirmation, setErasureConfirmation] = useState('');
   const [isExporting, setIsExporting] = useState(false);
   const [isErasing, setIsErasing] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.email && !gdprEmail) {
+      setGdprEmail(user.email);
+    }
+  }, [user?.email]);
 
   if (!isOpen) return null;
 

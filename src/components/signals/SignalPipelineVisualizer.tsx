@@ -45,9 +45,9 @@ export const SignalPipelineVisualizer: React.FC<SignalPipelineVisualizerProps> =
       name: isId ? '1. Ingest & Normalization' : '1. Ingest & Normalization',
       subtitle: isId ? 'Backend / CCXT / WebSocket' : 'Backend / CCXT / WebSocket Feed',
       icon: Server,
-      color: 'text-cyan-400',
-      borderColor: 'border-cyan-500/40',
-      bgColor: 'bg-cyan-500/10',
+      color: 'text-pink-400',
+      borderColor: 'border-pink-500/40',
+      bgColor: 'bg-pink-500/10',
       summary: isId
         ? 'Mengumpulkan data real-time asinkron dari Binance, Bybit, dan OKX (Tick harga, volume L2, dan data likuidasi derivatif) secara dinormalisasi.'
         : 'Asynchronously aggregate real-time exchange feeds via CCXT & WebSockets with normalized data contracts.',

@@ -788,6 +788,49 @@ function calculateOrderFlow(candles: OHLCVCandle[]): OrderFlowIndicator {
   };
 }
 
+// Helper to compute standard Friday option expiration dates dynamically
+export function getUpcomingOptionExpiries(baseTimestamp?: number): { nearExpiry: string; nextExpiry: string } {
+  const base = baseTimestamp ? new Date(baseTimestamp) : new Date();
+  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+  // Helper to find the last Friday of a given year and month (0-indexed)
+  const getLastFridayOfMonth = (year: number, month: number): Date => {
+    const lastDay = new Date(Date.UTC(year, month + 1, 0, 8, 0, 0)); // 08:00 UTC Deribit settlement
+    const dayOfWeek = lastDay.getUTCDay(); // 0=Sun, 5=Fri
+    const diff = dayOfWeek >= 5 ? dayOfWeek - 5 : dayOfWeek + 2;
+    lastDay.setUTCDate(lastDay.getUTCDate() - diff);
+    return lastDay;
+  };
+
+  const formatDate = (d: Date): string => {
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    const mon = months[d.getUTCMonth()];
+    const yr = d.getUTCFullYear();
+    return `${day}-${mon}-${yr}`;
+  };
+
+  const currentYear = base.getUTCFullYear();
+  const currentMonth = base.getUTCMonth();
+
+  const thisMonthLastFri = getLastFridayOfMonth(currentYear, currentMonth);
+  let nearExpiryDate: Date;
+  let nextExpiryDate: Date;
+
+  // If this month's last Friday is more than 24 hours in the future
+  if (base.getTime() < thisMonthLastFri.getTime() - 24 * 3600 * 1000) {
+    nearExpiryDate = thisMonthLastFri;
+    nextExpiryDate = getLastFridayOfMonth(currentMonth === 11 ? currentYear + 1 : currentYear, (currentMonth + 1) % 12);
+  } else {
+    nearExpiryDate = getLastFridayOfMonth(currentMonth === 11 ? currentYear + 1 : currentYear, (currentMonth + 1) % 12);
+    nextExpiryDate = getLastFridayOfMonth(currentMonth >= 10 ? currentYear + 1 : currentYear, (currentMonth + 2) % 12);
+  }
+
+  return {
+    nearExpiry: formatDate(nearExpiryDate),
+    nextExpiry: formatDate(nextExpiryDate),
+  };
+}
+
 // 12. Option Flow (Derivatives & Open Interest)
 function calculateOptionFlow(candles: OHLCVCandle[]): OptionFlowIndicator {
   const last = candles[candles.length - 1];
@@ -861,27 +904,52 @@ function calculateOptionFlow(candles: OHLCVCandle[]): OptionFlowIndicator {
       ? 'POSITIVE_GAMMA_STABILIZING'
       : 'NEGATIVE_GAMMA_VOLATILE';
 
-  // Generate Notional Open Interest display based on asset tier
-  let openInterestNotional = '$4.85B';
-  if (currentPrice > 20000) openInterestNotional = '$18.42B'; // BTC scale
-  else if (currentPrice > 1000) openInterestNotional = '$6.85B'; // ETH scale
-  else if (currentPrice > 50) openInterestNotional = '$1.42B'; // Large cap
-  else openInterestNotional = '$380M';
+  // Dynamically estimate open interest based on volume turnover and asset tier
+  const recentVolumeSum = lookback.reduce((acc, c) => acc + (c.volume || 0), 0);
+  const avgVolumePerCandle = recentVolumeSum / (lookback.length || 1);
+  const estimated24hTurnoverUsd = avgVolumePerCandle * currentPrice * 24;
 
-  // Block trades
+  let baselineOiUsd = 450_000_000;
+  if (currentPrice > 20000) baselineOiUsd = 18_500_000_000; // BTC tier
+  else if (currentPrice > 1000) baselineOiUsd = 6_800_000_000;  // ETH tier
+  else if (currentPrice > 100) baselineOiUsd = 1_500_000_000;   // Large cap tier
+  else if (currentPrice > 10) baselineOiUsd = 450_000_000;      // Mid cap tier
+  else baselineOiUsd = 120_000_000;                             // Altcoin tier
+
+  const volumeMultiplier = estimated24hTurnoverUsd > 0
+    ? Math.max(0.7, Math.min(1.8, estimated24hTurnoverUsd / (baselineOiUsd * 0.4)))
+    : (1 + ((currentPrice * 13) % 20) / 100);
+  const dynamicOiVal = baselineOiUsd * volumeMultiplier;
+
+  let openInterestNotional = `$${(dynamicOiVal / 1_000_000_000).toFixed(2)}B`;
+  if (dynamicOiVal < 1_000_000_000) {
+    openInterestNotional = `$${(dynamicOiVal / 1_000_000).toFixed(1)}M`;
+  }
+
+  // Dynamic upcoming Friday expiration dates calculated based on the latest candle / current date
+  const expiries = getUpcomingOptionExpiries(last.time);
+
+  const dynamicBlock1Premium = dynamicOiVal > 1_000_000_000
+    ? `$${((dynamicOiVal * 0.0003) / 1_000_000).toFixed(1)}M`
+    : `$${Math.max(10, Math.round((dynamicOiVal * 0.0003) / 1000))}K`;
+  const dynamicBlock2Premium = dynamicOiVal > 1_000_000_000
+    ? `$${((dynamicOiVal * 0.00018) / 1_000_000).toFixed(1)}M`
+    : `$${Math.max(10, Math.round((dynamicOiVal * 0.00018) / 1000))}K`;
+
+  // Dynamic Block trades with live upcoming expiries
   const unusualOptionsActivity = [
     {
       type: pcrSentiment === 'BULLISH_CALL_HEAVY' ? ('CALL_BLOCK' as const) : ('PUT_BLOCK' as const),
       strike: Number((baseStrike + (pcrSentiment === 'BULLISH_CALL_HEAVY' ? strikeStep * 2 : -strikeStep * 2)).toFixed(currentPrice < 2 ? 4 : 2)),
-      expiry: '28-MAR-2026',
-      premium: currentPrice > 10000 ? '$4.2M' : '$850K',
+      expiry: expiries.nearExpiry,
+      premium: dynamicBlock1Premium,
       sentiment: pcrSentiment === 'BULLISH_CALL_HEAVY' ? ('BULLISH' as const) : ('BEARISH' as const),
     },
     {
       type: 'CALL_BLOCK' as const,
       strike: Number((baseStrike + strikeStep).toFixed(currentPrice < 2 ? 4 : 2)),
-      expiry: '25-APR-2026',
-      premium: currentPrice > 10000 ? '$2.8M' : '$420K',
+      expiry: expiries.nextExpiry,
+      premium: dynamicBlock2Premium,
       sentiment: 'BULLISH' as const,
     },
   ];
@@ -900,7 +968,7 @@ function calculateOptionFlow(candles: OHLCVCandle[]): OptionFlowIndicator {
     confidence = 68;
   }
 
-  const summary = `Put/Call Ratio ${putCallRatio} (${pcrSentiment.replace('_', ' ')}). Max Pain di $${maxPainPrice} (${maxPainDistancePct >= 0 ? '+' : ''}${maxPainDistancePct}%). IV 30D: ${impliedVolatility}%.`;
+  const summary = `Put/Call Ratio ${putCallRatio} (${pcrSentiment.replace('_', ' ')}). Max Pain di $${maxPainPrice} (${maxPainDistancePct >= 0 ? '+' : ''}${maxPainDistancePct}%). IV 30D: ${impliedVolatility}%. OI: ${openInterestNotional}.`;
 
   return {
     putCallRatio,

@@ -37,6 +37,7 @@ export interface TerminalContextValue {
   navigateToLogin: () => void;
   navigateToTerminal: (stage?: StageId) => void;
   navigateToDocs: () => void;
+  navigateToSystemHealth: () => void;
   selectStage: (stage: StageId) => void;
   openBacktest: (indicatorKey?: IndicatorKey) => void;
 
@@ -123,6 +124,7 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     navigateToLogin,
     navigateToTerminal,
     navigateToDocs,
+    navigateToSystemHealth,
     selectStage,
     openBacktest,
   } = useTerminalNavigation('ticker');
@@ -170,10 +172,11 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   }, []);
 
-  const setTraderWorkbenchVisible = useCallback((visible: boolean) => {
-    setIsTraderWorkbenchVisible(visible);
+  const setTraderWorkbenchVisible = useCallback((visible: boolean | any) => {
+    const safeVal = typeof visible === 'boolean' ? visible : Boolean(visible);
+    setIsTraderWorkbenchVisible(safeVal);
     try {
-      localStorage.setItem('akiraqu_trader_workbench_visible', String(visible));
+      localStorage.setItem('akiraqu_trader_workbench_visible', String(safeVal));
     } catch {}
   }, []);
 
@@ -287,9 +290,13 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   }, []);
 
-  const setWorkspaceModeDirect = useCallback((mode: 'classic' | 'split' | 'launchpad') => {
-    setWorkspaceMode(mode);
-    localStorage.setItem('nexus_workspace_mode', mode);
+  const setWorkspaceModeDirect = useCallback((mode: 'classic' | 'split' | 'launchpad' | any) => {
+    if (mode === 'classic' || mode === 'split' || mode === 'launchpad') {
+      setWorkspaceMode(mode);
+      try {
+        localStorage.setItem('nexus_workspace_mode', mode);
+      } catch {}
+    }
   }, []);
 
   // Analysis engine business logic hook
@@ -497,6 +504,7 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     navigateToLogin,
     navigateToTerminal,
     navigateToDocs,
+    navigateToSystemHealth,
     selectStage,
     openBacktest,
 
@@ -571,6 +579,7 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     navigateToLogin,
     navigateToTerminal,
     navigateToDocs,
+    navigateToSystemHealth,
     selectStage,
     openBacktest,
     lang,

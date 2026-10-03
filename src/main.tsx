@@ -4,6 +4,10 @@ import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from './contexts/AuthContext.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary.tsx';
+import { initClientErrorLogger } from './utils/clientErrorLogger.ts';
+
+// Initialize centralized client-side error reporting for mobile & browser observability
+initClientErrorLogger();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

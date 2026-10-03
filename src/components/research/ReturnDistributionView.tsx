@@ -17,7 +17,7 @@ export const ReturnDistributionView: React.FC<ReturnDistributionViewProps> = ({
 
   const stats = [
     { label: 'Sharpe Ratio', value: '2.48', rating: 'Exceptional (> 2.0)', color: 'text-emerald-400' },
-    { label: 'Sortino Ratio', value: '3.82', rating: 'High Downside Protection', color: 'text-cyan-400' },
+    { label: 'Sortino Ratio', value: '3.82', rating: 'High Downside Protection', color: 'text-pink-400' },
     { label: 'Max Historical Drawdown', value: '-11.4%', rating: 'Low Risk Profile', color: 'text-amber-400' },
     { label: 'Value at Risk (VaR 95%)', value: '-2.18% / day', rating: '95% Confidence Bound', color: 'text-indigo-400' },
     { label: 'Skewness (Distribusi)', value: '+0.42 (Right Skew)', rating: 'Positive Asymmetric Gains', color: 'text-pink-400' },
@@ -30,7 +30,7 @@ export const ReturnDistributionView: React.FC<ReturnDistributionViewProps> = ({
     { range: '-2% s/d 0%', frequency: 28, count: 126, color: 'bg-amber-600' },
     { range: '0% s/d +2%', frequency: 36, count: 162, color: 'bg-emerald-600' },
     { range: '+2% s/d +4%', frequency: 14, count: 63, color: 'bg-emerald-500' },
-    { range: '> +4%', frequency: 6, count: 27, color: 'bg-cyan-500' },
+    { range: '> +4%', frequency: 6, count: 27, color: 'bg-pink-500' },
   ];
 
   return (

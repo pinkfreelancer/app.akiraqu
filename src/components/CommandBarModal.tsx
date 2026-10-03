@@ -468,7 +468,7 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-mono text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30">
+            <span className="text-[11px] font-mono text-pink-400 bg-pink-950/60 px-2 py-0.5 rounded border border-pink-500/30">
               {filteredCommands.length} {lang === 'id' ? 'opsi' : 'options'}
             </span>
             <button
@@ -482,7 +482,7 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
 
         {/* Search Input Row */}
         <div className="flex items-center gap-3 px-4 py-3 bg-[#090d16]">
-          <div className="p-1 rounded bg-cyan-500/10 text-cyan-400 font-mono text-xs font-bold shrink-0">
+          <div className="p-1 rounded bg-pink-500/10 text-pink-400 font-mono text-xs font-bold shrink-0">
             &gt;_
           </div>
           <input
@@ -530,7 +530,7 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
                 onClick={() => setSelectedCategory(cat.id as any)}
                 className={`px-2.5 py-1 rounded text-xs font-mono font-medium transition-all cursor-pointer shrink-0 ${
                   isTabActive
-                    ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/60 font-bold shadow-xs'
+                    ? 'bg-pink-500/25 text-pink-300 border border-pink-500/60 font-bold shadow-xs'
                     : 'bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-slate-200 hover:bg-slate-800'
                 }`}
               >
@@ -551,7 +551,7 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
       >
         {filteredCommands.length === 0 ? (
           <div className="py-12 text-center text-slate-400">
-            <Search className="w-8 h-8 mx-auto mb-2 text-cyan-400/60" />
+            <Search className="w-8 h-8 mx-auto mb-2 text-pink-400/60" />
             <p className="text-sm font-semibold text-slate-200">
               {lang === 'id' ? 'Tidak ada perintah atau simbol yang cocok' : 'No matching command or symbol found'}
             </p>
@@ -575,7 +575,7 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
                 onMouseEnter={() => setSelectedIndex(idx)}
                 className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg cursor-pointer transition-all ${
                   isSelected
-                    ? 'bg-cyan-500/20 text-white border border-cyan-400/50 shadow-sm'
+                    ? 'bg-pink-500/20 text-white border border-pink-400/50 shadow-sm'
                     : 'text-slate-200 border border-transparent hover:bg-slate-800/80 hover:text-white'
                 }`}
               >
@@ -583,8 +583,8 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
                   <div
                     className={`p-2 rounded-md shrink-0 border ${
                       isSelected
-                        ? 'bg-cyan-500 text-slate-950 border-cyan-400 font-bold'
-                        : 'bg-slate-800/90 text-cyan-400 border-slate-700'
+                        ? 'bg-pink-600 text-white border-pink-500 font-bold'
+                        : 'bg-slate-800/90 text-pink-400 border-slate-700'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -621,11 +621,11 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
 
                 <div className="flex items-center gap-2 shrink-0 ml-3">
                   {cmd.shortcut && (
-                    <kbd className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-slate-800 border border-slate-700 text-cyan-300 shadow-xs">
+                    <kbd className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-slate-800 border border-slate-700 text-pink-300 shadow-xs">
                       {cmd.shortcut}
                     </kbd>
                   )}
-                  {isSelected && <ArrowRight className="w-4 h-4 text-cyan-400" />}
+                  {isSelected && <ArrowRight className="w-4 h-4 text-pink-400" />}
                 </div>
               </div>
             );
@@ -646,7 +646,7 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
             <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 text-slate-300 rounded mr-1">ESC</kbd> Tutup
           </span>
         </div>
-        <span className="text-cyan-400 font-semibold hidden sm:inline">
+        <span className="text-pink-400 font-semibold hidden sm:inline">
           {lang === 'id' ? 'Pencarian & Perintah Cepat • AKIRA.QU' : 'Trading Workspace • AKIRA.QU'}
         </span>
       </div>

@@ -209,42 +209,42 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
       )}
 
       {/* Chart Top Bar & Overlays Controller */}
-      <div className={`flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b ${
+      <div className={`flex flex-col lg:flex-row lg:items-center justify-between gap-2 sm:gap-3 pb-2.5 sm:pb-3 border-b ${
         isDark ? 'border-slate-800/80' : 'border-slate-200'
       }`}>
-        {/* Active Candle Telemetry */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-mono">
-          <div className={`flex items-center gap-1.5 font-bold text-sm ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
+        {/* Active Candle Telemetry (Scrollable on small screens) */}
+        <div className="flex items-center gap-2 sm:gap-3 text-xs font-mono overflow-x-auto scrollbar-none py-0.5 whitespace-nowrap">
+          <div className={`flex items-center gap-1.5 font-bold text-xs sm:text-sm shrink-0 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
             <span>{symbol}</span>
-            <span className={`px-1.5 py-0.5 rounded-[2px] text-[11px] border ${
+            <span className={`px-1.5 py-0.5 rounded-[2px] text-[10px] sm:text-[11px] border ${
               isDark ? 'bg-slate-800 text-pink-400 border-slate-700' : 'bg-pink-50 text-pink-700 border-pink-200'
             }`}>
               {timeframe}
             </span>
           </div>
-          <div className="text-slate-400">
+          <div className="text-slate-400 shrink-0 text-[11px] sm:text-xs">
             O: <span className="text-slate-200">${formatChartPrice(activeCandle.open)}</span>
           </div>
-          <div className="text-slate-400">
+          <div className="text-slate-400 shrink-0 text-[11px] sm:text-xs">
             H: <span className="text-emerald-400">${formatChartPrice(activeCandle.high)}</span>
           </div>
-          <div className="text-slate-400">
+          <div className="text-slate-400 shrink-0 text-[11px] sm:text-xs">
             L: <span className="text-rose-400">${formatChartPrice(activeCandle.low)}</span>
           </div>
-          <div className="text-slate-400">
+          <div className="text-slate-400 shrink-0 text-[11px] sm:text-xs">
             C: <span className={isUpActive ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold'}>
               ${formatChartPrice(activeCandle.close)}
             </span>
           </div>
-          <div className={`font-semibold ${isUpActive ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <div className={`font-semibold shrink-0 text-[11px] sm:text-xs ${isUpActive ? 'text-emerald-400' : 'text-rose-400'}`}>
             ({isUpActive ? '+' : ''}{pctChange}%)
           </div>
-          <div className="text-slate-400 hidden sm:inline-block">
+          <div className="text-slate-400 hidden sm:inline-block shrink-0 text-[11px] sm:text-xs">
             Vol: {activeCandle.volume.toLocaleString()}
           </div>
           {isDataSimulated ? (
             <span
-              className="px-2 py-0.5 rounded-[2px] text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 cursor-help"
+              className="px-2 py-0.5 rounded-[2px] text-[9px] sm:text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 cursor-help shrink-0"
               title={lang === 'id' ? 'Umpan data offline estimasi matematis. Rekoneksi bursa aktif berlangsung otomatis.' : 'Offline simulated data feed. Automatic exchange reconnection active.'}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
@@ -252,7 +252,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             </span>
           ) : (
             <span
-              className="px-2 py-0.5 rounded-[2px] text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1"
+              className="px-2 py-0.5 rounded-[2px] text-[9px] sm:text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1 shrink-0"
               title={`${selectedExchange} ${selectedMarketType} Tier-1 Feed (${candles.length} Bar)`}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -261,13 +261,13 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
           )}
         </div>
 
-        {/* Toggle Overlays and Maximize Controls */}
-        <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 text-xs font-mono">
+        {/* Toggle Overlays and Maximize Controls (Scrollable 1-row on mobile) */}
+        <div className="flex items-center gap-1 sm:gap-1.5 text-xs font-mono overflow-x-auto scrollbar-none py-0.5 whitespace-nowrap">
           <button
             id="chart-toggle-vwap"
             type="button"
             onClick={() => setShowVWAP(!showVWAP)}
-            className={`px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[32px] ${
+            className={`px-2 sm:px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[28px] sm:min-h-[32px] shrink-0 ${
               showVWAP ? 'bg-pink-500/20 text-pink-300 border-pink-500/40' : 'text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
           >
@@ -277,7 +277,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="chart-toggle-avwap"
             type="button"
             onClick={() => setShowAVWAP(!showAVWAP)}
-            className={`px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[32px] flex items-center gap-1 ${
+            className={`px-2 sm:px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[28px] sm:min-h-[32px] flex items-center gap-1 shrink-0 ${
               showAVWAP ? 'bg-indigo-950/60 text-indigo-300 border-indigo-500/50' : 'text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
             title="Anchored VWAP (Daily Session, Swing High, Swing Low)"
@@ -289,7 +289,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="chart-toggle-smc"
             type="button"
             onClick={() => setShowSMC(!showSMC)}
-            className={`px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[32px] ${
+            className={`px-2 sm:px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[28px] sm:min-h-[32px] shrink-0 ${
               showSMC ? 'bg-amber-950/60 text-amber-300 border-amber-500/50' : 'text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
           >
@@ -299,7 +299,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="chart-toggle-fib"
             type="button"
             onClick={() => setShowFib(!showFib)}
-            className={`px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[32px] ${
+            className={`px-2 sm:px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[28px] sm:min-h-[32px] shrink-0 ${
               showFib ? 'bg-slate-800 text-pink-300 border-pink-500/40' : 'text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
           >
@@ -309,7 +309,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="chart-toggle-sr"
             type="button"
             onClick={() => setShowSR(!showSR)}
-            className={`px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[32px] ${
+            className={`px-2 sm:px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[28px] sm:min-h-[32px] shrink-0 ${
               showSR ? 'bg-slate-800 text-slate-200 border-slate-600' : 'text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
           >
@@ -319,7 +319,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="chart-toggle-liq-heatmap"
             type="button"
             onClick={() => setShowLiqHeatmap(!showLiqHeatmap)}
-            className={`px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border flex items-center gap-1 min-h-[32px] ${
+            className={`px-2 sm:px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border flex items-center gap-1 min-h-[28px] sm:min-h-[32px] shrink-0 ${
               showLiqHeatmap
                 ? 'bg-amber-950/60 text-amber-300 border-amber-500/50'
                 : 'text-slate-400 border-slate-800 hover:text-slate-200'
@@ -335,7 +335,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
             id="btn-chart-maximize"
             type="button"
             onClick={() => setIsChartFullscreen(!isChartFullscreen)}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[32px] ${
+            className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-[2px] text-xs font-medium transition-colors cursor-pointer border min-h-[28px] sm:min-h-[32px] shrink-0 ${
               isChartFullscreen
                 ? 'bg-slate-700 text-white font-semibold border-slate-500'
                 : 'text-slate-300 hover:text-white bg-slate-800/80 border-slate-700 hover:border-slate-500'

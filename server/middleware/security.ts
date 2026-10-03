@@ -61,8 +61,20 @@ export function rateLimitMiddleware(req: Request, res: Response, next: NextFunct
   next();
 }
 
-export function errorHandlerMiddleware(err: any, _req: Request, res: Response, _next: NextFunction) {
-  console.error('[AKIRAQU Server Error]:', err);
+export function errorHandlerMiddleware(err: any, req: Request, res: Response, _next: NextFunction) {
+  const structuredError = {
+    severity: 'ERROR',
+    service: 'akiraqu-backend-express',
+    type: 'SERVER_UNHANDLED_EXCEPTION',
+    message: err.message || 'An unexpected server error occurred',
+    stack: err.stack || null,
+    path: req.path,
+    method: req.method,
+    clientIp: req.ip || req.headers['x-forwarded-for'],
+    timestamp: new Date().toISOString(),
+  };
+  console.error(JSON.stringify(structuredError));
+
   const statusCode = err.status || err.statusCode || 500;
   res.status(statusCode).json({
     error: err.name || 'Internal Server Error',

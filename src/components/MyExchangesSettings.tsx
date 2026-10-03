@@ -197,12 +197,10 @@ export const MyExchangesSettings: React.FC<MyExchangesSettingsProps> = ({
     let res: { success: boolean; message: string; latencyMs?: number; balanceUsd?: number };
 
     if (cred.cipherBlob && cred.iv && cred.tag) {
-      // Authenticated server-side decryption verification
+      // Authenticated server-side decryption verification strictly by credId from Firestore vault
       const verifyRes = await verifyCredentialsServerSide({
+        credId: cred.id,
         exchange: cred.exchange,
-        cipherBlob: cred.cipherBlob,
-        iv: cred.iv,
-        tag: cred.tag,
       });
       res = {
         success: verifyRes.verified,
@@ -305,16 +303,6 @@ export const MyExchangesSettings: React.FC<MyExchangesSettingsProps> = ({
       return;
     }
 
-    // 2. Test connectivity using server verification without exposing secret to client
-    const testRes = await verifyCredentialsServerSide({
-      exchange: formExchange,
-      cipherBlob: encrypted.cipherBlob,
-      iv: encrypted.iv,
-      tag: encrypted.tag,
-    });
-
-    setFormIsTesting(false);
-
     const maskedKey = encrypted.maskedKey;
     const credId = editingCredId || `cred-${formExchange.toLowerCase()}-${formMarketType.toLowerCase()}-${Date.now()}`;
 
@@ -328,7 +316,7 @@ export const MyExchangesSettings: React.FC<MyExchangesSettingsProps> = ({
       passphrase: formPassphrase ? '***ENCRYPTED***' : undefined,
       isTestnet: formIsTestnet,
       isDemo: false,
-      status: (testRes.verified ? 'CONNECTED' : 'ERROR') as 'CONNECTED' | 'ERROR',
+      status: 'TESTING',
       permissions: {
         readOnly: true,
         spotTrading: formMarketType === 'SPOT',
@@ -347,6 +335,25 @@ export const MyExchangesSettings: React.FC<MyExchangesSettingsProps> = ({
       isEncrypted: true,
     };
 
+    // 2. Persist encrypted credentials into user's Firestore vault first under authenticated user
+    if (auth?.currentUser?.uid) {
+      try {
+        await saveEncryptedCredentialToFirestore(auth.currentUser.uid, newOrUpdatedCred);
+      } catch (fsErr) {
+        console.warn('[AKIRAQU Credentials] Firestore encrypted credential vault sync notice:', fsErr);
+      }
+    }
+
+    // 3. Test connectivity via server verification strictly loading from Firestore vault by credId
+    const testRes = await verifyCredentialsServerSide({
+      credId,
+      exchange: formExchange,
+    });
+
+    setFormIsTesting(false);
+
+    newOrUpdatedCred.status = (testRes.verified ? 'CONNECTED' : 'ERROR') as 'CONNECTED' | 'ERROR';
+
     let updatedList: ExchangeApiCredential[];
     if (editingCredId) {
       updatedList = credentials.map((c) => (c.id === editingCredId ? newOrUpdatedCred : c));
@@ -356,13 +363,9 @@ export const MyExchangesSettings: React.FC<MyExchangesSettingsProps> = ({
 
     onSaveCredentials(updatedList);
 
-    // 3. Save to Firestore Vault under /users/{userId}/credentials/{credId}
+    // Update verified status in Firestore
     if (auth?.currentUser?.uid) {
-      try {
-        await saveEncryptedCredentialToFirestore(auth.currentUser.uid, newOrUpdatedCred);
-      } catch (fsErr) {
-        console.warn('[AKIRAQU Credentials] Firestore encrypted credential vault sync notice:', fsErr);
-      }
+      saveEncryptedCredentialToFirestore(auth.currentUser.uid, newOrUpdatedCred).catch(() => {});
     }
 
     setShowModal(false);

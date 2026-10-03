@@ -479,7 +479,7 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
         }`}
       >
         <div className="flex items-center gap-3.5">
-          <div className="p-3 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400">
+          <div className="p-3 rounded-2xl bg-pink-500/15 border border-pink-500/30 text-pink-400">
             <BarChart3 className="w-6 h-6" />
           </div>
           <div>
@@ -498,7 +498,7 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
         <div className="flex items-center gap-2">
           <div className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono text-slate-300">
             <span className="text-slate-400">Hasil: </span>
-            <strong className="text-cyan-400">{filteredCoins.length}</strong> Koin
+            <strong className="text-pink-400">{filteredCoins.length}</strong> Koin
           </div>
 
           <button
@@ -526,7 +526,7 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
 
           <button
             onClick={handleExportCsv}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono font-bold text-xs transition cursor-pointer shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-mono font-bold text-xs transition cursor-pointer shadow-xs"
           >
             <Download className="w-3.5 h-3.5" />
             <span>{isId ? 'Unduh CSV' : 'Export CSV'}</span>
@@ -566,13 +566,13 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
               onClick={() => handlePresetSelect(p.id)}
               className={`p-3 rounded-2xl border text-left transition-all cursor-pointer font-mono ${
                 isActive
-                  ? 'bg-cyan-500/15 border-cyan-500 text-cyan-300 shadow-md shadow-cyan-500/10'
+                  ? 'bg-pink-500/15 border-pink-500 text-pink-300 shadow-md shadow-pink-500/10'
                   : 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:border-slate-700'
               }`}
             >
               <div className="flex items-center justify-between pb-1">
                 <span className="font-bold text-xs flex items-center gap-1.5">
-                  <Icon className="w-3.5 h-3.5 text-cyan-400" />
+                  <Icon className="w-3.5 h-3.5 text-pink-400" />
                   {p.name}
                 </span>
               </div>

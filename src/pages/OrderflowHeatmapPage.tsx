@@ -127,7 +127,7 @@ export const OrderflowHeatmapPage: React.FC<OrderflowHeatmapPageProps> = ({
                 <span>Wall Type</span>
               </div>
               {mockOrderBook.bids.map((b, idx) => (
-                <div key={idx} className="flex justify-between items-center py-1 text-slate-300">
+                <div key={`of-bid-${b.price}-${idx}`} className="flex justify-between items-center py-1 text-slate-300">
                   <span className="font-bold text-emerald-400">${formatCryptoPrice(b.price)}</span>
                   <span>${(b.volumeUsd / 1e6).toFixed(2)}M</span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300">{b.wallType}</span>
@@ -148,7 +148,7 @@ export const OrderflowHeatmapPage: React.FC<OrderflowHeatmapPageProps> = ({
                 <span>Wall Type</span>
               </div>
               {mockOrderBook.asks.map((a, idx) => (
-                <div key={idx} className="flex justify-between items-center py-1 text-slate-300">
+                <div key={`of-ask-${a.price}-${idx}`} className="flex justify-between items-center py-1 text-slate-300">
                   <span className="font-bold text-rose-400">${formatCryptoPrice(a.price)}</span>
                   <span>${(a.volumeUsd / 1e6).toFixed(2)}M</span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-950 text-rose-300">{a.wallType}</span>

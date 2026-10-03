@@ -80,51 +80,10 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
   const currentPrice = livePrice || (candles.length > 0 ? candles[candles.length - 1].close : 100);
   const isDark = theme === 'dark';
 
-  // Fallback orderbook if stream hasn't populated yet
-  const displayBids = useMemo(() => {
-    if (orderBookBids.length > 0) return orderBookBids;
-    const spread = currentPrice * 0.0003;
-    return Array.from({ length: 6 }, (_, i) => ({
-      price: currentPrice - spread - (i + 1) * spread * 0.8,
-      amount: Math.round((Math.random() * 5 + 0.1) * 1000) / 1000,
-      total: 10 + i * 5,
-    }));
-  }, [orderBookBids, currentPrice]);
-
-  const displayAsks = useMemo(() => {
-    if (orderBookAsks.length > 0) return orderBookAsks;
-    const spread = currentPrice * 0.0003;
-    return Array.from({ length: 6 }, (_, i) => ({
-      price: currentPrice + spread + (i + 1) * spread * 0.8,
-      amount: Math.round((Math.random() * 5 + 0.1) * 1000) / 1000,
-      total: 10 + i * 5,
-    }));
-  }, [orderBookAsks, currentPrice]);
-
-  // Fallback trades if stream hasn't populated yet
-  const displayTrades = useMemo(() => {
-    if (recentLiveTrades && recentLiveTrades.length > 0) return recentLiveTrades;
-    const now = Date.now();
-    const dec = getCryptoPrecision(currentPrice);
-    return Array.from({ length: 10 }, (_, i) => {
-      const isBuy = i % 2 === 0;
-      const offset = (Math.sin(i * 1.7) * 0.00025) * currentPrice;
-      const tradePrice = Number((currentPrice + (isBuy ? offset : -offset)).toFixed(dec));
-      const tradeTime = new Date(now - i * 1500).toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      });
-      return {
-        id: `seed-${now}-${i}`,
-        time: tradeTime,
-        timestamp: now - i * 1500,
-        price: tradePrice,
-        amount: Number((Math.random() * 1.8 + 0.05).toFixed(4)),
-        isBuy,
-      };
-    });
-  }, [recentLiveTrades, currentPrice]);
+  // Real-time orderbook & live trades (Strictly genuine exchange data, 0% Math.random synthesis)
+  const displayBids = orderBookBids;
+  const displayAsks = orderBookAsks;
+  const displayTrades = recentLiveTrades;
 
   const calculatedBidTotal = bidTotal > 0 ? bidTotal : displayBids.reduce((a, b) => a + b.amount, 0);
   const calculatedAskTotal = askTotal > 0 ? askTotal : displayAsks.reduce((a, b) => a + b.amount, 0);
@@ -200,16 +159,22 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
                 <span>Bids (Buy)</span>
                 <span>Size</span>
               </div>
-              {displayBids.map((bid, idx) => (
-                <div key={idx} className="relative flex justify-between py-0.5 px-1 rounded-[2px] overflow-hidden">
-                  <div 
-                    className="absolute inset-y-0 left-0 bg-emerald-500/15 transition-all duration-150"
-                    style={{ width: `${Math.min(100, (bid.amount / (calculatedBidTotal || 1)) * 180)}%` }}
-                  />
-                  <span className="text-emerald-400 font-bold relative z-10 tabular-nums">${formatCoinPrice(bid.price)}</span>
-                  <span className={`relative z-10 tabular-nums font-medium ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>{bid.amount}</span>
+              {displayBids.length === 0 ? (
+                <div className="py-4 text-center text-slate-500 text-[10px]">
+                  {lang === 'id' ? 'Sinkronisasi buku order...' : 'Syncing order book...'}
                 </div>
-              ))}
+              ) : (
+                displayBids.slice(0, 6).map((bid, idx) => (
+                  <div key={`bid-${bid.price}-${idx}`} className="relative flex justify-between py-0.5 px-1 rounded-[2px] overflow-hidden">
+                    <div 
+                      className="absolute inset-y-0 left-0 bg-emerald-500/15 transition-all duration-150"
+                      style={{ width: `${Math.min(100, (bid.amount / (calculatedBidTotal || 1)) * 180)}%` }}
+                    />
+                    <span className="text-emerald-400 font-bold relative z-10 tabular-nums">${formatCoinPrice(bid.price)}</span>
+                    <span className={`relative z-10 tabular-nums font-medium ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>{bid.amount}</span>
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Asks Column (Reds) */}
@@ -220,16 +185,22 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
                 <span>Asks (Sell)</span>
                 <span>Size</span>
               </div>
-              {displayAsks.map((ask, idx) => (
-                <div key={idx} className="relative flex justify-between py-0.5 px-1 rounded-[2px] overflow-hidden">
-                  <div 
-                    className="absolute inset-y-0 right-0 bg-rose-500/15 transition-all duration-150"
-                    style={{ width: `${Math.min(100, (ask.amount / (calculatedAskTotal || 1)) * 180)}%` }}
-                  />
-                  <span className="text-rose-400 font-bold relative z-10 tabular-nums">${formatPrice(ask.price)}</span>
-                  <span className={`relative z-10 tabular-nums font-medium ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>{ask.amount}</span>
+              {displayAsks.length === 0 ? (
+                <div className="py-4 text-center text-slate-500 text-[10px]">
+                  {lang === 'id' ? 'Sinkronisasi buku order...' : 'Syncing order book...'}
                 </div>
-              ))}
+              ) : (
+                displayAsks.slice(0, 6).map((ask, idx) => (
+                  <div key={`ask-${ask.price}-${idx}`} className="relative flex justify-between py-0.5 px-1 rounded-[2px] overflow-hidden">
+                    <div 
+                      className="absolute inset-y-0 right-0 bg-rose-500/15 transition-all duration-150"
+                      style={{ width: `${Math.min(100, (ask.amount / (calculatedAskTotal || 1)) * 180)}%` }}
+                    />
+                    <span className="text-rose-400 font-bold relative z-10 tabular-nums">${formatPrice(ask.price)}</span>
+                    <span className={`relative z-10 tabular-nums font-medium ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>{ask.amount}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -244,18 +215,24 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
               </span>
             </div>
             <div className="space-y-1 overflow-y-auto max-h-[140px] pr-1 scrollbar-thin">
-              {displayTrades.slice(0, 10).map((trade) => (
-                <div key={trade.id} className={`flex justify-between items-center text-[11px] font-mono py-0.5 px-1 rounded-[2px] transition-colors ${
-                  isDark ? 'hover:bg-slate-800/40' : 'hover:bg-slate-100'
-                }`}>
-                  <span className="text-slate-500">{trade.time}</span>
-                  <span className={`font-bold flex items-center gap-0.5 ${trade.isBuy ? 'text-emerald-400' : 'text-rose-400'}`}>
-                    {trade.isBuy ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                    ${formatPrice(trade.price)}
-                  </span>
-                  <span className={isDark ? 'text-slate-300' : 'text-slate-600'}>{trade.amount}</span>
+              {displayTrades.length === 0 ? (
+                <div className="py-4 text-center text-slate-500 text-[10px]">
+                  {lang === 'id' ? 'Sinkronisasi data transaksi...' : 'Syncing live trades...'}
                 </div>
-              ))}
+              ) : (
+                displayTrades.slice(0, 10).map((trade, idx) => (
+                  <div key={`trade-${trade.id || 't'}-${trade.timestamp || idx}-${idx}`} className={`flex justify-between items-center text-[11px] font-mono py-0.5 px-1 rounded-[2px] transition-colors ${
+                    isDark ? 'hover:bg-slate-800/40' : 'hover:bg-slate-100'
+                  }`}>
+                    <span className="text-slate-500">{trade.time}</span>
+                    <span className={`font-bold flex items-center gap-0.5 ${trade.isBuy ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      {trade.isBuy ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                      ${formatPrice(trade.price)}
+                    </span>
+                    <span className={isDark ? 'text-slate-300' : 'text-slate-600'}>{trade.amount}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

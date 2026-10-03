@@ -198,28 +198,34 @@ export async function encryptCredentialsServerSide(params: {
 }
 
 /**
- * Tests connection via Server-side Decryption without client ever seeing raw secrets.
+ * Tests connection via Server-side Decryption strictly after validating user ownership in Firestore vault.
+ * Protects against decryption oracle attacks by querying Firestore by credId under the verified user's uid.
  */
 export async function verifyCredentialsServerSide(params: {
-  exchange: string;
-  cipherBlob: string;
-  iv: string;
-  tag: string;
+  credId: string;
+  exchange?: string;
 }): Promise<{ verified: boolean; message?: string }> {
   try {
     const token = await getAuthToken();
+    if (!token) {
+      return {
+        verified: false,
+        message: 'Pengguna belum terautentikasi dengan Firebase Auth.',
+      };
+    }
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
     };
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
 
     const res = await fetch('/api/v1/credentials/verify', {
       method: 'POST',
       headers,
-      body: JSON.stringify(params),
+      body: JSON.stringify({
+        credId: params.credId,
+        exchange: params.exchange,
+      }),
     });
     const json = await res.json();
     return {

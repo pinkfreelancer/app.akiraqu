@@ -801,9 +801,9 @@ export const ManualTradingView: React.FC<ManualTradingViewProps> = ({
 
             {/* Asks (Sell Orders) */}
             <div className="space-y-1 pt-2 font-mono text-xs">
-              {orderBookData.asks.reverse().map((ask, idx) => (
+              {[...orderBookData.asks].reverse().map((ask, idx) => (
                 <div
-                  key={idx}
+                  key={`manual-ask-${ask.price}-${idx}`}
                   onClick={() => setPriceInput(Number(ask.price.toFixed(2)))}
                   className="flex items-center justify-between px-2 py-1 rounded hover:bg-rose-500/10 cursor-pointer relative overflow-hidden"
                 >
@@ -831,7 +831,7 @@ export const ManualTradingView: React.FC<ManualTradingViewProps> = ({
             <div className="space-y-1 font-mono text-xs">
               {orderBookData.bids.map((bid, idx) => (
                 <div
-                  key={idx}
+                  key={`manual-bid-${bid.price}-${idx}`}
                   onClick={() => setPriceInput(Number(bid.price.toFixed(2)))}
                   className="flex items-center justify-between px-2 py-1 rounded hover:bg-emerald-500/10 cursor-pointer relative overflow-hidden"
                 >

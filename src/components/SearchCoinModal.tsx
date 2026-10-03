@@ -397,25 +397,25 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
         aria-modal="false"
         id="coin-search-dropdown"
         aria-label={lang === 'id' ? 'Katalog Pasangan Koin & Pencarian Pasar' : 'Coin Pairs Catalog & Market Search'}
-        className="absolute left-0 top-full mt-1.5 z-50 w-[95vw] sm:w-[540px] md:w-[620px] max-w-[calc(100vw-1rem)] max-h-[75vh] flex flex-col rounded-xl border border-cyan-500/40 bg-[#090d16] text-slate-100 shadow-2xl shadow-black/95 ring-1 ring-cyan-500/30 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        className="absolute left-0 top-full mt-1.5 z-50 w-[95vw] sm:w-[540px] md:w-[620px] max-w-[calc(100vw-1rem)] max-h-[75vh] flex flex-col rounded-xl border border-pink-500/40 bg-[#090d16] text-slate-100 shadow-2xl shadow-black/95 ring-1 ring-pink-500/30 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
         onKeyDown={handleKeyDown}
       >
         {/* Dropdown Compact Header */}
         <div className="shrink-0 px-4 py-2.5 bg-[#0c1322] border-b border-[#1e293b] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-1 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+            <div className="p-1 rounded bg-pink-500/20 text-pink-300 border border-pink-500/40">
               <Coins className="w-4 h-4" />
             </div>
             <span className="text-xs font-bold font-mono tracking-wider text-white uppercase">
               {lang === 'id' ? 'Katalog Pasangan Koin & Pasar' : 'Coin Pairs Catalog & Market'}
             </span>
-            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold">
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-pink-500/20 text-pink-300 border border-pink-500/40 font-bold">
               {symbols.length}+ Pairs
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30">
+            <span className="text-[10px] font-mono text-pink-400 bg-pink-950/60 px-2 py-0.5 rounded border border-pink-500/30">
               {filteredCoins.length} {lang === 'id' ? 'aset' : 'assets'}
             </span>
             <button
@@ -432,14 +432,14 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
         {/* Search Input Bar & Controls */}
         <div className="shrink-0 p-3 bg-[#0c1322]/80 border-b border-[#1e293b] space-y-2.5">
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-400" />
             <input
               ref={inputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={lang === 'id' ? 'Ketik koin apa saja: "SOL", "ENA", "PEPE", "AAVE", "ONDO", "KAS", "DEGEN"...' : 'Search any coin: "SOL", "ENA", "PEPE", "AAVE", "ONDO", "KAS", "DEGEN"...'}
-              className="w-full pl-10 pr-20 py-2.5 bg-[#080d18] border border-cyan-500/30 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 rounded-lg text-sm font-sans font-medium text-white placeholder:text-slate-400 focus:outline-none transition-all shadow-inner"
+              className="w-full pl-10 pr-20 py-2.5 bg-[#080d18] border border-pink-500/30 focus:border-pink-400 focus:ring-2 focus:ring-pink-500/20 rounded-lg text-sm font-sans font-medium text-white placeholder:text-slate-400 focus:outline-none transition-all shadow-inner"
             />
             {searchQuery ? (
               <button
@@ -474,8 +474,8 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                   onClick={() => handleSelect(ticker)}
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono font-medium transition-all cursor-pointer shrink-0 ${
                     isCurr
-                      ? 'bg-cyan-500 text-slate-950 font-bold border border-cyan-400 shadow-xs'
-                      : 'bg-slate-900 border border-slate-700 text-slate-200 hover:text-white hover:border-cyan-500/60 hover:bg-slate-800'
+                      ? 'bg-pink-600 text-white font-bold border border-pink-500 shadow-xs'
+                      : 'bg-slate-900 border border-slate-700 text-slate-200 hover:text-white hover:border-pink-500/60 hover:bg-slate-800'
                   }`}
                 >
                   <CryptoIcon symbol={ticker} size="xs" />
@@ -489,7 +489,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
           {recentPairs.length > 0 && (
             <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none text-xs">
               <span className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-300 shrink-0 mr-1">
-                <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                <Clock className="w-3.5 h-3.5 text-pink-400" />
                 <span>{lang === 'id' ? 'Terakhir:' : 'Recent:'}</span>
               </span>
               {recentPairs.map((p) => (
@@ -497,7 +497,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                   key={p}
                   type="button"
                   onClick={() => handleSelect(p)}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono bg-blue-950/40 border border-blue-700/60 text-blue-200 hover:text-white hover:border-cyan-400 transition cursor-pointer shrink-0 font-medium"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono bg-pink-950/40 border border-pink-700/60 text-pink-200 hover:text-white hover:border-pink-400 transition cursor-pointer shrink-0 font-medium"
                 >
                   <CryptoIcon symbol={p} size="xs" />
                   <span>{p}</span>
@@ -516,7 +516,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-2.5 py-1 rounded-md text-xs font-mono whitespace-nowrap transition-all cursor-pointer ${
                     selectedCategory === cat
-                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
+                      ? 'bg-pink-600 text-white font-bold shadow-xs'
                       : 'bg-slate-900 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800'
                   }`}
                 >
@@ -528,14 +528,14 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
             {/* Sort Toggle Controls */}
             <div className="flex items-center gap-1 text-[11px] font-mono shrink-0">
               <span className="text-slate-400 hidden sm:inline flex items-center gap-0.5">
-                <ArrowUpDown className="w-3 h-3" />
+                <ArrowUpDown className="w-3.5 h-3.5" />
               </span>
               <button
                 type="button"
                 onClick={() => setSortOption('relevance')}
                 className={`px-2.5 py-1 rounded transition cursor-pointer ${
                   sortOption === 'relevance'
-                    ? 'bg-cyan-500/25 text-cyan-300 font-bold border border-cyan-500/60 shadow-xs'
+                    ? 'bg-pink-500/25 text-pink-300 font-bold border border-pink-500/60 shadow-xs'
                     : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -546,7 +546,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                 onClick={() => setSortOption('volume')}
                 className={`px-2.5 py-1 rounded transition cursor-pointer ${
                   sortOption === 'volume'
-                    ? 'bg-cyan-500/25 text-cyan-300 font-bold border border-cyan-500/60 shadow-xs'
+                    ? 'bg-pink-500/25 text-pink-300 font-bold border border-pink-500/60 shadow-xs'
                     : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -589,9 +589,9 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
         >
           {/* Custom Dynamic Pair Prompt Card (if user typed a valid ticker not at the top) */}
           {customPairCandidate && (
-            <div className="mb-2 p-3 rounded-lg bg-gradient-to-r from-cyan-950/50 via-blue-950/40 to-slate-900 border border-cyan-500/50 flex items-center justify-between shadow-xs">
+            <div className="mb-2 p-3 rounded-lg bg-gradient-to-r from-pink-950/50 via-rose-950/40 to-slate-900 border border-pink-500/50 flex items-center justify-between shadow-xs">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-md bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
+                <div className="p-2 rounded-md bg-pink-500/20 text-pink-400 border border-pink-500/40">
                   <PlusCircle className="w-4 h-4" />
                 </div>
                 <div>
@@ -599,7 +599,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                     <span className="font-mono font-bold text-white text-sm">
                       {customPairCandidate}
                     </span>
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold">
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-pink-500/20 text-pink-300 border border-pink-500/40 font-bold">
                       {lang === 'id' ? 'Aset Bebas On-Demand' : 'On-Demand Asset'}
                     </span>
                   </div>
@@ -614,7 +614,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
               <button
                 type="button"
                 onClick={() => handleSelect(customPairCandidate)}
-                className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold font-mono text-xs transition shadow-sm cursor-pointer shrink-0"
+                className="px-3 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-500 text-white font-bold font-mono text-xs transition shadow-sm cursor-pointer shrink-0"
               >
                 {lang === 'id' ? 'Buka Pair ➔' : 'Open Pair ➔'}
               </button>
@@ -642,7 +642,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                   onClick={() => handleSelect(coin.symbol)}
                   className={`w-full p-3 rounded-lg flex items-center justify-between text-left transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-cyan-500/20 border border-cyan-400/60 shadow-sm text-white'
+                      ? 'bg-pink-500/20 border border-pink-400/60 shadow-sm text-white'
                       : isHighlighted
                       ? 'bg-slate-800/90 border border-slate-600 shadow-xs text-white'
                       : 'bg-[#080d18]/60 border border-slate-800/80 text-slate-200 hover:bg-slate-800/60 hover:border-slate-700 hover:text-white'
@@ -659,12 +659,12 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                           {coin.category}
                         </span>
                         {isSelected && (
-                          <span className="text-[10px] font-mono text-cyan-300 font-bold bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-400/50 shadow-xs">
+                          <span className="text-[10px] font-mono text-pink-300 font-bold bg-pink-950/80 px-2 py-0.5 rounded border border-pink-400/50 shadow-xs">
                             ✓ Aktif
                           </span>
                         )}
                         {isHighlighted && !isSelected && (
-                          <span className="text-[10px] font-mono text-cyan-400 font-semibold hidden sm:inline">
+                          <span className="text-[10px] font-mono text-pink-400 font-semibold hidden sm:inline">
                             [Enter ↵]
                           </span>
                         )}
@@ -710,7 +710,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
               <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 text-slate-300 rounded mr-1">ESC</kbd> Tutup
             </span>
           </div>
-          <span className="text-cyan-400 font-bold hidden sm:inline">
+          <span className="text-pink-400 font-bold hidden sm:inline">
             CCXT Live Feed
           </span>
         </div>

@@ -179,81 +179,90 @@ export const LaunchpadOrderBookTape: React.FC<LaunchpadOrderBookTapeProps> = ({
             </div>
           </div>
 
-          {/* Asks (Sell Wall) - Red */}
-          <div className="space-y-0.5">
-            <div className="grid grid-cols-3 text-[10px] text-slate-500 uppercase tracking-wider pb-1 border-b border-slate-800">
-              <span>{isId ? 'Harga' : 'Price'}</span>
-              <span className="text-right">{isId ? 'Jumlah' : 'Size'}</span>
-              <span className="text-right">{isId ? 'Total ($)' : 'Total ($)'}</span>
+          {/* Order Book Depth Content */}
+          {orderBookBids.length === 0 && orderBookAsks.length === 0 ? (
+            <div className="py-12 text-center text-slate-500 text-xs">
+              {isId ? 'Sinkronisasi buku order bursa...' : 'Syncing exchange order book...'}
             </div>
-            {orderBookAsks.slice(0, 7).reverse().map((ask, idx) => {
-              const depthPct = Math.min(100, (ask.amount / maxAskQty) * 100);
-              return (
-                <div
-                  key={`ask-${idx}`}
-                  className="grid grid-cols-3 text-[11px] py-0.5 relative group hover:bg-rose-500/10 transition-colors"
-                >
-                  <div
-                    className="absolute right-0 top-0 bottom-0 bg-rose-500/15 pointer-events-none transition-all duration-300"
-                    style={{ width: `${depthPct}%` }}
-                  />
-                  <span className="text-rose-400 font-bold tabular-nums z-10">
-                    ${formatCryptoPrice(ask.price)}
-                  </span>
-                  <span className="text-right text-slate-300 tabular-nums z-10">
-                    {ask.amount.toFixed(4)}
-                  </span>
-                  <span className="text-right text-slate-400 tabular-nums z-10">
-                    ${(ask.price * ask.amount).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                  </span>
+          ) : (
+            <>
+              {/* Asks (Sell Wall) - Red */}
+              <div className="space-y-0.5">
+                <div className="grid grid-cols-3 text-[10px] text-slate-500 uppercase tracking-wider pb-1 border-b border-slate-800">
+                  <span>{isId ? 'Harga' : 'Price'}</span>
+                  <span className="text-right">{isId ? 'Jumlah' : 'Size'}</span>
+                  <span className="text-right">{isId ? 'Total ($)' : 'Total ($)'}</span>
                 </div>
-              );
-            })}
-          </div>
+                {orderBookAsks.slice(0, 7).reverse().map((ask, idx) => {
+                  const depthPct = Math.min(100, (ask.amount / maxAskQty) * 100);
+                  return (
+                    <div
+                      key={`ask-${idx}`}
+                      className="grid grid-cols-3 text-[11px] py-0.5 relative group hover:bg-rose-500/10 transition-colors"
+                    >
+                      <div
+                        className="absolute right-0 top-0 bottom-0 bg-rose-500/15 pointer-events-none transition-all duration-300"
+                        style={{ width: `${depthPct}%` }}
+                      />
+                      <span className="text-rose-400 font-bold tabular-nums z-10">
+                        ${formatCryptoPrice(ask.price)}
+                      </span>
+                      <span className="text-right text-slate-300 tabular-nums z-10">
+                        {ask.amount.toFixed(4)}
+                      </span>
+                      <span className="text-right text-slate-400 tabular-nums z-10">
+                        ${(ask.price * ask.amount).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
 
-          {/* Spread Ribbon */}
-          <div
-            className={`py-1 px-3 rounded-lg flex items-center justify-between border font-bold text-xs ${
-              isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-slate-100 border-slate-200'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-slate-400 text-[10px] uppercase">{isId ? 'Spread:' : 'Spread:'}</span>
-              <span className="text-cyan-300 tabular-nums">${spreadUsd.toFixed(2)}</span>
-              <span className="text-[10px] text-slate-500">({spreadBps.toFixed(1)} bps)</span>
-            </div>
-            <div className="flex items-center gap-1 text-slate-300">
-              <span className="text-[10px] text-slate-400">{isId ? 'Harga Pasar:' : 'Mark:'}</span>
-              <span className="text-white">${formatCryptoPrice(currentPrice)}</span>
-            </div>
-          </div>
-
-          {/* Bids (Buy Wall) - Green */}
-          <div className="space-y-0.5">
-            {orderBookBids.slice(0, 7).map((bid, idx) => {
-              const depthPct = Math.min(100, (bid.amount / maxBidQty) * 100);
-              return (
-                <div
-                  key={`bid-${idx}`}
-                  className="grid grid-cols-3 text-[11px] py-0.5 relative group hover:bg-emerald-500/10 transition-colors"
-                >
-                  <div
-                    className="absolute right-0 top-0 bottom-0 bg-emerald-500/15 pointer-events-none transition-all duration-300"
-                    style={{ width: `${depthPct}%` }}
-                  />
-                  <span className="text-emerald-400 font-bold tabular-nums z-10">
-                    ${formatCryptoPrice(bid.price)}
-                  </span>
-                  <span className="text-right text-slate-300 tabular-nums z-10">
-                    {bid.amount.toFixed(4)}
-                  </span>
-                  <span className="text-right text-slate-400 tabular-nums z-10">
-                    ${(bid.price * bid.amount).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                  </span>
+              {/* Spread Ribbon */}
+              <div
+                className={`py-1 px-3 rounded-lg flex items-center justify-between border font-bold text-xs ${
+                  isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-slate-100 border-slate-200'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-400 text-[10px] uppercase">{isId ? 'Spread:' : 'Spread:'}</span>
+                  <span className="text-cyan-300 tabular-nums">${spreadUsd.toFixed(2)}</span>
+                  <span className="text-[10px] text-slate-500">({spreadBps.toFixed(1)} bps)</span>
                 </div>
-              );
-            })}
-          </div>
+                <div className="flex items-center gap-1 text-slate-300">
+                  <span className="text-[10px] text-slate-400">{isId ? 'Harga Pasar:' : 'Mark:'}</span>
+                  <span className="text-white">${formatCryptoPrice(currentPrice)}</span>
+                </div>
+              </div>
+
+              {/* Bids (Buy Wall) - Green */}
+              <div className="space-y-0.5">
+                {orderBookBids.slice(0, 7).map((bid, idx) => {
+                  const depthPct = Math.min(100, (bid.amount / maxBidQty) * 100);
+                  return (
+                    <div
+                      key={`bid-${idx}`}
+                      className="grid grid-cols-3 text-[11px] py-0.5 relative group hover:bg-emerald-500/10 transition-colors"
+                    >
+                      <div
+                        className="absolute right-0 top-0 bottom-0 bg-emerald-500/15 pointer-events-none transition-all duration-300"
+                        style={{ width: `${depthPct}%` }}
+                      />
+                      <span className="text-emerald-400 font-bold tabular-nums z-10">
+                        ${formatCryptoPrice(bid.price)}
+                      </span>
+                      <span className="text-right text-slate-300 tabular-nums z-10">
+                        {bid.amount.toFixed(4)}
+                      </span>
+                      <span className="text-right text-slate-400 tabular-nums z-10">
+                        ${(bid.price * bid.amount).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -279,7 +288,7 @@ export const LaunchpadOrderBookTape: React.FC<LaunchpadOrderBookTapeProps> = ({
                 const isWhale = notionalUsd >= 50000;
                 return (
                   <div
-                    key={`${trade.timestamp}-${idx}`}
+                    key={`tape-${trade.id || 'tx'}-${trade.timestamp || idx}-${idx}`}
                     className={`grid grid-cols-4 items-center py-1 px-1.5 rounded text-[11px] transition-colors ${
                       isWhale
                         ? isDark

@@ -1,21 +1,17 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
-  Search,
   PanelLeftClose,
   PanelLeftOpen,
   TrendingUp,
   TrendingDown,
   X,
-  RotateCcw,
   CandlestickChart,
   BookOpen,
 } from 'lucide-react';
 import { StageId, MarketBias } from '../types/market.types';
 import { Language } from '../i18n/translations';
 import {
-  CategoryKey,
   SIDEBAR_NAV_GROUPS,
-  CATEGORY_TABS,
 } from './sidebarConfig';
 
 interface SidebarProps {
@@ -47,10 +43,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const isDark = theme === 'dark';
   const isId = lang === 'id';
-
-  // Functional Efficiency States: Search & Category Filter
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeCategory, setActiveCategory] = useState<CategoryKey>('all');
 
   // Compute localized Nav Groups with dynamic badges (e.g. confluence score)
   const navGroups = useMemo(() => {
@@ -90,34 +82,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       };
     });
   }, [isId, confluenceScore]);
-
-  // Filter groups and items based on search query and category tab
-  const filteredNavGroups = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-
-    return navGroups
-      .filter((group) => activeCategory === 'all' || group.key === activeCategory)
-      .map((group) => {
-        if (!query) return group;
-        const matchingItems = group.items.filter(
-          (item) =>
-            item.label.toLowerCase().includes(query) ||
-            item.stepNumber.includes(query) ||
-            item.id.toLowerCase().includes(query) ||
-            (item.badge && item.badge.toLowerCase().includes(query))
-        );
-        return {
-          ...group,
-          items: matchingItems,
-        };
-      })
-      .filter((group) => group.items.length > 0);
-  }, [navGroups, searchQuery, activeCategory]);
-
-  const totalFilteredCount = useMemo(
-    () => filteredNavGroups.reduce((acc, g) => acc + g.items.length, 0),
-    [filteredNavGroups]
-  );
 
   // Auto-close drawer on mobile (<768px)
   const handleItemClick = (stageId: StageId) => {
@@ -169,26 +133,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="flex flex-col min-w-0">
                 <span
                   className={`text-xs font-bold tracking-tight truncate ${
-                    isDark ? 'text-slate-200' : 'text-slate-800'
+                    isDark ? 'text-pink-300' : 'text-pink-700'
                   }`}
                 >
-                  {isId ? 'Menu' : 'Menu'}
+                  {isId ? 'Navigasi Terminal (17 Alat)' : 'Terminal Navigation (17 Tools)'}
                 </span>
-                <span className="text-[10px] font-mono text-slate-400">30 {isId ? 'Modul Kuantitatif' : 'Quant Modules'}</span>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  {isId ? 'Pilih stage analisis' : 'Select analysis stage'}
+                </span>
               </div>
             </div>
           ) : null}
 
-          <div className="flex items-center justify-center shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             {/* Mobile Close Button */}
             {isOpen && (
               <button
                 type="button"
                 onClick={onToggleOpen}
-                className={`md:hidden p-1.5 rounded-[2px] transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center ${
+                className={`md:hidden p-1.5 rounded-[2px] border transition-colors cursor-pointer min-h-[34px] min-w-[34px] flex items-center justify-center ${
                   isDark
-                    ? 'hover:bg-slate-800 text-slate-400 hover:text-white'
-                    : 'hover:bg-slate-200 text-slate-600 hover:text-slate-900'
+                    ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-white hover:border-pink-500/40'
+                    : 'bg-white border-slate-200 text-slate-700 hover:text-slate-900 hover:border-pink-400'
                 }`}
                 title={isId ? 'Tutup Sidebar' : 'Close Drawer'}
                 aria-label="Close Mobile Sidebar"
@@ -201,7 +167,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               type="button"
               onClick={onToggleOpen}
-              className={`p-1.5 rounded-[2px] transition-colors cursor-pointer flex items-center justify-center min-h-[32px] min-w-[32px] ${
+              className={`hidden md:flex p-1.5 rounded-[2px] transition-colors cursor-pointer items-center justify-center min-h-[32px] min-w-[32px] ${
                 isDark
                   ? 'text-slate-400 hover:text-white hover:bg-slate-800/50'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/60'
@@ -218,189 +184,110 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        {/* Controls: Search & Category Tabs */}
-        {isOpen && (
-          <div
-            className={`p-2.5 space-y-2 border-b shrink-0 ${
-              isDark ? 'border-[#1e293b]/60 bg-[#090d16]' : 'border-slate-100 bg-white'
-            }`}
-          >
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={isId ? 'Cari modul (30 fitur)...' : 'Search 30 modules...'}
-                className={`w-full pl-8 pr-7 py-1.5 rounded-[2px] text-xs font-mono transition-all outline-hidden border ${
-                  isDark
-                    ? 'bg-[#0f172a] border-[#1e293b] text-white placeholder-slate-500 focus:border-pink-500/50'
-                    : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-pink-500'
-                }`}
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-2 p-0.5 text-slate-400 hover:text-slate-200 cursor-pointer"
-                  title="Clear"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-            </div>
-
-            {/* Category Filter Tabs (Ordered by Workflow) */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none text-[11px] font-mono font-semibold">
-              {CATEGORY_TABS.map((tab) => {
-                const isActive = activeCategory === tab.key;
-                return (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    onClick={() => setActiveCategory(tab.key)}
-                    className={`px-2 py-1 rounded-[2px] transition-colors cursor-pointer shrink-0 ${
-                      isActive
-                        ? isDark
-                          ? 'bg-pink-500/15 text-pink-300 border border-pink-500/30'
-                          : 'bg-pink-600 text-white shadow-xs'
-                        : isDark
-                        ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                  >
-                    {isId ? tab.labelId : tab.labelEn}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         {/* Navigation Groups List */}
         <div className="flex-1 overflow-y-auto py-2.5 px-2 space-y-3.5 scrollbar-thin scrollbar-thumb-slate-700">
-          {totalFilteredCount === 0 ? (
-            <div className="py-8 px-3 text-center space-y-2">
-              <p className="text-xs text-slate-400">
-                {isId ? 'Tidak ada modul yang cocok.' : 'No matching tools found.'}
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery('');
-                  setActiveCategory('all');
-                }}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-bold rounded-[2px] bg-pink-600 hover:bg-pink-500 text-white cursor-pointer"
-              >
-                <RotateCcw className="w-3 h-3" />
-                <span>{isId ? 'Reset Filter' : 'Reset Filter'}</span>
-              </button>
-            </div>
-          ) : (
-            filteredNavGroups.map((group) => {
-              return (
-                <div key={group.key} className="space-y-1">
-                  {group.isSystemDivider && (
-                    <div className="my-2 border-t border-slate-800/80" />
-                  )}
+          {navGroups.map((group) => {
+            return (
+              <div key={group.key} className="space-y-1">
+                {group.isSystemDivider && (
+                  <div className="my-2 border-t border-slate-800/80" />
+                )}
 
-                  {isOpen && (
-                    <div className="px-2.5 py-1 text-[11px] font-mono font-bold text-slate-400 flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 truncate">
-                        <span className="uppercase tracking-wider truncate font-semibold text-slate-300">
-                          {group.groupName}
-                        </span>
-                      </div>
-                      <span className="text-[10px] px-1.5 py-0.2 rounded-[2px] bg-slate-800/60 text-slate-400 font-mono tabular-nums">
-                        {group.items.length}
+                {isOpen && (
+                  <div className="px-2.5 py-1 text-[11px] font-mono font-bold text-slate-400 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 truncate">
+                      <span className="uppercase tracking-wider truncate font-semibold text-slate-300">
+                        {group.groupName}
                       </span>
                     </div>
-                  )}
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-[2px] bg-slate-800/60 text-slate-400 font-mono tabular-nums">
+                      {group.items.length}
+                    </span>
+                  </div>
+                )}
 
-                  <div className="space-y-1">
-                    {group.items.map((item) => {
-                      const ItemIcon = item.icon;
-                      const isActive = currentStage === item.id;
+                <div className="space-y-1">
+                  {group.items.map((item) => {
+                    const ItemIcon = item.icon;
+                    const isActive = currentStage === item.id;
 
-                      // Collapsed Rail Mode
-                      if (!isOpen) {
-                        return (
-                          <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => handleItemClick(item.id)}
-                            className={`w-10 h-10 mx-auto rounded-[2px] flex items-center justify-center transition-all cursor-pointer relative group ${
-                              isActive
-                                ? isDark
-                                  ? 'bg-pink-500/15 text-[#EC4899] shadow-xs'
-                                  : 'bg-pink-100/90 text-pink-700 shadow-xs'
-                                : isDark
-                                ? 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50'
-                                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-                            }`}
-                            title={`${item.stepNumber}. ${item.label}`}
-                            aria-current={isActive ? 'page' : undefined}
-                          >
-                            <ItemIcon
-                              className={`w-4 h-4 transition-transform group-hover:scale-110 ${
-                                isActive ? 'text-[#EC4899]' : ''
-                              }`}
-                            />
-                          </button>
-                        );
-                      }
-
-                      // Expanded Sidebar Mode
+                    // Collapsed Rail Mode
+                    if (!isOpen) {
                       return (
                         <button
                           key={item.id}
                           type="button"
                           onClick={() => handleItemClick(item.id)}
-                          className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-[2px] text-xs transition-all cursor-pointer group min-h-[34px] ${
+                          className={`w-10 h-10 mx-auto rounded-[2px] flex items-center justify-center transition-all cursor-pointer relative group ${
                             isActive
                               ? isDark
-                                ? 'bg-pink-500/15 text-pink-100 font-semibold shadow-xs'
-                                : 'bg-pink-50 text-pink-950 font-semibold shadow-xs'
+                                ? 'bg-pink-500/15 text-[#EC4899] shadow-xs'
+                                : 'bg-pink-100/90 text-pink-700 shadow-xs'
                               : isDark
-                              ? 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/40'
-                              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                              ? 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50'
+                              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
                           }`}
+                          title={`${item.stepNumber}. ${item.label}`}
                           aria-current={isActive ? 'page' : undefined}
                         >
-                          <div
-                            className={`shrink-0 p-1 rounded-[2px] transition-colors ${
-                              isActive
-                                ? isDark
-                                  ? 'text-[#EC4899]'
-                                  : 'text-pink-600'
-                                : isDark
-                                ? 'text-slate-400 group-hover:text-slate-200'
-                                : 'text-slate-500 group-hover:text-slate-800'
+                          <ItemIcon
+                            className={`w-4 h-4 transition-transform group-hover:scale-110 ${
+                              isActive ? 'text-[#EC4899]' : ''
                             }`}
-                          >
-                            <ItemIcon className="w-3.5 h-3.5" />
-                          </div>
-
-                          <div className="flex-1 flex items-center justify-between min-w-0">
-                            <span className="truncate text-left">{item.label}</span>
-
-                            {item.badge && (
-                              <span
-                                className={`text-[10px] px-1.5 py-0.2 rounded-[2px] font-mono font-semibold shrink-0 ml-1.5 ${item.badgeColor}`}
-                              >
-                                {item.badge}
-                              </span>
-                            )}
-                          </div>
+                          />
                         </button>
                       );
-                    })}
-                  </div>
+                    }
+
+                    // Expanded Sidebar Mode
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleItemClick(item.id)}
+                        className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-[2px] text-xs transition-all cursor-pointer group min-h-[34px] ${
+                          isActive
+                            ? isDark
+                              ? 'bg-pink-500/15 text-pink-100 font-semibold shadow-xs'
+                              : 'bg-pink-50 text-pink-950 font-semibold shadow-xs'
+                            : isDark
+                            ? 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/40'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                        }`}
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        <div
+                          className={`shrink-0 p-1 rounded-[2px] transition-colors ${
+                            isActive
+                              ? isDark
+                                ? 'text-[#EC4899]'
+                                : 'text-pink-600'
+                              : isDark
+                              ? 'text-slate-400 group-hover:text-slate-200'
+                              : 'text-slate-500 group-hover:text-slate-800'
+                          }`}
+                        >
+                          <ItemIcon className="w-3.5 h-3.5" />
+                        </div>
+
+                        <div className="flex-1 flex items-center justify-between min-w-0">
+                          <span className="truncate text-left">{item.label}</span>
+
+                          {item.badge && (
+                            <span
+                              className={`text-[10px] px-1.5 py-0.2 rounded-[2px] font-mono font-semibold shrink-0 ml-1.5 ${item.badgeColor}`}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-              );
-            })
-          )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Sidebar Footer */}

@@ -152,7 +152,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
-                  onClick={onNavigateToTerminal}
+                  onClick={() => onNavigateToTerminal()}
                   className="flex-1 py-3 px-4 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-[2px] font-bold font-mono text-xs flex items-center justify-center gap-2 shadow-lg shadow-pink-500/20 cursor-pointer transition-all active:scale-[0.99]"
                 >
                   <span>{lang === 'id' ? 'Lanjut ke Terminal' : 'Proceed to Terminal'}</span>

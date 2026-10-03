@@ -28,6 +28,7 @@ interface TerminalStatusBarProps {
   onToggleWorkspaceMode: () => void;
   onOpenCommandBar: () => void;
   onOpenShortcuts: () => void;
+  onOpenSystemHealth?: () => void;
   lang?: Language;
   theme?: 'light' | 'dark';
   isFullWidth?: boolean;
@@ -47,6 +48,7 @@ export const TerminalStatusBar: React.FC<TerminalStatusBarProps> = ({
   onToggleWorkspaceMode,
   onOpenCommandBar,
   onOpenShortcuts,
+  onOpenSystemHealth,
   lang = 'id',
   theme = 'dark',
   isFullWidth = true,
@@ -184,6 +186,21 @@ export const TerminalStatusBar: React.FC<TerminalStatusBarProps> = ({
           </div>
 
           <span className={`text-slate-600 ${isDark ? 'text-slate-700' : 'text-slate-300'}`}>·</span>
+
+          {onOpenSystemHealth && (
+            <button
+              onClick={onOpenSystemHealth}
+              className={`flex items-center gap-1 px-1.5 py-0.5 rounded border transition-colors cursor-pointer ${
+                isDark
+                  ? 'bg-slate-900/80 border-slate-800 text-cyan-400 hover:text-cyan-300 hover:border-cyan-500/40'
+                  : 'bg-white border-slate-300 text-cyan-700 hover:text-cyan-900 hover:border-cyan-400'
+              }`}
+              title="Buka Dasbor Kesehatan Sistem V8 & Uptime (/system_health)"
+            >
+              <Activity className="w-3 h-3 text-cyan-400" />
+              <span className="hidden sm:inline">V8 Uptime</span>
+            </button>
+          )}
 
           <div className="flex items-center gap-1.5 text-[11px] font-mono font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

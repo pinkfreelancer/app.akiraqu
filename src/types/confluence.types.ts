@@ -36,6 +36,8 @@ export interface ConfluenceEvaluation {
   idempotencyKey: string;
   latencyMs: number;
   aiEngine: string;
+  userEmail?: string;
+  userUid?: string;
 }
 
 export interface AuditLogEntry {
@@ -48,6 +50,8 @@ export interface AuditLogEntry {
   bias: string;
   latencyMs: number;
   ipHash: string;
+  userEmail?: string;
+  userUid?: string;
 }
 
 export interface BullishCriteriaVerification {

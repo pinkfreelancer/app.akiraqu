@@ -260,30 +260,30 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   };
 
   return (
-    <div id="page-settings-master" className="space-y-6 max-w-6xl mx-auto pb-12">
+    <div id="page-settings-master" className="space-y-4 sm:space-y-6 max-w-6xl mx-auto pb-12 px-1 sm:px-2">
       {/* Header Banner */}
       <div
-        className={`p-6 rounded-2xl border transition-all ${
+        className={`p-4 sm:p-6 rounded-[2px] sm:rounded-xl border transition-all ${
           isDark
             ? 'bg-gradient-to-r from-[#0b1329] via-[#0f172a] to-[#070b14] border-[#1e293b]'
             : 'bg-gradient-to-r from-cyan-50 via-white to-blue-50 border-slate-200 shadow-sm'
         }`}
       >
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
-              <Sliders className="w-6 h-6" />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="p-2.5 sm:p-3 rounded-[2px] sm:rounded-xl bg-pink-500/10 border border-pink-500/30 text-pink-400 shrink-0">
+              <Sliders className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold font-mono tracking-tight flex items-center gap-2">
+              <h1 className="text-lg sm:text-2xl font-bold font-mono tracking-tight flex items-center gap-2 flex-wrap">
                 <span className={isDark ? 'text-white' : 'text-slate-900'}>
                   {isId ? 'Pengaturan Terminal & Keamanan' : 'Terminal Settings & Security'}
                 </span>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-semibold font-mono">
+                <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-[2px] bg-pink-500/20 text-pink-300 border border-pink-500/30 font-semibold font-mono">
                   v2.5 Pro
                 </span>
               </h1>
-              <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+              <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 leading-relaxed">
                 {isId
                   ? 'Konfigurasi Profil Pengguna, Preferensi Regional, Kustomisasi Tampilan, Kanal Notifikasi Sinyal, dan Integrasi API.'
                   : 'Manage User Profile, Regional Formatting, Display Theming, Signal Alert Channels, and API Integrations.'}
@@ -292,24 +292,24 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           </div>
 
           {/* Quick Actions & Status */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
             {saveSuccessNotice && (
-              <span className="flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-3 py-1.5 rounded-xl animate-fade-in">
-                <CheckCircle2 className="w-4 h-4" />
+              <span className="flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-1.5 rounded-[2px] animate-fade-in">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
                 <span>{saveSuccessNotice}</span>
               </span>
             )}
 
             <button
               onClick={handleExportData}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer shadow-xs ${
+              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-[2px] text-xs font-mono font-bold border transition-all cursor-pointer shadow-xs w-full sm:w-auto min-h-[36px] ${
                 isDark
                   ? 'bg-slate-800/80 hover:bg-slate-700 text-slate-200 border-slate-700'
                   : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
               }`}
               title={isId ? 'Ekspor Backup Pengaturan & Jurnal ke JSON' : 'Export Settings & Journal Backup'}
             >
-              <Download className="w-3.5 h-3.5 text-cyan-400" />
+              <Download className="w-3.5 h-3.5 text-pink-400 shrink-0" />
               <span>{isId ? 'Ekspor Data' : 'Export Data'}</span>
             </button>
           </div>
@@ -318,7 +318,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
       {/* Tabs Navigation */}
       <div
-        className={`flex items-center gap-1.5 p-1 rounded-2xl border overflow-x-auto scrollbar-none ${
+        className={`flex items-center gap-1.5 p-1 rounded-[2px] sm:rounded-xl border overflow-x-auto scrollbar-none touch-pan-x ${
           isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'
         }`}
       >
@@ -335,15 +335,15 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as SettingsTab)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shrink-0 border ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-[2px] text-xs font-mono font-bold transition-all cursor-pointer shrink-0 border min-h-[38px] ${
                 isActive
-                  ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-sm'
+                  ? 'bg-pink-600 text-white border-pink-500 shadow-xs'
                   : isDark
                   ? 'bg-[#070b14] text-slate-400 border-[#1e293b] hover:text-slate-200 hover:bg-slate-800/60'
                   : 'bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-950'
               }`}
             >
-              <TabIcon className="w-4 h-4" />
+              <TabIcon className="w-4 h-4 shrink-0" />
               <span>{tab.label}</span>
             </button>
           );
@@ -354,48 +354,48 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       {/* TAB 1: PROFIL & KEAMANAN (USER PROFILE, ACCOUNT, PRIVACY) */}
       {/* ========================================================= */}
       {activeTab === 'PROFILE' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* User Profile Card */}
-          <div className={`p-6 rounded-2xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
-            <h3 className="text-base font-bold font-mono text-white mb-4 flex items-center gap-2">
+          <div className={`p-4 sm:p-6 rounded-[2px] sm:rounded-xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
+            <h3 className="text-sm sm:text-base font-bold font-mono text-white mb-4 flex items-center gap-2">
               <User className="w-5 h-5 text-cyan-400" />
               <span>{isId ? 'Profil Pengguna & Status Akun' : 'User Profile & Account Status'}</span>
             </h3>
 
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-slate-700/30">
-              <div className="flex items-center gap-4">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6 pb-4 sm:pb-6 border-b border-slate-700/30">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                 {user?.photoURL ? (
                   <img
                     src={user.photoURL}
                     alt={settings.account.displayName}
-                    className="w-16 h-16 rounded-2xl object-cover border-2 border-cyan-500/50 shadow-md"
+                    className="w-12 h-12 sm:w-16 sm:h-16 rounded-[2px] sm:rounded-xl object-cover border-2 border-cyan-500/50 shadow-md shrink-0"
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-500 text-slate-950 text-2xl font-bold flex items-center justify-center font-mono shadow-md">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-[2px] sm:rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-500 text-slate-950 text-xl sm:text-2xl font-bold flex items-center justify-center font-mono shadow-md shrink-0">
                     {settings.account.displayName.charAt(0).toUpperCase()}
                   </div>
                 )}
 
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold font-mono text-white">{settings.account.displayName}</span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-bold">
+                <div className="space-y-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-base sm:text-lg font-bold font-mono text-white truncate">{settings.account.displayName}</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-[2px] bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-bold shrink-0">
                       {settings.account.role}
                     </span>
                   </div>
-                  <span className="text-xs text-slate-400 font-mono block">{settings.account.email}</span>
-                  <span className="text-[11px] text-slate-500 font-mono block">
+                  <span className="text-xs text-slate-400 font-mono block truncate">{settings.account.email}</span>
+                  <span className="text-[10px] sm:text-[11px] text-slate-500 font-mono block truncate">
                     User ID: <code className="text-cyan-400">{settings.account.userId}</code> • Terdaftar: {settings.account.memberSince}
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full md:w-auto">
                 {isAuthenticated && user ? (
                   <button
                     onClick={() => logout()}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer ${
+                    className={`w-full md:w-auto flex items-center justify-center gap-1.5 px-3 py-2 rounded-[2px] text-xs font-mono font-bold border transition-all cursor-pointer min-h-[36px] ${
                       isDark
                         ? 'bg-rose-950/40 border-rose-500/30 text-rose-300 hover:bg-rose-900/50'
                         : 'bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100'
@@ -412,7 +412,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
 
             {/* Editable Profile Name */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mt-4 sm:mt-6">
               <div className="space-y-1.5 font-mono text-xs">
                 <label className="text-slate-400 font-bold">{isId ? 'Nama Tampilan' : 'Display Name'}</label>
                 <input
@@ -423,7 +423,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       account: { ...settings.account, displayName: e.target.value },
                     })
                   }
-                  className={`w-full px-3 py-2 rounded-xl border font-mono text-xs ${
+                  className={`w-full px-3 py-2 rounded-[2px] border font-mono text-xs ${
                     isDark ? 'bg-[#070b14] border-[#1e293b] text-white focus:border-cyan-500' : 'bg-slate-50 border-slate-200 text-slate-800'
                   }`}
                 />
@@ -438,7 +438,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       account: { ...settings.account, role: e.target.value as any },
                     })
                   }
-                  className={`w-full px-3 py-2 rounded-xl border font-mono text-xs ${
+                  className={`w-full px-3 py-2 rounded-[2px] border font-mono text-xs ${
                     isDark ? 'bg-[#070b14] border-[#1e293b] text-white focus:border-cyan-500' : 'bg-slate-50 border-slate-200 text-slate-800'
                   }`}
                 >
@@ -451,21 +451,21 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           </div>
 
           {/* Security & Access Protection */}
-          <div className={`p-6 rounded-2xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
-            <h3 className="text-base font-bold font-mono text-white mb-4 flex items-center gap-2">
+          <div className={`p-4 sm:p-6 rounded-[2px] sm:rounded-xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
+            <h3 className="text-sm sm:text-base font-bold font-mono text-white mb-4 flex items-center gap-2">
               <Shield className="w-5 h-5 text-emerald-400" />
               <span>{isId ? 'Keamanan & Perlindungan Akses' : 'Security & Session Protection'}</span>
             </h3>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {/* 2FA Protection Toggle */}
-              <div className={`p-4 rounded-xl border flex items-center justify-between ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3.5 sm:p-4 rounded-[2px] border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="space-y-0.5">
-                  <span className="text-sm font-bold font-mono text-white flex items-center gap-1.5">
-                    <Lock className="w-4 h-4 text-emerald-400" />
+                  <span className="text-xs sm:text-sm font-bold font-mono text-white flex items-center gap-1.5">
+                    <Lock className="w-4 h-4 text-emerald-400 shrink-0" />
                     {isId ? 'Autentikasi Dua Faktor (2FA Sim)' : 'Two-Factor Authentication (2FA)'}
                   </span>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-[11px] sm:text-xs text-slate-400">
                     {isId ? 'Meminta verifikasi kode sebelum mengeksekusi order riil di bursa.' : 'Require 2FA verification before placing live orders.'}
                   </p>
                 </div>
@@ -475,7 +475,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       account: { ...settings.account, twoFactorEnabled: !settings.account.twoFactorEnabled },
                     })
                   }
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-[2px] text-xs font-mono font-bold transition-all cursor-pointer min-h-[36px] w-full sm:w-auto ${
                     settings.account.twoFactorEnabled
                       ? 'bg-emerald-500 text-slate-950 font-bold'
                       : 'bg-slate-800 text-slate-400'
@@ -486,13 +486,13 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               </div>
 
               {/* Auto Lock Session */}
-              <div className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3.5 sm:p-4 rounded-[2px] border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="space-y-0.5">
-                  <span className="text-sm font-bold font-mono text-white flex items-center gap-1.5">
-                    <Clock className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs sm:text-sm font-bold font-mono text-white flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-cyan-400 shrink-0" />
                     {isId ? 'Kunci Otomatis Terminal (Auto-Lock)' : 'Terminal Auto-Lock Timeout'}
                   </span>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-[11px] sm:text-xs text-slate-400">
                     {isId ? 'Mengunci layar terminal otomatis saat tidak ada aktivitas.' : 'Automatically lock terminal upon inactivity.'}
                   </p>
                 </div>
@@ -504,7 +504,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       account: { ...settings.account, autoLockMinutes: Number(e.target.value) },
                     })
                   }
-                  className={`px-3 py-2 rounded-lg border font-mono text-xs ${
+                  className={`px-3 py-2 rounded-[2px] border font-mono text-xs w-full sm:w-auto ${
                     isDark ? 'bg-[#0f172a] border-[#1e293b] text-white' : 'bg-white border-slate-200 text-slate-800'
                   }`}
                 >
@@ -519,22 +519,22 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           </div>
 
           {/* Privacy & Data Management */}
-          <div className={`p-6 rounded-2xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
-            <h3 className="text-base font-bold font-mono text-white mb-4 flex items-center gap-2">
+          <div className={`p-4 sm:p-6 rounded-[2px] sm:rounded-xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
+            <h3 className="text-sm sm:text-base font-bold font-mono text-white mb-3 flex items-center gap-2">
               <Shield className="w-5 h-5 text-amber-400" />
               <span>{isId ? 'Privasi & Kedaulatan Data Lokal' : 'Privacy & Data Sovereignty'}</span>
             </h3>
 
-            <p className="text-xs text-slate-400 leading-relaxed mb-5">
+            <p className="text-xs text-slate-400 leading-relaxed mb-4">
               {isId
                 ? 'Terminal IMASBTC beroperasi dengan arsitektur Local-First. API Key bursa, riwayat transaksi, dan jurnal analisis disimpan terlindungi di perangkat lokal pengguna atau Firestore terenkripsi milik Anda.'
                 : 'IMASBTC operates on a Local-First architecture. Exchange API keys, trade histories, and journal entries are securely stored on your local browser instance or private Firestore.'}
             </p>
 
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
               <button
                 onClick={handleExportData}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-mono font-bold text-xs transition cursor-pointer shadow-sm"
+                className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-[2px] bg-cyan-600 hover:bg-cyan-500 text-white font-mono font-bold text-xs transition cursor-pointer shadow-xs min-h-[38px]"
               >
                 <Download className="w-4 h-4" />
                 <span>{isId ? 'Download Cadangan Data Lengkap (.JSON)' : 'Download Full Data Backup (.JSON)'}</span>
@@ -542,7 +542,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
               <button
                 onClick={() => setShowClearConfirm(true)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-950/60 hover:bg-rose-900 border border-rose-500/40 text-rose-300 font-mono font-bold text-xs transition cursor-pointer"
+                className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-[2px] bg-rose-950/60 hover:bg-rose-900 border border-rose-500/40 text-rose-300 font-mono font-bold text-xs transition cursor-pointer min-h-[38px]"
               >
                 <Trash2 className="w-4 h-4 text-rose-400" />
                 <span>{isId ? 'Reset Cache & Data Lokal' : 'Clear Local Cache & Reset'}</span>
@@ -551,26 +551,26 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
             {/* Clear Confirmation Modal */}
             {showClearConfirm && (
-              <div className="mt-4 p-4 rounded-xl border border-rose-500/50 bg-rose-950/40 space-y-3 animate-fade-in">
+              <div className="mt-4 p-4 rounded-[2px] border border-rose-500/50 bg-rose-950/40 space-y-3 animate-fade-in">
                 <div className="flex items-center gap-2 text-rose-300 font-mono font-bold text-sm">
                   <AlertTriangle className="w-4 h-4 text-rose-400" />
                   <span>{isId ? 'Konfirmasi Reset Data Lokal' : 'Confirm Local Reset'}</span>
                 </div>
-                <p className="text-xs text-rose-200/80">
+                <p className="text-xs text-rose-200/80 leading-relaxed">
                   {isId
                     ? 'Tindakan ini akan menghapus riwayat jurnal trading, backtest, dan preferensi yang tersimpan di browser Anda.'
                     : 'This action will wipe all stored trading journals, backtest runs, and preferences stored in your browser cache.'}
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <button
                     onClick={handleClearAllData}
-                    className="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-mono font-bold rounded-lg cursor-pointer"
+                    className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-mono font-bold rounded-[2px] cursor-pointer min-h-[34px]"
                   >
                     {isId ? 'Ya, Hapus Semua' : 'Yes, Wipe Everything'}
                   </button>
                   <button
                     onClick={() => setShowClearConfirm(false)}
-                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono font-bold rounded-lg cursor-pointer"
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono font-bold rounded-[2px] cursor-pointer min-h-[34px]"
                   >
                     {isId ? 'Batal' : 'Cancel'}
                   </button>
@@ -585,26 +585,26 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       {/* TAB 2: BAHASA, WAKTU & FORMAT ANGKA (REGIONAL & FORMAT)   */}
       {/* ========================================================= */}
       {activeTab === 'REGIONAL' && (
-        <div className="space-y-6">
-          <div className={`p-6 rounded-2xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
-            <h3 className="text-base font-bold font-mono text-white mb-5 flex items-center gap-2">
+        <div className="space-y-4 sm:space-y-6">
+          <div className={`p-4 sm:p-6 rounded-[2px] sm:rounded-xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
+            <h3 className="text-sm sm:text-base font-bold font-mono text-white mb-4 sm:mb-5 flex items-center gap-2">
               <Globe className="w-5 h-5 text-cyan-400" />
               <span>{isId ? 'Bahasa, Zona Waktu & Format Angka' : 'Language, Timezone & Number Formatting'}</span>
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {/* Language Selection */}
               <div className="space-y-2">
                 <label className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider block">
                   {isId ? 'Bahasa Pengantar (Language)' : 'Interface Language'}
                 </label>
-                <div className={`flex p-1 rounded-xl border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-100 border-slate-200'}`}>
+                <div className={`flex p-1 rounded-[2px] border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-100 border-slate-200'}`}>
                   <button
                     onClick={() => {
                       onToggleLang('id');
                       handleUpdateSettings({ regional: { ...settings.regional, language: 'id' } });
                     }}
-                    className={`flex-1 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                    className={`flex-1 py-2 rounded-[2px] text-xs font-mono font-bold transition-all cursor-pointer min-h-[36px] ${
                       lang === 'id'
                         ? 'bg-cyan-500 text-slate-950 shadow-xs'
                         : isDark
@@ -619,7 +619,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       onToggleLang('en');
                       handleUpdateSettings({ regional: { ...settings.regional, language: 'en' } });
                     }}
-                    className={`flex-1 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                    className={`flex-1 py-2 rounded-[2px] text-xs font-mono font-bold transition-all cursor-pointer min-h-[36px] ${
                       lang === 'en'
                         ? 'bg-cyan-500 text-slate-950 shadow-xs'
                         : isDark
@@ -644,7 +644,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       regional: { ...settings.regional, timezone: e.target.value as TimezoneOption },
                     })
                   }
-                  className={`w-full px-3 py-2.5 rounded-xl border font-mono text-xs ${
+                  className={`w-full px-3 py-2.5 rounded-[2px] border font-mono text-xs ${
                     isDark ? 'bg-[#070b14] border-[#1e293b] text-white focus:border-cyan-500' : 'bg-slate-50 border-slate-200 text-slate-800'
                   }`}
                 >
@@ -659,7 +659,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
               {/* Number Format Selection */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-1">
                   <label className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider block">
                     {isId ? 'Format Pemisah Desimal & Ribuan' : 'Number & Decimal Format'}
                   </label>
@@ -678,7 +678,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       regional: { ...settings.regional, numberFormat: e.target.value as NumberFormatOption },
                     })
                   }
-                  className={`w-full px-3 py-2.5 rounded-xl border font-mono text-xs ${
+                  className={`w-full px-3 py-2.5 rounded-[2px] border font-mono text-xs ${
                     isDark ? 'bg-[#070b14] border-[#1e293b] text-white focus:border-cyan-500' : 'bg-slate-50 border-slate-200 text-slate-800'
                   }`}
                 >
@@ -686,7 +686,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   <option value="US">Format Internasional / US: 1,234,567.89 (Ribuan: Koma [,] | Desimal: Titik [.])</option>
                   <option value="EU">Format Eropa / EU: 1 234 567,89 (Ribuan: Spasi [ ] | Desimal: Koma [,])</option>
                 </select>
-                <p className="text-[11px] text-slate-400 font-mono">
+                <p className="text-[11px] text-slate-400 font-mono leading-relaxed">
                   {isId
                     ? 'Pemisah ini diterapkan ke seluruh chart, buku order, riwayat transaksi, tabel screening, dan kalkulator risiko.'
                     : 'This separator standard applies across charts, order books, trade logs, screener tables, and risk calculators.'}
@@ -705,7 +705,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       regional: { ...settings.regional, currencySymbol: e.target.value as CurrencySymbolOption },
                     })
                   }
-                  className={`w-full px-3 py-2.5 rounded-xl border font-mono text-xs ${
+                  className={`w-full px-3 py-2.5 rounded-[2px] border font-mono text-xs ${
                     isDark ? 'bg-[#070b14] border-[#1e293b] text-white focus:border-cyan-500' : 'bg-slate-50 border-slate-200 text-slate-800'
                   }`}
                 >
@@ -728,7 +728,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       regional: { ...settings.regional, dateFormat: e.target.value as any },
                     })
                   }
-                  className={`w-full px-3 py-2.5 rounded-xl border font-mono text-xs ${
+                  className={`w-full px-3 py-2.5 rounded-[2px] border font-mono text-xs ${
                     isDark ? 'bg-[#070b14] border-[#1e293b] text-white focus:border-cyan-500' : 'bg-slate-50 border-slate-200 text-slate-800'
                   }`}
                 >
@@ -743,12 +743,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 <label className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider block">
                   {isId ? 'Format Jam (Waktu)' : 'Time Format'}
                 </label>
-                <div className={`flex p-1 rounded-xl border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-100 border-slate-200'}`}>
+                <div className={`flex p-1 rounded-[2px] border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-100 border-slate-200'}`}>
                   <button
                     onClick={() =>
                       handleUpdateSettings({ regional: { ...settings.regional, timeFormat: '24h' } })
                     }
-                    className={`flex-1 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                    className={`flex-1 py-2 rounded-[2px] text-xs font-mono font-bold transition-all cursor-pointer min-h-[36px] ${
                       settings.regional.timeFormat === '24h'
                         ? 'bg-cyan-500 text-slate-950 shadow-xs'
                         : isDark
@@ -762,7 +762,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     onClick={() =>
                       handleUpdateSettings({ regional: { ...settings.regional, timeFormat: '12h' } })
                     }
-                    className={`flex-1 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                    className={`flex-1 py-2 rounded-[2px] text-xs font-mono font-bold transition-all cursor-pointer min-h-[36px] ${
                       settings.regional.timeFormat === '12h'
                         ? 'bg-cyan-500 text-slate-950 shadow-xs'
                         : isDark
@@ -777,28 +777,28 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
 
             {/* Live Format Preview Strip */}
-            <div className={`mt-6 p-4 rounded-xl border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
-              <div className="flex items-center justify-between mb-3">
+            <div className={`mt-5 sm:mt-6 p-3 sm:p-4 rounded-[2px] border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                 <span className="text-[11px] font-mono font-bold text-cyan-400 uppercase flex items-center gap-1.5">
                   <Activity className="w-3.5 h-3.5" />
                   {isId ? 'Pratinjau Format Langsung (Live Preview)' : 'Live Format Preview'}
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-[2px] bg-cyan-950 text-cyan-300 border border-cyan-500/30 w-fit">
                   {settings.regional.numberFormat === 'ID' ? 'Format Aktif: Indonesia (ID)' : settings.regional.numberFormat === 'EU' ? 'Format Aktif: Eropa (EU)' : 'Format Aktif: Internasional (US)'}
                 </span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
-                <div className={`p-2.5 rounded-lg border ${isDark ? 'bg-[#0b1329] border-[#1e293b]' : 'bg-white border-slate-200'}`}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 text-xs font-mono">
+                <div className={`p-2.5 rounded-[2px] border ${isDark ? 'bg-[#0b1329] border-[#1e293b]' : 'bg-white border-slate-200'}`}>
                   <span className="text-slate-400 block text-[10px] mb-0.5">Harga BTC / USDT:</span>
                   <span className="text-white font-bold block">{getCurrencyPrefix()}{formatCryptoPrice(87450.25, { numberFormat: settings.regional.numberFormat })}</span>
                   <span className="text-[9px] text-slate-500 block">Ribuan & 2 Desimal</span>
                 </div>
-                <div className={`p-2.5 rounded-lg border ${isDark ? 'bg-[#0b1329] border-[#1e293b]' : 'bg-white border-slate-200'}`}>
+                <div className={`p-2.5 rounded-[2px] border ${isDark ? 'bg-[#0b1329] border-[#1e293b]' : 'bg-white border-slate-200'}`}>
                   <span className="text-slate-400 block text-[10px] mb-0.5">Microcap (PEPE):</span>
                   <span className="text-cyan-300 font-bold block">{getCurrencyPrefix()}{formatCryptoPrice(0.00000331, { numberFormat: settings.regional.numberFormat })}</span>
                   <span className="text-[9px] text-slate-500 block">Presisi 8 Desimal</span>
                 </div>
-                <div className={`p-2.5 rounded-lg border ${isDark ? 'bg-[#0b1329] border-[#1e293b]' : 'bg-white border-slate-200'}`}>
+                <div className={`p-2.5 rounded-[2px] border ${isDark ? 'bg-[#0b1329] border-[#1e293b]' : 'bg-white border-slate-200'}`}>
                   <span className="text-slate-400 block text-[10px] mb-0.5">Saldo Portofolio:</span>
                   <span className="text-emerald-400 font-bold block">
                     {formatCurrency(settings.regional.currencySymbol === 'IDR' ? 1425890000 : 87450.25, {
@@ -808,7 +808,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   </span>
                   <span className="text-[9px] text-slate-500 block">Mata Uang {settings.regional.currencySymbol}</span>
                 </div>
-                <div className={`p-2.5 rounded-lg border ${isDark ? 'bg-[#0b1329] border-[#1e293b]' : 'bg-white border-slate-200'}`}>
+                <div className={`p-2.5 rounded-[2px] border ${isDark ? 'bg-[#0b1329] border-[#1e293b]' : 'bg-white border-slate-200'}`}>
                   <span className="text-slate-400 block text-[10px] mb-0.5">PnL 24 Jam:</span>
                   <span className="text-emerald-400 font-bold block">
                     {formatCurrency(settings.regional.currencySymbol === 'IDR' ? 45200000 : 2840.50, {
@@ -823,8 +823,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
 
             {/* Matrix Perbandingan Format Pemisah Desimal & Ribuan */}
-            <div className={`mt-5 p-4 rounded-xl border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
-              <div className="flex items-center justify-between mb-3">
+            <div className={`mt-4 sm:mt-5 p-3 sm:p-4 rounded-[2px] border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-3">
                 <span className="text-[11px] font-mono font-bold text-amber-400 uppercase flex items-center gap-1.5">
                   <Layers className="w-3.5 h-3.5" />
                   {isId ? 'Matriks Perbandingan Format Pemisah Desimal & Ribuan' : 'Decimal & Thousands Separator Comparison Matrix'}
@@ -834,8 +834,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 </span>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left font-mono text-xs border-collapse">
+              <div className="overflow-x-auto -mx-1 px-1 sm:mx-0 sm:px-0">
+                <table className="w-full text-left font-mono text-xs border-collapse min-w-[550px]">
                   <thead>
                     <tr className={`border-b ${isDark ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-600'}`}>
                       <th className="py-2 px-2.5 font-bold">Standard / Locale</th>
@@ -957,16 +957,16 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       {/* TAB 3: TAMPILAN & TEMA (DISPLAY & THEME ENGINE)            */}
       {/* ========================================================= */}
       {activeTab === 'DISPLAY' && (
-        <div className="space-y-6">
-          <div className={`p-6 rounded-2xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
-            <h3 className="text-base font-bold font-mono text-white mb-5 flex items-center gap-2">
+        <div className="space-y-4 sm:space-y-6">
+          <div className={`p-4 sm:p-6 rounded-[2px] sm:rounded-xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
+            <h3 className="text-sm sm:text-base font-bold font-mono text-white mb-4 sm:mb-5 flex items-center gap-2">
               <Palette className="w-5 h-5 text-cyan-400" />
               <span>{isId ? 'Kustomisasi Tampilan & Tema Engine' : 'Display Customization & Engine Theme'}</span>
             </h3>
 
             {/* Theme Engine Selection: 1. theme-light, 2. theme-dark (Default), 3. theme-terminal, 4. theme-custom */}
             <div className="space-y-3 mb-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                 <label className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider block">
                   {isId ? 'Pilihan Tema Engine Visual (5 Pilihan Engine)' : 'Visual Engine Theme (5 Engine Presets)'}
                 </label>
@@ -979,7 +979,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
                 {/* 0. Glassnode Institutional (theme-glassnode) */}
                 <button
                   type="button"
@@ -988,7 +988,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     else if (isDark) onToggleTheme();
                     handleUpdateSettings({ display: { ...settings.display, themeMode: 'light' } });
                   }}
-                  className={`p-4 rounded-[2px] border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`p-3.5 sm:p-4 rounded-[2px] border text-left transition-all cursor-pointer flex flex-col justify-between ${
                     normalizedTheme === 'theme-glassnode'
                       ? 'bg-white border-[#1A1A1A] ring-2 ring-[#F472B6]/40 shadow-sm'
                       : isDark
@@ -1034,7 +1034,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     else if (isDark) onToggleTheme();
                     handleUpdateSettings({ display: { ...settings.display, themeMode: 'light' } });
                   }}
-                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`p-3.5 sm:p-4 rounded-[2px] border text-left transition-all cursor-pointer flex flex-col justify-between ${
                     normalizedTheme === 'theme-light'
                       ? 'bg-white border-[#F472B6] ring-2 ring-[#F472B6]/30 shadow-md'
                       : isDark
@@ -1079,7 +1079,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     else if (!isDark) onToggleTheme();
                     handleUpdateSettings({ display: { ...settings.display, themeMode: 'dark' } });
                   }}
-                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`p-3.5 sm:p-4 rounded-[2px] border text-left transition-all cursor-pointer flex flex-col justify-between ${
                     normalizedTheme === 'theme-dark'
                       ? 'bg-[#1E293B]/80 backdrop-blur-md border-[#EC4899] ring-2 ring-[#EC4899]/30 shadow-lg'
                       : 'bg-[#0B0F19] border-[#1e293b] hover:border-slate-700'
@@ -1121,7 +1121,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     if (onSelectTheme) onSelectTheme('theme-terminal');
                     handleUpdateSettings({ display: { ...settings.display, themeMode: 'classic' } });
                   }}
-                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`p-3.5 sm:p-4 rounded-[2px] border text-left transition-all cursor-pointer flex flex-col justify-between ${
                     normalizedTheme === 'theme-terminal'
                       ? 'bg-[#0B0F19] border-[#FF007A] ring-2 ring-[#FF007A]/30 shadow-md'
                       : 'bg-[#030712] border-emerald-500/20 hover:border-emerald-500/40'
@@ -1163,7 +1163,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     if (onSelectTheme) onSelectTheme('theme-custom', customThemeColor, customThemeBg);
                     handleUpdateSettings({ display: { ...settings.display, themeMode: 'custom' } });
                   }}
-                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`p-3.5 sm:p-4 rounded-[2px] border text-left transition-all cursor-pointer flex flex-col justify-between ${
                     normalizedTheme === 'theme-custom'
                       ? 'bg-[#0f172a] border-pink-400 ring-2 ring-pink-400/30 shadow-md'
                       : 'bg-[#070b14] border-[#1e293b] hover:border-slate-700'
@@ -1215,7 +1215,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
             {/* Custom Theme Mini Color Picker & Contrast Controls */}
             {normalizedTheme === 'theme-custom' && (
-              <div className={`p-5 rounded-[2px] border mb-6 ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
+              <div className={`p-4 sm:p-5 rounded-[2px] border mb-6 ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
                 <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b ${isDark ? 'border-[#1e293b]/70' : 'border-slate-200'}`}>
                   <div>
                     <h4 className={`text-sm font-bold font-mono flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -1230,7 +1230,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   </div>
                   {/* WCAG AA Compliance Badge */}
                   <div
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-[2px] font-mono text-xs font-bold border shrink-0"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-[2px] font-mono text-xs font-bold border shrink-0 w-fit"
                     style={{
                       backgroundColor: customThemeColor,
                       color: getContrastTextColor(customThemeColor),
@@ -1241,9 +1241,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   {/* Left Column: Soft Pink Saturation & Accent Hue */}
-                  <div className={`space-y-4 p-4 rounded-[2px] border ${isDark ? 'bg-[#0B0F19] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className={`space-y-4 p-3.5 sm:p-4 rounded-[2px] border ${isDark ? 'bg-[#0B0F19] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
                     <div>
                       <label className="text-xs font-mono font-bold text-pink-500 uppercase tracking-wider block mb-1">
                         {isId ? '1. Saturasi & Pilihan Aksen Soft Pink' : '1. Soft Pink Saturation & Accent'}
@@ -1262,14 +1262,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                           onUpdateCustomColor?.(val);
                           onSelectTheme?.('theme-custom', val, customThemeBg);
                         }}
-                        className="w-12 h-12 rounded-[2px] border border-[#334155] cursor-pointer bg-transparent shrink-0"
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-[2px] border border-[#334155] cursor-pointer bg-transparent shrink-0"
                         aria-label="Soft Pink Accent Color Picker"
                       />
                       <div className="flex-1 space-y-1">
                         <div className={`flex items-center rounded-[2px] border px-3 py-2 text-xs font-mono ${
                           isDark ? 'border-[#334155] bg-[#070b14]' : 'border-slate-300 bg-white'
                         }`}>
-                          <span className="text-slate-500 mr-2">ACCENT HEX:</span>
+                          <span className="text-slate-500 mr-2 text-[10px] sm:text-xs">ACCENT HEX:</span>
                           <input
                             type="text"
                             value={customThemeColor}
@@ -1298,7 +1298,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       <span className={`text-[11px] font-mono block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                         {isId ? 'Pilihan Cepat Soft Pink:' : 'Quick Soft Pink Presets:'}
                       </span>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
                         {SOFT_PINK_SHADES.map((preset) => (
                           <button
                             key={preset.hex}
@@ -1307,7 +1307,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                               onUpdateCustomColor?.(preset.hex);
                               onSelectTheme?.('theme-custom', preset.hex, customThemeBg);
                             }}
-                            className={`flex items-center gap-2 px-2.5 py-1 rounded-[2px] border text-xs font-mono transition-all cursor-pointer ${
+                            className={`flex items-center gap-1.5 px-2 py-1 rounded-[2px] border text-[11px] font-mono transition-all cursor-pointer ${
                               customThemeColor.toLowerCase() === preset.hex.toLowerCase()
                                 ? 'bg-pink-950/60 border-pink-400 text-pink-200 ring-1 ring-pink-400/40'
                                 : isDark
@@ -1327,7 +1327,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   </div>
 
                   {/* Right Column: Background Contrast Control */}
-                  <div className={`space-y-4 p-4 rounded-[2px] border ${isDark ? 'bg-[#0B0F19] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className={`space-y-4 p-3.5 sm:p-4 rounded-[2px] border ${isDark ? 'bg-[#0B0F19] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
                     <div>
                       <label className="text-xs font-mono font-bold text-cyan-500 uppercase tracking-wider block mb-1">
                         {isId ? '2. Kontras Background & Surface' : '2. Background & Surface Contrast'}
@@ -1346,14 +1346,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                           onUpdateCustomBg?.(val);
                           onSelectTheme?.('theme-custom', customThemeColor, val);
                         }}
-                        className="w-12 h-12 rounded-[2px] border border-[#334155] cursor-pointer bg-transparent shrink-0"
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-[2px] border border-[#334155] cursor-pointer bg-transparent shrink-0"
                         aria-label="Background Contrast Color Picker"
                       />
                       <div className="flex-1 space-y-1">
                         <div className={`flex items-center rounded-[2px] border px-3 py-2 text-xs font-mono ${
                           isDark ? 'border-[#334155] bg-[#070b14]' : 'border-slate-300 bg-white'
                         }`}>
-                          <span className="text-slate-500 mr-2">BG HEX:</span>
+                          <span className="text-slate-500 mr-2 text-[10px] sm:text-xs">BG HEX:</span>
                           <input
                             type="text"
                             value={customThemeBg}
@@ -1382,7 +1382,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       <span className={`text-[11px] font-mono block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                         {isId ? 'Pilihan Kontras Background Populer:' : 'Popular Background Presets:'}
                       </span>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
                         {PRESET_BACKGROUND_CONTRASTS.map((bgPreset) => (
                           <button
                             key={bgPreset.hex}
@@ -1391,7 +1391,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                               onUpdateCustomBg?.(bgPreset.hex);
                               onSelectTheme?.('theme-custom', customThemeColor, bgPreset.hex);
                             }}
-                            className={`flex items-center gap-2 px-2.5 py-1 rounded-[2px] border text-xs font-mono transition-all cursor-pointer ${
+                            className={`flex items-center gap-1.5 px-2 py-1 rounded-[2px] border text-[11px] font-mono transition-all cursor-pointer ${
                               customThemeBg.toLowerCase() === bgPreset.hex.toLowerCase()
                                 ? 'bg-slate-800 border-cyan-400 text-cyan-200 ring-1 ring-cyan-400/40'
                                 : isDark
@@ -1414,21 +1414,21 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             )}
 
             {/* Ergonomic Display Layout Toggles */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-700/30">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 pt-4 border-t border-slate-700/30">
               {/* Fullscreen Toggle */}
-              <div className={`p-4 rounded-xl border flex flex-col justify-between ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3.5 sm:p-4 rounded-[2px] border flex flex-col justify-between ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="space-y-1 mb-3">
-                  <span className="text-sm font-bold font-mono text-white flex items-center gap-2">
-                    <Maximize className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs sm:text-sm font-bold font-mono text-white flex items-center gap-2">
+                    <Maximize className="w-4 h-4 text-cyan-400 shrink-0" />
                     {isId ? 'Layar Penuh (Fullscreen)' : 'Fullscreen Mode'}
                   </span>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-[11px] sm:text-xs text-slate-400">
                     {isId ? 'Maksimalkan tampilan ke seluruh layar monitor.' : 'Expand viewport across your entire monitor.'}
                   </p>
                 </div>
                 <button
                   onClick={onToggleFullscreen}
-                  className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-mono font-bold text-xs transition cursor-pointer"
+                  className="w-full flex items-center justify-center gap-1.5 py-2 rounded-[2px] bg-cyan-600 hover:bg-cyan-500 text-white font-mono font-bold text-xs transition cursor-pointer min-h-[36px]"
                 >
                   {isFullscreen ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
                   <span>{isFullscreen ? (isId ? 'Keluar Layar Penuh' : 'Exit Fullscreen') : (isId ? 'Masuk Layar Penuh' : 'Enter Fullscreen')}</span>
@@ -1436,38 +1436,38 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               </div>
 
               {/* Full Width Layout - Permanently Active & Responsive */}
-              <div className={`p-4 rounded-xl border flex flex-col justify-between ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3.5 sm:p-4 rounded-[2px] border flex flex-col justify-between ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="space-y-1 mb-3">
-                  <span className="text-sm font-bold font-mono text-white flex items-center gap-2">
-                    <StretchHorizontal className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs sm:text-sm font-bold font-mono text-white flex items-center gap-2">
+                    <StretchHorizontal className="w-4 h-4 text-cyan-400 shrink-0" />
                     {isId ? 'Tata Letak Penuh (Full-Width)' : 'Full-Width Responsive Layout'}
                   </span>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-[11px] sm:text-xs text-slate-400">
                     {isId ? 'Tampilan 100% Full-Width responsif di seluruh perangkat (Mobile, Tablet, Desktop, Ultra-Wide).' : '100% full-width responsive across all devices (Mobile, Tablet, Desktop, Ultra-Wide).'}
                   </p>
                 </div>
-                <div className="w-full py-2 px-3 rounded-lg text-xs font-mono font-bold border border-cyan-500/40 bg-cyan-500/15 text-cyan-300 flex items-center justify-between">
+                <div className="w-full py-2 px-3 rounded-[2px] text-xs font-mono font-bold border border-cyan-500/40 bg-cyan-500/15 text-cyan-300 flex items-center justify-between min-h-[36px]">
                   <span>{isId ? 'Status: 100% Full Width Aktif' : 'Status: 100% Full Width Active'}</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-400/20 text-cyan-200 font-semibold uppercase tracking-wider">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-[2px] bg-cyan-400/20 text-cyan-200 font-semibold uppercase tracking-wider">
                     {isId ? 'Permanen' : 'Default'}
                   </span>
                 </div>
               </div>
 
               {/* Workspace Layout Switcher */}
-              <div className={`p-4 rounded-xl border flex flex-col justify-between ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3.5 sm:p-4 rounded-[2px] border flex flex-col justify-between ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="space-y-1 mb-3">
-                  <span className="text-sm font-bold font-mono text-white flex items-center gap-2">
-                    <LayoutGrid className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs sm:text-sm font-bold font-mono text-white flex items-center gap-2">
+                    <LayoutGrid className="w-4 h-4 text-cyan-400 shrink-0" />
                     {isId ? 'Mode Meja Kerja' : 'Workspace Layout'}
                   </span>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-[11px] sm:text-xs text-slate-400">
                     {isId ? 'Beralih antara Quad-Grid Launchpad atau Alur Bertahap.' : 'Toggle between Multi-Panel Quad-Grid and Stepper.'}
                   </p>
                 </div>
                 <button
                   onClick={onToggleWorkspaceMode}
-                  className={`w-full py-2 rounded-lg text-xs font-mono font-bold border transition cursor-pointer ${
+                  className={`w-full py-2 rounded-[2px] text-xs font-mono font-bold border transition cursor-pointer min-h-[36px] ${
                     workspaceMode === 'launchpad'
                       ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
                       : isDark
@@ -1487,11 +1487,11 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       {/* TAB 4: NOTIFIKASI KANAL & SINYAL (SIGNAL ALERTS & CHANNELS)*/}
       {/* ========================================================= */}
       {activeTab === 'NOTIFICATIONS' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Status Feedback Notification */}
           {testAlertFeedback && (
             <div
-              className={`p-4 rounded-xl border font-mono text-xs flex items-center gap-3 animate-fade-in ${
+              className={`p-3.5 sm:p-4 rounded-[2px] border font-mono text-xs flex items-center gap-3 animate-fade-in ${
                 testAlertFeedback.success
                   ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300'
                   : 'bg-rose-950/60 border-rose-500/40 text-rose-300'
@@ -1503,32 +1503,32 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           )}
 
           {/* Master Signal Alert Rules Header */}
-          <div className={`p-6 rounded-2xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
-            <h3 className="text-base font-bold font-mono text-white mb-2 flex items-center gap-2">
+          <div className={`p-4 sm:p-6 rounded-[2px] sm:rounded-xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
+            <h3 className="text-sm sm:text-base font-bold font-mono text-white mb-2 flex items-center gap-2">
               <Bell className="w-5 h-5 text-cyan-400" />
               <span>{isId ? 'Kanal Pengiriman Sinyal & Notifikasi Otomatis' : 'Signal Alert Channels & Automated Notifications'}</span>
             </h3>
-            <p className="text-xs text-slate-400 leading-relaxed mb-6">
+            <p className="text-xs text-slate-400 leading-relaxed mb-4 sm:mb-6">
               {isId
                 ? 'Hubungkan Email, Bot Telegram, dan WhatsApp untuk menerima sinyal konfluensi tinggi (Score >= 80), order flow squeeze, dan eksekusi TP/SL secara instan di mana pun Anda berada.'
                 : 'Connect Email, Telegram Bot, and WhatsApp to receive high conviction confluence alerts, order flow squeezes, and trade executions instantly.'}
             </p>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* 1. EMAIL NOTIFICATION CHANNEL */}
-              <div className={`p-5 rounded-xl border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-700/30">
+              <div className={`p-4 sm:p-5 rounded-[2px] border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-slate-700/30">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                    <div className="p-2 sm:p-2.5 rounded-[2px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shrink-0">
                       <Mail className="w-5 h-5" />
                     </div>
                     <div>
                       <span className="text-sm font-bold font-mono text-white block">Email Dispatch</span>
-                      <span className="text-xs text-slate-400">Pengiriman laporan ringkasan sinyal ke inbox email</span>
+                      <span className="text-[11px] sm:text-xs text-slate-400">Pengiriman laporan ringkasan sinyal ke inbox email</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
                     <button
                       onClick={() =>
                         handleUpdateSettings({
@@ -1538,7 +1538,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                           },
                         })
                       }
-                      className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${
+                      className={`flex-1 sm:flex-initial px-3 py-2 rounded-[2px] text-xs font-mono font-bold transition cursor-pointer min-h-[36px] ${
                         settings.notifications.email.enabled
                           ? 'bg-emerald-500 text-slate-950 font-bold'
                           : 'bg-slate-800 text-slate-400'
@@ -1550,7 +1550,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     <button
                       onClick={() => handleTestAlert('email')}
                       disabled={isTestingAlert || !settings.notifications.email.enabled}
-                      className="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 text-white text-xs font-mono font-bold transition cursor-pointer flex items-center gap-1"
+                      className="flex-1 sm:flex-initial px-3 py-2 rounded-[2px] bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 text-white text-xs font-mono font-bold transition cursor-pointer flex items-center justify-center gap-1 min-h-[36px]"
                     >
                       <Send className="w-3 h-3" />
                       <span>{isTestingAlert ? 'Mengirim...' : 'Tes Email'}</span>
@@ -1558,7 +1558,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 font-mono text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mt-4 font-mono text-xs">
                   <div className="space-y-1">
                     <label className="text-slate-400">Alamat Email Tujuan:</label>
                     <input
@@ -1572,7 +1572,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                           },
                         })
                       }
-                      className={`w-full px-3 py-2 rounded-xl border ${
+                      className={`w-full px-3 py-2 rounded-[2px] border ${
                         isDark ? 'bg-[#0f172a] border-[#1e293b] text-white focus:border-cyan-500' : 'bg-white border-slate-200 text-slate-800'
                       }`}
                     />
@@ -1590,7 +1590,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                           },
                         })
                       }
-                      className={`w-full px-3 py-2 rounded-xl border ${
+                      className={`w-full px-3 py-2 rounded-[2px] border ${
                         isDark ? 'bg-[#0f172a] border-[#1e293b] text-white' : 'bg-white border-slate-200 text-slate-800'
                       }`}
                     >
@@ -1603,19 +1603,19 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               </div>
 
               {/* 2. TELEGRAM BOT CHANNEL */}
-              <div className={`p-5 rounded-xl border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-700/30">
+              <div className={`p-4 sm:p-5 rounded-[2px] border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-slate-700/30">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                    <div className="p-2 sm:p-2.5 rounded-[2px] bg-sky-500/10 text-sky-400 border border-sky-500/20 shrink-0">
                       <Send className="w-5 h-5" />
                     </div>
                     <div>
                       <span className="text-sm font-bold font-mono text-white block">Telegram Channel / Bot</span>
-                      <span className="text-xs text-slate-400">Kirim sinyal langsung ke Grup Telegram atau Chat Pribadi</span>
+                      <span className="text-[11px] sm:text-xs text-slate-400">Kirim sinyal langsung ke Grup Telegram atau Chat Pribadi</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
                     <button
                       onClick={() =>
                         handleUpdateSettings({
@@ -1628,7 +1628,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                           },
                         })
                       }
-                      className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${
+                      className={`flex-1 sm:flex-initial px-3 py-2 rounded-[2px] text-xs font-mono font-bold transition cursor-pointer min-h-[36px] ${
                         settings.notifications.telegram.enabled
                           ? 'bg-emerald-500 text-slate-950 font-bold'
                           : 'bg-slate-800 text-slate-400'
@@ -1640,7 +1640,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     <button
                       onClick={() => handleTestAlert('telegram')}
                       disabled={isTestingAlert || !settings.notifications.telegram.enabled}
-                      className="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-40 text-white text-xs font-mono font-bold transition cursor-pointer flex items-center gap-1"
+                      className="flex-1 sm:flex-initial px-3 py-2 rounded-[2px] bg-sky-600 hover:bg-sky-500 disabled:opacity-40 text-white text-xs font-mono font-bold transition cursor-pointer flex items-center justify-center gap-1 min-h-[36px]"
                     >
                       <Send className="w-3 h-3" />
                       <span>{isTestingAlert ? 'Mengirim...' : 'Tes Telegram'}</span>
@@ -1648,7 +1648,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 font-mono text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mt-4 font-mono text-xs">
                   <div className="space-y-1">
                     <label className="text-slate-400">Channel / Chat ID:</label>
                     <input
@@ -1667,7 +1667,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                           },
                         })
                       }
-                      className={`w-full px-3 py-2 rounded-xl border ${
+                      className={`w-full px-3 py-2 rounded-[2px] border ${
                         isDark ? 'bg-[#0f172a] border-[#1e293b] text-white focus:border-cyan-500' : 'bg-white border-slate-200 text-slate-800'
                       }`}
                     />
@@ -1690,7 +1690,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                           },
                         })
                       }
-                      className={`w-full px-3 py-2 rounded-xl border ${
+                      className={`w-full px-3 py-2 rounded-[2px] border ${
                         isDark ? 'bg-[#0f172a] border-[#1e293b] text-white focus:border-cyan-500' : 'bg-white border-slate-200 text-slate-800'
                       }`}
                     />
@@ -1699,19 +1699,19 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               </div>
 
               {/* 3. WHATSAPP ALERT CHANNEL */}
-              <div className={`p-5 rounded-xl border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-700/30">
+              <div className={`p-4 sm:p-5 rounded-[2px] border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-slate-700/30">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <div className="p-2 sm:p-2.5 rounded-[2px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
                       <Smartphone className="w-5 h-5" />
                     </div>
                     <div>
                       <span className="text-sm font-bold font-mono text-white block">WhatsApp Signal Alerts</span>
-                      <span className="text-xs text-slate-400">Kirim notifikasi instan langsung ke nomor WhatsApp</span>
+                      <span className="text-[11px] sm:text-xs text-slate-400">Kirim notifikasi instan langsung ke nomor WhatsApp</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
                     <button
                       onClick={() =>
                         handleUpdateSettings({
@@ -1724,7 +1724,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                           },
                         })
                       }
-                      className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${
+                      className={`flex-1 sm:flex-initial px-3 py-2 rounded-[2px] text-xs font-mono font-bold transition cursor-pointer min-h-[36px] ${
                         settings.notifications.whatsapp.enabled
                           ? 'bg-emerald-500 text-slate-950 font-bold'
                           : 'bg-slate-800 text-slate-400'
@@ -1736,7 +1736,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     <button
                       onClick={() => handleTestAlert('whatsapp')}
                       disabled={isTestingAlert || !settings.notifications.whatsapp.enabled}
-                      className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-mono font-bold transition cursor-pointer flex items-center gap-1"
+                      className="flex-1 sm:flex-initial px-3 py-2 rounded-[2px] bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-mono font-bold transition cursor-pointer flex items-center justify-center gap-1 min-h-[36px]"
                     >
                       <MessageSquare className="w-3 h-3" />
                       <span>{isTestingAlert ? 'Mengirim...' : 'Tes WhatsApp'}</span>
@@ -1744,7 +1744,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 font-mono text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mt-4 font-mono text-xs">
                   <div className="space-y-1">
                     <label className="text-slate-400">Nomor WhatsApp (+62...):</label>
                     <input
@@ -1759,7 +1759,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                           },
                         })
                       }
-                      className={`w-full px-3 py-2 rounded-xl border ${
+                      className={`w-full px-3 py-2 rounded-[2px] border ${
                         isDark ? 'bg-[#0f172a] border-[#1e293b] text-white focus:border-cyan-500' : 'bg-white border-slate-200 text-slate-800'
                       }`}
                     />
@@ -1779,7 +1779,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                           },
                         })
                       }
-                      className={`w-full px-3 py-2 rounded-xl border ${
+                      className={`w-full px-3 py-2 rounded-[2px] border ${
                         isDark ? 'bg-[#0f172a] border-[#1e293b] text-white focus:border-cyan-500' : 'bg-white border-slate-200 text-slate-800'
                       }`}
                     />
@@ -1795,26 +1795,26 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       {/* TAB 5: INTEGRASI API (EXCHANGE SOURCES & AI MODELS)        */}
       {/* ========================================================= */}
       {activeTab === 'API_INTEGRATIONS' && (
-        <div className="space-y-8">
+        <div className="space-y-4 sm:space-y-6">
           {/* Section 1: AI Model Engine Configuration */}
-          <div className={`p-6 rounded-2xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold font-mono text-white flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-cyan-400" />
+          <div className={`p-4 sm:p-6 rounded-[2px] sm:rounded-xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-xs'}`}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 sm:mb-4">
+              <h3 className="text-sm sm:text-base font-bold font-mono text-white flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-cyan-400 shrink-0" />
                 <span>{isId ? 'Pilihan Model AI Kuantitatif (Gemini Engine & Segera)' : 'Quantitative AI Models'}</span>
               </h3>
-              <span className="text-xs font-mono text-cyan-400 font-bold bg-cyan-950/60 border border-cyan-500/30 px-2.5 py-1 rounded-lg">
+              <span className="text-[10px] sm:text-xs font-mono text-cyan-400 font-bold bg-cyan-950/60 border border-cyan-500/30 px-2.5 py-1 rounded-[2px] w-fit">
                 Google DeepMind GenAI
               </span>
             </div>
 
-            <p className="text-xs text-slate-400 leading-relaxed mb-5">
+            <p className="text-xs text-slate-400 leading-relaxed mb-4 sm:mb-5">
               {isId
                 ? 'Pilih model kecerdasan buatan untuk mengevaluasi 12 indikator, sintesis narasi order flow, dan deduksi batas risiko invalidasi.'
                 : 'Select inference AI models to evaluate indicators, order flow liquidity, and institutional risk plans.'}
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-3.5">
               {DEFAULT_AI_MODELS.map((model) => {
                 const isSelected = settings.aiIntegrations.selectedAIModel === model.id;
                 const isActive = model.status === 'ACTIVE';
@@ -1829,7 +1829,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                         });
                       }
                     }}
-                    className={`p-4 rounded-xl border transition-all relative ${
+                    className={`p-3.5 sm:p-4 rounded-[2px] border transition-all relative ${
                       isActive ? 'cursor-pointer' : 'opacity-70 cursor-not-allowed'
                     } ${
                       isSelected
@@ -1841,7 +1841,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span
-                        className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                        className={`text-[10px] font-mono px-2 py-0.5 rounded-[2px] font-bold ${
                           model.status === 'ACTIVE'
                             ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30'
                             : 'bg-amber-950 text-amber-300 border border-amber-500/30'
@@ -1870,7 +1870,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
 
             {/* AI Reasoning Parameters Slider */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-700/30 font-mono text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-slate-700/30 font-mono text-xs">
               <div className="space-y-1.5">
                 <div className="flex justify-between text-slate-400">
                   <span>Tingkat Penalaran (Reasoning Effort):</span>
@@ -1883,7 +1883,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                       aiIntegrations: { ...settings.aiIntegrations, reasoningEffort: e.target.value as any },
                     })
                   }
-                  className={`w-full px-3 py-2 rounded-xl border ${
+                  className={`w-full px-3 py-2 rounded-[2px] border ${
                     isDark ? 'bg-[#070b14] border-[#1e293b] text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
                   }`}
                 >
@@ -1918,8 +1918,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           {/* Section 2: Exchange API Sources & Sandbox Accounts */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold font-mono text-white flex items-center gap-2">
-                <Key className="w-5 h-5 text-amber-400" />
+              <h3 className="text-sm sm:text-base font-bold font-mono text-white flex items-center gap-2">
+                <Key className="w-5 h-5 text-amber-400 shrink-0" />
                 <span>{isId ? 'Sumber Bursa & Kunci API (Exchange Integrations)' : 'Exchange API Sources'}</span>
               </h3>
             </div>

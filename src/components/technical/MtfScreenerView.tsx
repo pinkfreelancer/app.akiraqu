@@ -162,13 +162,13 @@ export const MtfScreenerView: React.FC<MtfScreenerViewProps> = ({
       <div className={`p-4 sm:p-5 rounded-2xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-sm'}`}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+            <span className="p-2 rounded-xl bg-pink-500/20 text-pink-400 border border-pink-500/30">
               <Layers className="w-5 h-5" />
             </span>
             <div>
               <h1 className="text-lg sm:text-xl font-bold font-mono tracking-tight flex items-center gap-2">
                 <span>{isId ? 'Screener Multi-Timeframe (MTF Alignment)' : 'Multi-Timeframe Screener'}</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 font-mono">1m - 1D</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-pink-500/15 text-pink-400 border border-pink-500/30 font-mono">1m - 1D</span>
               </h1>
               <p className="text-xs text-slate-400">
                 {isId ? 'Deteksi penyelarasan arah tren dari 1m hingga 1D untuk menyaring peluang high-probability trend continuation.' : 'Multi-timeframe trend confluence matrix scanning for 100% directional alignment.'}
@@ -180,7 +180,7 @@ export const MtfScreenerView: React.FC<MtfScreenerViewProps> = ({
             <button
               onClick={() => setFilterMode('ALL')}
               className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                filterMode === 'ALL' ? 'bg-cyan-500 text-slate-950 shadow-xs' : 'text-slate-400 hover:text-white'
+                filterMode === 'ALL' ? 'bg-pink-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
               }`}
             >
               Semua

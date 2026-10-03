@@ -304,7 +304,7 @@ export const LaunchpadToolbar: React.FC<LaunchpadToolbarProps> = ({
 
         {/* Section 2: Timeframe, Presets, Actions */}
         <div className="flex flex-wrap items-center justify-between xl:justify-end gap-2 text-xs">
-          {/* Timeframe Selector */}
+          {/* Timeframe Selector (1m - 1D) */}
           {onSelectTimeframe && (
             <div
               className={`flex items-center gap-0.5 p-1 rounded-xl border ${
@@ -315,11 +315,9 @@ export const LaunchpadToolbar: React.FC<LaunchpadToolbarProps> = ({
                 <button
                   key={tf}
                   onClick={() => onSelectTimeframe(tf)}
-                  className={`px-2 py-1 rounded-lg text-[10px] font-bold font-mono transition-colors cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold font-mono transition-colors cursor-pointer ${
                     timeframe === tf
-                      ? isDark
-                        ? 'bg-cyan-500 text-slate-950 shadow-xs'
-                        : 'bg-cyan-600 text-white shadow-xs'
+                      ? 'bg-pink-600 text-white shadow-xs'
                       : isDark
                       ? 'text-slate-400 hover:text-white'
                       : 'text-slate-600 hover:text-slate-950'
@@ -331,170 +329,19 @@ export const LaunchpadToolbar: React.FC<LaunchpadToolbarProps> = ({
             </div>
           )}
 
-          {/* Layout Presets Buttons */}
-          <div
-            className={`flex items-center gap-0.5 p-1 rounded-xl border overflow-x-auto ${
-              isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-100 border-slate-200'
-            }`}
-          >
-            <button
-              onClick={() => onSelectLayout('quad')}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors cursor-pointer shrink-0 flex items-center gap-1 ${
-                layoutPreset === 'quad'
-                  ? isDark
-                    ? 'bg-cyan-500 text-slate-950 shadow-xs'
-                    : 'bg-cyan-600 text-white shadow-xs'
-                  : isDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-950'
-              }`}
-              title={isId ? '4 Panel: Grafik + Konfluensi + Likuidasi + Risiko' : '4-Panel Quad Desk'}
-            >
-              <LayoutGrid className="w-3 h-3" />
-              <span>{isId ? '4 Panel' : '4-Grid'}</span>
-            </button>
-
-            <button
-              onClick={() => onSelectLayout('chart_focus')}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors cursor-pointer shrink-0 flex items-center gap-1 ${
-                layoutPreset === 'chart_focus'
-                  ? isDark
-                    ? 'bg-cyan-500 text-slate-950 shadow-xs'
-                    : 'bg-cyan-600 text-white shadow-xs'
-                  : isDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-950'
-              }`}
-              title={isId ? 'Fokus Grafik Lebar (8 kolom) + Samping' : 'Wide Chart Focus'}
-            >
-              <BarChart2 className="w-3 h-3" />
-              <span>{isId ? 'Fokus Grafik' : 'Chart+'}</span>
-            </button>
-
-            <button
-              onClick={() => onSelectLayout('execution_focus')}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors cursor-pointer shrink-0 flex items-center gap-1 ${
-                layoutPreset === 'execution_focus'
-                  ? isDark
-                    ? 'bg-cyan-500 text-slate-950 shadow-xs'
-                    : 'bg-cyan-600 text-white shadow-xs'
-                  : isDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-950'
-              }`}
-              title={isId ? 'Fokus Eksekusi Cepat & Orderbook L2' : 'Quick Execution & Depth'}
-            >
-              <Shield className="w-3 h-3" />
-              <span>{isId ? 'Eksekusi' : 'Exec'}</span>
-            </button>
-
-            <button
-              onClick={() => onSelectLayout('dual_chart_confluence')}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors cursor-pointer shrink-0 flex items-center gap-1 ${
-                layoutPreset === 'dual_chart_confluence'
-                  ? isDark
-                    ? 'bg-cyan-500 text-slate-950 shadow-xs'
-                    : 'bg-cyan-600 text-white shadow-xs'
-                  : isDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-950'
-              }`}
-              title={isId ? '2 Panel Kritis: Candlestick & Skor Konfluensi' : 'Dual Critical Desk'}
-            >
-              <Layers className="w-3 h-3" />
-              <span>{isId ? '2 Panel' : 'Dual'}</span>
-            </button>
-
-            <button
-              onClick={() => onSelectLayout('triple_analytics')}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors cursor-pointer shrink-0 flex items-center gap-1 ${
-                layoutPreset === 'triple_analytics'
-                  ? isDark
-                    ? 'bg-cyan-500 text-slate-950 shadow-xs'
-                    : 'bg-cyan-600 text-white shadow-xs'
-                  : isDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-950'
-              }`}
-              title={isId ? '3 Panel Kuantitatif: Grafik, Likuidasi, dan Matriks' : 'Triple Analytics Desk'}
-            >
-              <Activity className="w-3 h-3" />
-              <span>{isId ? '3 Panel' : 'Triple'}</span>
-            </button>
-          </div>
-
-          {/* Density Toggle (Simple vs Pro) */}
-          {onToggleDensityMode && (
-            <button
-              onClick={onToggleDensityMode}
-              className={`px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer min-h-[38px] ${
-                densityMode === 'simple'
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-xs'
-                  : isDark
-                  ? 'bg-slate-900 border-slate-700 text-slate-300 hover:text-cyan-300 hover:border-cyan-500/50'
-                  : 'bg-slate-100 border-slate-300 text-slate-700 hover:text-cyan-800'
-              }`}
-              title={
-                densityMode === 'simple'
-                  ? isId
-                    ? 'Beralih ke Mode Kuantitatif Pro (Semua Panel & 12 Indikator)'
-                    : 'Switch to Pro Quant Mode'
-                  : isId
-                  ? 'Beralih ke Mode Ringkas (Hanya Level Kritis & Eksekusi Cepat)'
-                  : 'Switch to Simple Clean Mode'
-              }
-            >
-              <LayoutTemplate className="w-3.5 h-3.5 text-cyan-400" />
-              <span>{densityMode === 'simple' ? (isId ? 'Ringkas' : 'Simple') : isId ? 'Pro (12-Ind)' : 'Pro'}</span>
-            </button>
-          )}
-
-          {/* Action Trigger Button: Analyze Confluence */}
-          {onTriggerAnalyze && (
-            <button
-              onClick={onTriggerAnalyze}
-              disabled={isLoading}
-              className={`px-3 py-1.5 rounded-[2px] font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-xs min-h-[38px] ${
-                isLoading
-                  ? 'bg-pink-500/40 text-slate-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white active:scale-95'
-              }`}
-              title={isId ? 'Jalankan kalkulasi konfluensi 12 algoritma (Shortcut: [R])' : 'Run 12-indicator confluence scan (Shortcut: [R])'}
-            >
-              <Zap className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : 'fill-current'}`} />
-              <span className="hidden sm:inline">
-                {isLoading ? (isId ? 'Menganalisis...' : 'Scanning...') : isId ? 'Pindai [R]' : 'Scan [R]'}
-              </span>
-            </button>
-          )}
-
-          {/* Sound, Guide, Glossary & Customizer Controls */}
+          {/* Sound, Glossary & Customizer Controls */}
           <div className="flex items-center gap-1">
             {onOpenGlossary && (
               <button
                 onClick={onOpenGlossary}
                 className={`p-2 rounded-xl border transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center ${
                   isDark
-                    ? 'bg-slate-900 border-slate-800 text-slate-400 hover:text-cyan-300 hover:border-slate-700'
-                    : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-cyan-700 hover:border-slate-300'
+                    ? 'bg-slate-900 border-slate-800 text-slate-400 hover:text-pink-300 hover:border-slate-700'
+                    : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-pink-700 hover:border-slate-300'
                 }`}
-                title={isId ? 'Kamus Istilah Trading (CVD, MSS, FVG, Killzone)' : 'Trading Glossary (CVD, MSS, FVG)'}
+                title={isId ? 'Glosarium & Kamus Istilah Kuantitatif' : 'Quant Trading Glossary'}
               >
-                <BookOpen className="w-3.5 h-3.5" />
-              </button>
-            )}
-
-            {onOpenOnboarding && (
-              <button
-                onClick={onOpenOnboarding}
-                className={`p-2 rounded-xl border transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center ${
-                  isDark
-                    ? 'bg-slate-900 border-slate-800 text-slate-400 hover:text-cyan-300 hover:border-slate-700'
-                    : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-cyan-700 hover:border-slate-300'
-                }`}
-                title={isId ? 'Mulai Tur Interaktif Meja Kerja' : 'Start Workspace Tour'}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <BookOpen className="w-4 h-4" />
               </button>
             )}
 
@@ -502,44 +349,27 @@ export const LaunchpadToolbar: React.FC<LaunchpadToolbarProps> = ({
               onClick={onToggleSoundAlerts}
               className={`p-2 rounded-xl border transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center ${
                 soundAlerts
-                  ? isDark
-                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
-                    : 'bg-cyan-100 text-cyan-900 border-cyan-300'
+                  ? 'bg-pink-500/20 border-pink-500/40 text-pink-400'
                   : isDark
                   ? 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'
-                  : 'bg-slate-100 border-slate-200 text-slate-400 hover:text-slate-700'
+                  : 'bg-slate-100 border-slate-200 text-slate-400 hover:text-slate-600'
               }`}
-              title={soundAlerts ? (isId ? 'Suara Notifikasi: Aktif' : 'Audio Alerts: On') : (isId ? 'Suara Notifikasi: Mati' : 'Audio Alerts: Off')}
+              title={soundAlerts ? (isId ? 'Suara Notifikasi: Aktif' : 'Audio Alert: ON') : (isId ? 'Suara Notifikasi: Nonaktif' : 'Audio Alert: OFF')}
             >
-              {soundAlerts ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-            </button>
-
-            <button
-              onClick={onToggleGuide}
-              className={`p-2 rounded-xl border transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center ${
-                showWorkflowGuide
-                  ? isDark
-                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
-                    : 'bg-cyan-100 text-cyan-900 border-cyan-300'
-                  : isDark
-                  ? 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'
-                  : 'bg-slate-100 border-slate-200 text-slate-400 hover:text-slate-700'
-              }`}
-              title={isId ? 'Panduan Alur Meja Kerja' : 'Workflow Guide'}
-            >
-              <HelpCircle className="w-3.5 h-3.5" />
+              {soundAlerts ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </button>
 
             <button
               onClick={onOpenCustomizer}
-              className={`p-2 rounded-xl border transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center ${
+              className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer min-h-[38px] ${
                 isDark
-                  ? 'bg-slate-900 border-slate-800 text-slate-400 hover:text-cyan-400 hover:border-slate-700'
-                  : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-cyan-700 hover:border-slate-300'
+                  ? 'bg-slate-900 border-slate-800 text-slate-300 hover:border-pink-500/50 hover:text-white'
+                  : 'bg-slate-100 border-slate-200 text-slate-700 hover:border-pink-400'
               }`}
-              title={isId ? 'Kustomisasi Tampilan Panel' : 'Panel Customizer'}
+              title={isId ? 'Kustomisasi Kuadran Panel' : 'Customize Quadrant Panels'}
             >
-              <Sliders className="w-3.5 h-3.5" />
+              <Sliders className="w-3.5 h-3.5 text-pink-400" />
+              <span className="hidden sm:inline">{isId ? 'Panel Grid' : 'Panels'}</span>
             </button>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import v8 from 'v8';
 import { SUPPORTED_SYMBOLS } from '../../src/services/marketData';
 import {
   fetchTickersParallelCCXT,
@@ -6,8 +7,22 @@ import {
   getPipelineTelemetry,
 } from '../../src/services/ccxtService';
 import { fetchLiveComprehensiveNewsAndSentiment } from '../../src/services/newsSentimentService';
+import { marketWsProxy } from '../services/marketWsProxy';
 
 export const marketRouter = Router();
+
+function formatUptime(seconds: number): string {
+  const d = Math.floor(seconds / (3600 * 24));
+  const h = Math.floor((seconds % (3600 * 24)) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  const parts = [];
+  if (d > 0) parts.push(`${d}d`);
+  if (h > 0 || d > 0) parts.push(`${h}h`);
+  if (m > 0 || h > 0 || d > 0) parts.push(`${m}m`);
+  parts.push(`${s}s`);
+  return parts.join(' ');
+}
 
 // 1. Symbols Catalog with Live 24hr Ticker Feed (CCXT Async Parallel Batch)
 marketRouter.get('/symbols', async (_req: Request, res: Response) => {
@@ -37,15 +52,41 @@ marketRouter.get('/symbols', async (_req: Request, res: Response) => {
   }
 });
 
-// 2. Pipeline Telemetry & Architecture Status
-marketRouter.get('/pipeline-info', (_req: Request, res: Response) => {
+// 2. Pipeline Telemetry & Architecture Status (V8 Heap & Uptime Observability for Developers)
+marketRouter.get(['/pipeline-info', '/market/pipeline-info'], (_req: Request, res: Response) => {
   const telemetry = getPipelineTelemetry();
+  const mem = process.memoryUsage();
+  const heapStats = v8.getHeapStatistics();
+  const uptimeSeconds = Math.floor(process.uptime());
+
   res.json({
     status: 'success',
     data: {
       ...telemetry,
-      activeMemoryUsage: `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(1)} MB`,
+      activeMemoryUsage: `${(mem.heapUsed / 1024 / 1024).toFixed(1)} MB`,
       lazyLoadPolicy: '10 Indicators computed solely upon user selection/search; zero unselected coins computed.',
+      serverUptime: {
+        seconds: uptimeSeconds,
+        formatted: formatUptime(uptimeSeconds),
+        startedAt: new Date(Date.now() - uptimeSeconds * 1000).toISOString(),
+        nodeVersion: process.version,
+        platform: process.platform,
+        arch: process.arch,
+        pid: process.pid,
+      },
+      v8HeapMemory: {
+        heapUsedMb: Number((mem.heapUsed / 1024 / 1024).toFixed(2)),
+        heapTotalMb: Number((mem.heapTotal / 1024 / 1024).toFixed(2)),
+        rssMb: Number((mem.rss / 1024 / 1024).toFixed(2)),
+        externalMb: Number((mem.external / 1024 / 1024).toFixed(2)),
+        arrayBuffersMb: Number(((mem.arrayBuffers || 0) / 1024 / 1024).toFixed(2)),
+        heapLimitMb: Number((heapStats.heap_size_limit / 1024 / 1024).toFixed(1)),
+        totalAvailableMb: Number((heapStats.total_available_size / 1024 / 1024).toFixed(2)),
+        usedHeapPercentage: Number(((mem.heapUsed / heapStats.heap_size_limit) * 100).toFixed(1)),
+        allocatedPercentage: Number(((mem.heapUsed / mem.heapTotal) * 100).toFixed(1)),
+      },
+      wsProxy: marketWsProxy.getStats(),
+      timestamp: new Date().toISOString(),
     },
   });
 });
@@ -62,6 +103,22 @@ marketRouter.get('/candles', async (req: Request, res: Response) => {
     res.json({ status: 'success', data: candles, exchange, marketType, limit, onDemand: true });
   } catch (err: any) {
     res.status(500).json({ error: 'Failed to fetch market candles on-demand', details: err.message });
+  }
+});
+
+// 4. KuCoin Public Bullet Token Proxy (Eliminates Browser CORS restrictions for KuCoin WebSocket)
+marketRouter.all(['/kucoin-bullet', '/market/kucoin-bullet'], async (req: Request, res: Response) => {
+  try {
+    const marketType = (req.query.marketType || (req.body && req.body.marketType) || 'SPOT') as string;
+    const isFut = String(marketType).toUpperCase() === 'FUTURES';
+    const bulletUrl = isFut
+      ? 'https://api-futures.kucoin.com/api/v1/bullet-public'
+      : 'https://api.kucoin.com/api/v1/bullet-public';
+    const r = await fetch(bulletUrl, { method: 'POST' });
+    const json = await r.json();
+    res.json(json);
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to fetch KuCoin bullet token', details: err.message });
   }
 });
 

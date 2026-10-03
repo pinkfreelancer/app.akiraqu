@@ -39,7 +39,7 @@ interface LandingPageProps {
   theme: 'light' | 'dark';
   onSetLang: (lang: Language) => void;
   onToggleTheme: () => void;
-  onNavigateToTerminal: (stage?: string) => void;
+  onNavigateToTerminal: (stage?: StageId) => void;
   onNavigateToLogin: () => void;
   onOpenDocs?: () => void;
 }

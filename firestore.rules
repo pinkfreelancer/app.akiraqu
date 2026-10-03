@@ -23,6 +23,11 @@ service cloud.firestore {
       match /journal/{journalId} {
         allow read, write: if isOwner(userId);
       }
+
+      // Subcollection for user confluence & Gemini AI analysis notes
+      match /analysis_notes/{noteId} {
+        allow read, write: if isOwner(userId);
+      }
       
       // Subcollection for user watchlists and general settings
       match /settings/{settingId} {

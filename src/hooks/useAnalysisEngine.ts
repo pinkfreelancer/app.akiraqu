@@ -101,12 +101,26 @@ export function useAnalysisEngine(currentLang: Language = 'id'): UseAnalysisEngi
       setErrorNotice(null);
       const idempotencyKey = crypto.randomUUID();
 
+      let activeUserEmail: string | undefined;
+      let activeUserId: string | undefined;
+      try {
+        const rawSession = localStorage.getItem('imasbtc_user_session');
+        if (rawSession) {
+          const parsed = JSON.parse(rawSession);
+          if (parsed?.email) activeUserEmail = parsed.email;
+          if (parsed?.uid) activeUserId = parsed.uid;
+        }
+      } catch (_e) {
+        // ignore storage parse error
+      }
+
       try {
         const res = await fetch('/api/v1/analyze', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'X-Idempotency-Key': idempotencyKey,
+            ...(activeUserEmail ? { 'X-User-Email': activeUserEmail } : {}),
           },
           body: JSON.stringify({
             symbol: sym,
@@ -116,6 +130,8 @@ export function useAnalysisEngine(currentLang: Language = 'id'): UseAnalysisEngi
             idempotencyKey,
             language: targetLang,
             lang: targetLang,
+            userEmail: activeUserEmail,
+            userId: activeUserId,
           }),
         });
 

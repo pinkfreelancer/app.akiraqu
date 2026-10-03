@@ -44,6 +44,23 @@
         "notes": { "type": "string", "description": "Strategy analysis and review" }
       },
       "required": ["userId", "pair", "type", "entryPrice"]
+    },
+    "AnalysisJournalNote": {
+      "title": "AnalysisJournalNote",
+      "description": "Confluence analysis and Google Gemini AI insights notes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Note unique UUID" },
+        "userId": { "type": "string", "description": "Owner user ID" },
+        "symbol": { "type": "string", "description": "Crypto trading pair" },
+        "timeframe": { "type": "string", "description": "Chart timeframe" },
+        "userNotes": { "type": "string", "description": "Trader observations and thesis" },
+        "aiEngine": { "type": "string", "description": "Gemini AI model used" },
+        "confluenceScore": { "type": "number", "description": "Quantitative confluence score 0-100" },
+        "marketBias": { "type": "string", "description": "Market trend bias" },
+        "timestamp": { "type": "string", "description": "Creation timestamp" }
+      },
+      "required": ["id", "userId", "symbol", "userNotes"]
     }
   },
   "firestore": {
@@ -58,6 +75,10 @@
     "/users/{userId}/journal/{journalId}": {
       "schema": "TradingJournal",
       "description": "User trading logs and journal history"
+    },
+    "/users/{userId}/analysis_notes/{noteId}": {
+      "schema": "AnalysisJournalNote",
+      "description": "AI analysis insights and confluence notes"
     }
   }
 }

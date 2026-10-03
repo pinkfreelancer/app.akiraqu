@@ -183,7 +183,7 @@ export const EconomicCalendarView: React.FC<EconomicCalendarViewProps> = ({
                 {ev.consensus && (
                   <div className="text-left font-mono">
                     <div className="text-[10px] text-slate-500 uppercase">Konsensus / Est</div>
-                    <div className="text-xs font-bold text-cyan-400">{ev.consensus}</div>
+                    <div className="text-xs font-bold text-pink-400">{ev.consensus}</div>
                   </div>
                 )}
                 {ev.previous && (

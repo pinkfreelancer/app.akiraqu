@@ -37,6 +37,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { DocsPage } from './pages/DocsPage';
+import { SystemHealthPage } from './pages/SystemHealthPage';
 
 // Newly structured Terminal Views
 import { MarketHeatmapView } from './components/market/MarketHeatmapView';
@@ -65,6 +66,7 @@ function TerminalApp() {
     navigateToLogin,
     navigateToTerminal,
     navigateToDocs,
+    navigateToSystemHealth,
     selectStage,
     openBacktest,
 
@@ -205,7 +207,7 @@ function TerminalApp() {
         theme={binaryTheme}
         onSetLang={toggleLang}
         onToggleTheme={toggleTheme}
-        onNavigateToTerminal={navigateToTerminal}
+        onNavigateToTerminal={(stage) => navigateToTerminal(stage)}
         onNavigateToLogin={navigateToLogin}
         onOpenDocs={navigateToDocs}
       />
@@ -232,8 +234,20 @@ function TerminalApp() {
         theme={binaryTheme}
         onSetLang={toggleLang}
         onToggleTheme={toggleTheme}
-        onNavigateToTerminal={navigateToTerminal}
+        onNavigateToTerminal={(stage) => navigateToTerminal(stage)}
         onNavigateToLanding={navigateToLanding}
+      />
+    );
+  }
+
+  // If in System Health Mode (/system_health), render Developer Health & V8 Telemetry Dashboard
+  if (viewMode === 'system_health') {
+    return (
+      <SystemHealthPage
+        isDark={isDark}
+        onNavigateToTerminal={() => navigateToTerminal()}
+        onNavigateToLanding={() => navigateToLanding()}
+        onNavigateToDocs={() => navigateToDocs()}
       />
     );
   }
@@ -313,6 +327,7 @@ function TerminalApp() {
         onOpenCommandBar={() => setIsCommandBarOpen(true)}
         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
         onOpenDocs={navigateToDocs}
+        onOpenSystemHealth={navigateToSystemHealth}
         currentStage={currentStage}
         onSelectStage={selectStage}
         isSidebarOpen={isSidebarOpen}
@@ -337,8 +352,8 @@ function TerminalApp() {
         />
 
         {/* Scrollable Stage Workspace Content */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-          <main id="main-content" tabIndex={-1} className="flex-1 w-full mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 transition-all duration-200 max-w-none focus:outline-none">
+        <div className="flex-1 flex flex-col min-w-0 max-w-full overflow-y-auto overflow-x-hidden">
+          <main id="main-content" tabIndex={-1} className="flex-1 w-full max-w-full mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 transition-all duration-200 focus:outline-none overflow-x-hidden">
             {/* Meja Kerja Trader Workflow Bar (Siklus Harian & Personalisasi) */}
             {isTraderWorkbenchVisible && (
               <TraderWorkflowBar
@@ -1202,48 +1217,83 @@ function TerminalApp() {
         onToggleWorkspaceMode={toggleWorkspaceMode}
         onOpenCommandBar={() => setIsCommandBarOpen(true)}
         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+        onOpenSystemHealth={navigateToSystemHealth}
         lang={lang}
         theme={binaryTheme}
         isFullWidth={isFullWidth}
       />
 
       {/* Footer with Standards & Specifications */}
-      <footer className={`w-full border-t py-3 text-xs font-mono transition-colors duration-200 ${
+      <footer id="terminal-footer" className={`w-full border-t py-4 text-xs font-mono transition-colors duration-200 ${
         isDark ? 'border-[#1e293b] bg-[#0b0f19] text-slate-400' : 'border-slate-200 bg-slate-100 text-slate-700'
       }`}>
-        <div className="w-full mx-auto px-3 sm:px-4 lg:px-8 space-y-2.5">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <AkiraQuLogo size={20} theme={binaryTheme} variant="symbol" />
-              <span className={`font-bold tracking-wider ${isDark ? 'text-[#F89DB5]' : 'text-[#21242B]'}`}>
-                AKIRAQU
-              </span>
+        <div className="w-full mx-auto px-3 sm:px-4 lg:px-8 space-y-3">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+            {/* Brand and Status Pill */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+              <div className="flex items-center gap-2">
+                <AkiraQuLogo size={20} theme={binaryTheme} variant="symbol" />
+                <span className={`font-bold tracking-wider text-sm ${isDark ? 'text-[#F89DB5]' : 'text-[#21242B]'}`}>
+                  AKIRAQU
+                </span>
+              </div>
               <span className={isDark ? 'text-slate-600' : 'text-slate-400'}>•</span>
-              <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Analytic Quantitative Crypto Tools</span>
+              <span className={`text-[11px] sm:text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                {lang === 'id' ? 'Alat Kuantitatif & Terminal Presisi' : 'Analytic Quantitative Crypto Tools'}
+              </span>
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-[2px] bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold ml-auto sm:ml-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                <span>ONLINE</span>
+              </span>
             </div>
 
-            <div className="flex items-center gap-4">
+            {/* Quick Links with Mobile Wrap */}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] sm:text-xs">
               <button
+                type="button"
+                onClick={navigateToSystemHealth}
+                className={`flex items-center gap-1 py-1 px-2 rounded-[2px] border transition-all cursor-pointer ${
+                  isDark
+                    ? 'bg-cyan-950/40 border-cyan-500/30 text-cyan-400 hover:bg-cyan-900/50 hover:text-cyan-200'
+                    : 'bg-cyan-50 border-cyan-300 text-cyan-700 hover:bg-cyan-100'
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                <span className="font-semibold">{lang === 'id' ? 'Status Sistem' : 'System Health'}</span>
+              </button>
+              <button
+                type="button"
                 onClick={navigateToLanding}
-                className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
+                className={`py-1 px-2 rounded-[2px] transition-colors cursor-pointer ${
+                  isDark ? 'hover:bg-slate-800 text-slate-300 hover:text-white' : 'hover:bg-slate-200 text-slate-700 hover:text-black'
+                }`}
               >
-                {lang === 'id' ? 'Halaman Depan (Landing)' : 'Landing Page'}
+                {lang === 'id' ? 'Halaman Depan' : 'Landing'}
               </button>
               <button
+                type="button"
                 onClick={navigateToLogin}
-                className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
+                className={`py-1 px-2 rounded-[2px] transition-colors cursor-pointer ${
+                  isDark ? 'hover:bg-slate-800 text-slate-300 hover:text-white' : 'hover:bg-slate-200 text-slate-700 hover:text-black'
+                }`}
               >
-                {lang === 'id' ? 'Akun Gmail' : 'Gmail Account'}
+                {lang === 'id' ? 'Akun Google' : 'Google Auth'}
               </button>
               <button
+                type="button"
                 onClick={() => setIsAssuranceModalOpen(true)}
-                className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
+                className={`py-1 px-2 rounded-[2px] transition-colors cursor-pointer ${
+                  isDark ? 'hover:bg-slate-800 text-slate-300 hover:text-white' : 'hover:bg-slate-200 text-slate-700 hover:text-black'
+                }`}
               >
                 {t.footer.assuranceLink}
               </button>
               <button
+                type="button"
                 onClick={() => setIsExportModalOpen(true)}
-                className={`transition-colors cursor-pointer ${isDark ? 'hover:text-cyan-300' : 'hover:text-cyan-700'}`}
+                className={`py-1 px-2 rounded-[2px] transition-colors cursor-pointer ${
+                  isDark ? 'hover:bg-slate-800 text-slate-300 hover:text-white' : 'hover:bg-slate-200 text-slate-700 hover:text-black'
+                }`}
               >
                 {t.footer.privacyLink}
               </button>
@@ -1258,7 +1308,9 @@ function TerminalApp() {
             <p className="font-mono">
               <span className="font-bold text-amber-400 mr-1.5">Disclaimer: Penafian</span>
               <span>
-                Segala informasi yang terdapat di halaman ini tidak boleh dianggap sebagai nasihat keuangan. Anda harus melakukan riset sendiri sebelum mengambil keputusan apa pun.
+                {lang === 'id'
+                  ? 'Segala informasi yang terdapat di halaman ini tidak boleh dianggap sebagai nasihat keuangan. Anda harus melakukan riset sendiri sebelum mengambil keputusan apa pun.'
+                  : 'All information provided on this platform is for analytical purposes only and must not be considered financial advice. Always conduct your own research.'}
               </span>
             </p>
           </div>

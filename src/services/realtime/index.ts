@@ -10,14 +10,31 @@ export * from './subscriptionManager';
 
 const BINANCE_WS_BASE = 'wss://stream.binance.com:9443/ws';
 
+export function getWsEndpoint(): string {
+  if (typeof window !== 'undefined' && window.location && window.location.host) {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    // Primary: Server-side Express WS Proxy to bypass ISP geoblocking / TrustPositif censorship
+    return `${protocol}//${window.location.host}/ws/market`;
+  }
+  return BINANCE_WS_BASE;
+}
+
 let connectionInstance: ConnectionManager | null = null;
 let subscriptionInstance: SubscriptionManager | null = null;
 
 export function getRealtimeService() {
   if (!connectionInstance && typeof window !== 'undefined') {
-    connectionInstance = new ConnectionManager(BINANCE_WS_BASE, (rawJson) => {
+    const initialUrl = getWsEndpoint();
+    connectionInstance = new ConnectionManager(initialUrl, (rawJson) => {
       try {
         const data = JSON.parse(rawJson);
+
+        // Server-Side WS Proxy Greeting Frame
+        if (data.type === 'PROXY_CONNECTED') {
+          useTickerStore.getState().setWsStatus('connected');
+          useTickerStore.getState().setLatency(data.latencyMs || 15);
+          return;
+        }
 
         // Handle Binance 24hr ticker stream
         if (data.e === '24hrTicker') {

@@ -83,7 +83,7 @@ export const CorrelationBetaView: React.FC<CorrelationBetaViewProps> = ({
       {/* Cross-Asset Correlation Table */}
       <div className={`p-4 sm:p-5 rounded-2xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-sm'}`}>
         <h2 className="text-sm font-bold font-mono text-slate-200 mb-3 flex items-center gap-2">
-          <BarChart3 className="w-4 h-4 text-cyan-400" />
+          <BarChart3 className="w-4 h-4 text-pink-400" />
           <span>{isId ? 'Matriks Korelasi Spearman/Pearson' : 'Correlation Heatmap'}</span>
         </h2>
 
@@ -136,7 +136,7 @@ export const CorrelationBetaView: React.FC<CorrelationBetaViewProps> = ({
                   <span className="text-xs font-bold text-white">{item.asset}</span>
                   <span className="text-[10px] text-slate-400 block">{item.name}</span>
                 </div>
-                <span className="text-sm font-bold font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                <span className="text-sm font-bold font-mono text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded border border-pink-500/20">
                   Beta: {item.beta.toFixed(2)}
                 </span>
               </div>

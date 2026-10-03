@@ -373,7 +373,7 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono font-bold text-xs transition cursor-pointer shadow-xs"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-mono font-bold text-xs transition cursor-pointer shadow-xs"
           >
             <Plus className="w-4 h-4" />
             <span>{isId ? 'Tambah Koin' : 'Add Coin'}</span>
@@ -381,9 +381,9 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
 
           <button
             onClick={() => setShowNewFolderModal(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-mono font-bold text-xs transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-mono font-bold text-xs transition cursor-pointer"
           >
-            <FolderPlus className="w-4 h-4 text-cyan-400" />
+            <FolderPlus className="w-4 h-4 text-pink-400" />
             <span>{isId ? 'Folder Baru' : 'New Folder'}</span>
           </button>
 
@@ -398,8 +398,8 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
       </div>
 
       {actionNotice && (
-        <div className="p-3 bg-cyan-950/80 border border-cyan-500/50 rounded-xl text-cyan-300 font-mono text-xs flex items-center gap-2 animate-in fade-in">
-          <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+        <div className="p-3 bg-pink-950/80 border border-pink-500/50 rounded-xl text-pink-300 font-mono text-xs flex items-center gap-2 animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 text-pink-400" />
           <span>{actionNotice}</span>
         </div>
       )}
@@ -420,7 +420,7 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
                 onClick={() => setActiveFolderId(folder.id)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl font-bold transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20'
+                    ? 'bg-pink-600 text-white shadow-md shadow-pink-500/20'
                     : 'text-slate-300 hover:bg-slate-800/60'
                 }`}
               >
@@ -428,7 +428,7 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
                 <span>{folder.name}</span>
                 <span
                   className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                    isActive ? 'bg-black/30 text-slate-950' : 'bg-slate-800 text-slate-400'
+                    isActive ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'
                   }`}
                 >
                   {count}
@@ -537,7 +537,7 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
                       <td className="py-3">
                         <div className="flex items-center gap-1">
                           <Sparkles className="w-3 h-3 text-amber-400" />
-                          <span className="font-bold text-cyan-400">{item.confluenceScore}/100</span>
+                          <span className="font-bold text-pink-400">{item.confluenceScore}/100</span>
                         </div>
                       </td>
 

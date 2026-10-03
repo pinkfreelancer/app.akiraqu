@@ -338,13 +338,13 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
               onClick={() => setActiveFilter('REALTIME')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer shrink-0 border ${
                 activeFilter === 'REALTIME'
-                  ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-xs'
+                  ? 'bg-pink-600 text-white border-pink-500 shadow-xs'
                   : isDark
                   ? 'bg-[#1e293b] border-slate-700 text-slate-300 hover:text-white hover:border-slate-600'
                   : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              <Radio className={`w-3.5 h-3.5 ${activeFilter === 'REALTIME' ? 'text-slate-950' : 'text-cyan-400'}`} />
+              <Radio className={`w-3.5 h-3.5 ${activeFilter === 'REALTIME' ? 'text-white' : 'text-pink-400'}`} />
               <span>Realtime Scan</span>
             </button>
 

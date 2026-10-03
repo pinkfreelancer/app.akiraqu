@@ -148,6 +148,14 @@ analysisRouter.post('/analyze', async (req: Request, res: Response) => {
       language,
     });
 
+    const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+    const ipHash = crypto.createHash('sha256').update(clientIp).digest('hex').substring(0, 16);
+    const userEmail = (validation.data.userEmail || (req.headers['x-user-email'] as string) || req.user?.email || '').toLowerCase().trim() || undefined;
+    const userUid = validation.data.userId || req.user?.uid || undefined;
+
+    evaluation.userEmail = userEmail;
+    evaluation.userUid = userUid;
+
     onDemandCalculationCache.set(cacheKey, {
       timestamp: now,
       evaluation,
@@ -156,9 +164,6 @@ analysisRouter.post('/analyze', async (req: Request, res: Response) => {
 
     persistedSessions.set(evaluation.idempotencyKey, evaluation);
     idempotencyStore.set(idempotencyKey, evaluation);
-
-    const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
-    const ipHash = crypto.createHash('sha256').update(clientIp).digest('hex').substring(0, 16);
 
     const auditEntry: AuditLogEntry = {
       id: crypto.randomUUID(),
@@ -170,6 +175,8 @@ analysisRouter.post('/analyze', async (req: Request, res: Response) => {
       bias: evaluation.marketBias,
       latencyMs: Date.now() - startTime,
       ipHash,
+      userEmail,
+      userUid,
     };
     auditLogs.unshift(auditEntry);
     if (auditLogs.length > 50) auditLogs.pop();
@@ -244,6 +251,33 @@ analysisRouter.post('/analyze', async (req: Request, res: Response) => {
         language,
       });
 
+      const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+      const ipHash = crypto.createHash('sha256').update(clientIp).digest('hex').substring(0, 16);
+      const userEmail = (validation.data.userEmail || (req.headers['x-user-email'] as string) || req.user?.email || '').toLowerCase().trim() || undefined;
+      const userUid = validation.data.userId || req.user?.uid || undefined;
+
+      fallbackEvaluation.userEmail = userEmail;
+      fallbackEvaluation.userUid = userUid;
+
+      persistedSessions.set(fallbackEvaluation.idempotencyKey, fallbackEvaluation);
+      idempotencyStore.set(idempotencyKey, fallbackEvaluation);
+
+      const fallbackAuditEntry: AuditLogEntry = {
+        id: crypto.randomUUID(),
+        timestamp: new Date().toISOString(),
+        action: 'CONFLUENCE_ANALYSIS_FALLBACK_EXECUTED',
+        symbol,
+        timeframe,
+        confluenceScore: fallbackEvaluation.confluenceScore,
+        bias: fallbackEvaluation.marketBias,
+        latencyMs: Date.now() - startTime,
+        ipHash,
+        userEmail,
+        userUid,
+      };
+      auditLogs.unshift(fallbackAuditEntry);
+      if (auditLogs.length > 50) auditLogs.pop();
+
       res.json({
         status: 'success',
         cached: false,
@@ -265,19 +299,28 @@ analysisRouter.post('/analyze', async (req: Request, res: Response) => {
   }
 });
 
-// 2. History
-analysisRouter.get('/history', (_req: Request, res: Response) => {
-  const list = Array.from(persistedSessions.values()).slice(-20).reverse();
+// 2. History (Scoped per user if query param or header provided)
+analysisRouter.get('/history', (req: Request, res: Response) => {
+  const queryEmail = ((req.query.userEmail as string) || (req.headers['x-user-email'] as string) || req.user?.email || '').toLowerCase().trim();
+  let list = Array.from(persistedSessions.values());
+  if (queryEmail) {
+    list = list.filter((s) => s.userEmail && s.userEmail.toLowerCase() === queryEmail);
+  }
   res.json({
     status: 'success',
-    data: list,
+    data: list.slice(-20).reverse(),
   });
 });
 
-// 3. Audit Log Inspector
-analysisRouter.get('/audit-log', (_req: Request, res: Response) => {
+// 3. Audit Log Inspector (Scoped per user if query param or header provided)
+analysisRouter.get('/audit-log', (req: Request, res: Response) => {
+  const queryEmail = ((req.query.userEmail as string) || (req.headers['x-user-email'] as string) || req.user?.email || '').toLowerCase().trim();
+  let list = auditLogs;
+  if (queryEmail) {
+    list = list.filter((a) => a.userEmail && a.userEmail.toLowerCase() === queryEmail);
+  }
   res.json({
     status: 'success',
-    data: auditLogs,
+    data: list,
   });
 });

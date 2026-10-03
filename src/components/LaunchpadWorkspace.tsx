@@ -541,8 +541,8 @@ Catatan: ${evaluation.executiveNarrative || 'Kalkulasi 12-Indikator kuantitatif 
         </div>
       )}
 
-      {/* 📱 Mobile Tabs Switcher (Shown on mobile when in Pro mode) */}
-      {!maximizedPanel && densityMode === 'pro' && (
+      {/* 📱 Mobile Tabs Switcher (Shown on mobile when not maximized) */}
+      {!maximizedPanel && (
         <LaunchpadMobileTabBar
           activeTab={mobileTab}
           onSelectTab={setMobileTab}
@@ -553,27 +553,8 @@ Catatan: ${evaluation.executiveNarrative || 'Kalkulasi 12-Indikator kuantitatif 
         />
       )}
 
-      {/* 🎛️ Simple Density View OR Pro Multi-Grid View */}
-      {densityMode === 'simple' ? (
-        <LaunchpadSimpleView
-          candles={candles}
-          symbol={symbol}
-          timeframe={timeframe}
-          evaluation={evaluation}
-          currentPrice={activeDisplayPrice}
-          selectedExchange={selectedExchange}
-          selectedMarketType={selectedMarketType}
-          onExecuteTrade={handleExecuteSimTrade}
-          onSwitchToProView={() => {
-            setDensityMode('pro');
-            localStorage.setItem('imasbtc_grid_density', 'pro');
-          }}
-          onTriggerAnalyze={onTriggerAnalyze}
-          isLoading={isLoading}
-          isDark={isDark}
-          lang={lang}
-        />
-      ) : maximizedPanel ? (
+      {/* 🎛️ Maximized Single Panel OR 4-Panel Multi-Grid View */}
+      {maximizedPanel ? (
         // Single Maximized Panel View
         <div
           className={`w-full rounded-2xl border overflow-hidden transition-colors ${

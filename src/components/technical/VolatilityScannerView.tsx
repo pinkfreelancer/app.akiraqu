@@ -167,7 +167,7 @@ export const VolatilityScannerView: React.FC<VolatilityScannerViewProps> = ({
               </div>
               <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
                 <span className="text-[10px] text-slate-500 block">BB Width Band</span>
-                <span className="text-cyan-400 font-bold">{item.bbWidth}%</span>
+                <span className="text-pink-400 font-bold">{item.bbWidth}%</span>
               </div>
             </div>
 

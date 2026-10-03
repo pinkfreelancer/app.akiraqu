@@ -177,7 +177,7 @@ export const TradingJournalPage: React.FC<TradingJournalPageProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsAddingTrade(!isAddingTrade)}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs font-mono transition-colors cursor-pointer"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs font-mono transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Catat Trade Baru ({currentSymbol})
@@ -187,7 +187,7 @@ export const TradingJournalPage: React.FC<TradingJournalPageProps> = ({
 
       {/* Add trade form modal / collapse */}
       {isAddingTrade && (
-        <form onSubmit={handleCreateTrade} className={`p-5 rounded-2xl border ${isDark ? 'bg-[#0f172a] border-cyan-500/40' : 'bg-slate-50 border-cyan-300'} space-y-4`}>
+        <form onSubmit={handleCreateTrade} className={`p-5 rounded-2xl border ${isDark ? 'bg-[#0f172a] border-pink-500/40' : 'bg-slate-50 border-pink-300'} space-y-4`}>
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-white font-mono">Catat Trade Setup: {currentSymbol}</h3>
             <span className="text-xs text-slate-400">Score Confluence: {currentScore}/100</span>
@@ -290,7 +290,7 @@ export const TradingJournalPage: React.FC<TradingJournalPageProps> = ({
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs font-mono"
+              className="px-4 py-1.5 rounded-lg bg-pink-600 text-white font-bold text-xs font-mono"
             >
               Simpan ke Jurnal
             </button>
@@ -308,7 +308,7 @@ export const TradingJournalPage: React.FC<TradingJournalPageProps> = ({
                 onClick={() => setFilterStatus(filter)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
                   filterStatus === filter
-                    ? 'bg-cyan-500 text-slate-950 font-bold'
+                    ? 'bg-pink-600 text-white font-bold'
                     : 'bg-[#1e293b] text-slate-400 hover:text-white'
                 }`}
               >

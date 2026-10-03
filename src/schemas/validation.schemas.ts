@@ -50,6 +50,8 @@ export const AnalysisSchema = z.object({
   lang: z.enum(['id', 'en']).optional(),
   exchange: z.enum(['BINANCE', 'OKX', 'BYBIT', 'KUCOIN', 'BITGET', 'CRYPTO_COM', 'BITUNIX']).optional().default('BINANCE'),
   marketType: z.enum(['SPOT', 'FUTURES']).optional().default('SPOT'),
+  userEmail: z.string().email().optional(),
+  userId: z.string().optional(),
 });
 
 export const RiskCalculatorSchema = z.object({

@@ -96,6 +96,7 @@ interface HeaderProps {
   onOpenCommandBar?: () => void;
   onOpenShortcuts?: () => void;
   onOpenDocs?: () => void;
+  onOpenSystemHealth?: () => void;
   currentStage?: StageId;
   onSelectStage?: (stage: StageId) => void;
   isSidebarOpen?: boolean;
@@ -145,6 +146,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCommandBar,
   onOpenShortcuts,
   onOpenDocs,
+  onOpenSystemHealth,
   currentStage = 'ticker',
   onSelectStage,
   isSidebarOpen = true,
@@ -159,11 +161,9 @@ export const Header: React.FC<HeaderProps> = ({
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const currentCoin = symbols.find((s) => s.symbol === selectedSymbol);
   const displayPrice = livePrice && livePrice > 0 ? livePrice : currentCoin?.basePrice || 0;
@@ -193,9 +193,6 @@ export const Header: React.FC<HeaderProps> = ({
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsSettingsOpen(false);
-      }
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
-        setIsUserMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -243,24 +240,24 @@ export const Header: React.FC<HeaderProps> = ({
     >
       {/* Top Bar: Brand Logo, Page Navigator, Auth & Settings */}
       <div
-        className={`flex items-center justify-between px-3 sm:px-4 lg:px-8 py-1.5 text-xs border-b transition-colors duration-200 ${
+        className={`flex items-center justify-between px-2.5 sm:px-4 lg:px-8 py-1.5 text-xs border-b transition-colors duration-200 ${
           isDark ? 'border-[#1e293b]/50 bg-[#0b0f19] text-slate-400' : 'border-slate-200/60 bg-slate-50 text-slate-600'
         }`}
       >
         {/* Brand Logo & Brand Tagline */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 min-w-0 shrink">
           <div
             onClick={onNavigateToLanding}
-            className="flex items-center gap-2.5 cursor-pointer group select-none"
+            className="flex items-center gap-2 cursor-pointer group select-none min-w-0"
             title={isId ? 'AKIRAQU - Beranda' : 'AKIRAQU - Home'}
           >
             <AkiraQuLogo
-              size={28}
+              size={24}
               theme={isDark ? 'dark' : 'light'}
               className="shrink-0 group-hover:scale-105 transition-transform"
             />
             <span
-              className={`text-xs sm:text-sm font-extrabold tracking-wider font-display leading-tight flex items-center transition-colors ${
+              className={`text-xs sm:text-sm font-extrabold tracking-wider font-display leading-tight flex items-center transition-colors truncate ${
                 isDark ? 'text-[#F89DB5]' : 'text-[#21242B]'
               }`}
             >
@@ -270,8 +267,8 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Right Top Bar Controls: Alert, Settings & Mobile Toggle */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5">
-          {/* Unified Alert Center Toggle Button (Beside Settings) */}
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          {/* Unified Alert Center Toggle Button */}
           <button
             id="btn-header-alert-toggle"
             onClick={() => {
@@ -283,7 +280,7 @@ export const Header: React.FC<HeaderProps> = ({
                 openAlertCenter();
               }
             }}
-            className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] border text-xs font-mono font-bold transition-all cursor-pointer min-h-[30px] ${
+            className={`relative flex items-center gap-1 px-2 py-1 rounded-[2px] border text-xs font-mono font-bold transition-all cursor-pointer min-h-[30px] ${
               isAlertCenterOpen
                 ? 'bg-pink-600/25 border-pink-500 text-pink-300 ring-1 ring-pink-500/50 shadow-xs'
                 : unreadCount > 0
@@ -310,16 +307,16 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
               )}
             </div>
-            <span className="hidden sm:inline">Alert</span>
+            <span className="hidden md:inline">Alert</span>
           </button>
 
-          {/* Documentation Menu Button (Doc) */}
+          {/* Documentation Menu Button (Doc) - Hidden on extra small mobile to save space */}
           {onOpenDocs && (
             <button
               id="btn-header-docs-toggle"
               type="button"
               onClick={onOpenDocs}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] border text-xs font-mono font-bold transition-all cursor-pointer min-h-[30px] ${
+              className={`hidden sm:flex items-center gap-1 px-2 py-1 rounded-[2px] border text-xs font-mono font-bold transition-all cursor-pointer min-h-[30px] ${
                 isDark
                   ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-pink-300 hover:border-pink-500/40 hover:bg-slate-800/80'
                   : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600 hover:border-pink-500/30'
@@ -331,31 +328,187 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           )}
 
-          {/* Combined Settings Dropdown (Theme, Language, Fullscreen) */}
+          {/* Combined Account & Settings Menu (Google Account + Theme + Language + System) */}
           <div className="relative" ref={dropdownRef}>
             <button
+              id="btn-header-account-settings"
+              type="button"
               onClick={() => setIsSettingsOpen((prev) => !prev)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] border text-xs font-mono font-bold transition-all cursor-pointer ${
-                isDark
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] border text-xs font-mono font-bold transition-all cursor-pointer min-h-[30px] ${
+                isSettingsOpen
+                  ? 'bg-pink-500/20 border-pink-500 text-pink-300 ring-1 ring-pink-500/40'
+                  : isAuthenticated && user
+                  ? isDark
+                    ? 'bg-[#0f172a] border-emerald-500/40 text-emerald-400 hover:bg-slate-800/80 hover:border-emerald-500/60'
+                    : 'bg-white border-emerald-300 text-emerald-700 hover:bg-emerald-50'
+                  : isDark
                   ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-pink-300 hover:border-pink-500/30'
                   : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600 hover:border-pink-500/30'
               }`}
+              title={
+                isAuthenticated && user
+                  ? `${user.displayName || user.email || 'User'} - ${isId ? 'Akun & Pengaturan' : 'Account & Settings'}`
+                  : isId
+                  ? 'Akun Google & Pengaturan Terminal'
+                  : 'Google Account & Terminal Settings'
+              }
             >
-              <Settings className="w-3.5 h-3.5 text-pink-400" />
-              <span className="hidden sm:inline">{isId ? 'Pengaturan' : 'Settings'}</span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
+              {isAuthenticated && user ? (
+                <>
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt={user.displayName || 'User'}
+                      className="w-4 h-4 rounded-full border border-emerald-400/50 object-cover shrink-0"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-bold shrink-0">
+                      {user.displayName?.charAt(0).toUpperCase() || 'G'}
+                    </span>
+                  )}
+                  <span className="hidden sm:inline truncate max-w-[80px]">
+                    {user.displayName || 'Gmail'}
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                  <Settings className="w-3.5 h-3.5 text-pink-400 shrink-0 ml-0.5" />
+                </>
+              ) : (
+                <>
+                  <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                    />
+                  </svg>
+                  <Settings className="w-3.5 h-3.5 text-pink-400 shrink-0" />
+                  <span className="hidden sm:inline">{isId ? 'Akun & Pengaturan' : 'Settings'}</span>
+                </>
+              )}
+              <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
             </button>
 
-            {/* Dropdown Menu Overlay */}
+            {/* Combined Dropdown Menu Overlay */}
             {isSettingsOpen && (
               <div
-                className={`absolute right-0 mt-2 w-64 rounded-[2px] border p-4 shadow-xl z-50 transition-all ${
+                className={`absolute right-0 mt-2 w-72 rounded-[2px] border p-4 shadow-2xl z-50 transition-all ${
                   isDark
-                    ? 'bg-[#0f172a] border-[#1e293b] text-white shadow-black/50'
-                    : 'bg-white border-slate-200 text-slate-800 shadow-slate-300/50'
+                    ? 'bg-[#0f172a] border-[#1e293b] text-white shadow-black/70'
+                    : 'bg-white border-slate-200 text-slate-800 shadow-slate-300/60'
                 }`}
               >
                 <div className="space-y-4">
+                  {/* Google Account Section */}
+                  {isAuthenticated && user ? (
+                    <div className="space-y-2.5 pb-3 border-b border-slate-800/70">
+                      <div className="flex items-start gap-3">
+                        {user.photoURL ? (
+                          <img
+                            src={user.photoURL}
+                            alt={user.displayName || 'User'}
+                            className="w-10 h-10 rounded-full border border-emerald-400/60 object-cover shrink-0"
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/40 shrink-0">
+                            {user.displayName?.charAt(0).toUpperCase() || 'G'}
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1 text-[10px] font-mono text-emerald-400 font-bold">
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>Google Verified</span>
+                          </div>
+                          <h4 className="text-xs font-bold truncate mt-0.5">{user.displayName}</h4>
+                          <p className="text-[11px] font-mono text-slate-400 truncate">{user.email}</p>
+                        </div>
+                      </div>
+
+                      <div
+                        className={`p-2 rounded-[2px] border flex items-center justify-between text-[10px] font-mono ${
+                          isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'
+                        }`}
+                      >
+                        <span className="text-slate-400 flex items-center gap-1">
+                          <Database className="w-3 h-3 text-pink-400" />
+                          <span>Firestore Cloud Sync:</span>
+                        </span>
+                        <span className="text-emerald-400 font-bold">Aktif & Sinkron</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setIsSettingsOpen(false);
+                          await logout();
+                        }}
+                        className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-[2px] text-xs font-mono font-bold border transition-colors cursor-pointer ${
+                          isDark
+                            ? 'bg-rose-950/30 hover:bg-rose-950/60 border-rose-500/30 text-rose-300'
+                            : 'bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-700'
+                        }`}
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        <span>{isId ? 'Keluar Akun Gmail' : 'Sign Out'}</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 pb-3 border-b border-slate-800/70">
+                      <span className="block text-[10px] font-bold font-mono text-slate-400 uppercase tracking-wider">
+                        {isId ? 'Akun Google' : 'Google Account'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsSettingsOpen(false);
+                          if (onNavigateToLogin) onNavigateToLogin();
+                        }}
+                        className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-[2px] border text-xs font-mono font-bold transition-all cursor-pointer shadow-xs active:scale-[0.98] ${
+                          isDark
+                            ? 'bg-white hover:bg-slate-100 text-slate-900 border-slate-200'
+                            : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-300'
+                        }`}
+                      >
+                        <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                          <path
+                            fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                          />
+                          <path
+                            fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                          />
+                          <path
+                            fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                          />
+                          <path
+                            fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                          />
+                        </svg>
+                        <span>{isId ? 'Masuk dengan Akun Google' : 'Sign in with Google'}</span>
+                      </button>
+                      <p className="text-[10px] text-slate-400 leading-tight font-mono">
+                        {isId
+                          ? 'Sinkronkan Watchlist, Portofolio & Jurnal ke Cloud Firestore.'
+                          : 'Sync Watchlist, Portfolio & Journal to Cloud Firestore.'}
+                      </p>
+                    </div>
+                  )}
+
                   {/* Theme Section */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -541,6 +694,31 @@ export const Header: React.FC<HeaderProps> = ({
                     </button>
                   )}
 
+                  {/* System Health & V8 Telemetry Action */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onOpenSystemHealth) {
+                        onOpenSystemHealth();
+                      } else if (typeof window !== 'undefined') {
+                        window.history.pushState({}, '', '/system_health');
+                        window.dispatchEvent(new PopStateEvent('popstate'));
+                      }
+                      setIsSettingsOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-[2px] text-xs font-mono border transition-colors cursor-pointer ${
+                      isDark
+                        ? 'bg-[#0b0f19] border-[#1e293b] hover:bg-slate-800/70 text-slate-200 hover:border-cyan-500/40'
+                        : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700 hover:border-cyan-400'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>{isId ? 'Status Sistem & V8 Uptime' : 'System Health & V8 Uptime'}</span>
+                    </span>
+                    <span className="text-[10px] text-cyan-400 font-bold">/system_health</span>
+                  </button>
+
                   {/* Full Settings Hub Button */}
                   {onSelectStage && (
                     <button
@@ -569,218 +747,70 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
-          {/* Google / Gmail Account & Login Menu */}
-          <div className="relative" ref={userMenuRef}>
-            {isAuthenticated && user ? (
-              <button
-                id="btn-header-user-menu"
-                type="button"
-                onClick={() => setIsUserMenuOpen((prev) => !prev)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] border text-xs font-mono font-bold transition-all cursor-pointer min-h-[30px] ${
-                  isUserMenuOpen
-                    ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 ring-1 ring-emerald-500/40'
-                    : isDark
-                    ? 'bg-[#0f172a] border-emerald-500/40 text-emerald-400 hover:bg-slate-800/80 hover:border-emerald-500/60'
-                    : 'bg-white border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-                }`}
-                title={user.email || 'Akun Google / Gmail'}
-              >
-                {user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt={user.displayName || 'User'}
-                    className="w-4 h-4 rounded-full border border-emerald-400/50 object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-bold">
-                    {user.displayName?.charAt(0).toUpperCase() || 'G'}
-                  </span>
-                )}
-                <span className="hidden sm:inline truncate max-w-[85px]">
-                  {user.displayName || 'Gmail'}
-                </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <ChevronDown className="w-3 h-3 text-slate-400" />
-              </button>
-            ) : (
-              <button
-                id="btn-header-login"
-                type="button"
-                onClick={onNavigateToLogin}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[2px] border text-xs font-mono font-bold transition-all cursor-pointer min-h-[30px] shadow-xs active:scale-[0.98] ${
-                  isDark
-                    ? 'bg-white hover:bg-slate-100 text-slate-900 border-slate-200'
-                    : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-300'
-                }`}
-                title={isId ? 'Masuk dengan Akun Google (Gmail)' : 'Sign in with Google (Gmail)'}
-              >
-                <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                  />
-                </svg>
-                <span className="hidden sm:inline">{isId ? 'Masuk' : 'Sign In'}</span>
-                <span className="sm:hidden">Login</span>
-              </button>
-            )}
-
-            {/* User Profile Popover */}
-            {isUserMenuOpen && isAuthenticated && user && (
-              <div
-                className={`absolute right-0 mt-2 w-72 rounded-[2px] border p-4 shadow-xl z-50 transition-all ${
-                  isDark
-                    ? 'bg-[#0f172a] border-[#1e293b] text-white shadow-black/60'
-                    : 'bg-white border-slate-200 text-slate-900 shadow-slate-300/60'
-                }`}
-              >
-                <div className="space-y-3.5">
-                  {/* Account Header */}
-                  <div className="flex items-start gap-3 pb-3 border-b border-slate-800/60">
-                    {user.photoURL ? (
-                      <img
-                        src={user.photoURL}
-                        alt={user.displayName || 'User'}
-                        className="w-10 h-10 rounded-full border border-emerald-400/60 object-cover shrink-0"
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/40 shrink-0">
-                        {user.displayName?.charAt(0).toUpperCase() || 'G'}
-                      </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1 text-[11px] font-mono text-emerald-400 font-bold">
-                        <CheckCircle2 className="w-3 h-3" />
-                        <span>Google Verified</span>
-                      </div>
-                      <h4 className="text-xs font-bold truncate mt-0.5">{user.displayName}</h4>
-                      <p className="text-[11px] font-mono text-slate-400 truncate">{user.email}</p>
-                    </div>
-                  </div>
-
-                  {/* Sync Status Badge */}
-                  <div className={`p-2.5 rounded-[2px] border space-y-1 text-[11px] font-mono ${
-                    isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'
-                  }`}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400 flex items-center gap-1">
-                        <Database className="w-3 h-3 text-pink-400" />
-                        <span>Cloud Firestore:</span>
-                      </span>
-                      <span className="text-emerald-400 font-bold">Online & Active</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[10px] text-slate-500">
-                      <span>Auth Provider:</span>
-                      <span>Google OAuth 2.0</span>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="space-y-1.5 pt-1">
-                    {onSelectStage && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onSelectStage('settings');
-                          setIsUserMenuOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-[2px] text-xs font-mono font-semibold border transition-colors cursor-pointer ${
-                          isDark
-                            ? 'bg-[#0b0f19] border-slate-800 hover:bg-slate-800 text-slate-200 hover:border-pink-500/40'
-                            : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700'
-                        }`}
-                      >
-                        <span className="flex items-center gap-2">
-                          <User className="w-3.5 h-3.5 text-pink-400" />
-                          <span>{isId ? 'Profil & Preferensi' : 'Profile & Settings'}</span>
-                        </span>
-                        <span className="text-[10px] text-slate-400">Ctrl+12</span>
-                      </button>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        setIsUserMenuOpen(false);
-                        await logout();
-                      }}
-                      className={`w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-[2px] text-xs font-mono font-bold border transition-colors cursor-pointer ${
-                        isDark
-                          ? 'bg-rose-950/30 hover:bg-rose-950/60 border-rose-500/30 text-rose-300'
-                          : 'bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-700'
-                      }`}
-                    >
-                      <LogOut className="w-3.5 h-3.5" />
-                      <span>{isId ? 'Keluar Akun Gmail' : 'Sign Out'}</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Menu Toggle Button */}
+          {/* Mobile Menu & Sidebar Drawer Toggle Button */}
           <button
             id="btn-mobile-menu-toggle"
-            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-            className={`flex md:hidden items-center justify-center p-1.5 rounded-[2px] border text-xs cursor-pointer min-h-[36px] min-w-[36px] ${
-              isDark ? 'bg-[#0f172a] border-[#1e293b] text-slate-300' : 'bg-white border-slate-200 text-slate-700'
+            type="button"
+            onClick={() => {
+              if (onToggleSidebar) {
+                onToggleSidebar();
+              } else {
+                setIsMobileMenuOpen((prev) => !prev);
+              }
+            }}
+            className={`flex md:hidden items-center justify-center p-1.5 rounded-[2px] border text-xs cursor-pointer min-h-[36px] min-w-[36px] transition-colors ${
+              (isSidebarOpen || isMobileMenuOpen)
+                ? 'bg-pink-500/20 border-pink-500 text-pink-300 ring-1 ring-pink-500/40'
+                : isDark
+                ? 'bg-[#0f172a] border-[#1e293b] text-slate-300 hover:text-pink-400 hover:border-pink-500/30'
+                : 'bg-white border-slate-200 text-slate-700 hover:text-pink-600 hover:border-pink-500/30'
             }`}
-            aria-label="Toggle Mobile Menu"
+            aria-label={isId ? 'Navigasi Sidebar Terminal' : 'Toggle Navigation Sidebar'}
+            title={isId ? 'Navigasi Sidebar Terminal' : 'Terminal Sidebar Navigation'}
+            aria-expanded={Boolean(isSidebarOpen || isMobileMenuOpen)}
           >
-            {isMobileMenuOpen ? <X className="w-4 h-4 text-pink-400" /> : <Menu className="w-4 h-4 text-pink-400" />}
+            {(isSidebarOpen || isMobileMenuOpen) ? (
+              <X className="w-4 h-4 text-pink-400" />
+            ) : (
+              <Menu className="w-4 h-4 text-pink-400" />
+            )}
           </button>
         </div>
       </div>
 
-      {/* Main Navigation Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5 px-3 sm:px-4 lg:px-6 py-2">
-        {/* Left Side: Coin Selector, Timeframe, & Run Analysis */}
-        <div className="flex flex-wrap items-center gap-2">          
-
+      {/* Main Navigation Bar (Clean Responsive Layout: 2-Row on Mobile, 1-Row on Desktop) */}
+      <div className="px-2.5 sm:px-4 lg:px-6 py-1.5 sm:py-2 flex flex-col md:flex-row md:items-center justify-between gap-1.5 sm:gap-2.5">
+        {/* Row 1 on Mobile / Left on Desktop: Coin Selector & Quick Analyze */}
+        <div className="flex items-center justify-between gap-1.5 sm:gap-2 w-full md:w-auto">
           {/* Unified Clean Asset Selector Dropdown Anchor */}
-          <div className="relative">
+          <div className="relative flex-1 md:flex-initial min-w-0">
             <button
               id="btn-open-pair-search"
               type="button"
               onClick={() => setIsSearchOpen((prev) => !prev)}
               aria-haspopup="listbox"
               aria-expanded={isSearchOpen}
-              className={`flex items-center justify-between gap-2 px-3.5 py-1.5 border rounded-[2px] text-xs font-mono transition-all cursor-pointer shadow-xs group min-h-[38px] w-56 sm:w-64 md:w-72 lg:w-80 ${
+              className={`flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 border rounded-[2px] text-xs font-mono transition-all cursor-pointer shadow-xs group min-h-[34px] sm:min-h-[38px] w-full md:w-64 lg:w-72 ${
                 isDark
-                  ? 'bg-[#0f172a] border-[#1e293b] text-slate-200 hover:border-cyan-500/50 hover:bg-slate-800/80'
-                  : 'bg-white border-slate-200 text-slate-800 hover:border-cyan-400 hover:bg-slate-50'
-              } ${isSearchOpen ? (isDark ? 'border-cyan-500 ring-1 ring-cyan-500/50' : 'border-cyan-500 ring-1 ring-cyan-500/40') : ''}`}
+                  ? 'bg-[#0f172a] border-[#1e293b] text-slate-200 hover:border-pink-500/50 hover:bg-slate-800/80'
+                  : 'bg-white border-slate-200 text-slate-800 hover:border-pink-400 hover:bg-slate-50'
+              } ${isSearchOpen ? (isDark ? 'border-pink-500 ring-1 ring-pink-500/50' : 'border-pink-500 ring-1 ring-pink-500/40') : ''}`}
               title={`${t.header.searchModalTitle} (Shortcut: /)`}
             >
-              <div className="flex items-center gap-2 min-w-0">
-                <CryptoIcon symbol={selectedSymbol} size="sm" className="rounded-full shadow-xs shrink-0" />
-                <span className={`font-bold text-xs sm:text-sm truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <div className="flex items-center gap-1.5 min-w-0 shrink">
+                <CryptoIcon symbol={selectedSymbol} size="xs" className="rounded-full shadow-xs shrink-0" />
+                <span className={`font-bold text-xs sm:text-sm shrink-0 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   {selectedSymbol}
                 </span>
-                <span className={`text-xs font-semibold shrink-0 ${isDark ? 'text-cyan-300' : 'text-cyan-700'}`}>
+                <span className={`text-xs font-semibold shrink-0 ${isDark ? 'text-pink-300' : 'text-pink-600'}`}>
                   ${formatPrice(displayPrice)}
                 </span>
               </div>
 
-              <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1 shrink-0">
                 {currentCoin && (
                   <span
-                    className={`text-[11px] font-bold px-1.5 py-0.5 rounded-[2px] ${
+                    className={`text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded-[2px] shrink-0 ${
                       currentCoin.change24h >= 0
                         ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                         : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
@@ -790,7 +820,7 @@ export const Header: React.FC<HeaderProps> = ({
                     {currentCoin.change24h}%
                   </span>
                 )}
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-400 transition-transform duration-200 ${isSearchOpen ? 'rotate-180 text-cyan-400' : ''}`} />
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-pink-400 transition-transform duration-200 shrink-0 ${isSearchOpen ? 'rotate-180 text-pink-400' : ''}`} />
               </div>
             </button>
 
@@ -805,9 +835,35 @@ export const Header: React.FC<HeaderProps> = ({
             />
           </div>
 
-          {/* Segmented Timeframe Buttons */}
+          {/* Quick Trigger Analyze Button (Inline with Asset Selector on Mobile) */}
+          <button
+            onClick={onTriggerAnalyze}
+            disabled={isLoading}
+            className="flex items-center justify-center gap-1.5 px-3 sm:px-3.5 py-1.5 font-semibold text-xs rounded-[2px] transition-colors bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white disabled:opacity-50 cursor-pointer min-h-[34px] sm:min-h-[38px] shadow-xs shrink-0"
+            title={
+              !hasEvaluation
+                ? isId
+                  ? `Jalankan analisa 12-indikator (${selectedTimeframe})`
+                  : `Run 12-indicator analysis (${selectedTimeframe})`
+                : undefined
+            }
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            <span className="font-semibold text-xs">
+              {isLoading
+                ? t.header.analyzing
+                : isId
+                ? 'Analisis'
+                : 'Analyze'}
+            </span>
+          </button>
+        </div>
+
+        {/* Row 2 on Mobile / Right on Desktop: Timeframes, Workspace Mode & Workbench */}
+        <div className="flex items-center justify-between md:justify-end gap-1.5 sm:gap-2 w-full md:w-auto">
+          {/* Segmented Timeframe Buttons (Scrollable smoothly on small mobile) */}
           <div
-            className={`flex items-center p-0.5 rounded-[2px] border ${
+            className={`flex-1 md:flex-initial flex items-center justify-around sm:justify-start gap-0.5 p-0.5 rounded-[2px] border overflow-x-auto scrollbar-none ${
               isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-slate-100 border-slate-200'
             }`}
           >
@@ -815,7 +871,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 key={tf}
                 onClick={() => onSelectTimeframe(tf)}
-                className={`px-2 sm:px-2.5 py-1 text-xs font-mono rounded-[2px] transition-colors cursor-pointer min-h-[30px] flex items-center justify-center ${
+                className={`px-1.5 sm:px-2.5 py-1 text-[11px] sm:text-xs font-mono rounded-[2px] transition-colors cursor-pointer min-h-[28px] sm:min-h-[30px] flex items-center justify-center shrink-0 ${
                   selectedTimeframe === tf
                     ? isDark
                       ? 'bg-slate-800 text-white font-semibold shadow-xs'
@@ -830,44 +886,14 @@ export const Header: React.FC<HeaderProps> = ({
             ))}
           </div>
 
-          {/* Primary Action Button: Jalankan Analisis */}
-          <button
-            onClick={onTriggerAnalyze}
-            disabled={isLoading}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 font-semibold text-xs rounded-[2px] transition-colors bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white disabled:opacity-50 cursor-pointer min-h-[38px] shadow-xs"
-            title={
-              !hasEvaluation
-                ? isId
-                  ? `Jalankan analisa 12-indikator (${selectedTimeframe})`
-                  : `Run 12-indicator analysis (${selectedTimeframe})`
-                : undefined
-            }
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-            <span className="font-semibold">
-              {isLoading
-                ? t.header.analyzing
-                : !hasEvaluation
-                ? isId
-                  ? `Analisis (${selectedTimeframe})`
-                  : `Analyze (${selectedTimeframe})`
-                : isId
-                ? 'Jalankan Analisis'
-                : 'Run Analysis'}
-            </span>
-          </button>
-        </div>
-
-        {/* Right Side: Workspace Mode Switcher */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Workspace Mode Switcher (Compact 3-state: Fokus, Split, Grid) */}
+          {/* Workspace Mode Switcher (Compact: Fokus, Split, Grid) */}
           {onToggleWorkspaceMode && (
             <button
               id="btn-header-workspace-mode"
               onClick={onToggleWorkspaceMode}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 border rounded-[2px] text-xs font-mono font-bold transition-all cursor-pointer min-h-[38px] ${
+              className={`flex items-center justify-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 border rounded-[2px] text-xs font-mono font-bold transition-all cursor-pointer min-h-[30px] sm:min-h-[34px] shrink-0 ${
                 workspaceMode === 'launchpad'
-                  ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300 shadow-xs'
+                  ? 'bg-pink-500/20 border-pink-500/50 text-pink-300 shadow-xs'
                   : workspaceMode === 'split'
                   ? 'bg-pink-500/20 border-pink-500/50 text-pink-300 shadow-xs'
                   : isDark
@@ -876,24 +902,24 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
               title={
                 isId
-                  ? 'Ganti Tata Letak Meja Kerja: Fokus (Alur Tunggal) ➔ Split (Jangkar Chart) ➔ Grid (4 Kuadran) (Tekan W)'
-                  : 'Switch Layout: Single Focus ➔ Split Chart Anchor ➔ Quad Grid (Key: W)'
+                  ? 'Ganti Tata Letak: Fokus ➔ Split ➔ Grid (Tekan W)'
+                  : 'Switch Layout: Single ➔ Split ➔ Grid (Key: W)'
               }
             >
               {workspaceMode === 'launchpad' ? (
                 <>
-                  <LayoutGrid className="w-3.5 h-3.5 text-cyan-400" />
-                  <span className="hidden xl:inline">Grid 4P</span>
+                  <LayoutGrid className="w-3.5 h-3.5 text-pink-400" />
+                  <span className="text-[11px] sm:text-xs">Grid</span>
                 </>
               ) : workspaceMode === 'split' ? (
                 <>
                   <Columns className="w-3.5 h-3.5 text-pink-400" />
-                  <span className="hidden xl:inline">Split Chart</span>
+                  <span className="text-[11px] sm:text-xs">Split</span>
                 </>
               ) : (
                 <>
                   <Layers className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="hidden xl:inline">{isId ? 'Fokus' : 'Focus'}</span>
+                  <span className="text-[11px] sm:text-xs">{isId ? 'Fokus' : 'Focus'}</span>
                 </>
               )}
             </button>
@@ -905,7 +931,7 @@ export const Header: React.FC<HeaderProps> = ({
               id="btn-header-toggle-workbench"
               type="button"
               onClick={onToggleWorkbench}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 border rounded-[2px] text-xs font-mono font-bold transition-all cursor-pointer min-h-[38px] ${
+              className={`flex items-center justify-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 border rounded-[2px] text-xs font-mono font-bold transition-all cursor-pointer min-h-[30px] sm:min-h-[34px] shrink-0 ${
                 isWorkbenchVisible
                   ? isDark
                     ? 'bg-pink-500/15 border-pink-500/40 text-pink-300 hover:bg-pink-500/25'
@@ -917,26 +943,23 @@ export const Header: React.FC<HeaderProps> = ({
               title={
                 isId
                   ? (isWorkbenchVisible
-                      ? 'Sembunyikan Meja Kerja Trader (Maksimalkan Ruang Kerja) (Tekan H)'
-                      : 'Tampilkan Meja Kerja Trader (7 Tahap & Personalisasi) (Tekan H)')
+                      ? 'Sembunyikan Meja Kerja Trader (Tekan H)'
+                      : 'Tampilkan Meja Kerja Trader (Tekan H)')
                   : (isWorkbenchVisible
-                      ? 'Hide Trader Workbench (Maximize Screen) (Key: H)'
-                      : 'Show Trader Workbench (7 Steps & Persona) (Key: H)')
+                      ? 'Hide Trader Workbench (Key: H)'
+                      : 'Show Trader Workbench (Key: H)')
               }
             >
               {isWorkbenchVisible ? (
                 <>
                   <Sparkles className="w-3.5 h-3.5 text-pink-400 shrink-0" />
-                  <span className="hidden xl:inline">{isId ? 'Meja Kerja' : 'Workbench'}</span>
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 ml-0.5 animate-pulse" title={isId ? 'Aktif' : 'Active'} />
+                  <span className="hidden sm:inline text-[11px] sm:text-xs">{isId ? 'Meja Kerja' : 'Workbench'}</span>
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 ml-0.5 animate-pulse" />
                 </>
               ) : (
                 <>
                   <EyeOff className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span className="hidden xl:inline">{isId ? 'Meja Kerja' : 'Workbench'}</span>
-                  <span className="px-1 py-0.2 rounded-xs text-[9px] bg-slate-800 text-slate-400 border border-slate-700 font-normal">
-                    {isId ? 'Sembunyi' : 'Hidden'}
-                  </span>
+                  <span className="text-[11px] sm:text-xs">{isId ? 'Sembunyi' : 'Hidden'}</span>
                 </>
               )}
             </button>

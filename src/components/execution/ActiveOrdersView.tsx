@@ -163,7 +163,7 @@ export const ActiveOrdersView: React.FC<ActiveOrdersViewProps> = ({
                   <tr key={ord.id} className="hover:bg-slate-800/30 transition-colors">
                     <td className="py-3 px-3 text-slate-400">{ord.id}</td>
                     <td className="py-3 px-3 font-bold text-white">{ord.symbol}</td>
-                    <td className="py-3 px-3 text-cyan-400">{ord.exchange}</td>
+                    <td className="py-3 px-3 text-pink-400">{ord.exchange}</td>
                     <td className="py-3 px-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                         ord.side === 'BUY'
