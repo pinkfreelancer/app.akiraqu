@@ -3,6 +3,7 @@ import {
   OHLCVCandle,
   Timeframe,
   MMPlaybookAnalysis,
+  LiveOrderBookLevel,
 } from '../types/crypto.types';
 import { analyzeMarketMakerPlaybook } from '../services/marketMaker/mmEngine';
 import {
@@ -17,6 +18,7 @@ import {
   Radio,
   TrendingUp,
   TrendingDown,
+  Info,
 } from 'lucide-react';
 import { Language } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
@@ -26,6 +28,9 @@ interface MMBotTrackerCardProps {
   symbol: string;
   timeframe: Timeframe;
   currentPrice?: number;
+  mmData?: MMPlaybookAnalysis;
+  orderBookBids?: LiveOrderBookLevel[];
+  orderBookAsks?: LiveOrderBookLevel[];
   lang?: Language;
   theme?: 'dark' | 'light';
 }
@@ -35,6 +40,9 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
   symbol,
   timeframe,
   currentPrice: overridePrice,
+  mmData: precomputedMMData,
+  orderBookBids,
+  orderBookAsks,
   lang = 'id',
   theme = 'dark',
 }) => {
@@ -45,9 +53,16 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
 
   const livePrice = overridePrice || (candles.length > 0 ? candles[candles.length - 1].close : 0);
 
+  // Compute MM data once, or use precomputed value from parent
+  const lastCandleTime = candles.length > 0 ? candles[candles.length - 1].time : 0;
+  const candleCount = candles.length;
+  const bidsCount = orderBookBids?.length || 0;
+  const asksCount = orderBookAsks?.length || 0;
+
   const mmData: MMPlaybookAnalysis = useMemo(() => {
-    return analyzeMarketMakerPlaybook(candles, livePrice, symbol, timeframe);
-  }, [candles, livePrice, symbol, timeframe]);
+    if (precomputedMMData) return precomputedMMData;
+    return analyzeMarketMakerPlaybook(candles, livePrice, symbol, timeframe, orderBookBids, orderBookAsks);
+  }, [precomputedMMData, candleCount, lastCandleTime, livePrice, symbol, timeframe, bidsCount, asksCount]);
 
   const { orderBookDepth, derivatives, anchoredVWAP } = mmData;
 
@@ -69,20 +84,24 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
             <Bot className="w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-base sm:text-lg font-black tracking-tight font-display">
-                {isId ? 'Radar Pelacak Bot & Market Maker (MM)' : 'Market Maker & Bot Flow Telemetry'}
+                {isId ? 'Radar Pelacak Aliran Market Maker & Bot' : 'Market Maker & Bot Flow Telemetry'}
               </h3>
-              <span className={`hidden sm:inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded-[2px] border font-bold ${
-                isDark ? 'bg-pink-500/15 border-pink-500/30 text-pink-300' : 'bg-pink-50 border-pink-200 text-pink-700'
+              <span className={`inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded-[2px] border font-bold ${
+                !orderBookDepth.isEstimated
+                  ? isDark ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                  : isDark ? 'bg-amber-500/15 border-amber-500/30 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-700'
               }`}>
-                <Radio className="w-3 h-3 text-pink-400" />
-                HFT Real-Time
+                <Radio className="w-3 h-3" />
+                {!orderBookDepth.isEstimated
+                  ? (isId ? 'Buku Order L2 Live' : 'Live L2 Book')
+                  : (isId ? 'Perkiraan (Berbasis Lilin & CVD)' : 'Estimated (Candle & CVD)')}
               </span>
             </div>
             <p className="text-xs text-slate-400 font-mono">
               {isId
-                ? 'Order Book Depth, Delta CVD, Open Interest, Funding Rate, & Multi-Anchor VWAP'
+                ? 'Order Book Depth, Delta CVD, Estimasi Open Interest, Funding Rate, & Multi-Anchor VWAP'
                 : 'Depth Imbalance, Cumulative Delta (CVD), OI Dynamics, & Anchored VWAPs'}
             </p>
           </div>
@@ -113,7 +132,7 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
             }`}
           >
             <Activity className="w-3.5 h-3.5" />
-            <span>OI & Funding</span>
+            <span>OI & Funding (~Est)</span>
           </button>
 
           <button
@@ -144,7 +163,10 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
                 isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'
               }`}>
                 <div className="flex items-center justify-between text-xs font-mono mb-2">
-                  <span className="text-slate-400 font-semibold uppercase">{isId ? 'Bid/Ask Imbalance' : 'Bid/Ask Imbalance'}</span>
+                  <span className="text-slate-400 font-semibold uppercase flex items-center gap-1">
+                    <span>{isId ? 'Bid/Ask Imbalance' : 'Bid/Ask Imbalance'}</span>
+                    {orderBookDepth.isEstimated && <span className="text-[10px] text-amber-400">(~Est)</span>}
+                  </span>
                   <span className={`font-bold px-2 py-0.5 rounded-[2px] text-[11px] ${
                     orderBookDepth.imbalanceRatio >= 1.2
                       ? isDark ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
@@ -170,7 +192,7 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
                 </div>
                 <span className={`block mt-2 text-xs font-mono ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                   {orderBookDepth.bidPercent > 55
-                    ? (isId ? 'Tekanan beli dominan di order book terdekat' : 'Buy pressure dominates near bid ladder')
+                    ? (isId ? 'Tekanan beli dominan di kedalaman buku order' : 'Buy pressure dominates near bid ladder')
                     : (isId ? 'Tekanan jual menekan ask side' : 'Sell pressure heavy on ask ladder')}
                 </span>
               </div>
@@ -202,7 +224,7 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
                 </div>
                 <p className={`mt-2 text-xs font-mono ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                   {isId
-                    ? 'Total selisih volume agresi market buy dikurangi market sell'
+                    ? 'Total selisih volume agresi taker buy dikurangi taker sell'
                     : 'Net cumulative market aggressor buy volume minus sell volume'}
                 </p>
               </div>
@@ -229,19 +251,19 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
                   />
                 </div>
                 <p className={`mt-2 text-xs font-mono ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                  {isId ? 'Intensitas eksekusi algoritma HFT / Market Maker' : 'Algorithmic MM and HFT execution velocity'}
+                  {isId ? 'Intensitas eksekusi order flow algoritma Market Maker' : 'Algorithmic MM and HFT execution velocity'}
                 </p>
               </div>
             </div>
 
-            {/* Spoofing Alert Banner if detected */}
+            {/* Imbalance Alert Banner if detected */}
             {orderBookDepth.spoofAlert && (
               <div className={`flex items-start gap-3 p-3.5 rounded-[2px] border text-xs font-mono ${
                 isDark ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-800'
               }`}>
                 <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold block uppercase">{isId ? 'Peringatan Anomali Spoof Wall Algoritmik' : 'Algorithmic Spoof Wall Alert'}</span>
+                  <span className="font-bold block uppercase">{isId ? 'Deteksi Imbalance Order Flow' : 'Order Flow Imbalance Alert'}</span>
                   <p className={`mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>{orderBookDepth.spoofAlert}</p>
                 </div>
               </div>
@@ -258,7 +280,8 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
                 }`}>
                   <span className="text-xs font-bold font-mono text-emerald-400 uppercase flex items-center gap-1.5">
                     <TrendingUp className="w-3.5 h-3.5" />
-                    {isId ? 'Tembok Beli Institusi (Bid Walls)' : 'Institutional Bid Walls'}
+                    <span>{isId ? 'Tembok Beli (Bid Walls)' : 'Bid Walls'}</span>
+                    {orderBookDepth.isEstimated && <span className="text-[10px] text-amber-400 font-normal">(~Est)</span>}
                   </span>
                   <span className="text-[11px] font-mono text-slate-400">{isId ? 'Jarak / Nominal USD' : 'Distance / USD'}</span>
                 </div>
@@ -268,21 +291,12 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
                     <div
                       key={idx}
                       className={`flex items-center justify-between p-2 rounded-[2px] text-xs font-mono transition-colors border ${
-                        wall.isSpoofSuspicion
-                          ? isDark ? 'bg-amber-500/15 border-amber-500/40 text-amber-300' : 'bg-amber-50 border-amber-300 text-amber-800'
-                          : isDark ? 'bg-slate-900/70 hover:bg-slate-800/80 border-slate-800/60' : 'bg-white hover:bg-slate-100 border-slate-200 shadow-2xs'
+                        isDark ? 'bg-slate-900/70 hover:bg-slate-800/80 border-slate-800/60' : 'bg-white hover:bg-slate-100 border-slate-200 shadow-2xs'
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-emerald-400 font-bold">${formatPrice(wall.price)}</span>
                         <span className="text-[11px] text-slate-400">(-{wall.distancePct}%)</span>
-                        {wall.isSpoofSuspicion && (
-                          <span className={`text-[11px] px-1.5 py-0.5 rounded-[2px] font-bold ${
-                            isDark ? 'bg-amber-500/20 text-amber-300' : 'bg-amber-100 text-amber-800'
-                          }`}>
-                            SPOOF?
-                          </span>
-                        )}
                       </div>
                       <div className="flex items-center gap-3">
                         <span className={isDark ? 'text-slate-300' : 'text-slate-600'}>{wall.amount} token</span>
@@ -302,7 +316,8 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
                 }`}>
                   <span className="text-xs font-bold font-mono text-rose-400 uppercase flex items-center gap-1.5">
                     <TrendingDown className="w-3.5 h-3.5" />
-                    {isId ? 'Tembok Jual Institusi (Ask Walls)' : 'Institutional Ask Walls'}
+                    <span>{isId ? 'Tembok Jual (Ask Walls)' : 'Ask Walls'}</span>
+                    {orderBookDepth.isEstimated && <span className="text-[10px] text-amber-400 font-normal">(~Est)</span>}
                   </span>
                   <span className="text-[11px] font-mono text-slate-400">{isId ? 'Jarak / Nominal USD' : 'Distance / USD'}</span>
                 </div>
@@ -312,21 +327,12 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
                     <div
                       key={idx}
                       className={`flex items-center justify-between p-2 rounded-[2px] text-xs font-mono transition-colors border ${
-                        wall.isSpoofSuspicion
-                          ? isDark ? 'bg-amber-500/15 border-amber-500/40 text-amber-300' : 'bg-amber-50 border-amber-300 text-amber-800'
-                          : isDark ? 'bg-slate-900/70 hover:bg-slate-800/80 border-slate-800/60' : 'bg-white hover:bg-slate-100 border-slate-200 shadow-2xs'
+                        isDark ? 'bg-slate-900/70 hover:bg-slate-800/80 border-slate-800/60' : 'bg-white hover:bg-slate-100 border-slate-200 shadow-2xs'
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-rose-400 font-bold">${formatPrice(wall.price)}</span>
                         <span className="text-[11px] text-slate-400">(+{wall.distancePct}%)</span>
-                        {wall.isSpoofSuspicion && (
-                          <span className={`text-[11px] px-1.5 py-0.5 rounded-[2px] font-bold ${
-                            isDark ? 'bg-amber-500/20 text-amber-300' : 'bg-amber-100 text-amber-800'
-                          }`}>
-                            SPOOF?
-                          </span>
-                        )}
                       </div>
                       <div className="flex items-center gap-3">
                         <span className={isDark ? 'text-slate-300' : 'text-slate-600'}>{wall.amount} token</span>
@@ -345,6 +351,18 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
         {/* ======================================================== */}
         {activeTab === 'derivatives' && (
           <div className="space-y-5">
+            {/* Disclaimer Notice */}
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-[2px] border text-xs font-mono ${
+              isDark ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-800'
+            }`}>
+              <Info className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>
+                {isId
+                  ? 'Catatan: Metrik Open Interest & Funding di bawah dihitung menggunakan model estimasi korelasi volatilitas & tren harga 24 jam.'
+                  : 'Notice: Derivatives metrics below are computed using a 24-hour volatility-price correlation estimation model.'}
+              </span>
+            </div>
+
             {/* Top 4 Derivatives Metric Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Card 1: Notional Open Interest */}
@@ -352,10 +370,10 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
                 isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'
               }`}>
                 <span className="text-xs text-slate-400 font-mono uppercase font-bold block mb-1">
-                  {isId ? 'Total Open Interest (OI)' : 'Total Open Interest'}
+                  {isId ? 'Open Interest (~Est)' : 'Open Interest (~Est)'}
                 </span>
                 <div className="text-xl font-black font-mono text-pink-400">
-                  ${(derivatives.openInterestUsd / 1000000000).toFixed(2)}B
+                  ~${(derivatives.openInterestUsd / 1000000000).toFixed(2)}B
                 </div>
                 <div className="mt-2 flex items-center gap-2 text-xs font-mono">
                   <span className={`font-bold ${derivatives.oiChange24hPct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -371,7 +389,7 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
                 isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'
               }`}>
                 <span className="text-xs text-slate-400 font-mono uppercase font-bold block mb-1">
-                  {isId ? 'Funding Rate (8 Jam)' : 'Funding Rate (8h)'}
+                  {isId ? 'Funding Rate 8h (~Est)' : 'Funding Rate 8h (~Est)'}
                 </span>
                 <div className={`text-xl font-black font-mono ${
                   derivatives.fundingRate8h > 0.02
@@ -393,7 +411,7 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
                 isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'
               }`}>
                 <span className="text-xs text-slate-400 font-mono uppercase font-bold block mb-1">
-                  {isId ? 'Rasio Akun Long / Short' : 'Long/Short Ratio'}
+                  {isId ? 'Rasio Long / Short (~Est)' : 'Long/Short Ratio (~Est)'}
                 </span>
                 <div className={`text-xl font-black font-mono flex items-center justify-between ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
                   <span>{derivatives.longShortRatio}</span>
@@ -534,8 +552,8 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
                   isDark ? 'text-slate-400 border-slate-800/60' : 'text-slate-600 border-slate-200'
                 }`}>
                   {isId
-                    ? 'Titik ekuilibrium volume institusional mingguan (Weekly Mean Benchmark)'
-                    : 'Weekly institutional volume-weighted fair value baseline'}
+                    ? 'Titik ekuilibrium volume institusional mingguan (Reset Senin 00:00 UTC)'
+                    : 'Weekly volume-weighted institutional baseline (Reset Monday 00:00 UTC)'}
                 </p>
               </div>
 

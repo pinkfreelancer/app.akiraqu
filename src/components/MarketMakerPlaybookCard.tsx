@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   OHLCVCandle,
   Timeframe,
   MMPlaybookAnalysis,
+  LiveOrderBookLevel,
 } from '../types/crypto.types';
 import { analyzeMarketMakerPlaybook } from '../services/marketMaker/mmEngine';
 import {
@@ -13,6 +14,7 @@ import {
   TrendingUp,
   AlertTriangle,
   Radio,
+  Info,
 } from 'lucide-react';
 import { Language } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
@@ -22,6 +24,9 @@ interface MarketMakerPlaybookCardProps {
   symbol: string;
   timeframe: Timeframe;
   currentPrice?: number;
+  mmData?: MMPlaybookAnalysis;
+  orderBookBids?: LiveOrderBookLevel[];
+  orderBookAsks?: LiveOrderBookLevel[];
   lang?: Language;
   theme?: 'dark' | 'light';
 }
@@ -31,6 +36,9 @@ export const MarketMakerPlaybookCard: React.FC<MarketMakerPlaybookCardProps> = (
   symbol,
   timeframe,
   currentPrice: overridePrice,
+  mmData: precomputedMMData,
+  orderBookBids,
+  orderBookAsks,
   lang = 'id',
   theme = 'dark',
 }) => {
@@ -41,9 +49,15 @@ export const MarketMakerPlaybookCard: React.FC<MarketMakerPlaybookCardProps> = (
 
   const livePrice = overridePrice || (candles.length > 0 ? candles[candles.length - 1].close : 0);
 
-  const mmData: MMPlaybookAnalysis = React.useMemo(() => {
-    return analyzeMarketMakerPlaybook(candles, livePrice, symbol, timeframe);
-  }, [candles, livePrice, symbol, timeframe]);
+  const lastCandleTime = candles.length > 0 ? candles[candles.length - 1].time : 0;
+  const candleCount = candles.length;
+  const bidsCount = orderBookBids?.length || 0;
+  const asksCount = orderBookAsks?.length || 0;
+
+  const mmData: MMPlaybookAnalysis = useMemo(() => {
+    if (precomputedMMData) return precomputedMMData;
+    return analyzeMarketMakerPlaybook(candles, livePrice, symbol, timeframe, orderBookBids, orderBookAsks);
+  }, [precomputedMMData, candleCount, lastCandleTime, livePrice, symbol, timeframe, bidsCount, asksCount]);
 
   const {
     regime,
@@ -73,7 +87,7 @@ export const MarketMakerPlaybookCard: React.FC<MarketMakerPlaybookCardProps> = (
             <Fingerprint className="w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-base sm:text-lg font-black tracking-tight font-display flex items-center gap-2">
                 <span>{isId ? 'Anatomi Pola Manipulasi Algoritma' : 'Algorithmic Manipulation Playbook'}</span>
                 <span className={`text-[11px] font-mono px-2 py-0.5 rounded-[2px] border font-bold uppercase ${
@@ -85,7 +99,7 @@ export const MarketMakerPlaybookCard: React.FC<MarketMakerPlaybookCardProps> = (
             </div>
             <p className="text-xs text-slate-400 font-mono">
               {isId
-                ? 'Dekonstruksi Strategi Market Maker: The Trap & Spike, Absorption Phase, & The Flush / Liquidity Sweep'
+                ? 'Dekonstruksi Strategi Kuantitatif: The Trap & Spike, Absorption Phase, & The Flush / Liquidity Sweep'
                 : 'Deconstructing Market Maker Patterns: The Trap & Spike, Silent Absorption, & Liquidity Flush'}
             </p>
           </div>
@@ -212,7 +226,7 @@ export const MarketMakerPlaybookCard: React.FC<MarketMakerPlaybookCardProps> = (
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-sm uppercase font-mono">
-                      {trapAndSpike.isDetected ? `Pola Aktif: ${trapAndSpike.trapType.replace(/_/g, ' ')}` : 'Status: Tidak Terdeteksi Fake Spike Ekstrem'}
+                      {trapAndSpike.isDetected ? `Pola Aktif: ${trapAndSpike.trapType.replace(/_/g, ' ')}` : 'Status: Tidak Terdeteksi False Spike Ekstrem'}
                     </span>
                     {trapAndSpike.isDetected && (
                       <span className="text-[11px] px-2 py-0.5 rounded-[2px] bg-rose-500/20 text-rose-400 font-bold font-mono border border-rose-500/30">
@@ -233,6 +247,20 @@ export const MarketMakerPlaybookCard: React.FC<MarketMakerPlaybookCardProps> = (
                 </div>
               )}
             </div>
+
+            {/* Characteristics list */}
+            {trapAndSpike.characteristics.length > 0 && (
+              <div className={`p-3 rounded-[2px] border text-xs font-mono ${
+                isDark ? 'bg-[#0b0f19] border-slate-800/80 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
+              }`}>
+                <span className="text-slate-400 uppercase font-bold block mb-1">Karakteristik Sinyal:</span>
+                <ul className="list-disc list-inside space-y-0.5">
+                  {trapAndSpike.characteristics.map((c, idx) => (
+                    <li key={idx}>{c}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Step-by-Step Anatomical Breakdown */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -348,38 +376,42 @@ export const MarketMakerPlaybookCard: React.FC<MarketMakerPlaybookCardProps> = (
                   ${(absorptionPhase.passiveVolumeAbsorbedUsd / 1000000).toFixed(1)}M
                 </div>
                 <p className={`text-xs mt-1 font-mono ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                  {isId ? 'Total akumulasi limit order pasif (Iceberg)' : 'Total passive iceberg limit orders executed'}
+                  {isId ? 'Total estimasi notional limit yang dieksekusi pasif' : 'Total estimated passive limit execution'}
                 </p>
               </div>
 
               <div className={`p-3.5 rounded-[2px] border ${isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
                 <span className="text-[11px] font-mono text-slate-400 uppercase font-bold block mb-1">
-                  {isId ? 'Arah Breakout Imminent' : 'Breakout Trajectory'}
+                  {isId ? 'Arah Breakout Imminent' : 'Imminent Breakout'}
                 </span>
-                <div className="text-xl font-black font-mono text-emerald-400 flex items-center gap-1.5">
-                  <TrendingUp className="w-5 h-5" />
-                  <span>{absorptionPhase.breakoutImminentDirection}</span>
+                <div className={`text-xl font-black font-mono ${
+                  absorptionPhase.breakoutImminentDirection === 'UP'
+                    ? 'text-emerald-400'
+                    : absorptionPhase.breakoutImminentDirection === 'DOWN'
+                    ? 'text-rose-400'
+                    : 'text-slate-400'
+                }`}>
+                  {absorptionPhase.breakoutImminentDirection === 'UP' ? 'EXPANSION UP ↗' : absorptionPhase.breakoutImminentDirection === 'DOWN' ? 'EXPANSION DOWN ↘' : 'PENDING'}
                 </div>
                 <p className={`text-xs mt-1 font-mono ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                  {isId ? 'Potensi ledakan momentum pasca penyerapan tuntas' : 'Anticipated momentum impulse following absorption exhaustion'}
+                  {isId ? 'Ekspektasi arah ekspansi pasca absorpsi' : 'Expected post-absorption breakout velocity'}
                 </p>
               </div>
             </div>
 
-            {/* Smart Money Action Playbook */}
-            <div className={`p-4 rounded-[2px] border ${
-              isDark ? 'bg-indigo-950/15 border-indigo-500/30' : 'bg-indigo-50/70 border-indigo-200'
-            }`}>
-              <div className="flex items-center gap-2 mb-2">
-                <Crosshair className="w-4 h-4 text-indigo-400" />
-                <span className="text-xs font-bold font-mono uppercase text-indigo-400">
-                  {isId ? 'Panduan Aksi Akumulasi (Institutional Accumulation Play)' : 'Institutional Accumulation Plan'}
-                </span>
+            {/* Characteristics list */}
+            {absorptionPhase.characteristics.length > 0 && (
+              <div className={`p-3 rounded-[2px] border text-xs font-mono ${
+                isDark ? 'bg-[#0b0f19] border-slate-800/80 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
+              }`}>
+                <span className="text-slate-400 uppercase font-bold block mb-1">Karakteristik Sinyal:</span>
+                <ul className="list-disc list-inside space-y-0.5">
+                  {absorptionPhase.characteristics.map((c, idx) => (
+                    <li key={idx}>{c}</li>
+                  ))}
+                </ul>
               </div>
-              <p className={`text-xs font-mono leading-relaxed ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
-                {absorptionPhase.actionPlan}
-              </p>
-            </div>
+            )}
           </div>
         )}
 
@@ -401,7 +433,7 @@ export const MarketMakerPlaybookCard: React.FC<MarketMakerPlaybookCardProps> = (
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-sm uppercase font-mono">
-                      {liquiditySweep.isDetected ? `Pola Aktif: ${liquiditySweep.sweepType.replace(/_/g, ' ')}` : 'Status: Menunggu Pemicu Sapuan Likuiditas'}
+                      {liquiditySweep.isDetected ? `Pola Aktif: ${liquiditySweep.sweepType.replace(/_/g, ' ')}` : 'Status: Belum Ada Sweep Signifikan'}
                     </span>
                     {liquiditySweep.isDetected && (
                       <span className="text-[11px] px-2 py-0.5 rounded-[2px] bg-pink-500/20 text-pink-400 font-bold font-mono border border-pink-500/30">
@@ -417,59 +449,25 @@ export const MarketMakerPlaybookCard: React.FC<MarketMakerPlaybookCardProps> = (
 
               {liquiditySweep.isDetected && (
                 <div className="text-right font-mono text-xs">
-                  <span className="text-slate-400 block text-[11px] uppercase">Level Reclaim Konfirmasi</span>
+                  <span className="text-slate-400 block text-[11px] uppercase">Level Reclaim Validasi</span>
                   <span className="text-base font-black text-pink-400">${formatPrice(liquiditySweep.reclaimLevel)}</span>
                 </div>
               )}
             </div>
 
-            {/* Anatomy Breakdown: Why Liquidity Sweeps Happen */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className={`p-4 rounded-[2px] border ${isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
-                <span className="text-[11px] font-mono text-pink-400 uppercase font-bold block mb-1">
-                  1. TARGET POOL LIKUIDITAS
-                </span>
-                <h4 className={`text-xs font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Equal Highs / Equal Lows (EQH/EQL)</h4>
-                <p className={`text-xs font-mono leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                  Traders ritel menempatkan ribuan stop-loss dan breakout orders persis beberapa poin di luar swing high / swing low. Ini adalah magnet likuiditas raksasa bagi Market Maker.
-                </p>
+            {/* Characteristics list */}
+            {liquiditySweep.characteristics.length > 0 && (
+              <div className={`p-3 rounded-[2px] border text-xs font-mono ${
+                isDark ? 'bg-[#0b0f19] border-slate-800/80 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
+              }`}>
+                <span className="text-slate-400 uppercase font-bold block mb-1">Karakteristik Sinyal:</span>
+                <ul className="list-disc list-inside space-y-0.5">
+                  {liquiditySweep.characteristics.map((c, idx) => (
+                    <li key={idx}>{c}</li>
+                  ))}
+                </ul>
               </div>
-
-              <div className={`p-4 rounded-[2px] border ${isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
-                <span className="text-[11px] font-mono text-pink-400 uppercase font-bold block mb-1">
-                  2. THE SWEEP & DISPLACEMENT
-                </span>
-                <h4 className={`text-xs font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Sapuan Stop Run Kilat</h4>
-                <p className={`text-xs font-mono leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                  Harga disapu beberapa pips untuk mengaktifkan seluruh stop loss menjadi market order, yang langsung ditelan oleh limit order institusional tanpa slippage (Filling Size).
-                </p>
-              </div>
-
-              <div className={`p-4 rounded-[2px] border ${isDark ? 'bg-[#0b0f19] border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
-                <span className="text-[11px] font-mono text-pink-400 uppercase font-bold block mb-1">
-                  3. THE RECLAIM ENTRY
-                </span>
-                <h4 className={`text-xs font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Konfirmasi Reclaim Kunci</h4>
-                <p className={`text-xs font-mono leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                  Begitu candle merebut kembali (reclaim) level yang disapu, momentum berbalik tajam menuju sisi berlawanan dari range likuiditas (Liquidity Run).
-                </p>
-              </div>
-            </div>
-
-            {/* Smart Money Action Playbook */}
-            <div className={`p-4 rounded-[2px] border ${
-              isDark ? 'bg-pink-950/15 border-pink-500/30' : 'bg-pink-50/70 border-pink-200'
-            }`}>
-              <div className="flex items-center gap-2 mb-2">
-                <Crosshair className="w-4 h-4 text-pink-400" />
-                <span className="text-xs font-bold font-mono uppercase text-pink-400">
-                  {isId ? 'Panduan Aksi Likuiditas (Smart Money Sweep Play)' : 'Smart Money Sweep Action Plan'}
-                </span>
-              </div>
-              <p className={`text-xs font-mono leading-relaxed ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
-                {liquiditySweep.actionPlan}
-              </p>
-            </div>
+            )}
           </div>
         )}
       </div>

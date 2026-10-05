@@ -426,6 +426,9 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setCandles(cached.candles);
       }
     } else {
+      const targetCoin = symbols.find((s) => s.symbol === selectedSymbol);
+      const basePrice = activeDisplayPrice || (targetCoin ? targetCoin.basePrice : 1.0);
+      setCandles(generatePlaceholderCandles(basePrice, selectedSymbol, selectedTimeframe));
       setEvaluation(null);
       fetchFastCandles(selectedSymbol, selectedTimeframe, ex, selectedMarketType).then((newCandles) => {
         if (newCandles && newCandles.length > 0) {
@@ -433,7 +436,7 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       });
     }
-  }, [selectedSymbol, selectedTimeframe, lang, selectedMarketType, checkCache, setCandles, setEvaluation]);
+  }, [selectedSymbol, selectedTimeframe, lang, selectedMarketType, checkCache, symbols, activeDisplayPrice, generatePlaceholderCandles, setCandles, setEvaluation]);
 
   const handleMarketTypeChange = useCallback((mt: MarketType) => {
     setSelectedMarketType(mt);
@@ -446,6 +449,9 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setCandles(cached.candles);
       }
     } else {
+      const targetCoin = symbols.find((s) => s.symbol === selectedSymbol);
+      const basePrice = activeDisplayPrice || (targetCoin ? targetCoin.basePrice : 1.0);
+      setCandles(generatePlaceholderCandles(basePrice, selectedSymbol, selectedTimeframe));
       setEvaluation(null);
       fetchFastCandles(selectedSymbol, selectedTimeframe, selectedExchange, mt).then((newCandles) => {
         if (newCandles && newCandles.length > 0) {
@@ -453,7 +459,7 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       });
     }
-  }, [selectedSymbol, selectedTimeframe, lang, selectedExchange, checkCache, setCandles, setEvaluation]);
+  }, [selectedSymbol, selectedTimeframe, lang, selectedExchange, checkCache, symbols, activeDisplayPrice, generatePlaceholderCandles, setCandles, setEvaluation]);
 
   const toggleLang = useCallback((newLang: Language) => {
     setLang(newLang);

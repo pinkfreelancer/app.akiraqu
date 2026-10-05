@@ -481,23 +481,69 @@ function calculateSMC(candles: OHLCVCandle[]): SMCIndicator {
     }
   }
 
-  // Identify Order Blocks
+  // Identify Order Blocks with exact start indices and mitigation verification
   const orderBlocks: SMCIndicator['orderBlocks'] = [];
-  const lowestCandle = recent.reduce((min, c) => (c.low < min.low ? c : min), recent[0]);
-  const highestCandle = recent.reduce((max, c) => (c.high > max.high ? c : max), recent[0]);
+  let lowestIndex = len - recent.length;
+  let highestIndex = len - recent.length;
+
+  for (let i = len - recent.length; i < len; i++) {
+    if (candles[i].low < candles[lowestIndex].low) {
+      lowestIndex = i;
+    }
+    if (candles[i].high > candles[highestIndex].high) {
+      highestIndex = i;
+    }
+  }
+
+  const lowestCandle = candles[lowestIndex];
+  const highestCandle = candles[highestIndex];
+
+  // Check Bullish OB mitigation (if any subsequent candle low penetrated below the OB high/body)
+  let bullishMitigated = false;
+  let bullishMitigatedIndex: number | undefined;
+  const bullHigh = lowestCandle.high;
+  const bullLow = lowestCandle.low;
+
+  for (let i = lowestIndex + 1; i < len; i++) {
+    if (candles[i].low <= bullHigh) {
+      bullishMitigated = true;
+      bullishMitigatedIndex = i;
+      break;
+    }
+  }
+
+  // Check Bearish OB mitigation (if any subsequent candle high penetrated above the OB low/body)
+  let bearishMitigated = false;
+  let bearishMitigatedIndex: number | undefined;
+  const bearHigh = highestCandle.high;
+  const bearLow = highestCandle.low;
+
+  for (let i = highestIndex + 1; i < len; i++) {
+    if (candles[i].high >= bearLow) {
+      bearishMitigated = true;
+      bearishMitigatedIndex = i;
+      break;
+    }
+  }
 
   orderBlocks.push({
     type: 'BULLISH_OB',
-    high: Number(lowestCandle.high.toFixed(2)),
-    low: Number(lowestCandle.low.toFixed(2)),
-    tested: false,
+    high: Number(bullHigh.toFixed(2)),
+    low: Number(bullLow.toFixed(2)),
+    tested: bullishMitigated,
+    mitigated: bullishMitigated,
+    startIndex: lowestIndex,
+    mitigatedIndex: bullishMitigatedIndex,
   });
 
   orderBlocks.push({
     type: 'BEARISH_OB',
-    high: Number(highestCandle.high.toFixed(2)),
-    low: Number(highestCandle.low.toFixed(2)),
-    tested: false,
+    high: Number(bearHigh.toFixed(2)),
+    low: Number(bearLow.toFixed(2)),
+    tested: bearishMitigated,
+    mitigated: bearishMitigated,
+    startIndex: highestIndex,
+    mitigatedIndex: bearishMitigatedIndex,
   });
 
   // Check Break of Structure
@@ -530,7 +576,7 @@ function calculateSMC(candles: OHLCVCandle[]): SMCIndicator {
     liquiditySwept: true,
     signal,
     confidence,
-    summary: `Identified ${breakOfStructure} with unmitigated institutional Bullish OB ($${orderBlocks[0].low} - $${orderBlocks[0].high}) and ${fvgs.length} FVGs.`,
+    summary: `Identified ${breakOfStructure} with ${bullishMitigated ? 'mitigated' : 'unmitigated'} institutional Bullish OB ($${orderBlocks[0].low} - $${orderBlocks[0].high}) and ${fvgs.length} FVGs.`,
   };
 }
 

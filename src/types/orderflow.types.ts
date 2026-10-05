@@ -61,6 +61,8 @@ export interface OrderBookDepthData {
   institutionalAggressionScore: number;
   cvdTrend: 'STRONG_ACCUMULATION' | 'MILD_ACCUMULATION' | 'NEUTRAL' | 'MILD_DISTRIBUTION' | 'STRONG_DISTRIBUTION';
   spoofAlert: string | null;
+  isEstimated?: boolean;
+  dataSourceLabel?: string;
 }
 
 export type OIDivergenceType =
@@ -83,6 +85,8 @@ export interface DerivativesMetrics {
   longShortRatio: number;
   longPercent: number;
   shortPercent: number;
+  isEstimated?: boolean;
+  dataSourceLabel?: string;
   oiPriceDivergence: {
     type: OIDivergenceType;
     significance: 'HIGH' | 'MEDIUM' | 'LOW';
@@ -102,6 +106,8 @@ export interface AnchoredVWAPAnchor {
   lowerBand1: number;
   lowerBand2: number;
   status: 'SUPPORT_HOLDING' | 'RESISTANCE_REJECTION' | 'PRICE_ABOVE' | 'PRICE_BELOW';
+  startIndex?: number;
+  series?: { index: number; vwap: number }[];
 }
 
 export interface AnchoredVWAPData {

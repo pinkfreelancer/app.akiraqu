@@ -4,6 +4,7 @@ import { CandleSizeProjectionCard } from '../components/CandleSizeProjectionCard
 import { LiquidationHeatmapCard } from '../components/LiquidationHeatmapCard';
 import { MMBotTrackerCard } from '../components/MMBotTrackerCard';
 import { MarketMakerPlaybookCard } from '../components/MarketMakerPlaybookCard';
+import { analyzeMarketMakerPlaybook } from '../services/marketMaker/mmEngine';
 import {
   OHLCVCandle,
   Timeframe,
@@ -87,6 +88,15 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
 
   const calculatedBidTotal = bidTotal > 0 ? bidTotal : displayBids.reduce((a, b) => a + b.amount, 0);
   const calculatedAskTotal = askTotal > 0 ? askTotal : displayAsks.reduce((a, b) => a + b.amount, 0);
+
+  const candleCount = candles.length;
+  const lastCandleTime = candleCount > 0 ? candles[candleCount - 1].time : 0;
+  const bidsCount = orderBookBids?.length || 0;
+  const asksCount = orderBookAsks?.length || 0;
+
+  const sharedMMData = useMemo(() => {
+    return analyzeMarketMakerPlaybook(candles, currentPrice, symbol, timeframe, orderBookBids, orderBookAsks);
+  }, [candleCount, lastCandleTime, currentPrice, symbol, timeframe, bidsCount, asksCount]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -196,7 +206,7 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
                       className="absolute inset-y-0 right-0 bg-rose-500/15 transition-all duration-150"
                       style={{ width: `${Math.min(100, (ask.amount / (calculatedAskTotal || 1)) * 180)}%` }}
                     />
-                    <span className="text-rose-400 font-bold relative z-10 tabular-nums">${formatPrice(ask.price)}</span>
+                    <span className="text-rose-400 font-bold relative z-10 tabular-nums">${formatCoinPrice(ask.price)}</span>
                     <span className={`relative z-10 tabular-nums font-medium ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>{ask.amount}</span>
                   </div>
                 ))
@@ -254,6 +264,9 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
         symbol={symbol}
         timeframe={timeframe}
         currentPrice={currentPrice}
+        mmData={sharedMMData}
+        orderBookBids={orderBookBids}
+        orderBookAsks={orderBookAsks}
         lang={lang}
         theme={theme}
       />
@@ -264,6 +277,9 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
         symbol={symbol}
         timeframe={timeframe}
         currentPrice={currentPrice}
+        mmData={sharedMMData}
+        orderBookBids={orderBookBids}
+        orderBookAsks={orderBookAsks}
         lang={lang}
         theme={theme}
       />

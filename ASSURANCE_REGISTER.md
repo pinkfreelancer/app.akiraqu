@@ -20,4 +20,4 @@
 - [x] `/api/v1/health` endpoint returning 200 OK with latency & uptime telemetry.
 - [x] Structured JSON audit logging active.
 - [x] Graceful fallback to deterministic quantitative analysis if API keys are unset.
-- [x] Unit Test Suite (Vitest): Verified coverage for `liquidationEngine`, `mmEngine`, `confluenceEngine`, `riskCalculator`, `usePortfolioStore`, and `useOrderBookStore` (27/27 tests passing).
+- [x] Unit Test Suite (Vitest): Verified coverage for `liquidationEngine`, `mmEngine`, `confluenceEngine`, `riskCalculator`, `indicatorEngine`, `usePortfolioStore`, `useOrderBookStore`, and `privacy` routes (34/34 tests passing).

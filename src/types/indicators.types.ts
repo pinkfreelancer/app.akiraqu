@@ -100,6 +100,9 @@ export interface SMCOrderBlock {
   high: number;
   low: number;
   tested?: boolean;
+  mitigated?: boolean;
+  startIndex?: number;
+  mitigatedIndex?: number;
 }
 
 export interface SMCFairValueGap {

@@ -122,6 +122,9 @@ export const MasterAnchorChart: React.FC<MasterAnchorChartProps> = ({
               {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
               {isPositive ? '+' : ''}
               {priceChangePct.toFixed(2)}%
+              <span className="text-[10px] text-slate-500 font-normal ml-0.5">
+                ({candles.length}b {timeframe})
+              </span>
             </span>
           </div>
 
