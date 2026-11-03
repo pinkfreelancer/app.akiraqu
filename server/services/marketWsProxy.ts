@@ -2,21 +2,28 @@ import { WebSocketServer, WebSocket as WsClient } from 'ws';
 import { IncomingMessage } from 'http';
 import { Duplex } from 'stream';
 
-const BINANCE_SPOT_WS = 'wss://stream.binance.com:9443/ws';
-const BINANCE_FUTURES_WS = 'wss://fstream.binance.com/ws';
+const SPOT_UPSTREAM_ENDPOINTS = [
+  'wss://data-stream.binance.vision/stream',
+  'wss://stream.binance.com:9443/stream',
+  'wss://stream.binance.com:443/stream',
+];
+
+const FUTURES_UPSTREAM_ENDPOINTS = [
+  'wss://fstream.binance.com/stream',
+];
+
+function computeBackoffWithJitter(attempt: number, baseMs = 1000, maxMs = 20_000): number {
+  const exp = Math.min(maxMs, baseMs * Math.pow(2, Math.max(0, Math.min(10, attempt))));
+  const jitter = 0.75 + 0.5 * Math.random();
+  return Math.max(400, Math.min(maxMs, Math.round(exp * jitter)));
+}
 
 /**
  * Server-Side WebSocket Market Data Proxy
- * 
- * Mitigates local ISP geoblocking and DNS censorship (e.g. Kominfo/TrustPositif)
- * by proxying exchange streams through the server.
- * 
- * ARCHITECTURE & SECURITY:
- * 1. Per-client subscription sets (clientSubscriptions: Map<WsClient, Set<string>>).
- * 2. Topic reference counting (topicRefCount: Map<string, number>).
- * 3. Targeted frame routing: Client A requesting BTCUSDT never receives Client B's ETHUSDT.
- * 4. Safe unsubscribe: Unsubscribing a topic decrements the refcount and only sends upstream
- *    UNSUBSCRIBE when zero active browser clients are listening to that topic.
+ *
+ * Uses Binance combined `/stream` endpoints with automatic endpoint rotation,
+ * exponential backoff + jitter, upstream silence watchdog, per-client topic isolation,
+ * and reference-counted SUBSCRIBE / UNSUBSCRIBE hygiene.
  */
 export class MarketWsProxy {
   private wss: WebSocketServer;
@@ -26,8 +33,14 @@ export class MarketWsProxy {
   private futuresWs: WsClient | null = null;
   private isConnectingSpot = false;
   private isConnectingFutures = false;
+  private spotEndpointIdx = 0;
+  private futuresEndpointIdx = 0;
+  private spotReconnectAttempt = 0;
+  private futuresReconnectAttempt = 0;
   private spotReconnectTimer: NodeJS.Timeout | null = null;
   private futuresReconnectTimer: NodeJS.Timeout | null = null;
+  private lastSpotMessageAt = 0;
+  private lastFuturesMessageAt = 0;
 
   // Subscription management
   private clientSubscriptions = new Map<WsClient, Set<string>>();
@@ -39,7 +52,7 @@ export class MarketWsProxy {
   }
 
   // --------------------------------------------------------------------------
-  // Upstream Binance Spot Connection
+  // Upstream Binance Spot Connection (Combined /stream)
   // --------------------------------------------------------------------------
   private connectSpotUpstream() {
     if (this.isConnectingSpot || this.spotWs?.readyState === WsClient.OPEN) {
@@ -47,17 +60,21 @@ export class MarketWsProxy {
     }
 
     this.isConnectingSpot = true;
+    const url = SPOT_UPSTREAM_ENDPOINTS[this.spotEndpointIdx % SPOT_UPSTREAM_ENDPOINTS.length];
+
     try {
-      this.spotWs = new WsClient(BINANCE_SPOT_WS, { handshakeTimeout: 10000 });
+      const ws = new WsClient(url, { handshakeTimeout: 8000 });
+      this.spotWs = ws;
 
-      this.spotWs.on('open', () => {
+      ws.on('open', () => {
         this.isConnectingSpot = false;
-        console.log('[MarketWsProxy] Upstream Binance Spot WS connected');
+        this.spotReconnectAttempt = 0;
+        this.lastSpotMessageAt = Date.now();
+        console.log(`[MarketWsProxy] Upstream Spot WS connected (${url})`);
 
-        // Resubscribe all active spot topics
         const spotTopics = Array.from(this.topicRefCount.keys()).filter((t) => !t.includes('!futures'));
-        if (spotTopics.length > 0) {
-          this.spotWs?.send(
+        if (spotTopics.length > 0 && ws.readyState === WsClient.OPEN) {
+          ws.send(
             JSON.stringify({
               method: 'SUBSCRIBE',
               params: spotTopics,
@@ -67,29 +84,38 @@ export class MarketWsProxy {
         }
       });
 
-      this.spotWs.on('message', (data: any) => {
-        this.routeUpstreamMessage(data);
+      ws.on('message', (data: any) => {
+        this.lastSpotMessageAt = Date.now();
+        this.routeUpstreamMessage(data, false);
       });
 
-      this.spotWs.on('error', (err) => {
-        console.warn('[MarketWsProxy] Spot upstream error:', err.message);
+      ws.on('pong', () => {
+        this.lastSpotMessageAt = Date.now();
       });
 
-      this.spotWs.on('close', () => {
+      ws.on('error', (err) => {
+        console.warn(`[MarketWsProxy] Spot upstream error (${url}):`, err.message);
+      });
+
+      ws.on('close', () => {
         this.isConnectingSpot = false;
-        this.spotWs = null;
+        if (this.spotWs === ws) {
+          this.spotWs = null;
+        }
         if (this.hasActiveSpotSubscriptions()) {
+          this.spotEndpointIdx = (this.spotEndpointIdx + 1) % SPOT_UPSTREAM_ENDPOINTS.length;
           this.scheduleSpotReconnect();
         }
       });
     } catch (_err) {
       this.isConnectingSpot = false;
+      this.spotEndpointIdx = (this.spotEndpointIdx + 1) % SPOT_UPSTREAM_ENDPOINTS.length;
       this.scheduleSpotReconnect();
     }
   }
 
   // --------------------------------------------------------------------------
-  // Upstream Binance Futures Connection
+  // Upstream Binance Futures Connection (Combined /stream)
   // --------------------------------------------------------------------------
   private connectFuturesUpstream() {
     if (this.isConnectingFutures || this.futuresWs?.readyState === WsClient.OPEN) {
@@ -97,19 +123,23 @@ export class MarketWsProxy {
     }
 
     this.isConnectingFutures = true;
+    const url = FUTURES_UPSTREAM_ENDPOINTS[this.futuresEndpointIdx % FUTURES_UPSTREAM_ENDPOINTS.length];
+
     try {
-      this.futuresWs = new WsClient(BINANCE_FUTURES_WS, { handshakeTimeout: 10000 });
+      const ws = new WsClient(url, { handshakeTimeout: 8000 });
+      this.futuresWs = ws;
 
-      this.futuresWs.on('open', () => {
+      ws.on('open', () => {
         this.isConnectingFutures = false;
-        console.log('[MarketWsProxy] Upstream Binance Futures WS connected');
+        this.futuresReconnectAttempt = 0;
+        this.lastFuturesMessageAt = Date.now();
+        console.log(`[MarketWsProxy] Upstream Futures WS connected (${url})`);
 
-        // Resubscribe active futures topics
         const futTopics = Array.from(this.topicRefCount.keys())
           .filter((t) => t.includes('!futures'))
           .map((t) => t.replace('!futures', ''));
-        if (futTopics.length > 0) {
-          this.futuresWs?.send(
+        if (futTopics.length > 0 && ws.readyState === WsClient.OPEN) {
+          ws.send(
             JSON.stringify({
               method: 'SUBSCRIBE',
               params: futTopics,
@@ -119,23 +149,32 @@ export class MarketWsProxy {
         }
       });
 
-      this.futuresWs.on('message', (data: any) => {
-        this.routeUpstreamMessage(data);
+      ws.on('message', (data: any) => {
+        this.lastFuturesMessageAt = Date.now();
+        this.routeUpstreamMessage(data, true);
       });
 
-      this.futuresWs.on('error', (err) => {
-        console.warn('[MarketWsProxy] Futures upstream error:', err.message);
+      ws.on('pong', () => {
+        this.lastFuturesMessageAt = Date.now();
       });
 
-      this.futuresWs.on('close', () => {
+      ws.on('error', (err) => {
+        console.warn(`[MarketWsProxy] Futures upstream error (${url}):`, err.message);
+      });
+
+      ws.on('close', () => {
         this.isConnectingFutures = false;
-        this.futuresWs = null;
+        if (this.futuresWs === ws) {
+          this.futuresWs = null;
+        }
         if (this.hasActiveFuturesSubscriptions()) {
+          this.futuresEndpointIdx = (this.futuresEndpointIdx + 1) % FUTURES_UPSTREAM_ENDPOINTS.length;
           this.scheduleFuturesReconnect();
         }
       });
     } catch (_err) {
       this.isConnectingFutures = false;
+      this.futuresEndpointIdx = (this.futuresEndpointIdx + 1) % FUTURES_UPSTREAM_ENDPOINTS.length;
       this.scheduleFuturesReconnect();
     }
   }
@@ -156,24 +195,26 @@ export class MarketWsProxy {
 
   private scheduleSpotReconnect() {
     if (this.spotReconnectTimer) return;
+    const delay = computeBackoffWithJitter(this.spotReconnectAttempt++);
     this.spotReconnectTimer = setTimeout(() => {
       this.spotReconnectTimer = null;
       this.connectSpotUpstream();
-    }, 4000);
+    }, delay);
   }
 
   private scheduleFuturesReconnect() {
     if (this.futuresReconnectTimer) return;
+    const delay = computeBackoffWithJitter(this.futuresReconnectAttempt++);
     this.futuresReconnectTimer = setTimeout(() => {
       this.futuresReconnectTimer = null;
       this.connectFuturesUpstream();
-    }, 4000);
+    }, delay);
   }
 
   // --------------------------------------------------------------------------
   // Message Routing & Targeted Dispatch
   // --------------------------------------------------------------------------
-  private routeUpstreamMessage(data: any) {
+  private routeUpstreamMessage(data: any, isFromFutures: boolean) {
     const rawStr = typeof data === 'string' ? data : data.toString();
     let packet: any;
     try {
@@ -182,38 +223,46 @@ export class MarketWsProxy {
       return;
     }
 
-    // Identify matching topics for the incoming payload
-    // Possible formats from Binance:
-    // 1. Ticker / aggTrade / depth: { e: 'aggTrade', s: 'BTCUSDT', ... }
-    // 2. Combined stream wrapper: { stream: 'btcusdt@aggTrade', data: { ... } }
-    // 3. Mini-ticker: { e: '24hrMiniTicker', s: 'BTCUSDT', ... }
-    const streamName: string = packet.stream || '';
-    const eventType: string = packet.e || packet.data?.e || '';
-    const symbol: string = (packet.s || packet.data?.s || '').toLowerCase();
+    // Ignore command acknowledgements like {"result":null,"id":123}
+    if (packet && packet.result === null && packet.id !== undefined) {
+      return;
+    }
 
-    // Iterate through all connected clients and send ONLY to interested subscribers
+    const streamName: string = (packet.stream || '').toLowerCase();
+    const inner = packet.data || packet;
+    const eventType: string = (inner?.e || '').toLowerCase();
+    const symbol: string = (inner?.s || (streamName ? streamName.split('@')[0] : '')).toLowerCase();
+
     for (const [client, subs] of this.clientSubscriptions.entries()) {
       if (client.readyState !== WsClient.OPEN) continue;
 
       let isInterested = false;
 
-      // Match 1: Exact stream name match
-      if (streamName && (subs.has(streamName) || subs.has(`${streamName}!futures`))) {
-        isInterested = true;
+      // Match 1: Exact combined stream name match (primary path for /stream)
+      if (streamName) {
+        const expectedTopic = isFromFutures ? `${streamName}!futures` : streamName;
+        if (subs.has(expectedTopic)) {
+          isInterested = true;
+        }
       }
-      // Match 2: Symbol & event matching
-      else if (symbol) {
+
+      // Match 2: Fallback symbol + event matching with strict Spot / Futures isolation
+      if (!isInterested && symbol) {
         for (const sub of subs) {
+          const clientIsFutures = sub.includes('!futures');
+          if (clientIsFutures !== isFromFutures) continue;
+
           const cleanSub = sub.replace('!futures', '').toLowerCase();
-          if (cleanSub.startsWith(symbol)) {
+          const subSymbol = cleanSub.split('@')[0];
+          if (subSymbol === symbol) {
             if (
-              (eventType === 'aggTrade' && cleanSub.includes('@aggTrade')) ||
+              (eventType === 'aggtrade' && cleanSub.includes('@aggtrade')) ||
               (eventType === 'trade' && cleanSub.includes('@trade')) ||
-              (eventType === '24hrTicker' && cleanSub.includes('@ticker')) ||
-              (eventType === '24hrMiniTicker' && cleanSub.includes('@ticker')) ||
+              (eventType === '24hrticker' && cleanSub.includes('@ticker')) ||
+              (eventType === '24hrminiticker' && cleanSub.includes('@ticker')) ||
               (eventType === 'kline' && cleanSub.includes('@kline')) ||
-              (eventType === 'depthUpdate' && cleanSub.includes('@depth')) ||
-              cleanSub.includes(symbol)
+              (eventType === 'depthupdate' && cleanSub.includes('@depth')) ||
+              ((inner?.bids || inner?.b) && cleanSub.includes('@depth'))
             ) {
               isInterested = true;
               break;
@@ -223,19 +272,62 @@ export class MarketWsProxy {
       }
 
       if (isInterested) {
-        client.send(rawStr);
+        try {
+          client.send(rawStr);
+        } catch (_sendErr) {}
       }
     }
   }
 
   // --------------------------------------------------------------------------
-  // Browser Client Lifecycle & Per-Connection Subscriptions
+  // Browser Client Lifecycle & Heartbeat Watchdog
   // --------------------------------------------------------------------------
   private setupClientListeners() {
+    setInterval(() => {
+      const now = Date.now();
+
+      for (const client of this.wss.clients) {
+        if (client.readyState === WsClient.OPEN) {
+          try {
+            client.ping();
+          } catch (_e) {}
+        }
+      }
+
+      if (this.spotWs && this.spotWs.readyState === WsClient.OPEN) {
+        if (this.hasActiveSpotSubscriptions() && this.lastSpotMessageAt > 0 && now - this.lastSpotMessageAt > 30_000) {
+          console.warn('[MarketWsProxy] Spot upstream silent >30s, rotating endpoint');
+          try {
+            this.spotWs.terminate();
+          } catch (_e) {}
+        } else {
+          try {
+            this.spotWs.ping();
+          } catch (_e) {}
+        }
+      }
+
+      if (this.futuresWs && this.futuresWs.readyState === WsClient.OPEN) {
+        if (
+          this.hasActiveFuturesSubscriptions() &&
+          this.lastFuturesMessageAt > 0 &&
+          now - this.lastFuturesMessageAt > 30_000
+        ) {
+          console.warn('[MarketWsProxy] Futures upstream silent >30s, reconnecting');
+          try {
+            this.futuresWs.terminate();
+          } catch (_e) {}
+        } else {
+          try {
+            this.futuresWs.ping();
+          } catch (_e) {}
+        }
+      }
+    }, 15_000);
+
     this.wss.on('connection', (clientWs: WsClient) => {
       this.clientSubscriptions.set(clientWs, new Set());
 
-      // Initial connection greeting
       clientWs.send(
         JSON.stringify({
           type: 'PROXY_CONNECTED',
@@ -249,7 +341,7 @@ export class MarketWsProxy {
         try {
           const raw = typeof message === 'string' ? message : message.toString();
           if (raw === 'ping' || raw.includes('"ping"')) {
-            clientWs.send(JSON.stringify({ pong: Date.now() }));
+            clientWs.send(JSON.stringify({ type: 'pong', pong: Date.now() }));
             return;
           }
 
@@ -257,7 +349,10 @@ export class MarketWsProxy {
           const isFutures = parsed.marketType === 'FUTURES' || parsed.isFutures === true;
 
           if (parsed.method === 'SUBSCRIBE' && Array.isArray(parsed.params)) {
-            for (const rawParam of parsed.params) {
+            const newlyAddedUpstream: string[] = [];
+            for (const rawItem of parsed.params) {
+              if (typeof rawItem !== 'string' || !rawItem.trim()) continue;
+              const rawParam = rawItem.trim().toLowerCase();
               const topicKey = isFutures ? `${rawParam}!futures` : rawParam;
               const clientSubs = this.clientSubscriptions.get(clientWs);
 
@@ -266,14 +361,19 @@ export class MarketWsProxy {
                 const currentCount = this.topicRefCount.get(topicKey) || 0;
                 this.topicRefCount.set(topicKey, currentCount + 1);
 
-                // First client requesting this topic -> subscribe upstream
                 if (currentCount === 0) {
-                  this.subscribeUpstream(rawParam, isFutures);
+                  newlyAddedUpstream.push(rawParam);
                 }
               }
             }
+            if (newlyAddedUpstream.length > 0) {
+              this.subscribeUpstreamBatch(newlyAddedUpstream, isFutures);
+            }
           } else if (parsed.method === 'UNSUBSCRIBE' && Array.isArray(parsed.params)) {
-            for (const rawParam of parsed.params) {
+            const removedUpstream: string[] = [];
+            for (const rawItem of parsed.params) {
+              if (typeof rawItem !== 'string' || !rawItem.trim()) continue;
+              const rawParam = rawItem.trim().toLowerCase();
               const topicKey = isFutures ? `${rawParam}!futures` : rawParam;
               const clientSubs = this.clientSubscriptions.get(clientWs);
 
@@ -284,11 +384,14 @@ export class MarketWsProxy {
 
                 if (newCount <= 0) {
                   this.topicRefCount.delete(topicKey);
-                  this.unsubscribeUpstream(rawParam, isFutures);
+                  removedUpstream.push(rawParam);
                 } else {
                   this.topicRefCount.set(topicKey, newCount);
                 }
               }
+            }
+            if (removedUpstream.length > 0) {
+              this.unsubscribeUpstreamBatch(removedUpstream, isFutures);
             }
           }
         } catch (_err) {
@@ -299,6 +402,8 @@ export class MarketWsProxy {
       clientWs.on('close', () => {
         const clientSubs = this.clientSubscriptions.get(clientWs);
         if (clientSubs) {
+          const spotRemove: string[] = [];
+          const futRemove: string[] = [];
           for (const topicKey of clientSubs) {
             const isFutures = topicKey.includes('!futures');
             const rawParam = topicKey.replace('!futures', '');
@@ -307,28 +412,32 @@ export class MarketWsProxy {
 
             if (newCount <= 0) {
               this.topicRefCount.delete(topicKey);
-              this.unsubscribeUpstream(rawParam, isFutures);
+              if (isFutures) futRemove.push(rawParam);
+              else spotRemove.push(rawParam);
             } else {
               this.topicRefCount.set(topicKey, newCount);
             }
           }
+          if (spotRemove.length > 0) this.unsubscribeUpstreamBatch(spotRemove, false);
+          if (futRemove.length > 0) this.unsubscribeUpstreamBatch(futRemove, true);
           this.clientSubscriptions.delete(clientWs);
         }
       });
 
       clientWs.on('error', (_err) => {
-        // Disconnection handled on 'close'
+        // Handled on close
       });
     });
   }
 
-  private subscribeUpstream(streamParam: string, isFutures: boolean) {
+  private subscribeUpstreamBatch(streamParams: string[], isFutures: boolean) {
+    if (streamParams.length === 0) return;
     const ws = isFutures ? this.futuresWs : this.spotWs;
     if (ws && ws.readyState === WsClient.OPEN) {
       ws.send(
         JSON.stringify({
           method: 'SUBSCRIBE',
-          params: [streamParam],
+          params: streamParams,
           id: Date.now(),
         })
       );
@@ -338,13 +447,14 @@ export class MarketWsProxy {
     }
   }
 
-  private unsubscribeUpstream(streamParam: string, isFutures: boolean) {
+  private unsubscribeUpstreamBatch(streamParams: string[], isFutures: boolean) {
+    if (streamParams.length === 0) return;
     const ws = isFutures ? this.futuresWs : this.spotWs;
     if (ws && ws.readyState === WsClient.OPEN) {
       ws.send(
         JSON.stringify({
           method: 'UNSUBSCRIBE',
-          params: [streamParam],
+          params: streamParams,
           id: Date.now(),
         })
       );

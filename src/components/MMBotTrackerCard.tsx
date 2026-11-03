@@ -22,6 +22,15 @@ import {
 } from 'lucide-react';
 import { Language } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
+import { useMarketDataStore } from '../stores/useMarketDataStore';
+import { DataStatusBadge } from './ui/DataStatusBadge';
+
+function formatNotionalUsd(val: number): string {
+  if (!Number.isFinite(val) || val <= 0) return '$0';
+  if (val >= 1_000_000) return `$${(val / 1_000_000).toFixed(2)}M`;
+  if (val >= 1000) return `$${(val / 1000).toFixed(1)}K`;
+  return `$${val.toFixed(0)}`;
+}
 
 interface MMBotTrackerCardProps {
   candles: OHLCVCandle[];
@@ -51,18 +60,21 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
 
   const [activeTab, setActiveTab] = useState<'depth' | 'derivatives' | 'avwap'>('depth');
 
-  const livePrice = overridePrice || (candles.length > 0 ? candles[candles.length - 1].close : 0);
+  const ssotPrice = useMarketDataStore((s) => s.tickers[symbol]?.price ?? null);
+  const ssotOrderBook = useMarketDataStore((s) => (s.orderBook.symbol === symbol ? s.orderBook : null));
 
-  // Compute MM data once, or use precomputed value from parent
+  const effectiveBids = ssotOrderBook && ssotOrderBook.bids.length > 0 ? ssotOrderBook.bids : orderBookBids;
+  const effectiveAsks = ssotOrderBook && ssotOrderBook.asks.length > 0 ? ssotOrderBook.asks : orderBookAsks;
+  const livePrice =
+    ssotPrice ?? overridePrice ?? (candles.length > 0 ? candles[candles.length - 1].close : 0);
+
   const lastCandleTime = candles.length > 0 ? candles[candles.length - 1].time : 0;
   const candleCount = candles.length;
-  const bidsCount = orderBookBids?.length || 0;
-  const asksCount = orderBookAsks?.length || 0;
 
   const mmData: MMPlaybookAnalysis = useMemo(() => {
     if (precomputedMMData) return precomputedMMData;
-    return analyzeMarketMakerPlaybook(candles, livePrice, symbol, timeframe, orderBookBids, orderBookAsks);
-  }, [precomputedMMData, candleCount, lastCandleTime, livePrice, symbol, timeframe, bidsCount, asksCount]);
+    return analyzeMarketMakerPlaybook(candles, livePrice, symbol, timeframe, effectiveBids, effectiveAsks);
+  }, [precomputedMMData, candleCount, lastCandleTime, livePrice, symbol, timeframe, effectiveBids, effectiveAsks]);
 
   const { orderBookDepth, derivatives, anchoredVWAP } = mmData;
 
@@ -98,6 +110,7 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
                   ? (isId ? 'Buku Order L2 Live' : 'Live L2 Book')
                   : (isId ? 'Perkiraan (Berbasis Lilin & CVD)' : 'Estimated (Candle & CVD)')}
               </span>
+              <DataStatusBadge symbol={symbol} scope="orderbook" lang={lang} compact />
             </div>
             <p className="text-xs text-slate-400 font-mono">
               {isId
@@ -294,13 +307,13 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
                         isDark ? 'bg-slate-900/70 hover:bg-slate-800/80 border-slate-800/60' : 'bg-white hover:bg-slate-100 border-slate-200 shadow-2xs'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 tabular-nums">
                         <span className="text-emerald-400 font-bold">${formatPrice(wall.price)}</span>
-                        <span className="text-[11px] text-slate-400">(-{wall.distancePct}%)</span>
+                        <span className="text-[11px] text-slate-400">(-{wall.distancePct.toFixed(2)}%)</span>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 tabular-nums">
                         <span className={isDark ? 'text-slate-300' : 'text-slate-600'}>{wall.amount} token</span>
-                        <span className={`font-bold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>${(wall.volumeUsd / 1000).toFixed(0)}K</span>
+                        <span className={`font-bold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{formatNotionalUsd(wall.volumeUsd)}</span>
                       </div>
                     </div>
                   ))}
@@ -330,13 +343,13 @@ export const MMBotTrackerCard: React.FC<MMBotTrackerCardProps> = ({
                         isDark ? 'bg-slate-900/70 hover:bg-slate-800/80 border-slate-800/60' : 'bg-white hover:bg-slate-100 border-slate-200 shadow-2xs'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 tabular-nums">
                         <span className="text-rose-400 font-bold">${formatPrice(wall.price)}</span>
-                        <span className="text-[11px] text-slate-400">(+{wall.distancePct}%)</span>
+                        <span className="text-[11px] text-slate-400">(+{wall.distancePct.toFixed(2)}%)</span>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 tabular-nums">
                         <span className={isDark ? 'text-slate-300' : 'text-slate-600'}>{wall.amount} token</span>
-                        <span className={`font-bold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>${(wall.volumeUsd / 1000).toFixed(0)}K</span>
+                        <span className={`font-bold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{formatNotionalUsd(wall.volumeUsd)}</span>
                       </div>
                     </div>
                   ))}

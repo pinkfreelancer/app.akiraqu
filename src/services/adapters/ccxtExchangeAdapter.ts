@@ -22,9 +22,9 @@ export class CcxtExchangeAdapter implements IExchangeAdapter {
 
     return {
       symbol,
-      price: 67450,
-      change24h: 1.25,
-      volume24h: '$1.2B',
+      price: 0,
+      change24h: 0,
+      volume24h: '$0',
       timestamp: Date.now(),
     };
   }
@@ -68,16 +68,8 @@ export class CcxtExchangeAdapter implements IExchangeAdapter {
   async fetchOrderBook(symbol: string, _limit?: number): Promise<ExchangeOrderBook> {
     return {
       symbol,
-      bids: [
-        [67400, 1.5],
-        [67350, 3.2],
-        [67300, 5.0],
-      ],
-      asks: [
-        [67450, 1.2],
-        [67500, 2.8],
-        [67550, 4.4],
-      ],
+      bids: [],
+      asks: [],
       timestamp: Date.now(),
     };
   }

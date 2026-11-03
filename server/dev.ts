@@ -13,7 +13,7 @@ dotenv.config();
 
 export async function startDevServer() {
   const app = express();
-  const PORT = Number(process.env.DEFAULT_APP_PORT || 3000);
+  const PORT = 3000;
 
   app.set('trust proxy', 1);
   app.use(express.json({ limit: '1mb' }));
@@ -46,6 +46,9 @@ export async function startDevServer() {
     },
     appType: 'spa',
   });
+  // Ensure Vite dependency pre-bundling finishes before accepting browser requests
+  // so react, react-dom/client, zustand, and recharts always share one identical browserHash.
+  await vite.transformRequest('/src/main.tsx').catch(() => {});
   app.use(vite.middlewares);
 
   const server = http.createServer(app);

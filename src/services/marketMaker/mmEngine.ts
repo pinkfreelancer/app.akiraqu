@@ -81,9 +81,35 @@ export function computeOrderBookDepthAndDelta(
     ? (runningCvd > 5000 ? 'STRONG_ACCUMULATION' : 'MILD_ACCUMULATION')
     : (runningCvd < -5000 ? 'STRONG_DISTRIBUTION' : 'MILD_DISTRIBUTION');
 
-  // Check if genuine live L2 order book data is available
-  const hasRealBook = Array.isArray(realOrderBookBids) && realOrderBookBids.length > 0 &&
-                      Array.isArray(realOrderBookAsks) && realOrderBookAsks.length > 0;
+  // Filter & validate genuine live L2 order book levels against safePrice (blocks cross-symbol $0.03 contamination)
+  const sanitizedRealBids = Array.isArray(realOrderBookBids)
+    ? realOrderBookBids.filter((b) => {
+        if (!b || !Number.isFinite(b.price) || b.price <= 0 || !Number.isFinite(b.amount) || b.amount <= 0) {
+          return false;
+        }
+        if (safePrice > 0 && Math.abs(b.price - safePrice) / safePrice > 0.2) {
+          return false;
+        }
+        return true;
+      })
+    : [];
+
+  const sanitizedRealAsks = Array.isArray(realOrderBookAsks)
+    ? realOrderBookAsks.filter((a) => {
+        if (!a || !Number.isFinite(a.price) || a.price <= 0 || !Number.isFinite(a.amount) || a.amount <= 0) {
+          return false;
+        }
+        if (safePrice > 0 && Math.abs(a.price - safePrice) / safePrice > 0.2) {
+          return false;
+        }
+        return true;
+      })
+    : [];
+
+  const hasRealBook =
+    sanitizedRealBids.length > 0 &&
+    sanitizedRealAsks.length > 0 &&
+    sanitizedRealBids[0].price < sanitizedRealAsks[0].price;
 
   let totalBidVol = 0;
   let totalAskVol = 0;
@@ -99,35 +125,34 @@ export function computeOrderBookDepthAndDelta(
     isEstimated = false;
     dataSourceLabel = 'Buku Order L2 Bursa (Live WebSocket)';
 
-    // Compute volume from real bids/asks
-    totalBidVol = realOrderBookBids.reduce((acc, b) => acc + (b.amount || 0), 0);
-    totalAskVol = realOrderBookAsks.reduce((acc, a) => acc + (a.amount || 0), 0);
+    totalBidVol = sanitizedRealBids.reduce((acc, b) => acc + (b.amount || 0), 0);
+    totalAskVol = sanitizedRealAsks.reduce((acc, a) => acc + (a.amount || 0), 0);
     const combinedTotal = totalBidVol + totalAskVol || 1;
 
     bidPercent = Number(((totalBidVol / combinedTotal) * 100).toFixed(1));
     askPercent = Number((100 - bidPercent).toFixed(1));
     imbalanceRatio = Number((totalBidVol / (totalAskVol || 1)).toFixed(2));
 
-    // Map top 8 real order book bids
-    realOrderBookBids.slice(0, 8).forEach((b) => {
-      const distPct = safePrice > 0 ? Math.abs(((safePrice - b.price) / safePrice) * 100) : 0;
+    const refMid = safePrice > 0 ? safePrice : (sanitizedRealBids[0].price + sanitizedRealAsks[0].price) / 2;
+
+    sanitizedRealBids.slice(0, 8).forEach((b) => {
+      const distPct = refMid > 0 ? Math.abs(((refMid - b.price) / refMid) * 100) : 0;
       bidWalls.push({
         price: b.price,
         amount: b.amount,
-        volumeUsd: Math.round(b.price * b.amount),
+        volumeUsd: Number((b.price * b.amount).toFixed(2)),
         distancePct: Number(distPct.toFixed(2)),
         isSpoofSuspicion: false,
         type: 'BID',
       });
     });
 
-    // Map top 8 real order book asks
-    realOrderBookAsks.slice(0, 8).forEach((a) => {
-      const distPct = safePrice > 0 ? Math.abs(((a.price - safePrice) / safePrice) * 100) : 0;
+    sanitizedRealAsks.slice(0, 8).forEach((a) => {
+      const distPct = refMid > 0 ? Math.abs(((a.price - refMid) / refMid) * 100) : 0;
       askWalls.push({
         price: a.price,
         amount: a.amount,
-        volumeUsd: Math.round(a.price * a.amount),
+        volumeUsd: Number((a.price * a.amount).toFixed(2)),
         distancePct: Number(distPct.toFixed(2)),
         isSpoofSuspicion: false,
         type: 'ASK',

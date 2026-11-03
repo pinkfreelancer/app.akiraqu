@@ -33,21 +33,25 @@ function formatVolume(val: number): string {
  * CCXT Async / Parallel Multipair Ticker Fetcher
  * Fetches multiple cryptocurrency pairs concurrently via CCXT async batching or parallel requests
  */
+let lastCatalogWasLive = false;
+
 export async function fetchTickersParallelCCXT(): Promise<{
   symbols: CryptoSymbolInfo[];
   engine: string;
   isParallelAsync: boolean;
+  isLiveFeed: boolean;
   latencyMs: number;
 }> {
   const startTime = Date.now();
   const now = Date.now();
 
   // Cache catalog for 6 seconds to prevent remote rate-limit bottlenecks
-  if (now - lastCatalogFetchTime < 6000 && cachedCatalog.length > 0) {
+  if (now - lastCatalogFetchTime < 6000 && cachedCatalog.length > 0 && lastCatalogWasLive) {
     return {
       symbols: cachedCatalog,
       engine: 'CCXT Async Memory Cache',
       isParallelAsync: true,
+      isLiveFeed: true,
       latencyMs: Date.now() - startTime,
     };
   }
@@ -105,12 +109,14 @@ export async function fetchTickersParallelCCXT(): Promise<{
 
       cachedCatalog = updated;
       lastCatalogFetchTime = now;
+      lastCatalogWasLive = true;
       totalAsyncTickersFetchedCount += tickerMap.size;
 
       return {
         symbols: updated,
         engine: 'CCXT Async Multi-Feed Ticker Engine',
         isParallelAsync: true,
+        isLiveFeed: true,
         latencyMs: Date.now() - startTime,
       };
     }
@@ -138,11 +144,13 @@ export async function fetchTickersParallelCCXT(): Promise<{
 
     cachedCatalog = updated;
     lastCatalogFetchTime = now;
+    lastCatalogWasLive = true;
 
     return {
       symbols: updated,
       engine: 'CCXT Direct Exchange Feed',
       isParallelAsync: true,
+      isLiveFeed: true,
       latencyMs: Date.now() - startTime,
     };
   } catch (_ccxtErr) {
@@ -151,8 +159,9 @@ export async function fetchTickersParallelCCXT(): Promise<{
 
   return {
     symbols: cachedCatalog,
-    engine: 'CCXT Cached State',
-    isParallelAsync: true,
+    engine: lastCatalogWasLive ? 'CCXT Cached State' : 'Static Catalog Seed',
+    isParallelAsync: lastCatalogWasLive,
+    isLiveFeed: lastCatalogWasLive,
     latencyMs: Date.now() - startTime,
   };
 }
@@ -193,35 +202,37 @@ export async function fetchOHLCVOnDemandCCXT(
     '1W': '1w',
   };
 
-  // 2. Primary fallback: Native Binance Spot klines (fast, 0ms overhead)
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
+  // 2. Primary fallback: Native Binance Spot klines (data-api.binance.vision first to avoid regional blocks)
+  const spotKlineUrls = [
+    `https://data-api.binance.vision/api/v3/klines?symbol=${cleanSymbol}&interval=${tfMap[timeframe]}&limit=${limit}`,
+    `https://api.binance.com/api/v3/klines?symbol=${cleanSymbol}&interval=${tfMap[timeframe]}&limit=${limit}`,
+  ];
+  for (const spotUrl of spotKlineUrls) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const res = await fetch(spotUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
 
-    const res = await fetch(
-      `https://api.binance.com/api/v3/klines?symbol=${cleanSymbol}&interval=${tfMap[timeframe]}&limit=${limit}`,
-      { signal: controller.signal }
-    );
-    clearTimeout(timeoutId);
-
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        return data.map((item: any[]) => ({
-          time: Number(item[0]),
-          open: parseFloat(item[1]),
-          high: parseFloat(item[2]),
-          low: parseFloat(item[3]),
-          close: parseFloat(item[4]),
-          volume: parseFloat(item[5]),
-          quoteVolume: item[7] ? parseFloat(item[7]) : undefined,
-          takerBuyVolume: item[9] ? parseFloat(item[9]) : undefined,
-          isSimulated: false,
-        }));
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          return data.map((item: any[]) => ({
+            time: Number(item[0]),
+            open: parseFloat(item[1]),
+            high: parseFloat(item[2]),
+            low: parseFloat(item[3]),
+            close: parseFloat(item[4]),
+            volume: parseFloat(item[5]),
+            quoteVolume: item[7] ? parseFloat(item[7]) : undefined,
+            takerBuyVolume: item[9] ? parseFloat(item[9]) : undefined,
+            isSimulated: false,
+          }));
+        }
       }
+    } catch (_spotErr) {
+      // Try next spot endpoint
     }
-  } catch (_spotErr) {
-    // Try futures path
   }
 
   // 3. Secondary fallback: Binance Futures klines (covers KAS, AKT, POPCAT, BRETT, MEW, etc.)

@@ -8,6 +8,7 @@ import {
 import { calculateAllIndicators } from '../../src/services/indicators/indicatorEngine';
 import { calculateRiskPlan } from '../../src/services/risk/riskCalculator';
 import { evaluateConfluence } from '../../src/services/confluence/confluenceEngine';
+import { computeIndicatorConsensus } from '../../src/services/confluence/signalConsensus';
 import { AuditLogEntry, ConfluenceEvaluation, MarketBias } from '../../src/types/crypto.types';
 
 export const analysisRouter = Router();
@@ -94,41 +95,8 @@ analysisRouter.post('/analyze', async (req: Request, res: Response) => {
   try {
     const candles = await fetchOHLCVOnDemandCCXT(symbol, timeframe, 150, exchange, marketType);
     const indicators = calculateAllIndicators(candles);
-
-    const weights = [
-      { weight: 0.12, signal: indicators.priceAction.signal, confidence: indicators.priceAction.confidence },
-      { weight: 0.12, signal: indicators.smc.signal, confidence: indicators.smc.confidence },
-      { weight: 0.11, signal: indicators.orderFlow.signal, confidence: indicators.orderFlow.confidence },
-      { weight: 0.10, signal: indicators.ict.signal, confidence: indicators.ict.confidence },
-      { weight: 0.09, signal: indicators.optionFlow.signal, confidence: indicators.optionFlow.confidence },
-      { weight: 0.08, signal: indicators.rsi.signal, confidence: indicators.rsi.confidence },
-      { weight: 0.08, signal: indicators.vwap.signal, confidence: indicators.vwap.confidence },
-      { weight: 0.08, signal: indicators.fibonacci.signal, confidence: indicators.fibonacci.confidence },
-      { weight: 0.08, signal: indicators.macd.signal, confidence: indicators.macd.confidence },
-      { weight: 0.06, signal: indicators.ichimoku.signal, confidence: indicators.ichimoku.confidence },
-      { weight: 0.04, signal: indicators.tdSequential.signal, confidence: indicators.tdSequential.confidence },
-      { weight: 0.04, signal: indicators.elliottWave.signal, confidence: indicators.elliottWave.confidence },
-    ];
-
-    let weightedScoreSum = 0;
-    for (const item of weights) {
-      if (item.signal === 'BULLISH') {
-        weightedScoreSum += item.weight * (50 + (item.confidence / 100) * 50);
-      } else if (item.signal === 'BEARISH') {
-        weightedScoreSum += item.weight * (50 - (item.confidence / 100) * 50);
-      } else {
-        weightedScoreSum += item.weight * 50;
-      }
-    }
-
-    const consensusScore = Math.max(5, Math.min(96, Math.round(weightedScoreSum)));
-    let weightedBias: MarketBias = 'Neutral';
-    if (consensusScore >= 78) weightedBias = 'Strong Bullish';
-    else if (consensusScore >= 58) weightedBias = 'Bullish';
-    else if (consensusScore <= 22) weightedBias = 'Strong Bearish';
-    else if (consensusScore <= 42) weightedBias = 'Bearish';
-
     const lastClose = candles[candles.length - 1].close;
+    const { marketBias: weightedBias } = computeIndicatorConsensus(indicators, lastClose);
     const riskPlan = calculateRiskPlan({
       currentPrice: lastClose,
       bias: weightedBias,

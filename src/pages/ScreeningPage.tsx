@@ -30,6 +30,10 @@ import {
 import { formatCryptoPrice } from '../utils/formatters';
 import { Language } from '../i18n/translations';
 import { useAlerts } from '../contexts/AlertContext';
+import { useMarketDataStore } from '../stores/useMarketDataStore';
+import { useTerminal } from '../contexts/TerminalContext';
+import { formatSmartCryptoPrice } from '../services/marketDataValidator';
+import { DataStatusBadge } from '../components/ui/DataStatusBadge';
 
 interface ScreeningPageProps {
   currentSymbol?: string;
@@ -41,36 +45,36 @@ interface ScreeningPageProps {
   lang?: Language;
 }
 
-const MOCK_SCREENER_COINS: CryptoScreenerCoin[] = [
+const SCREENER_COIN_TEMPLATES: CryptoScreenerCoin[] = [
   {
     symbol: 'BTC/USDT',
     name: 'Bitcoin',
     category: 'Layer 1',
-    price: 88450.0,
-    change24h: 3.45,
-    change7d: 8.2,
+    price: 0,
+    change24h: 0,
+    change7d: 4.2,
     volume24hUsd: 38450000000,
-    marketCapUsd: 1740000000000,
-    rsi14: 62.4,
-    macdStatus: 'BULLISH',
+    marketCapUsd: 1620000000000,
+    rsi14: 54.4,
+    macdStatus: 'NEUTRAL',
     supertrend: 'BULLISH',
     fundingRate8h: 0.008,
     fundingBias: 'NEUTRAL',
-    openInterestChange24h: 5.4,
+    openInterestChange24h: 3.4,
     volatilityAtrPct: 2.8,
-    confluenceScore: 94,
-    sparkline: [82000, 83500, 84200, 86000, 85400, 87200, 88450],
-    signalGrade: 'STRONG_BUY',
+    confluenceScore: 76,
+    sparkline: [0.97, 0.98, 0.99, 1.0, 0.995, 1.005, 1.0],
+    signalGrade: 'BUY',
   },
   {
     symbol: 'ETH/USDT',
     name: 'Ethereum',
     category: 'Layer 1',
-    price: 3380.0,
-    change24h: -1.25,
-    change7d: 4.1,
+    price: 0,
+    change24h: 0,
+    change7d: 2.1,
     volume24hUsd: 18450000000,
-    marketCapUsd: 408000000000,
+    marketCapUsd: 340000000000,
     rsi14: 48.6,
     macdStatus: 'NEUTRAL',
     supertrend: 'BEARISH',
@@ -78,100 +82,100 @@ const MOCK_SCREENER_COINS: CryptoScreenerCoin[] = [
     fundingBias: 'NEUTRAL',
     openInterestChange24h: -2.1,
     volatilityAtrPct: 3.4,
-    confluenceScore: 78,
-    sparkline: [3250, 3310, 3420, 3390, 3450, 3410, 3380],
+    confluenceScore: 74,
+    sparkline: [1.01, 1.02, 1.0, 0.99, 1.005, 0.995, 1.0],
     signalGrade: 'NEUTRAL',
   },
   {
     symbol: 'SOL/USDT',
     name: 'Solana',
     category: 'Layer 1',
-    price: 185.4,
-    change24h: 6.82,
-    change7d: 18.5,
+    price: 0,
+    change24h: 0,
+    change7d: 8.5,
     volume24hUsd: 7820000000,
-    marketCapUsd: 86400000000,
-    rsi14: 68.2,
+    marketCapUsd: 82400000000,
+    rsi14: 61.2,
     macdStatus: 'BULLISH_CROSS',
     supertrend: 'BULLISH',
     fundingRate8h: -0.012,
     fundingBias: 'EXTREME_NEGATIVE',
-    openInterestChange24h: 12.8,
+    openInterestChange24h: 9.8,
     volatilityAtrPct: 5.6,
-    confluenceScore: 91,
-    sparkline: [156, 162, 168, 172, 175, 179, 185.4],
-    signalGrade: 'STRONG_BUY',
+    confluenceScore: 84,
+    sparkline: [0.94, 0.96, 0.97, 0.98, 0.99, 0.995, 1.0],
+    signalGrade: 'BUY',
   },
   {
     symbol: 'SUI/USDT',
     name: 'Sui Network',
     category: 'Layer 1',
-    price: 3.42,
-    change24h: 11.45,
-    change7d: 28.4,
+    price: 0,
+    change24h: 0,
+    change7d: 14.4,
     volume24hUsd: 1850000000,
     marketCapUsd: 9800000000,
-    rsi14: 72.8,
+    rsi14: 64.8,
     macdStatus: 'BULLISH',
     supertrend: 'BULLISH',
     fundingRate8h: 0.015,
     fundingBias: 'POSITIVE',
-    openInterestChange24h: 22.4,
+    openInterestChange24h: 12.4,
     volatilityAtrPct: 7.8,
-    confluenceScore: 89,
-    sparkline: [2.65, 2.78, 2.92, 3.1, 3.05, 3.28, 3.42],
+    confluenceScore: 83,
+    sparkline: [0.92, 0.94, 0.96, 0.98, 0.97, 0.99, 1.0],
     signalGrade: 'BUY',
   },
   {
     symbol: 'NEAR/USDT',
     name: 'NEAR Protocol',
     category: 'AI & Big Data',
-    price: 6.85,
-    change24h: 8.92,
-    change7d: 22.1,
+    price: 0,
+    change24h: 0,
+    change7d: 11.1,
     volume24hUsd: 980000000,
     marketCapUsd: 8200000000,
-    rsi14: 65.4,
+    rsi14: 62.4,
     macdStatus: 'BULLISH_CROSS',
     supertrend: 'BULLISH',
     fundingRate8h: -0.008,
     fundingBias: 'NEGATIVE',
-    openInterestChange24h: 16.5,
+    openInterestChange24h: 11.5,
     volatilityAtrPct: 6.2,
-    confluenceScore: 92,
-    sparkline: [5.6, 5.85, 6.1, 6.05, 6.4, 6.65, 6.85],
-    signalGrade: 'STRONG_BUY',
+    confluenceScore: 85,
+    sparkline: [0.93, 0.95, 0.97, 0.96, 0.98, 0.99, 1.0],
+    signalGrade: 'BUY',
   },
   {
     symbol: 'PEPE/USDT',
     name: 'Pepe',
     category: 'Meme',
-    price: 0.0000108,
-    change24h: 14.8,
-    change7d: 35.2,
+    price: 0,
+    change24h: 0,
+    change7d: 15.2,
     volume24hUsd: 1450000000,
     marketCapUsd: 4540000000,
-    rsi14: 74.2,
+    rsi14: 66.2,
     macdStatus: 'BULLISH',
     supertrend: 'BULLISH',
     fundingRate8h: 0.018,
     fundingBias: 'POSITIVE',
-    openInterestChange24h: 31.2,
+    openInterestChange24h: 18.2,
     volatilityAtrPct: 12.4,
-    confluenceScore: 83,
-    sparkline: [0.000008, 0.0000085, 0.0000092, 0.000009, 0.0000098, 0.0000102, 0.0000108],
+    confluenceScore: 80,
+    sparkline: [0.9, 0.93, 0.95, 0.94, 0.97, 0.99, 1.0],
     signalGrade: 'BUY',
   },
   {
     symbol: 'AVAX/USDT',
     name: 'Avalanche',
     category: 'Layer 1',
-    price: 36.4,
-    change24h: -2.85,
+    price: 0,
+    change24h: 0,
     change7d: 1.4,
     volume24hUsd: 650000000,
     marketCapUsd: 14800000000,
-    rsi14: 38.2,
+    rsi14: 41.2,
     macdStatus: 'BEARISH_CROSS',
     supertrend: 'BEARISH',
     fundingRate8h: -0.004,
@@ -179,16 +183,16 @@ const MOCK_SCREENER_COINS: CryptoScreenerCoin[] = [
     openInterestChange24h: -4.5,
     volatilityAtrPct: 4.8,
     confluenceScore: 71,
-    sparkline: [38.5, 37.8, 38.2, 37.1, 36.8, 37.2, 36.4],
+    sparkline: [1.04, 1.02, 1.03, 1.01, 1.0, 1.01, 1.0],
     signalGrade: 'SELL',
   },
   {
     symbol: 'LINK/USDT',
     name: 'Chainlink',
     category: 'DeFi',
-    price: 15.2,
-    change24h: 4.65,
-    change7d: 11.2,
+    price: 0,
+    change24h: 0,
+    change7d: 7.2,
     volume24hUsd: 580000000,
     marketCapUsd: 9200000000,
     rsi14: 58.4,
@@ -198,16 +202,16 @@ const MOCK_SCREENER_COINS: CryptoScreenerCoin[] = [
     fundingBias: 'NEUTRAL',
     openInterestChange24h: 8.2,
     volatilityAtrPct: 4.1,
-    confluenceScore: 86,
-    sparkline: [13.8, 14.1, 14.5, 14.2, 14.8, 14.9, 15.2],
+    confluenceScore: 82,
+    sparkline: [0.95, 0.96, 0.98, 0.97, 0.99, 0.995, 1.0],
     signalGrade: 'BUY',
   },
   {
     symbol: 'TON/USDT',
     name: 'Toncoin',
     category: 'Layer 1',
-    price: 5.65,
-    change24h: 1.15,
+    price: 0,
+    change24h: 0,
     change7d: 6.8,
     volume24hUsd: 420000000,
     marketCapUsd: 14400000000,
@@ -218,68 +222,68 @@ const MOCK_SCREENER_COINS: CryptoScreenerCoin[] = [
     fundingBias: 'NEUTRAL',
     openInterestChange24h: 2.1,
     volatilityAtrPct: 3.6,
-    confluenceScore: 81,
-    sparkline: [5.3, 5.4, 5.5, 5.45, 5.58, 5.6, 5.65],
+    confluenceScore: 79,
+    sparkline: [0.96, 0.97, 0.98, 0.975, 0.99, 0.995, 1.0],
     signalGrade: 'BUY',
   },
   {
     symbol: 'DOGE/USDT',
     name: 'Dogecoin',
     category: 'Meme',
-    price: 0.185,
-    change24h: 5.42,
-    change7d: 14.2,
+    price: 0,
+    change24h: 0,
+    change7d: 9.2,
     volume24hUsd: 2150000000,
     marketCapUsd: 27100000000,
-    rsi14: 64.1,
+    rsi14: 60.1,
     macdStatus: 'BULLISH',
     supertrend: 'BULLISH',
     fundingRate8h: 0.011,
     fundingBias: 'POSITIVE',
-    openInterestChange24h: 14.1,
+    openInterestChange24h: 11.1,
     volatilityAtrPct: 8.5,
-    confluenceScore: 82,
-    sparkline: [0.162, 0.168, 0.174, 0.171, 0.178, 0.181, 0.185],
+    confluenceScore: 81,
+    sparkline: [0.93, 0.95, 0.97, 0.96, 0.98, 0.99, 1.0],
     signalGrade: 'BUY',
   },
   {
     symbol: 'FET/USDT',
     name: 'Artificial Superintelligence',
     category: 'AI & Big Data',
-    price: 1.48,
-    change24h: 9.85,
-    change7d: 24.8,
+    price: 0,
+    change24h: 0,
+    change7d: 14.8,
     volume24hUsd: 380000000,
     marketCapUsd: 3800000000,
-    rsi14: 69.2,
+    rsi14: 63.2,
     macdStatus: 'BULLISH_CROSS',
     supertrend: 'BULLISH',
-    fundingRate8h: -0.010,
+    fundingRate8h: -0.01,
     fundingBias: 'NEGATIVE',
-    openInterestChange24h: 19.8,
+    openInterestChange24h: 14.8,
     volatilityAtrPct: 9.2,
-    confluenceScore: 90,
-    sparkline: [1.18, 1.24, 1.31, 1.28, 1.38, 1.42, 1.48],
-    signalGrade: 'STRONG_BUY',
+    confluenceScore: 86,
+    sparkline: [0.91, 0.93, 0.96, 0.95, 0.98, 0.99, 1.0],
+    signalGrade: 'BUY',
   },
   {
     symbol: 'BNB/USDT',
     name: 'BNB',
     category: 'Layer 1',
-    price: 658.0,
-    change24h: 2.15,
+    price: 0,
+    change24h: 0,
     change7d: 5.4,
     volume24hUsd: 1420000000,
     marketCapUsd: 96000000000,
-    rsi14: 59.8,
+    rsi14: 57.8,
     macdStatus: 'BULLISH',
     supertrend: 'BULLISH',
     fundingRate8h: 0.007,
     fundingBias: 'NEUTRAL',
     openInterestChange24h: 4.8,
     volatilityAtrPct: 2.9,
-    confluenceScore: 85,
-    sparkline: [625, 634, 642, 638, 648, 652, 658],
+    confluenceScore: 82,
+    sparkline: [0.96, 0.97, 0.98, 0.975, 0.99, 0.995, 1.0],
     signalGrade: 'BUY',
   },
 ];
@@ -344,6 +348,71 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
   const [addedAlertCoin, setAddedAlertCoin] = useState<string | null>(null);
 
   const { addAlert, openAlertCenter, unreadCountByCategory, triggerSimulatedUpdate } = useAlerts();
+  const ssotTickers = useMarketDataStore((s) => s.tickers);
+  const { evaluation, selectedSymbol } = useTerminal();
+
+  const liveScreenerCoins = useMemo(() => {
+    const parseVol = (v?: string | number | null): number => {
+      if (typeof v === 'number' && Number.isFinite(v)) return v;
+      if (typeof v === 'string') {
+        const clean = v.replace(/[^0-9.BMK]/gi, '').toUpperCase();
+        const num = parseFloat(clean);
+        if (!Number.isFinite(num)) return 0;
+        if (clean.endsWith('B')) return num * 1e9;
+        if (clean.endsWith('M')) return num * 1e6;
+        if (clean.endsWith('K')) return num * 1e3;
+        return num;
+      }
+      return 0;
+    };
+    return SCREENER_COIN_TEMPLATES.map((tpl) => {
+      const ssot = ssotTickers[tpl.symbol];
+      const livePrice = ssot?.price ?? 0;
+      const liveChange = ssot?.change24h ?? 0;
+      const parsedVol = parseVol(ssot?.volume24h);
+      const liveVol = parsedVol > 0 ? parsedVol : tpl.volume24hUsd;
+
+      let confluenceScore = tpl.confluenceScore;
+      let supertrend = tpl.supertrend;
+      let signalGrade = tpl.signalGrade;
+
+      if (tpl.symbol === selectedSymbol && evaluation && evaluation.symbol === selectedSymbol) {
+        confluenceScore = evaluation.confluenceScore;
+        const isBear = evaluation.marketBias.toLowerCase().includes('bear');
+        const isBull = evaluation.marketBias.toLowerCase().includes('bull');
+        supertrend = isBear ? 'BEARISH' : isBull ? 'BULLISH' : tpl.supertrend;
+        signalGrade = isBear
+          ? confluenceScore <= 30
+            ? 'STRONG_SELL'
+            : 'SELL'
+          : isBull
+          ? confluenceScore >= 75
+            ? 'STRONG_BUY'
+            : 'BUY'
+          : 'NEUTRAL';
+      } else if (ssot) {
+        supertrend = liveChange >= 0 ? 'BULLISH' : 'BEARISH';
+      }
+
+      const scaledSparkline =
+        livePrice > 0
+          ? tpl.sparkline.map((ratio, idx) =>
+              idx === tpl.sparkline.length - 1 ? livePrice : livePrice * ratio
+            )
+          : tpl.sparkline;
+
+      return {
+        ...tpl,
+        price: livePrice,
+        change24h: Number(liveChange.toFixed(2)),
+        volume24hUsd: liveVol,
+        confluenceScore,
+        supertrend,
+        signalGrade,
+        sparkline: scaledSparkline,
+      };
+    });
+  }, [ssotTickers, selectedSymbol, evaluation]);
 
   const handleCreateCoinAlert = (coin: CryptoScreenerCoin) => {
     addAlert({
@@ -398,7 +467,7 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
 
   // Filtered & Sorted Coins
   const filteredCoins = useMemo(() => {
-    return MOCK_SCREENER_COINS.filter((coin) => {
+    return liveScreenerCoins.filter((coin) => {
       if (search) {
         const q = search.toLowerCase();
         if (!coin.symbol.toLowerCase().includes(q) && !coin.name.toLowerCase().includes(q)) {
@@ -427,6 +496,7 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
       return 0;
     });
   }, [
+    liveScreenerCoins,
     search,
     selectedCategory,
     selectedMarketCapTier,
@@ -495,7 +565,8 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
         </div>
 
         {/* Export & Summary */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <DataStatusBadge scope="screener" lang={lang} compact />
           <div className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono text-slate-300">
             <span className="text-slate-400">Hasil: </span>
             <strong className="text-pink-400">{filteredCoins.length}</strong> Koin
@@ -757,8 +828,12 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
                       </td>
 
                       {/* Price */}
-                      <td className="py-3 text-white font-bold text-sm">
-                        ${formatCryptoPrice(coin.price)}
+                      <td className="py-3 text-white font-bold text-sm tabular-nums">
+                        {coin.price > 0
+                          ? `$${formatSmartCryptoPrice(coin.price)}`
+                          : isId
+                          ? 'Sinkron...'
+                          : 'Syncing...'}
                       </td>
 
                       {/* 24h Change */}

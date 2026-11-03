@@ -22,8 +22,10 @@ import {
   ArrowUpRight,
   ArrowDownRight,
 } from 'lucide-react';
-import { formatCryptoPrice, getCryptoPrecision } from '../utils/formatters';
+import { formatCryptoPrice } from '../utils/formatters';
 import { CryptoIcon } from '../components/ui/CryptoIcon';
+import { useMarketDataStore } from '../stores/useMarketDataStore';
+import { DataStatusBadge } from '../components/ui/DataStatusBadge';
 
 interface TickerPageProps {
   candles: OHLCVCandle[];
@@ -39,7 +41,7 @@ interface TickerPageProps {
   onSelectExchange?: (exchange: SupportedExchange) => void;
   onSelectMarketType?: (marketType: MarketType) => void;
   latencyMs?: number;
-  wsStatus?: 'connected' | 'connecting' | 'fallback';
+  wsStatus?: 'connected' | 'connecting' | 'fallback' | 'disconnected';
   syncMetrics?: WebSocketSyncMetrics;
   recentLiveTrades?: LiveTradeTick[];
   orderBookBids?: LiveOrderBookLevel[];
@@ -78,25 +80,42 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
   bidTotal = 0,
   askTotal = 0,
 }) => {
-  const currentPrice = livePrice || (candles.length > 0 ? candles[candles.length - 1].close : 100);
+  const ssotPrice = useMarketDataStore((s) => s.tickers[symbol]?.price ?? null);
+  const ssotOrderBook = useMarketDataStore((s) => (s.orderBook.symbol === symbol ? s.orderBook : null));
+  const ssotTrades = useMarketDataStore((s) => (s.activeSymbol === symbol ? s.recentTrades : []));
+
+  const currentPrice =
+    ssotPrice ?? livePrice ?? (candles.length > 0 ? candles[candles.length - 1].close : 0);
   const isDark = theme === 'dark';
 
-  // Real-time orderbook & live trades (Strictly genuine exchange data, 0% Math.random synthesis)
-  const displayBids = orderBookBids;
-  const displayAsks = orderBookAsks;
-  const displayTrades = recentLiveTrades;
+  const displayBids = ssotOrderBook ? ssotOrderBook.bids : orderBookBids;
+  const displayAsks = ssotOrderBook ? ssotOrderBook.asks : orderBookAsks;
+  const displayTrades = ssotTrades.length > 0 ? ssotTrades : recentLiveTrades;
 
-  const calculatedBidTotal = bidTotal > 0 ? bidTotal : displayBids.reduce((a, b) => a + b.amount, 0);
-  const calculatedAskTotal = askTotal > 0 ? askTotal : displayAsks.reduce((a, b) => a + b.amount, 0);
+  const calculatedBidTotal =
+    ssotOrderBook && ssotOrderBook.bidTotal > 0
+      ? ssotOrderBook.bidTotal
+      : bidTotal > 0
+        ? bidTotal
+        : displayBids.reduce((a, b) => a + b.amount, 0);
+  const calculatedAskTotal =
+    ssotOrderBook && ssotOrderBook.askTotal > 0
+      ? ssotOrderBook.askTotal
+      : askTotal > 0
+        ? askTotal
+        : displayAsks.reduce((a, b) => a + b.amount, 0);
+
+  const bestBid = displayBids.length > 0 ? displayBids[0].price : 0;
+  const bestAsk = displayAsks.length > 0 ? displayAsks[0].price : 0;
+  const realSpread = bestBid > 0 && bestAsk > bestBid ? bestAsk - bestBid : 0;
+  const realSpreadPct = bestBid > 0 && realSpread > 0 ? (realSpread / bestBid) * 100 : 0;
 
   const candleCount = candles.length;
   const lastCandleTime = candleCount > 0 ? candles[candleCount - 1].time : 0;
-  const bidsCount = orderBookBids?.length || 0;
-  const asksCount = orderBookAsks?.length || 0;
 
   const sharedMMData = useMemo(() => {
-    return analyzeMarketMakerPlaybook(candles, currentPrice, symbol, timeframe, orderBookBids, orderBookAsks);
-  }, [candleCount, lastCandleTime, currentPrice, symbol, timeframe, bidsCount, asksCount]);
+    return analyzeMarketMakerPlaybook(candles, currentPrice, symbol, timeframe, displayBids, displayAsks);
+  }, [candles, candleCount, lastCandleTime, currentPrice, symbol, timeframe, displayBids, displayAsks]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -133,13 +152,10 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
                 {symbol} {lang === 'id' ? 'Live Order Book' : 'Live Order Book'}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-semibold text-cyan-400">{selectedExchange} {selectedMarketType}</span>
-            </div>
+            <DataStatusBadge symbol={symbol} scope="orderbook" lang={lang} compact />
           </div>
 
-          {/* Live Spread Ticker with RAF Buffered Updates */}
+          {/* Live Spread Ticker with Validated SSOT Price & Real L2 Spread */}
           <div className={`p-2.5 rounded-[2px] border mb-4 flex items-center justify-between ${
             isDark ? 'bg-[#0b0f19] border-slate-800' : 'bg-slate-50 border-slate-200'
           }`}>
@@ -148,13 +164,13 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
               <span className={`text-base font-extrabold tabular-nums transition-colors duration-200 ${
                 priceDirection === 'up' ? 'text-emerald-400' : priceDirection === 'down' ? 'text-rose-400' : (isDark ? 'text-slate-100' : 'text-slate-900')
               }`}>
-                ${formatCoinPrice(currentPrice)}
+                {currentPrice > 0 ? `$${formatCoinPrice(currentPrice)}` : '—'}
               </span>
             </div>
             <div className="text-right font-mono text-[10px]">
-              <span className={`block uppercase font-bold tracking-wider ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Spread (100ms)</span>
+              <span className={`block uppercase font-bold tracking-wider ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Spread (L2 Live)</span>
               <span className={`tabular-nums font-bold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
-                ${formatCoinPrice(currentPrice * 0.0003)} (0.03%)
+                {realSpread > 0 ? `$${formatCoinPrice(realSpread)} (${realSpreadPct.toFixed(3)}%)` : '—'}
               </span>
             </div>
           </div>

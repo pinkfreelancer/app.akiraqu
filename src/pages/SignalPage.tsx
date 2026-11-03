@@ -21,6 +21,7 @@ import {
   computeInstitutionalPerformance,
 } from '../components/signals/signalData';
 import { Bell, RefreshCw, Send } from 'lucide-react';
+import { useMarketDataStore } from '../stores/useMarketDataStore';
 
 interface SignalPageProps {
   currentSymbol?: string;
@@ -46,11 +47,40 @@ export const SignalPage: React.FC<SignalPageProps> = ({
   // Primary Tab Navigation (Produk: Sinyal, Kinerja, Analisis Langsung, Belajar; Section: Metodologi, Wawasan)
   const [activeTab, setActiveTab] = useState<SignalNavTab>('SINYAL');
 
-  // Signals State
-  const [signals, setSignals] = useState<CryptoTradingSignal[]>(INITIAL_INSTITUTIONAL_SIGNALS);
-  const [selectedSignalForLiveAnalysis, setSelectedSignalForLiveAnalysis] = useState<CryptoTradingSignal | null>(
-    INITIAL_INSTITUTIONAL_SIGNALS[0]
+  const ssotTickers = useMarketDataStore((s) => s.tickers);
+
+  // Signals State overlaid with live SSOT prices for active signals
+  const [rawSignals, setSignals] = useState<CryptoTradingSignal[]>(INITIAL_INSTITUTIONAL_SIGNALS);
+  const signals = useMemo(() => {
+    return rawSignals.map((sig) => {
+      if (sig.outcomeResult === 'WIN' || sig.outcomeResult === 'LOSS') {
+        return sig;
+      }
+      const liveP = ssotTickers[sig.symbol]?.price;
+      if (!liveP || liveP <= 0) return sig;
+      const isLong = sig.direction === 'LONG';
+      const pnlPct =
+        sig.entryPrice > 0
+          ? Number((((isLong ? liveP - sig.entryPrice : sig.entryPrice - liveP) / sig.entryPrice) * 100).toFixed(2))
+          : sig.pnlPctCurrent;
+      return {
+        ...sig,
+        currentPrice: liveP,
+        pnlPctCurrent: pnlPct,
+      };
+    });
+  }, [rawSignals, ssotTickers]);
+
+  const [selectedSignalId, setSelectedSignalId] = useState<string | null>(
+    INITIAL_INSTITUTIONAL_SIGNALS[0]?.id ?? null
   );
+  const selectedSignalForLiveAnalysis = useMemo(
+    () => signals.find((s) => s.id === selectedSignalId) || signals[0] || null,
+    [signals, selectedSignalId]
+  );
+  const setSelectedSignalForLiveAnalysis = (sig: CryptoTradingSignal | null) => {
+    setSelectedSignalId(sig?.id ?? null);
+  };
   const [selectedSignalForAudit, setSelectedSignalForAudit] = useState<CryptoTradingSignal | null>(null);
 
   // Operational pipeline scan simulation
@@ -133,17 +163,22 @@ export const SignalPage: React.FC<SignalPageProps> = ({
           setScanStatusMessage(null);
           playAlertSound();
 
-          // Generate dynamic ALPHA model signal
-          const randomId = `SIG-AVAX-${Math.floor(1000 + Math.random() * 9000)}`;
-          const entryPrice = 32.45;
+          // Generate dynamic ALPHA model signal using live SSOT price
+          const scanSymbol = currentSymbol || 'BTC/USDT';
+          const liveScanPrice = useMarketDataStore.getState().tickers[scanSymbol]?.price || 0;
+          if (liveScanPrice <= 0) return;
+
+          const baseCoin = scanSymbol.split('/')[0];
+          const randomId = `SIG-${baseCoin}-${Math.floor(1000 + Math.random() * 9000)}`;
+          const entryPrice = liveScanPrice;
           const step = entryPrice * 0.015;
 
           const newSignal: CryptoTradingSignal = {
             id: randomId,
-            symbol: 'AVAX/USDT',
-            name: 'Avalanche',
+            symbol: scanSymbol,
+            name: baseCoin,
             category: 'Layer 1',
-            exchange: 'BINANCE',
+            exchange: selectedExchange,
             direction: 'LONG',
             grade: 'STRONG_BUY',
             timeframe: '1H',
@@ -155,7 +190,7 @@ export const SignalPage: React.FC<SignalPageProps> = ({
             confluenceScore: 95,
             winRateProbability: 86.4,
             entryPrice: entryPrice,
-            currentPrice: 32.7,
+            currentPrice: liveScanPrice,
             targetPrice1: entryPrice + step * 1.0,
             targetPrice2: entryPrice + step * 1.8,
             targetPrice3: entryPrice + step * 2.8,
@@ -165,7 +200,7 @@ export const SignalPage: React.FC<SignalPageProps> = ({
             status: 'ACTIVE',
             lifecycleStatus: 'PENDING',
             outcomeResult: 'IN_PROGRESS',
-            pnlPctCurrent: 0.77,
+            pnlPctCurrent: 0,
             createdAt: isId ? 'Baru saja' : 'Just now',
             expiresAt: isId ? 'dalam 5 jam' : 'in 5 hours',
             highestRReached: 0,
@@ -189,8 +224,8 @@ export const SignalPage: React.FC<SignalPageProps> = ({
             indicatorsSummary: [
               'Alpha Model Liquidity Sweep Confirmed',
               'MSS Bullish Candle 1H Reversal',
-              'CVD Spot Whale Inflow +$18.5M',
-              'Orderbook Bid Imbalance 74%',
+              'CVD Spot Whale Inflow Confirmed',
+              'Orderbook Bid Imbalance Verified',
             ],
             notes:
               'Sinyal model ALPHA dengan konfirmasi STRONG pada timeframe 1-JAM. Target r1-r8 diproyeksikan dengan aktivasi Trailing Stop otomatis di level r1.',
@@ -205,18 +240,18 @@ export const SignalPage: React.FC<SignalPageProps> = ({
             riskStatus: 'PASSED',
             officialTimestamp: new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC',
             verificationHash: `0x${Math.random().toString(16).substring(2, 10)}${Math.random().toString(16).substring(2, 10)}`,
-            highestPnlReached: 0.77,
+            highestPnlReached: 0,
             auditTrail: [
               {
                 timestamp: 'Baru saja',
-                event: 'Sinyal Alpha dipublikasikan dengan 8 target Take-Profit dan batas stop s1',
+                event: 'Sinyal Alpha dipublikasikan dari harga live SSOT dengan 8 target Take-Profit',
                 price: entryPrice,
                 pnlPct: 0.0,
               },
             ],
           };
 
-          setSignals((prev) => [newSignal, ...prev.filter((s) => s.symbol !== 'AVAX/USDT')]);
+          setSignals((prev) => [newSignal, ...prev.filter((s) => s.symbol !== scanSymbol)]);
 
           addAlert({
             category: 'SIGNAL',

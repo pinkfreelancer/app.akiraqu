@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { formatCryptoPrice } from '../../utils/formatters';
 import { Language } from '../../i18n/translations';
+import { useMarketDataStore } from '../../stores/useMarketDataStore';
+import { DataStatusBadge } from '../ui/DataStatusBadge';
 
 interface PortfolioViewProps {
   onSelectSymbol?: (symbol: string) => void;
@@ -39,13 +41,13 @@ const INITIAL_HOLDINGS: PortfolioAsset[] = [
     available: 0.70,
     inOrders: 0.15,
     avgBuyPrice: 62450.0,
-    currentPrice: 76391.6,
-    valueUsd: 64932.86,
-    pnl24h: 1540.2,
-    pnl24hPct: 2.45,
-    unrealizedPnl: 11850.36,
-    unrealizedPnlPct: 22.32,
-    allocationPct: 52.4,
+    currentPrice: 0,
+    valueUsd: 0,
+    pnl24h: 0,
+    pnl24hPct: 0,
+    unrealizedPnl: 0,
+    unrealizedPnlPct: 0,
+    allocationPct: 0,
   },
   {
     asset: 'ETH',
@@ -54,13 +56,13 @@ const INITIAL_HOLDINGS: PortfolioAsset[] = [
     available: 6.0,
     inOrders: 2.5,
     avgBuyPrice: 2890.0,
-    currentPrice: 3380.0,
-    valueUsd: 28730.0,
-    pnl24h: -420.5,
-    pnl24hPct: -1.45,
-    unrealizedPnl: 4165.0,
-    unrealizedPnlPct: 16.95,
-    allocationPct: 23.2,
+    currentPrice: 0,
+    valueUsd: 0,
+    pnl24h: 0,
+    pnl24hPct: 0,
+    unrealizedPnl: 0,
+    unrealizedPnlPct: 0,
+    allocationPct: 0,
   },
   {
     asset: 'SOL',
@@ -69,13 +71,13 @@ const INITIAL_HOLDINGS: PortfolioAsset[] = [
     available: 70.0,
     inOrders: 15.0,
     avgBuyPrice: 142.0,
-    currentPrice: 185.4,
-    valueUsd: 15759.0,
-    pnl24h: 890.1,
-    pnl24hPct: 5.98,
-    unrealizedPnl: 3689.0,
-    unrealizedPnlPct: 30.56,
-    allocationPct: 12.7,
+    currentPrice: 0,
+    valueUsd: 0,
+    pnl24h: 0,
+    pnl24hPct: 0,
+    unrealizedPnl: 0,
+    unrealizedPnlPct: 0,
+    allocationPct: 0,
   },
   {
     asset: 'USDT',
@@ -90,7 +92,7 @@ const INITIAL_HOLDINGS: PortfolioAsset[] = [
     pnl24hPct: 0,
     unrealizedPnl: 0,
     unrealizedPnlPct: 0,
-    allocationPct: 10.1,
+    allocationPct: 100,
   },
   {
     asset: 'PEPE',
@@ -99,13 +101,13 @@ const INITIAL_HOLDINGS: PortfolioAsset[] = [
     available: 185000000,
     inOrders: 0,
     avgBuyPrice: 0.0000085,
-    currentPrice: 0.0000108,
-    valueUsd: 1998.0,
-    pnl24h: 180.2,
-    pnl24hPct: 9.85,
-    unrealizedPnl: 425.5,
-    unrealizedPnlPct: 27.06,
-    allocationPct: 1.6,
+    currentPrice: 0,
+    valueUsd: 0,
+    pnl24h: 0,
+    pnl24hPct: 0,
+    unrealizedPnl: 0,
+    unrealizedPnlPct: 0,
+    allocationPct: 0,
   },
 ];
 
@@ -147,6 +149,7 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
 }) => {
   const isDark = theme === 'dark';
   const isId = lang === 'id';
+  const ssotTickers = useMarketDataStore((s) => s.tickers);
 
   // Account Mode: DEMO (Paper Trading) vs REAL (API Connected)
   const [accountMode, setAccountMode] = useState<'DEMO' | 'REAL'>(() => {
@@ -222,62 +225,89 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
     setTimeout(() => setToastMsg(null), 3000);
   };
 
-  // Synchronize holdings with active balance
+  // Synchronize holdings with active balance & live SSOT prices
   const holdings = useMemo(() => {
-    if (accountMode === 'DEMO') {
-      return [
-        {
-          asset: 'USDT',
-          name: 'Tether USD (Demo Cash)',
-          total: demoUsdt,
-          available: demoUsdt,
-          inOrders: 0,
-          avgBuyPrice: 1.0,
-          currentPrice: 1.0,
-          valueUsd: demoUsdt,
-          pnl24h: 0,
-          pnl24hPct: 0,
-          unrealizedPnl: 0,
-          unrealizedPnlPct: 0,
-          allocationPct: 60.5,
-        },
-        {
-          asset: 'BTC',
-          name: 'Bitcoin (Paper)',
-          total: 0.5,
-          available: 0.5,
-          inOrders: 0,
-          avgBuyPrice: 65200.0,
-          currentPrice: 76391.6,
-          valueUsd: 38195.8,
-          pnl24h: 934.5,
-          pnl24hPct: 2.45,
-          unrealizedPnl: 5595.8,
-          unrealizedPnlPct: 17.16,
-          allocationPct: 27.2,
-        },
-        {
-          asset: 'ETH',
-          name: 'Ethereum (Paper)',
-          total: 5.0,
-          available: 5.0,
-          inOrders: 0,
-          avgBuyPrice: 3100.0,
-          currentPrice: 3380.0,
-          valueUsd: 16900.0,
-          pnl24h: -247.3,
-          pnl24hPct: -1.45,
-          unrealizedPnl: 1400.0,
-          unrealizedPnlPct: 9.03,
-          allocationPct: 12.0,
-        },
-      ];
-    }
+    const baseList: PortfolioAsset[] =
+      accountMode === 'DEMO'
+        ? [
+            {
+              asset: 'USDT',
+              name: 'Tether USD (Demo Cash)',
+              total: demoUsdt,
+              available: demoUsdt,
+              inOrders: 0,
+              avgBuyPrice: 1.0,
+              currentPrice: 1.0,
+              valueUsd: demoUsdt,
+              pnl24h: 0,
+              pnl24hPct: 0,
+              unrealizedPnl: 0,
+              unrealizedPnlPct: 0,
+              allocationPct: 0,
+            },
+            {
+              asset: 'BTC',
+              name: 'Bitcoin (Paper)',
+              total: 0.5,
+              available: 0.5,
+              inOrders: 0,
+              avgBuyPrice: 65200.0,
+              currentPrice: 0,
+              valueUsd: 0,
+              pnl24h: 0,
+              pnl24hPct: 0,
+              unrealizedPnl: 0,
+              unrealizedPnlPct: 0,
+              allocationPct: 0,
+            },
+            {
+              asset: 'ETH',
+              name: 'Ethereum (Paper)',
+              total: 5.0,
+              available: 5.0,
+              inOrders: 0,
+              avgBuyPrice: 3100.0,
+              currentPrice: 0,
+              valueUsd: 0,
+              pnl24h: 0,
+              pnl24hPct: 0,
+              unrealizedPnl: 0,
+              unrealizedPnlPct: 0,
+              allocationPct: 0,
+            },
+          ]
+        : INITIAL_HOLDINGS.map((h) =>
+            h.asset === 'USDT' ? { ...h, total: realUsdt, available: realUsdt, valueUsd: realUsdt } : h
+          );
 
-    return INITIAL_HOLDINGS.map((h) =>
-      h.asset === 'USDT' ? { ...h, total: realUsdt, available: realUsdt, valueUsd: realUsdt } : h
-    );
-  }, [accountMode, demoUsdt, realUsdt]);
+    const valued = baseList.map((h) => {
+      if (h.asset === 'USDT') return h;
+      const pair = `${h.asset}/USDT`;
+      const ssot = ssotTickers[pair];
+      const liveP = ssot?.price ?? 0;
+      const changePct = ssot?.change24h ?? 0;
+      const valueUsd = liveP > 0 ? h.total * liveP : 0;
+      const costBasis = h.total * h.avgBuyPrice;
+      const unrealizedPnl = liveP > 0 ? valueUsd - costBasis : 0;
+      const unrealizedPnlPct = liveP > 0 && costBasis > 0 ? (unrealizedPnl / costBasis) * 100 : 0;
+      const pnl24h = liveP > 0 ? valueUsd * (changePct / 100) : 0;
+      return {
+        ...h,
+        currentPrice: liveP,
+        valueUsd,
+        pnl24h,
+        pnl24hPct: Number(changePct.toFixed(2)),
+        unrealizedPnl,
+        unrealizedPnlPct: Number(unrealizedPnlPct.toFixed(2)),
+      };
+    });
+
+    const totalVal = Math.max(1, valued.reduce((sum, item) => sum + item.valueUsd, 0));
+    return valued.map((item) => ({
+      ...item,
+      allocationPct: Number(((item.valueUsd / totalVal) * 100).toFixed(1)),
+    }));
+  }, [accountMode, demoUsdt, realUsdt, ssotTickers]);
 
   const [exchanges] = useState<ExchangeBalance[]>(INITIAL_EXCHANGES);
 
@@ -310,11 +340,12 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
             <Wallet className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-sm font-bold font-mono text-white flex items-center gap-2">
+            <div className="text-sm font-bold font-mono text-white flex flex-wrap items-center gap-2">
               <span>{isId ? 'Manajemen Portofolio Terintegrasi' : 'Unified Portfolio Management'}</span>
               <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
                 {accountMode}
               </span>
+              <DataStatusBadge scope="ticker" lang={lang} compact />
             </div>
             <div className="text-xs font-mono text-slate-400">
               {accountMode === 'DEMO'

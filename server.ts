@@ -10,10 +10,11 @@ import path from 'path';
  * 2. AI Studio Development: Executed via `tsx server.ts` (`npm run dev`).
  *    Loads `server/dev.ts` with Vite middlewares on port 3000.
  */
-const isDev = process.env.npm_lifecycle_event === 'dev' || process.env.VITE_DEV === 'true';
+const isProduction = process.env.NODE_ENV === 'production';
 const distServer = path.join(process.cwd(), 'dist', 'server.cjs');
 
-if (!isDev && fs.existsSync(distServer)) {
+if (isProduction && fs.existsSync(distServer)) {
+  // @ts-ignore - production bundle generated after npm run build
   await import('./dist/server.cjs');
 } else {
   const { startDevServer } = await import('./server/dev.ts');

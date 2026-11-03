@@ -73,19 +73,34 @@ healthRouter.get('/health/history', (_req: Request, res: Response) => {
 // 3. Centralized Client-Side Error Ingestion (Cloud Logging JSON stdout format)
 healthRouter.post('/log-client-error', (req: Request, res: Response) => {
   try {
-    const { message, stack, componentStack, url, userAgent, symbol, timeframe, userId } = req.body || {};
+    const { message, stack, filename, componentStack, url, userAgent, symbol, timeframe, userId } = req.body || {};
 
     const msgLower = String(message || '').toLowerCase();
     const stackLower = String(stack || '').toLowerCase();
+    const fileLower = String(filename || '').toLowerCase();
 
-    // Ignore benign environment noise like Vite HMR WebSocket disconnects and sandbox frame inspections
+    // Ignore benign environment noise like Vite HMR WebSocket disconnects, sandbox frame inspections,
+    // and injected third-party wallet browser extensions (e.g., Binance Wallet inpage.js miniProgram)
     if (
+      fileLower.includes('chrome-extension://') ||
+      fileLower.includes('moz-extension://') ||
+      fileLower.includes('safari-web-extension://') ||
+      fileLower.includes('safari-extension://') ||
+      stackLower.includes('chrome-extension://') ||
+      stackLower.includes('moz-extension://') ||
+      stackLower.includes('safari-web-extension://') ||
+      stackLower.includes('safari-extension://') ||
+      stackLower.includes('_postmessagetomp') ||
+      msgLower.includes('_postmessagetomp') ||
+      msgLower.includes("reading 'miniprogram'") ||
+      msgLower.includes('cannot redefine property: ethereum') ||
+      msgLower.includes('cannot redefine property: binancechain') ||
       msgLower.includes('websocket closed without opened') ||
       msgLower.includes('@vite/client') ||
       stackLower.includes('@vite/client') ||
-      msgLower.includes('failed to construct \'websocket\'') ||
+      msgLower.includes("failed to construct 'websocket'") ||
       msgLower.includes('blocked a frame with origin') ||
-      msgLower.includes('failed to read a named property \'$$typeof\'') ||
+      msgLower.includes("failed to read a named property '$$typeof'") ||
       msgLower.includes('should not already be working') ||
       stackLower.includes('addobjecttoproperties')
     ) {

@@ -27,6 +27,7 @@ import { useMarketData } from '../hooks/useMarketData';
 import { fetchFastCandles } from '../services/marketData';
 import { useTerminalNavigation, TerminalViewMode } from '../hooks/useTerminalNavigation';
 import { useTerminalKeyboardShortcuts } from '../hooks/useTerminalKeyboardShortcuts';
+import { useMarketDataStore } from '../stores/useMarketDataStore';
 
 export interface TerminalContextValue {
   // Navigation & View Domain
@@ -83,7 +84,7 @@ export interface TerminalContextValue {
   livePrice: number | null;
   activeDisplayPrice: number | null | undefined;
   priceDirection: 'up' | 'down' | 'neutral';
-  wsStatus: 'connected' | 'connecting' | 'fallback';
+  wsStatus: 'connected' | 'connecting' | 'fallback' | 'disconnected';
   latencyMs: number;
   syncMetrics: WebSocketSyncMetrics;
   recentLiveTrades: LiveTradeTick[];
@@ -310,11 +311,7 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     generatePlaceholderCandles,
   } = useAnalysisEngine(lang);
 
-  const currentCoin = useMemo(() => {
-    return symbols.find((s) => s.symbol === selectedSymbol);
-  }, [symbols, selectedSymbol]);
-
-  // Unified Real-Time Market Data hook
+  // Unified Real-Time Market Data hook (strictly live SSOT, zero static catalog fallback)
   const {
     livePrice,
     activeDisplayPrice,
@@ -332,7 +329,6 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   } = useMarketData({
     symbol: selectedSymbol,
     timeframe: selectedTimeframe,
-    fallbackBasePrice: currentCoin?.basePrice,
     exchange: selectedExchange,
     marketType: selectedMarketType,
   });
@@ -367,6 +363,7 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [runAnalysis, selectedSymbol, selectedTimeframe, lang, selectedExchange, selectedMarketType, setCandles]);
 
   const handleSymbolChange = useCallback((sym: string) => {
+    const reqEpoch = useMarketDataStore.getState().switchSymbol(sym);
     setSelectedSymbol(sym);
     const cacheKey = `${sym}-${selectedTimeframe}-${lang}-${selectedExchange}-${selectedMarketType}`;
     const cached = checkCache(cacheKey);
@@ -376,22 +373,26 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setCandles(cached.candles);
       }
     } else {
-      const targetCoin = symbols.find((s) => s.symbol === sym);
-      const basePrice = targetCoin ? targetCoin.basePrice : 1.0;
-      setCandles(generatePlaceholderCandles(basePrice, sym, selectedTimeframe));
+      setCandles([]);
       setEvaluation(null);
 
-      // Fast chart-first load!
+      // Fast chart-first load + trigger fresh confluence analysis so chart & signals stay synchronized
       fetchFastCandles(sym, selectedTimeframe, selectedExchange, selectedMarketType).then((newCandles) => {
+        if (useMarketDataStore.getState().symbolEpoch !== reqEpoch) return;
         if (newCandles && newCandles.length > 0) {
           setCandles(newCandles);
         }
       });
+      runAnalysis(sym, selectedTimeframe, lang, selectedExchange, selectedMarketType, (newCandles) => {
+        if (useMarketDataStore.getState().symbolEpoch !== reqEpoch) return;
+        setCandles(newCandles);
+      });
     }
-  }, [selectedTimeframe, lang, selectedExchange, selectedMarketType, checkCache, symbols, generatePlaceholderCandles, setCandles, setEvaluation]);
+  }, [selectedTimeframe, lang, selectedExchange, selectedMarketType, checkCache, setCandles, setEvaluation, runAnalysis]);
 
   const handleTimeframeChange = useCallback((tf: Timeframe) => {
     setSelectedTimeframe(tf);
+    const reqEpoch = useMarketDataStore.getState().symbolEpoch;
     const cacheKey = `${selectedSymbol}-${tf}-${lang}-${selectedExchange}-${selectedMarketType}`;
     const cached = checkCache(cacheKey);
     if (cached) {
@@ -400,24 +401,26 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setCandles(cached.candles);
       }
     } else {
-      // Buka dulu chartnya! Load fast candles for the chart immediately without triggering heavy 12-indicator analysis
-      const targetCoin = symbols.find((s) => s.symbol === selectedSymbol);
-      const basePrice = activeDisplayPrice || (targetCoin ? targetCoin.basePrice : 1.0);
-      setCandles(generatePlaceholderCandles(basePrice, selectedSymbol, tf));
+      setCandles([]);
       setEvaluation(null);
 
-      // Fetch real historical candles for the chart in background immediately
       fetchFastCandles(selectedSymbol, tf, selectedExchange, selectedMarketType).then((newCandles) => {
+        if (useMarketDataStore.getState().symbolEpoch !== reqEpoch) return;
         if (newCandles && newCandles.length > 0) {
           setCandles(newCandles);
         }
       });
+      runAnalysis(selectedSymbol, tf, lang, selectedExchange, selectedMarketType, (newCandles) => {
+        if (useMarketDataStore.getState().symbolEpoch !== reqEpoch) return;
+        setCandles(newCandles);
+      });
     }
-  }, [selectedSymbol, lang, selectedExchange, selectedMarketType, checkCache, symbols, activeDisplayPrice, generatePlaceholderCandles, setCandles, setEvaluation]);
+  }, [selectedSymbol, lang, selectedExchange, selectedMarketType, checkCache, setCandles, setEvaluation, runAnalysis]);
 
   const handleExchangeChange = useCallback((ex: SupportedExchange) => {
     setSelectedExchange(ex);
     localStorage.setItem('nexus_exchange', ex);
+    const reqEpoch = useMarketDataStore.getState().switchSymbol(selectedSymbol);
     const cacheKey = `${selectedSymbol}-${selectedTimeframe}-${lang}-${ex}-${selectedMarketType}`;
     const cached = checkCache(cacheKey);
     if (cached) {
@@ -426,21 +429,25 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setCandles(cached.candles);
       }
     } else {
-      const targetCoin = symbols.find((s) => s.symbol === selectedSymbol);
-      const basePrice = activeDisplayPrice || (targetCoin ? targetCoin.basePrice : 1.0);
-      setCandles(generatePlaceholderCandles(basePrice, selectedSymbol, selectedTimeframe));
+      setCandles([]);
       setEvaluation(null);
       fetchFastCandles(selectedSymbol, selectedTimeframe, ex, selectedMarketType).then((newCandles) => {
+        if (useMarketDataStore.getState().symbolEpoch !== reqEpoch) return;
         if (newCandles && newCandles.length > 0) {
           setCandles(newCandles);
         }
       });
+      runAnalysis(selectedSymbol, selectedTimeframe, lang, ex, selectedMarketType, (newCandles) => {
+        if (useMarketDataStore.getState().symbolEpoch !== reqEpoch) return;
+        setCandles(newCandles);
+      });
     }
-  }, [selectedSymbol, selectedTimeframe, lang, selectedMarketType, checkCache, symbols, activeDisplayPrice, generatePlaceholderCandles, setCandles, setEvaluation]);
+  }, [selectedSymbol, selectedTimeframe, lang, selectedMarketType, checkCache, setCandles, setEvaluation, runAnalysis]);
 
   const handleMarketTypeChange = useCallback((mt: MarketType) => {
     setSelectedMarketType(mt);
     localStorage.setItem('nexus_market_type', mt);
+    const reqEpoch = useMarketDataStore.getState().switchSymbol(selectedSymbol);
     const cacheKey = `${selectedSymbol}-${selectedTimeframe}-${lang}-${selectedExchange}-${mt}`;
     const cached = checkCache(cacheKey);
     if (cached) {
@@ -449,17 +456,20 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setCandles(cached.candles);
       }
     } else {
-      const targetCoin = symbols.find((s) => s.symbol === selectedSymbol);
-      const basePrice = activeDisplayPrice || (targetCoin ? targetCoin.basePrice : 1.0);
-      setCandles(generatePlaceholderCandles(basePrice, selectedSymbol, selectedTimeframe));
+      setCandles([]);
       setEvaluation(null);
       fetchFastCandles(selectedSymbol, selectedTimeframe, selectedExchange, mt).then((newCandles) => {
+        if (useMarketDataStore.getState().symbolEpoch !== reqEpoch) return;
         if (newCandles && newCandles.length > 0) {
           setCandles(newCandles);
         }
       });
+      runAnalysis(selectedSymbol, selectedTimeframe, lang, selectedExchange, mt, (newCandles) => {
+        if (useMarketDataStore.getState().symbolEpoch !== reqEpoch) return;
+        setCandles(newCandles);
+      });
     }
-  }, [selectedSymbol, selectedTimeframe, lang, selectedExchange, checkCache, symbols, activeDisplayPrice, generatePlaceholderCandles, setCandles, setEvaluation]);
+  }, [selectedSymbol, selectedTimeframe, lang, selectedExchange, checkCache, setCandles, setEvaluation, runAnalysis]);
 
   const toggleLang = useCallback((newLang: Language) => {
     setLang(newLang);

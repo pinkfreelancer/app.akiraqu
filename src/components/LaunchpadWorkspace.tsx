@@ -66,7 +66,7 @@ interface LaunchpadWorkspaceProps {
   evaluation: ConfluenceEvaluation | null;
   livePrice?: number;
   priceDirection?: 'up' | 'down' | 'neutral';
-  wsStatus?: 'connected' | 'connecting' | 'fallback';
+  wsStatus?: 'connected' | 'connecting' | 'fallback' | 'disconnected';
   latencyMs?: number;
   syncMetrics?: WebSocketSyncMetrics;
   recentLiveTrades?: LiveTradeTick[];

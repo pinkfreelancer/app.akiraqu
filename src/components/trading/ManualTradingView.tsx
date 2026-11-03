@@ -31,6 +31,9 @@ import {
 } from 'lucide-react';
 import { formatCryptoPrice } from '../../utils/formatters';
 import { Language } from '../../i18n/translations';
+import { useMarketDataStore } from '../../stores/useMarketDataStore';
+import { formatSmartCryptoPrice } from '../../services/marketDataValidator';
+import { DataStatusBadge } from '../ui/DataStatusBadge';
 
 interface ManualTradingViewProps {
   currentSymbol: string;
@@ -42,81 +45,12 @@ interface ManualTradingViewProps {
   lang?: Language;
 }
 
-const INITIAL_POSITIONS: OpenPosition[] = [
-  {
-    id: 'pos-1',
-    symbol: 'BTC/USDT',
-    side: 'LONG',
-    size: 0.15,
-    sizeUsd: 11450,
-    entryPrice: 75800,
-    markPrice: 76391.6,
-    liquidationPrice: 69200,
-    margin: 1145,
-    leverage: 10,
-    marginMode: 'ISOLATED',
-    unrealizedPnl: 88.74,
-    unrealizedPnlPct: 7.75,
-    takeProfit: 82000,
-    stopLoss: 73500,
-    exchange: 'BINANCE',
-    marketType: 'FUTURES',
-    timestamp: Date.now() - 3600000 * 4,
-  },
-  {
-    id: 'pos-2',
-    symbol: 'ETH/USDT',
-    side: 'SHORT',
-    size: 2.5,
-    sizeUsd: 8450,
-    entryPrice: 3420,
-    markPrice: 3380,
-    liquidationPrice: 3750,
-    margin: 845,
-    leverage: 10,
-    marginMode: 'CROSS',
-    unrealizedPnl: 100.0,
-    unrealizedPnlPct: 11.83,
-    takeProfit: 3200,
-    stopLoss: 3550,
-    exchange: 'OKX',
-    marketType: 'FUTURES',
-    timestamp: Date.now() - 3600000 * 12,
-  },
-];
-
-const INITIAL_ACTIVE_ORDERS: ActiveOrder[] = [
-  {
-    id: 'ord-101',
-    symbol: 'BTC/USDT',
-    side: 'BUY',
-    type: 'LIMIT',
-    price: 74500,
-    amount: 0.2,
-    totalUsd: 14900,
-    filled: 0,
-    status: 'NEW',
-    timestamp: Date.now() - 1800000,
-    exchange: 'BINANCE',
-  },
-  {
-    id: 'ord-102',
-    symbol: 'SOL/USDT',
-    side: 'BUY',
-    type: 'LIMIT',
-    price: 182.5,
-    amount: 15,
-    totalUsd: 2737.5,
-    filled: 0,
-    status: 'NEW',
-    timestamp: Date.now() - 7200000,
-    exchange: 'BYBIT',
-  },
-];
+const INITIAL_POSITIONS: OpenPosition[] = [];
+const INITIAL_ACTIVE_ORDERS: ActiveOrder[] = [];
 
 export const ManualTradingView: React.FC<ManualTradingViewProps> = ({
   currentSymbol,
-  currentPrice,
+  currentPrice: propCurrentPrice,
   currentScore = 78,
   selectedExchange,
   selectedMarketType,
@@ -125,6 +59,12 @@ export const ManualTradingView: React.FC<ManualTradingViewProps> = ({
 }) => {
   const isDark = theme === 'dark';
   const isId = lang === 'id';
+
+  const tickers = useMarketDataStore((s) => s.tickers);
+  const ssotOrderBook = useMarketDataStore((s) => s.orderBook);
+  const ssotTicker = tickers[currentSymbol];
+  const currentPrice = ssotTicker?.price ?? (propCurrentPrice > 0 ? propCurrentPrice : 0);
+  const currentChange24h = ssotTicker?.change24h;
 
   // Account Mode: DEMO (Paper Trading) vs REAL (API Connected)
   const [accountMode, setAccountMode] = useState<'DEMO' | 'REAL'>(() => {
@@ -205,12 +145,12 @@ export const ManualTradingView: React.FC<ManualTradingViewProps> = ({
   const [orderType, setOrderType] = useState<ManualOrderType>('LIMIT');
   const [marginMode, setMarginMode] = useState<PositionMarginMode>('ISOLATED');
   const [leverage, setLeverage] = useState<number>(10);
-  const [priceInput, setPriceInput] = useState<number>(currentPrice || 76391.6);
+  const [priceInput, setPriceInput] = useState<number>(currentPrice || 0);
   const [amountUsd, setAmountUsd] = useState<number>(1000);
   const [percentSlider, setPercentSlider] = useState<number>(25);
   const [enableTpSl, setEnableTpSl] = useState<boolean>(true);
-  const [tpPrice, setTpPrice] = useState<number>(currentPrice * 1.05);
-  const [slPrice, setSlPrice] = useState<number>(currentPrice * 0.97);
+  const [tpPrice, setTpPrice] = useState<number>(currentPrice > 0 ? currentPrice * 1.05 : 0);
+  const [slPrice, setSlPrice] = useState<number>(currentPrice > 0 ? currentPrice * 0.97 : 0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Tab State for lower panel
@@ -237,14 +177,32 @@ export const ManualTradingView: React.FC<ManualTradingViewProps> = ({
 
   const effectiveLeverage = isSpot ? 1 : leverage;
 
-  // Sync Price when symbol changes
+  // Sync Price when symbol changes or initial live price arrives
   useEffect(() => {
-    if (currentPrice > 0) {
+    setPriceInput(currentPrice > 0 ? currentPrice : 0);
+    setTpPrice(
+      currentPrice > 0
+        ? side === 'LONG' || side === 'BUY'
+          ? currentPrice * 1.05
+          : currentPrice * 0.95
+        : 0
+    );
+    setSlPrice(
+      currentPrice > 0
+        ? side === 'LONG' || side === 'BUY'
+          ? currentPrice * 0.97
+          : currentPrice * 1.03
+        : 0
+    );
+  }, [currentSymbol, side]);
+
+  useEffect(() => {
+    if (priceInput <= 0 && currentPrice > 0) {
       setPriceInput(currentPrice);
       setTpPrice(side === 'LONG' || side === 'BUY' ? currentPrice * 1.05 : currentPrice * 0.95);
       setSlPrice(side === 'LONG' || side === 'BUY' ? currentPrice * 0.97 : currentPrice * 1.03);
     }
-  }, [currentPrice, currentSymbol, side]);
+  }, [currentPrice, priceInput, side]);
 
   const savePositions = (newPos: OpenPosition[]) => {
     setPositions(newPos);
@@ -376,23 +334,53 @@ export const ManualTradingView: React.FC<ManualTradingViewProps> = ({
     setTimeout(() => setToastMessage(null), 2500);
   };
 
-  // Mock Order Book Bids & Asks
+  // Live L2 Order Book Bids & Asks from SSOT
   const orderBookData = useMemo(() => {
-    const mid = currentPrice || 76391.6;
-    const asks = [
-      { price: mid * 1.0025, size: 1.45, total: 4.85 },
-      { price: mid * 1.002, size: 0.82, total: 3.4 },
-      { price: mid * 1.0015, size: 2.15, total: 2.58 },
-      { price: mid * 1.001, size: 0.43, total: 0.43 },
-    ];
-    const bids = [
-      { price: mid * 0.999, size: 0.95, total: 0.95 },
-      { price: mid * 0.9985, size: 1.84, total: 2.79 },
-      { price: mid * 0.998, size: 0.65, total: 3.44 },
-      { price: mid * 0.9975, size: 2.3, total: 5.74 },
-    ];
-    return { asks, bids };
-  }, [currentPrice]);
+    if (ssotOrderBook.symbol !== currentSymbol) {
+      return { asks: [], bids: [], maxTotal: 1, spreadAbs: 0, spreadPct: 0 };
+    }
+    let askCum = 0;
+    const asks = ssotOrderBook.asks.slice(0, 6).map((lvl) => {
+      askCum += lvl.amount;
+      return {
+        price: lvl.price,
+        size: Number(lvl.amount.toFixed(4)),
+        total: Number(askCum.toFixed(4)),
+      };
+    });
+    let bidCum = 0;
+    const bids = ssotOrderBook.bids.slice(0, 6).map((lvl) => {
+      bidCum += lvl.amount;
+      return {
+        price: lvl.price,
+        size: Number(lvl.amount.toFixed(4)),
+        total: Number(bidCum.toFixed(4)),
+      };
+    });
+    const maxTotal = Math.max(askCum, bidCum, 0.0001);
+    const bestAsk = asks[0]?.price ?? 0;
+    const bestBid = bids[0]?.price ?? 0;
+    const spreadAbs = bestAsk > 0 && bestBid > 0 ? Math.max(0, bestAsk - bestBid) : 0;
+    const spreadPct = bestBid > 0 ? (spreadAbs / bestBid) * 100 : 0;
+    return { asks, bids, maxTotal, spreadAbs, spreadPct };
+  }, [ssotOrderBook, currentSymbol]);
+
+  const livePositions = useMemo(() => {
+    return positions.map((pos) => {
+      const liveMark = tickers[pos.symbol]?.price ?? pos.markPrice;
+      if (!(liveMark > 0) || !(pos.entryPrice > 0)) return pos;
+      const isLongSide = pos.side === 'LONG' || (pos.side as any) === 'BUY';
+      const priceDiff = isLongSide ? liveMark - pos.entryPrice : pos.entryPrice - liveMark;
+      const unrealizedPnl = priceDiff * pos.size;
+      const unrealizedPnlPct = pos.margin > 0 ? (unrealizedPnl / pos.margin) * 100 : 0;
+      return {
+        ...pos,
+        markPrice: liveMark,
+        unrealizedPnl,
+        unrealizedPnlPct,
+      };
+    });
+  }, [positions, tickers]);
 
   return (
     <div className="space-y-4">
@@ -421,13 +409,23 @@ export const ManualTradingView: React.FC<ManualTradingViewProps> = ({
             <span>{currentSymbol}</span>
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className={`text-lg sm:text-xl font-bold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                ${formatCryptoPrice(currentPrice)}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`text-lg sm:text-xl font-bold font-mono tabular-nums ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                {currentPrice > 0 ? `$${formatSmartCryptoPrice(currentPrice)}` : isId ? 'Sinkron...' : 'Syncing...'}
               </span>
-              <span className="text-[11px] px-2 py-0.5 rounded-full font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                +2.45%
-              </span>
+              {currentPrice > 0 && typeof currentChange24h === 'number' && (
+                <span
+                  className={`text-[11px] px-2 py-0.5 rounded-[2px] font-mono tabular-nums font-bold border ${
+                    currentChange24h >= 0
+                      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                      : 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+                  }`}
+                >
+                  {currentChange24h >= 0 ? '+' : ''}
+                  {currentChange24h.toFixed(2)}%
+                </span>
+              )}
+              <DataStatusBadge symbol={currentSymbol} scope="orderbook" lang={lang} compact />
             </div>
             <div className="text-[11px] font-mono text-slate-400 flex items-center gap-2">
               <span>Exchange: <strong className="text-slate-200">{selectedExchange}</strong></span>
@@ -644,8 +642,8 @@ export const ManualTradingView: React.FC<ManualTradingViewProps> = ({
                     step="any"
                     value={priceInput}
                     onChange={(e) => setPriceInput(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl font-mono text-sm text-white focus:outline-none focus:border-cyan-400"
-                    placeholder="76391.6"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl font-mono tabular-nums text-sm text-white focus:outline-none focus:border-cyan-400"
+                    placeholder={isId ? 'Harga limit...' : 'Limit price...'}
                     required
                   />
                   <span className="absolute right-3 top-2.5 text-xs font-mono text-slate-400">USDT</span>
@@ -800,50 +798,68 @@ export const ManualTradingView: React.FC<ManualTradingViewProps> = ({
             </div>
 
             {/* Asks (Sell Orders) */}
-            <div className="space-y-1 pt-2 font-mono text-xs">
-              {[...orderBookData.asks].reverse().map((ask, idx) => (
-                <div
-                  key={`manual-ask-${ask.price}-${idx}`}
-                  onClick={() => setPriceInput(Number(ask.price.toFixed(2)))}
-                  className="flex items-center justify-between px-2 py-1 rounded hover:bg-rose-500/10 cursor-pointer relative overflow-hidden"
-                >
-                  <span className="text-rose-400 font-bold z-10">${formatCryptoPrice(ask.price)}</span>
-                  <span className="text-slate-300 z-10">{ask.size}</span>
-                  <span className="text-slate-500 text-[10px] z-10">{ask.total}</span>
-                  <div
-                    className="absolute right-0 top-0 bottom-0 bg-rose-500/10 rounded"
-                    style={{ width: `${(ask.total / 6) * 100}%` }}
-                  />
+            <div className="space-y-1 pt-2 font-mono tabular-nums text-xs">
+              {orderBookData.asks.length === 0 ? (
+                <div className="py-3 text-center text-slate-500">
+                  {isId ? `Sinkronisasi Ask ${currentSymbol}...` : `Syncing ${currentSymbol} Asks...`}
                 </div>
-              ))}
+              ) : (
+                [...orderBookData.asks].reverse().map((ask, idx) => (
+                  <div
+                    key={`manual-ask-${ask.price}-${idx}`}
+                    onClick={() => setPriceInput(ask.price)}
+                    className="flex items-center justify-between px-2 py-1 rounded hover:bg-rose-500/10 cursor-pointer relative overflow-hidden"
+                  >
+                    <span className="text-rose-400 font-bold z-10">${formatSmartCryptoPrice(ask.price)}</span>
+                    <span className="text-slate-300 z-10">{ask.size}</span>
+                    <span className="text-slate-500 text-[10px] z-10">{ask.total}</span>
+                    <div
+                      className="absolute right-0 top-0 bottom-0 bg-rose-500/10 rounded"
+                      style={{ width: `${Math.min(100, (ask.total / orderBookData.maxTotal) * 100)}%` }}
+                    />
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Middle Current Mark Price */}
-            <div className="my-2 py-1.5 px-3 rounded-lg bg-[#090d16] border border-cyan-500/30 flex items-center justify-between font-mono text-xs">
+            <div className="my-2 py-1.5 px-3 rounded-lg bg-[#090d16] border border-cyan-500/30 flex items-center justify-between font-mono tabular-nums text-xs">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-white font-bold text-sm">${formatCryptoPrice(currentPrice)}</span>
+                <span className="text-white font-bold text-sm">
+                  {currentPrice > 0 ? `$${formatSmartCryptoPrice(currentPrice)}` : '--'}
+                </span>
               </div>
-              <span className="text-slate-400 text-[10px]">Spread: $1.20 (0.001%)</span>
+              <span className="text-slate-400 text-[10px]">
+                {orderBookData.spreadAbs > 0
+                  ? `Spread: $${formatSmartCryptoPrice(orderBookData.spreadAbs)} (${orderBookData.spreadPct.toFixed(3)}%)`
+                  : 'Spread: --'}
+              </span>
             </div>
 
             {/* Bids (Buy Orders) */}
-            <div className="space-y-1 font-mono text-xs">
-              {orderBookData.bids.map((bid, idx) => (
-                <div
-                  key={`manual-bid-${bid.price}-${idx}`}
-                  onClick={() => setPriceInput(Number(bid.price.toFixed(2)))}
-                  className="flex items-center justify-between px-2 py-1 rounded hover:bg-emerald-500/10 cursor-pointer relative overflow-hidden"
-                >
-                  <span className="text-emerald-400 font-bold z-10">${formatCryptoPrice(bid.price)}</span>
-                  <span className="text-slate-300 z-10">{bid.size}</span>
-                  <span className="text-slate-500 text-[10px] z-10">{bid.total}</span>
-                  <div
-                    className="absolute right-0 top-0 bottom-0 bg-emerald-500/10 rounded"
-                    style={{ width: `${(bid.total / 6) * 100}%` }}
-                  />
+            <div className="space-y-1 font-mono tabular-nums text-xs">
+              {orderBookData.bids.length === 0 ? (
+                <div className="py-3 text-center text-slate-500">
+                  {isId ? `Sinkronisasi Bid ${currentSymbol}...` : `Syncing ${currentSymbol} Bids...`}
                 </div>
-              ))}
+              ) : (
+                orderBookData.bids.map((bid, idx) => (
+                  <div
+                    key={`manual-bid-${bid.price}-${idx}`}
+                    onClick={() => setPriceInput(bid.price)}
+                    className="flex items-center justify-between px-2 py-1 rounded hover:bg-emerald-500/10 cursor-pointer relative overflow-hidden"
+                  >
+                    <span className="text-emerald-400 font-bold z-10">${formatSmartCryptoPrice(bid.price)}</span>
+                    <span className="text-slate-300 z-10">{bid.size}</span>
+                    <span className="text-slate-500 text-[10px] z-10">{bid.total}</span>
+                    <div
+                      className="absolute right-0 top-0 bottom-0 bg-emerald-500/10 rounded"
+                      style={{ width: `${Math.min(100, (bid.total / orderBookData.maxTotal) * 100)}%` }}
+                    />
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -930,7 +946,7 @@ export const ManualTradingView: React.FC<ManualTradingViewProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/50">
-                  {positions.map((pos) => {
+                  {livePositions.map((pos) => {
                     const isProfitable = pos.unrealizedPnl >= 0;
                     return (
                       <tr key={pos.id} className="hover:bg-slate-800/30">

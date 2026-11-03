@@ -13,6 +13,8 @@ import {
 import { Timeframe, SupportedExchange, MarketType, WebSocketSyncMetrics } from '../types/crypto.types';
 import { Language } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
+import { useMarketDataStore } from '../stores/useMarketDataStore';
+import { DataStatusBadge } from './ui/DataStatusBadge';
 
 interface TerminalStatusBarProps {
   selectedSymbol: string;
@@ -21,7 +23,7 @@ interface TerminalStatusBarProps {
   selectedMarketType: MarketType;
   livePrice?: number;
   priceDirection?: 'up' | 'down' | 'neutral';
-  wsStatus?: 'connected' | 'connecting' | 'fallback';
+  wsStatus?: 'connected' | 'connecting' | 'fallback' | 'disconnected';
   latencyMs?: number;
   syncMetrics?: WebSocketSyncMetrics;
   workspaceMode: 'classic' | 'split' | 'launchpad';
@@ -54,6 +56,8 @@ export const TerminalStatusBar: React.FC<TerminalStatusBarProps> = ({
   isFullWidth = true,
 }) => {
   const isDark = theme === 'dark';
+  const ssotPrice = useMarketDataStore((s) => s.tickers[selectedSymbol]?.price ?? null);
+  const effectivePrice = ssotPrice ?? livePrice ?? 0;
   const [currentTime, setCurrentTime] = useState<string>('');
   const [utcTime, setUtcTime] = useState<string>('');
 
@@ -107,7 +111,7 @@ export const TerminalStatusBar: React.FC<TerminalStatusBarProps> = ({
             {selectedSymbol} • {selectedTimeframe}
           </span>
 
-          {livePrice && livePrice > 0 && (
+          {effectivePrice > 0 && (
             <span
               className={`hidden md:inline font-mono font-bold tabular-nums ${
                 priceDirection === 'up'
@@ -119,7 +123,7 @@ export const TerminalStatusBar: React.FC<TerminalStatusBarProps> = ({
                   : 'text-slate-700'
               }`}
             >
-              ${formatCryptoPrice(livePrice)}
+              ${formatCryptoPrice(effectivePrice)}
             </span>
           )}
         </div>
@@ -202,12 +206,7 @@ export const TerminalStatusBar: React.FC<TerminalStatusBarProps> = ({
             </button>
           )}
 
-          <div className="flex items-center gap-1.5 text-[11px] font-mono font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className={isDark ? 'text-emerald-400' : 'text-emerald-700'}>
-              {lang === 'id' ? 'L1/L2 Terverifikasi' : 'L1/L2 Verified'}
-            </span>
-          </div>
+          <DataStatusBadge symbol={selectedSymbol} scope="ticker" lang={lang} compact />
         </div>
       </div>
     </div>

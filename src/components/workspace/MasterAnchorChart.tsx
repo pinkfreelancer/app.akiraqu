@@ -10,6 +10,8 @@ import {
 import { Language } from '../../i18n/translations';
 import { InteractiveChart } from '../InteractiveChart';
 import { formatCryptoPrice } from '../../utils/formatters';
+import { useMarketDataStore } from '../../stores/useMarketDataStore';
+import { DataStatusBadge } from '../ui/DataStatusBadge';
 import {
   Maximize2,
   Minimize2,
@@ -34,7 +36,7 @@ interface MasterAnchorChartProps {
   evaluation: ConfluenceEvaluation | null;
   livePrice?: number;
   priceDirection?: 'up' | 'down' | 'neutral';
-  wsStatus?: 'connected' | 'connecting' | 'fallback';
+  wsStatus?: 'connected' | 'connecting' | 'fallback' | 'disconnected';
   latencyMs?: number;
   syncMetrics?: WebSocketSyncMetrics;
   selectedExchange?: SupportedExchange;
@@ -76,9 +78,15 @@ export const MasterAnchorChart: React.FC<MasterAnchorChartProps> = ({
 
   const TIMEFRAMES: Timeframe[] = ['1m', '5m', '15m', '1H', '4H', '1D'];
 
-  const displayPrice = livePrice || candles[candles.length - 1]?.close || 0;
+  const ssotTicker = useMarketDataStore((s) => s.tickers[symbol]);
+  const displayPrice = ssotTicker?.price ?? livePrice ?? candles[candles.length - 1]?.close ?? 0;
   const prevPrice = candles[0]?.open || displayPrice;
-  const priceChangePct = prevPrice > 0 ? ((displayPrice - prevPrice) / prevPrice) * 100 : 0;
+  const priceChangePct =
+    ssotTicker !== undefined
+      ? ssotTicker.change24h
+      : prevPrice > 0
+        ? ((displayPrice - prevPrice) / prevPrice) * 100
+        : 0;
   const isPositive = priceChangePct >= 0;
 
   return (
@@ -96,15 +104,12 @@ export const MasterAnchorChart: React.FC<MasterAnchorChartProps> = ({
       >
         {/* Left: Ticker Symbol & Live Price */}
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-pink-500/10 border border-pink-500/30 text-pink-400 font-mono text-xs font-bold">
-            <Radio className="w-3.5 h-3.5 text-pink-400 animate-pulse" />
-            <span>{isId ? 'JANGKAR GRAFIK' : 'ANCHOR CHART'}</span>
-          </div>
+          <DataStatusBadge symbol={symbol} scope="ticker" lang={lang} />
 
           <div className="flex items-baseline gap-2">
             <span className="font-mono font-bold text-sm sm:text-base text-slate-100">{symbol}</span>
             <span
-              className={`font-mono text-sm sm:text-base font-bold ${
+              className={`font-mono tabular-nums text-sm sm:text-base font-bold ${
                 priceDirection === 'up'
                   ? 'text-emerald-400'
                   : priceDirection === 'down'
@@ -112,10 +117,10 @@ export const MasterAnchorChart: React.FC<MasterAnchorChartProps> = ({
                   : 'text-slate-200'
               }`}
             >
-              ${formatCryptoPrice(displayPrice)}
+              {displayPrice > 0 ? `$${formatCryptoPrice(displayPrice)}` : '—'}
             </span>
             <span
-              className={`text-[11px] font-mono font-semibold flex items-center gap-0.5 ${
+              className={`text-[11px] font-mono tabular-nums font-semibold flex items-center gap-0.5 ${
                 isPositive ? 'text-emerald-400' : 'text-rose-400'
               }`}
             >

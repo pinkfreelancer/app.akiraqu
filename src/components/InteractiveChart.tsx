@@ -19,6 +19,7 @@ import { computeLiquidationHeatmap } from '../services/liquidation/liquidationEn
 import { computeAnchoredVWAPs } from '../services/marketMaker/mmEngine';
 import { formatCryptoPrice } from '../utils/formatters';
 import { ExchangeMarketSelector } from './ExchangeMarketSelector';
+import { DataStatusBadge } from './ui/DataStatusBadge';
 
 function formatChartPrice(val: number): string {
   return formatCryptoPrice(val);
@@ -125,7 +126,7 @@ interface InteractiveChartProps {
   onSelectExchange?: (exchange: SupportedExchange) => void;
   onSelectMarketType?: (marketType: MarketType) => void;
   latencyMs?: number;
-  wsStatus?: 'connected' | 'connecting' | 'fallback';
+  wsStatus?: 'connected' | 'connecting' | 'fallback' | 'disconnected';
   theme?: 'light' | 'dark';
 }
 
@@ -500,49 +501,15 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
     return { macdPts, signalPts, histBars, midY };
   }, [subPane, macdSeries, startIdx, endIdx, candleStep, subPaneTop, subPaneHeight]);
 
-  // Status Badge Helper
+  // Truthful per-data status badge (LIVE / DELAYED / STALE / OFFLINE + relative age)
   const renderStatusBadge = () => {
-    if (wsStatus === 'connecting') {
-      return (
-        <span
-          className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 shrink-0"
-          title={lang === 'id' ? 'Menghubungkan ke aliran WebSocket...' : 'Connecting to WebSocket...'}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-          CONNECTING
-        </span>
-      );
-    }
-    if (wsStatus === 'fallback') {
-      return (
-        <span
-          className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 shrink-0"
-          title={lang === 'id' ? 'Fallback REST polling aktif.' : 'REST fallback active.'}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-          FALLBACK
-        </span>
-      );
-    }
-    if (isDataSimulated) {
-      return (
-        <span
-          className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 shrink-0"
-          title={lang === 'id' ? 'Umpan data offline estimasi matematis.' : 'Offline simulated feed.'}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-          SIMULATION
-        </span>
-      );
-    }
     return (
-      <span
-        className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5 shrink-0"
-        title={`${selectedExchange} ${selectedMarketType} Tier-1 Feed (${latencyMs}ms)`}
-      >
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-        LIVE {selectedExchange} ({latencyMs}ms)
-      </span>
+      <div className="px-2 py-0.5 rounded bg-slate-900/70 border border-slate-800 flex items-center gap-2 shrink-0">
+        <DataStatusBadge symbol={symbol} scope="ticker" lang={lang} />
+        <span className="text-[10px] font-mono tabular-nums text-slate-500 hidden sm:inline">
+          · {selectedExchange} ({latencyMs}ms)
+        </span>
+      </div>
     );
   };
 
@@ -1526,7 +1493,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
               ? (lang === 'id' ? `Presisi ${candles.length}-Bar Stream Aktif` : `${candles.length}-Bar Live Stream Active`)
               : isDataSimulated
               ? (lang === 'id' ? 'Modus Estimasi Algoritmik' : 'Algorithmic Estimation Mode')
-              : (lang === 'id' ? 'Modus Polling Fallback' : 'Polling Fallback Mode')}
+              : (lang === 'id' ? 'Modus Polling Fallback (Sinkron 2s)' : 'Polling Fallback Mode (2s Sync)')}
           </span>
         </span>
       </div>

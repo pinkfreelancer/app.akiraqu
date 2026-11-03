@@ -643,7 +643,7 @@ function TerminalApp() {
                         {currentStage === 'position_sizing' && (
                           <PositionSizingView
                             currentSymbol={selectedSymbol}
-                            currentPrice={activeDisplayPrice || 88500}
+                            currentPrice={activeDisplayPrice ?? 0}
                             onNavigateToTrade={(sym) => {
                               handleSymbolChange(sym);
                               selectStage('manual_trading');
@@ -748,8 +748,8 @@ function TerminalApp() {
                           currentStage === 'reports') && (
                           <TradingHubPage
                             currentSymbol={selectedSymbol}
-                            currentPrice={activeDisplayPrice || 88500}
-                            currentScore={evaluation?.confluenceScore || 80}
+                            currentPrice={activeDisplayPrice ?? 0}
+                            currentScore={evaluation?.confluenceScore || 50}
                             selectedExchange={selectedExchange}
                             selectedMarketType={selectedMarketType}
                             currentStage={currentStage}
@@ -1017,7 +1017,7 @@ function TerminalApp() {
                     {currentStage === 'position_sizing' && (
                       <PositionSizingView
                         currentSymbol={selectedSymbol}
-                        currentPrice={activeDisplayPrice || 88500}
+                        currentPrice={activeDisplayPrice ?? 0}
                         onNavigateToTrade={(sym) => {
                           handleSymbolChange(sym);
                           selectStage('manual_trading');
@@ -1122,8 +1122,8 @@ function TerminalApp() {
                       currentStage === 'reports') && (
                       <TradingHubPage
                         currentSymbol={selectedSymbol}
-                        currentPrice={activeDisplayPrice || 88500}
-                        currentScore={evaluation?.confluenceScore || 80}
+                        currentPrice={activeDisplayPrice ?? 0}
+                        currentScore={evaluation?.confluenceScore || 50}
                         selectedExchange={selectedExchange}
                         selectedMarketType={selectedMarketType}
                         currentStage={currentStage}

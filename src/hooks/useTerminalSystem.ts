@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { CryptoSymbolInfo } from '../types/crypto.types';
 import { SUPPORTED_SYMBOLS } from '../services/marketData';
+import { useMarketDataStore } from '../stores/useMarketDataStore';
 
 export interface TerminalHealthStatus {
   uptime: number;
@@ -18,8 +19,16 @@ export interface UseTerminalSystemReturn {
   toggleFullWidth: () => void;
 }
 
+const ZERO_MOCK_INITIAL_SYMBOLS: CryptoSymbolInfo[] = SUPPORTED_SYMBOLS.map((sym) => ({
+  ...sym,
+  basePrice: 0,
+  change24h: 0,
+}));
+
 export function useTerminalSystem(): UseTerminalSystemReturn {
-  const [symbols, setSymbols] = useState<CryptoSymbolInfo[]>(SUPPORTED_SYMBOLS);
+  const [catalogSymbols, setCatalogSymbols] = useState<CryptoSymbolInfo[]>(ZERO_MOCK_INITIAL_SYMBOLS);
+  const ssotTickers = useMarketDataStore((s) => s.tickers);
+
   const [healthStatus, setHealthStatus] = useState<TerminalHealthStatus>({
     uptime: 0,
     latency: 0,
@@ -35,7 +44,6 @@ export function useTerminalSystem(): UseTerminalSystemReturn {
     return saved !== null ? saved === 'true' : true;
   });
 
-  // Track Native Fullscreen Change (F11, Escape, or programmatic)
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -64,7 +72,6 @@ export function useTerminalSystem(): UseTerminalSystemReturn {
     });
   }, []);
 
-  // Health check and symbols refresh on mount
   useEffect(() => {
     fetch('/api/v1/health')
       .then((res) => res.json())
@@ -83,8 +90,21 @@ export function useTerminalSystem(): UseTerminalSystemReturn {
       fetch('/api/v1/symbols')
         .then((res) => res.json())
         .then((res) => {
-          if (res.status === 'success' && res.data) {
-            setSymbols(res.data);
+          if (res.status === 'success' && Array.isArray(res.data)) {
+            if (res.meta?.isLiveFeed === true) {
+              useMarketDataStore.getState().ingestBatchTickers(
+                res.data
+                  .filter((item: CryptoSymbolInfo) => Number.isFinite(item.basePrice) && item.basePrice > 0)
+                  .map((item: CryptoSymbolInfo) => ({
+                    symbol: item.symbol,
+                    price: item.basePrice,
+                    change24h: item.change24h,
+                    volume24h: item.volume24h,
+                  })),
+                'REST'
+              );
+              setCatalogSymbols(res.data);
+            }
           }
         })
         .catch(() => {});
@@ -95,9 +115,23 @@ export function useTerminalSystem(): UseTerminalSystemReturn {
     return () => clearInterval(tickerInterval);
   }, []);
 
+  // Overlay Single Source of Truth live prices onto the symbol catalog so every consumer sees identical live prices
+  const symbols = useMemo(() => {
+    return catalogSymbols.map((sym) => {
+      const liveTick = ssotTickers[sym.symbol];
+      if (!liveTick) return sym;
+      return {
+        ...sym,
+        basePrice: liveTick.price,
+        change24h: liveTick.change24h,
+        volume24h: liveTick.volume24h || sym.volume24h,
+      };
+    });
+  }, [catalogSymbols, ssotTickers]);
+
   return {
     symbols,
-    setSymbols,
+    setSymbols: setCatalogSymbols,
     healthStatus,
     isFullscreen,
     toggleFullscreen,

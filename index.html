@@ -5,19 +5,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark light" />
     <meta name="theme-color" content="#0B0F19" />
-    <title>AKIRAQU - Analytic Quantitative Crypto Tools</title>
-    <meta name="description" content="AKIRAQU - Analytic Quantitative Crypto Tools" />
-    <meta property="og:title" content="AKIRAQU - Analytic Quantitative Crypto Tools" />
-    <meta property="og:description" content="AKIRAQU - Analytic Quantitative Crypto Tools" />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" type="image/svg+xml" href="/favicon-dark.svg" media="(prefers-color-scheme: dark)" />
-    <link rel="icon" type="image/svg+xml" href="/favicon-light.svg" media="(prefers-color-scheme: light)" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+      // Early guard against injected third-party wallet browser extensions (e.g. Binance Wallet inpage.js,
+      // MetaMask, Phantom) throwing synchronous errors or unhandled promise rejections inside sandboxed iframes.
+      (function() {
+        function createMiniProgramStub() {
+          return {
+            postMessage: function() {},
+            getEnv: function(cb) {
+              if (typeof cb === 'function') {
+                try { cb({ miniprogram: false }); } catch (_e) {}
+              }
+            },
+            navigateTo: function() {},
+            navigateBack: function() {},
+            switchTab: function() {},
+            reLaunch: function() {},
+            redirectTo: function() {}
+          };
+        }
+
+        try {
+          if (typeof window.bn === 'undefined') {
+            Object.defineProperty(window, 'bn', {
+              value: { miniProgram: createMiniProgramStub() },
+              writable: true,
+              configurable: true,
+              enumerable: false
+            });
+          } else if (window.bn && typeof window.bn === 'object' && typeof window.bn.miniProgram === 'undefined') {
+            window.bn.miniProgram = createMiniProgramStub();
+          }
+
+          if (typeof window.wx === 'undefined') {
+            Object.defineProperty(window, 'wx', {
+              value: { miniProgram: createMiniProgramStub() },
+              writable: true,
+              configurable: true,
+              enumerable: false
+            });
+          } else if (window.wx && typeof window.wx === 'object' && typeof window.wx.miniProgram === 'undefined') {
+            window.wx.miniProgram = createMiniProgramStub();
+          }
+        } catch (_stubErr) {}
+
+        try {
+          var originalDefineProperty = Object.defineProperty;
+          Object.defineProperty = function(obj, prop, descriptor) {
+            if (obj === window && (prop === 'ethereum' || prop === 'BinanceChain')) {
+              try {
+                return originalDefineProperty.call(Object, obj, prop, Object.assign({}, descriptor, { configurable: true }));
+              } catch (_err) {
+                return obj;
+              }
+            }
+            return originalDefineProperty.call(Object, obj, prop, descriptor);
+          };
+        } catch (_e) {}
+
+        function isExtensionError(message, filename, stack) {
+          var msg = String(message || '').toLowerCase();
+          var file = String(filename || '').toLowerCase();
+          var stk = String(stack || '').toLowerCase();
+
+          if (
+            file.indexOf('chrome-extension://') !== -1 ||
+            file.indexOf('moz-extension://') !== -1 ||
+            file.indexOf('safari-web-extension://') !== -1 ||
+            file.indexOf('safari-extension://') !== -1 ||
+            stk.indexOf('chrome-extension://') !== -1 ||
+            stk.indexOf('moz-extension://') !== -1 ||
+            stk.indexOf('safari-web-extension://') !== -1 ||
+            stk.indexOf('safari-extension://') !== -1
+          ) {
+            return true;
+          }
+
+          if (
+            msg.indexOf('ethereum') !== -1 ||
+            msg.indexOf('binancechain') !== -1 ||
+            msg.indexOf('miniprogram') !== -1 ||
+            msg.indexOf('_postmessagetomp') !== -1 ||
+            stk.indexOf('_postmessagetomp') !== -1
+          ) {
+            return true;
+          }
+
+          return false;
+        }
+
+        window.addEventListener('error', function(event) {
+          var errStack = event && event.error && event.error.stack ? event.error.stack : '';
+          if (event && isExtensionError(event.message, event.filename, errStack)) {
+            event.stopImmediatePropagation();
+            event.stopPropagation();
+            event.preventDefault();
+          }
+        }, true);
+
+        window.addEventListener('unhandledrejection', function(event) {
+          var reason = event ? event.reason : null;
+          var msg = reason && typeof reason === 'object' && 'message' in reason ? reason.message : String(reason || '');
+          var file = reason && typeof reason === 'object' ? (reason.fileName || reason.sourceURL || '') : '';
+          var stk = reason && typeof reason === 'object' && 'stack' in reason ? reason.stack : '';
+          if (event && isExtensionError(msg, file, stk)) {
+            event.stopImmediatePropagation();
+            event.stopPropagation();
+            event.preventDefault();
+          }
+        }, true);
+      })();
+    </script>
     <script>
       // Immediate pre-render theme synchronization to eliminate first-frame flash
       (function() {
@@ -67,31 +165,19 @@
         } catch(e) {}
       })();
     </script>
-    <script>
-      // Protect against wallet browser extensions throwing "Cannot redefine property: ethereum"
-      (function() {
-        try {
-          var originalDefineProperty = Object.defineProperty;
-          Object.defineProperty = function(obj, prop, descriptor) {
-            if (obj === window && prop === 'ethereum') {
-              try {
-                return originalDefineProperty.call(Object, obj, prop, Object.assign({}, descriptor, { configurable: true }));
-              } catch (_err) {
-                return obj;
-              }
-            }
-            return originalDefineProperty.call(Object, obj, prop, descriptor);
-          };
-        } catch (_e) {}
-
-        window.addEventListener('error', function(event) {
-          if (event && event.message && event.message.includes('ethereum')) {
-            event.stopImmediatePropagation();
-            event.preventDefault();
-          }
-        }, true);
-      })();
-    </script>
+    <title>AKIRAQU - Analytic Quantitative Crypto Tools</title>
+    <meta name="description" content="AKIRAQU - Analytic Quantitative Crypto Tools" />
+    <meta property="og:title" content="AKIRAQU - Analytic Quantitative Crypto Tools" />
+    <meta property="og:description" content="AKIRAQU - Analytic Quantitative Crypto Tools" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/favicon-dark.svg" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/svg+xml" href="/favicon-light.svg" media="(prefers-color-scheme: light)" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   </head>
   <body class="bg-[var(--bg-color)] text-[var(--text-main)] antialiased selection:bg-[var(--accent-subtle)] selection:text-[var(--text-main)]">
     <a href="#main-content" class="skip-link">Lewati ke konten utama</a>

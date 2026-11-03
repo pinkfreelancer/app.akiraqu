@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { SupportedExchange, MarketType } from '../types/crypto.types';
 import { SUPPORTED_EXCHANGES } from '../services/exchangeService';
-import { Zap, Radio, Layers, Flame, ArrowRightLeft, Check, ChevronDown } from 'lucide-react';
+import { Layers, Flame, Check, ChevronDown } from 'lucide-react';
+import { DataStatusBadge } from './ui/DataStatusBadge';
 
 interface ExchangeMarketSelectorProps {
   selectedExchange: SupportedExchange;
@@ -9,7 +10,7 @@ interface ExchangeMarketSelectorProps {
   onSelectExchange: (exchange: SupportedExchange) => void;
   onSelectMarketType: (marketType: MarketType) => void;
   latencyMs?: number;
-  wsStatus?: 'connected' | 'connecting' | 'fallback';
+  wsStatus?: 'connected' | 'connecting' | 'fallback' | 'disconnected';
   theme?: 'light' | 'dark';
   compact?: boolean;
 }
@@ -162,33 +163,29 @@ export const ExchangeMarketSelector: React.FC<ExchangeMarketSelectorProps> = ({
         )}
       </div>
 
-      {/* 4. Realtime Speed & Latency Badge */}
+      {/* 4. Realtime Speed & Freshness Status Badge */}
       <div
         id="realtime-latency-telemetry-badge"
-        className={`ml-auto flex items-center gap-1.5 px-2.5 py-0.5 rounded-[2px] text-[11px] font-mono border ${
-          wsStatus === 'connected'
-            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-            : wsStatus === 'connecting'
-            ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-            : 'bg-slate-800 border-slate-700 text-slate-300'
-        }`}
-        title={`WebSocket status: ${wsStatus}. Round-trip latency: ${latencyMs}ms`}
+        className="ml-auto flex items-center gap-2"
       >
-        <span className="relative flex h-2 w-2">
-          <span
-            className={`relative inline-flex rounded-full h-2 w-2 ${
+        <DataStatusBadge scope="ticker" compact />
+        {!compact && (
+          <div
+            className={`hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-[2px] text-[11px] font-mono tabular-nums border ${
               wsStatus === 'connected'
-                ? 'bg-emerald-500'
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                 : wsStatus === 'connecting'
-                ? 'bg-amber-500'
-                : 'bg-slate-400'
+                ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                : 'bg-slate-800 border-slate-700 text-slate-300'
             }`}
-          ></span>
-        </span>
-        <span className="font-bold">{latencyMs}ms</span>
-        <span className="hidden sm:inline text-slate-400">
-          • {activeExchangeObj.name} {selectedMarketType}
-        </span>
+            title={`WebSocket status: ${wsStatus}. Round-trip latency: ${latencyMs}ms`}
+          >
+            <span className="font-bold">{latencyMs}ms</span>
+            <span className="text-slate-400">
+              • {activeExchangeObj.name} {selectedMarketType}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

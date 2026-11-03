@@ -9,10 +9,47 @@ import {
 } from '../types/crypto.types';
 import { Language } from '../i18n/translations';
 import { generateInstantCandlesForPrice } from '../services/marketData';
-import { fetchOHLCVOnDemandCCXT } from '../services/ccxtService';
 import { calculateAllIndicators } from '../services/indicators/indicatorEngine';
 import { evaluateConfluence } from '../services/confluence/confluenceEngine';
+import { computeIndicatorConsensus } from '../services/confluence/signalConsensus';
 import { calculateRiskPlan } from '../services/risk/riskCalculator';
+
+async function fetchBrowserFallbackCandles(
+  symbol: string,
+  timeframe: Timeframe,
+  limit = 150
+): Promise<OHLCVCandle[]> {
+  const clean = symbol.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  const intervalMap: Record<Timeframe, string> = {
+    '1m': '1m',
+    '5m': '5m',
+    '15m': '15m',
+    '1H': '1h',
+    '4H': '4h',
+    '1D': '1d',
+    '1W': '1w',
+  };
+  const interval = intervalMap[timeframe] || '1h';
+  const res = await fetch(
+    `https://data-api.binance.vision/api/v3/klines?symbol=${clean}&interval=${interval}&limit=${limit}`,
+    { signal: AbortSignal.timeout(4500) }
+  );
+  if (!res.ok) {
+    throw new Error(`Fallback kline HTTP ${res.status}`);
+  }
+  const rows = await res.json();
+  if (!Array.isArray(rows) || rows.length === 0) {
+    throw new Error('Empty fallback klines');
+  }
+  return rows.map((r: any) => ({
+    time: Number(r[0]),
+    open: parseFloat(r[1]),
+    high: parseFloat(r[2]),
+    low: parseFloat(r[3]),
+    close: parseFloat(r[4]),
+    volume: parseFloat(r[5]),
+  }));
+}
 
 export interface UseAnalysisEngineReturn {
   evaluation: ConfluenceEvaluation | null;
@@ -182,42 +219,10 @@ export function useAnalysisEngine(currentLang: Language = 'id'): UseAnalysisEngi
         // Resilient fallback: Run institutional engine calculation client-side
         try {
           console.warn('[useAnalysisEngine] Server API error, running local institutional engine fallback:', err);
-          const localCandles = await fetchOHLCVOnDemandCCXT(sym, tf, 150, targetExchange, targetMarketType);
+          const localCandles = await fetchBrowserFallbackCandles(sym, tf, 150);
           const localIndicators = calculateAllIndicators(localCandles);
           const localLastClose = localCandles[localCandles.length - 1].close;
-
-          let weightedScoreSum = 0;
-          const weights = [
-            { weight: 0.12, signal: localIndicators.priceAction.signal, confidence: localIndicators.priceAction.confidence },
-            { weight: 0.12, signal: localIndicators.smc.signal, confidence: localIndicators.smc.confidence },
-            { weight: 0.11, signal: localIndicators.orderFlow.signal, confidence: localIndicators.orderFlow.confidence },
-            { weight: 0.10, signal: localIndicators.ict.signal, confidence: localIndicators.ict.confidence },
-            { weight: 0.09, signal: localIndicators.optionFlow.signal, confidence: localIndicators.optionFlow.confidence },
-            { weight: 0.08, signal: localIndicators.rsi.signal, confidence: localIndicators.rsi.confidence },
-            { weight: 0.08, signal: localIndicators.vwap.signal, confidence: localIndicators.vwap.confidence },
-            { weight: 0.08, signal: localIndicators.fibonacci.signal, confidence: localIndicators.fibonacci.confidence },
-            { weight: 0.08, signal: localIndicators.macd.signal, confidence: localIndicators.macd.confidence },
-            { weight: 0.06, signal: localIndicators.ichimoku.signal, confidence: localIndicators.ichimoku.confidence },
-            { weight: 0.04, signal: localIndicators.tdSequential.signal, confidence: localIndicators.tdSequential.confidence },
-            { weight: 0.04, signal: localIndicators.elliottWave.signal, confidence: localIndicators.elliottWave.confidence },
-          ];
-
-          for (const item of weights) {
-            if (item.signal === 'BULLISH') {
-              weightedScoreSum += item.weight * (50 + (item.confidence / 100) * 50);
-            } else if (item.signal === 'BEARISH') {
-              weightedScoreSum += item.weight * (50 - (item.confidence / 100) * 50);
-            } else {
-              weightedScoreSum += item.weight * 50;
-            }
-          }
-
-          const consensusScore = Math.max(5, Math.min(96, Math.round(weightedScoreSum)));
-          let weightedBias: MarketBias = 'Neutral';
-          if (consensusScore >= 78) weightedBias = 'Strong Bullish';
-          else if (consensusScore >= 58) weightedBias = 'Bullish';
-          else if (consensusScore <= 22) weightedBias = 'Strong Bearish';
-          else if (consensusScore <= 42) weightedBias = 'Bearish';
+          const { marketBias: weightedBias } = computeIndicatorConsensus(localIndicators, localLastClose);
 
           const localRiskPlan = calculateRiskPlan({
             currentPrice: localLastClose,

@@ -26,19 +26,15 @@ export interface TickerState {
 export const useTickerStore = create<TickerState>((set) => ({
   activeSymbol: 'BTC/USDT',
   activeTimeframe: '1H',
-  prices: {
-    'BTC/USDT': 67450.0,
-    'ETH/USDT': 3520.0,
-    'SOL/USDT': 188.5,
-  },
+  prices: {},
   priceDirections: {},
   changes24h: {},
   highs24h: {},
   lows24h: {},
   volumes24h: {},
-  wsStatus: 'connected',
-  latencyMs: 24,
-  lastUpdated: Date.now(),
+  wsStatus: 'connecting',
+  latencyMs: 0,
+  lastUpdated: 0,
 
   setActiveSymbol: (symbol) => set({ activeSymbol: symbol }),
   setActiveTimeframe: (timeframe) => set({ activeTimeframe: timeframe }),

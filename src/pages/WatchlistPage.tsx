@@ -30,6 +30,9 @@ import {
 import { formatCryptoPrice } from '../utils/formatters';
 import { Language } from '../i18n/translations';
 import { CryptoIcon } from '../components/ui/CryptoIcon';
+import { useMarketDataStore } from '../stores/useMarketDataStore';
+import { formatSmartCryptoPrice } from '../services/marketDataValidator';
+import { DataStatusBadge } from '../components/ui/DataStatusBadge';
 
 interface WatchlistPageProps {
   currentSymbol?: string;
@@ -78,17 +81,15 @@ const INITIAL_ITEMS: WatchlistItem[] = [
     symbol: 'BTC/USDT',
     name: 'Bitcoin',
     category: 'Layer 1',
-    currentPrice: 88450.0,
-    change24h: 3.45,
-    high24h: 89200.0,
-    low24h: 85200.0,
+    currentPrice: 0,
+    change24h: 0,
+    high24h: 0,
+    low24h: 0,
     volume24h: 38450000000,
-    marketCap: 1740000000000,
-    confluenceScore: 94,
-    sparkline: [82000, 83500, 84200, 86000, 85400, 87200, 88450],
-    alertPriceHigh: 90000.0,
-    alertPriceLow: 86500.0,
-    notes: 'Tunggu konfirmasi penutupan candle 4H di atas $89k untuk retest ATH.',
+    marketCap: 1620000000000,
+    confluenceScore: 86,
+    sparkline: [0.97, 0.98, 0.99, 1.0, 0.995, 1.005, 1.0],
+    notes: 'Pantau area keseimbangan VWAP dan konfirmasi candle 4H.',
     addedAt: '2026-06-10',
   },
   {
@@ -97,17 +98,15 @@ const INITIAL_ITEMS: WatchlistItem[] = [
     symbol: 'ETH/USDT',
     name: 'Ethereum',
     category: 'Layer 1',
-    currentPrice: 3380.0,
-    change24h: -1.25,
-    high24h: 3450.0,
-    low24h: 3340.0,
+    currentPrice: 0,
+    change24h: 0,
+    high24h: 0,
+    low24h: 0,
     volume24h: 18450000000,
-    marketCap: 408000000000,
+    marketCap: 340000000000,
     confluenceScore: 78,
-    sparkline: [3250, 3310, 3420, 3390, 3450, 3410, 3380],
-    alertPriceHigh: 3500.0,
-    alertPriceLow: 3300.0,
-    notes: 'Support kuat di $3,300. Siap akumulasi jika retest FVG support.',
+    sparkline: [1.01, 1.02, 1.0, 0.99, 1.005, 0.995, 1.0],
+    notes: 'Pantau reaksi likuiditas FVG support utama.',
     addedAt: '2026-06-11',
   },
   {
@@ -116,17 +115,15 @@ const INITIAL_ITEMS: WatchlistItem[] = [
     symbol: 'SOL/USDT',
     name: 'Solana',
     category: 'Layer 1',
-    currentPrice: 185.4,
-    change24h: 6.82,
-    high24h: 188.0,
-    low24h: 172.5,
+    currentPrice: 0,
+    change24h: 0,
+    high24h: 0,
+    low24h: 0,
     volume24h: 7820000000,
-    marketCap: 86400000000,
-    confluenceScore: 91,
-    sparkline: [156, 162, 168, 172, 175, 179, 185.4],
-    alertPriceHigh: 195.0,
-    alertPriceLow: 178.0,
-    notes: 'Short squeeze aktif. Target TP1 $192 tercapai.',
+    marketCap: 82400000000,
+    confluenceScore: 88,
+    sparkline: [0.94, 0.96, 0.97, 0.98, 0.99, 0.995, 1.0],
+    notes: 'Momentum likuiditas tinggi lintas bursa.',
     addedAt: '2026-06-12',
   },
   {
@@ -135,17 +132,15 @@ const INITIAL_ITEMS: WatchlistItem[] = [
     symbol: 'SUI/USDT',
     name: 'Sui Network',
     category: 'Layer 1',
-    currentPrice: 3.42,
-    change24h: 11.45,
-    high24h: 3.55,
-    low24h: 3.02,
+    currentPrice: 0,
+    change24h: 0,
+    high24h: 0,
+    low24h: 0,
     volume24h: 1850000000,
     marketCap: 9800000000,
-    confluenceScore: 89,
-    sparkline: [2.65, 2.78, 2.92, 3.1, 3.05, 3.28, 3.42],
-    alertPriceHigh: 3.80,
-    alertPriceLow: 3.15,
-    notes: 'Momentum breakout ATH lokal, pasang stop loss trailing di BEP.',
+    confluenceScore: 85,
+    sparkline: [0.92, 0.94, 0.96, 0.98, 0.97, 0.99, 1.0],
+    notes: 'Pantau kelanjutan momentum breakout intraday.',
     addedAt: '2026-06-12',
   },
   {
@@ -154,17 +149,15 @@ const INITIAL_ITEMS: WatchlistItem[] = [
     symbol: 'NEAR/USDT',
     name: 'NEAR Protocol',
     category: 'AI & Big Data',
-    currentPrice: 6.85,
-    change24h: 8.92,
-    high24h: 7.05,
-    low24h: 6.22,
+    currentPrice: 0,
+    change24h: 0,
+    high24h: 0,
+    low24h: 0,
     volume24h: 980000000,
     marketCap: 8200000000,
-    confluenceScore: 92,
-    sparkline: [5.6, 5.85, 6.1, 6.05, 6.4, 6.65, 6.85],
-    alertPriceHigh: 7.50,
-    alertPriceLow: 6.40,
-    notes: 'Model AI Confluence 92/100, rasio RRR 1:3.45.',
+    confluenceScore: 84,
+    sparkline: [0.93, 0.95, 0.97, 0.96, 0.98, 0.99, 1.0],
+    notes: 'Sektor AI & Big Data dengan likuiditas kuat.',
     addedAt: '2026-06-13',
   },
   {
@@ -173,17 +166,15 @@ const INITIAL_ITEMS: WatchlistItem[] = [
     symbol: 'FET/USDT',
     name: 'Artificial Superintelligence',
     category: 'AI & Big Data',
-    currentPrice: 1.48,
-    change24h: 9.85,
-    high24h: 1.54,
-    low24h: 1.32,
+    currentPrice: 0,
+    change24h: 0,
+    high24h: 0,
+    low24h: 0,
     volume24h: 380000000,
     marketCap: 3800000000,
-    confluenceScore: 90,
-    sparkline: [1.18, 1.24, 1.31, 1.28, 1.38, 1.42, 1.48],
-    alertPriceHigh: 1.65,
-    alertPriceLow: 1.35,
-    notes: 'Katalis pengumuman model ASI V2.',
+    confluenceScore: 83,
+    sparkline: [0.91, 0.93, 0.96, 0.95, 0.98, 0.99, 1.0],
+    notes: 'Pantau volume delta spot pada sesi aktif.',
     addedAt: '2026-06-13',
   },
   {
@@ -192,30 +183,28 @@ const INITIAL_ITEMS: WatchlistItem[] = [
     symbol: 'PEPE/USDT',
     name: 'Pepe',
     category: 'Meme',
-    currentPrice: 0.0000108,
-    change24h: 14.8,
-    high24h: 0.0000114,
-    low24h: 0.0000092,
+    currentPrice: 0,
+    change24h: 0,
+    high24h: 0,
+    low24h: 0,
     volume24h: 1450000000,
     marketCap: 4540000000,
-    confluenceScore: 83,
-    sparkline: [0.000008, 0.0000085, 0.0000092, 0.000009, 0.0000098, 0.0000102, 0.0000108],
-    alertPriceHigh: 0.0000120,
-    alertPriceLow: 0.0000098,
+    confluenceScore: 80,
+    sparkline: [0.9, 0.93, 0.95, 0.94, 0.97, 0.99, 1.0],
     notes: 'Volatilitas tinggi untuk scalping cepat 15m.',
     addedAt: '2026-06-14',
   },
 ];
 
 const AVAILABLE_ADD_COINS = [
-  { symbol: 'BNB/USDT', name: 'BNB Chain', category: 'Layer 1', price: 658.0, change24h: 2.15, confluence: 85 },
-  { symbol: 'AVAX/USDT', name: 'Avalanche', category: 'Layer 1', price: 36.4, change24h: -2.85, confluence: 71 },
-  { symbol: 'LINK/USDT', name: 'Chainlink', category: 'DeFi', price: 15.2, change24h: 4.65, confluence: 86 },
-  { symbol: 'TON/USDT', name: 'Toncoin', category: 'Layer 1', price: 5.65, change24h: 1.15, confluence: 81 },
-  { symbol: 'DOGE/USDT', name: 'Dogecoin', category: 'Meme', price: 0.185, change24h: 5.42, confluence: 82 },
-  { symbol: 'APT/USDT', name: 'Aptos', category: 'Layer 1', price: 11.2, change24h: 4.12, confluence: 80 },
-  { symbol: 'RENDER/USDT', name: 'Render', category: 'AI & Big Data', price: 7.45, change24h: 6.80, confluence: 88 },
-  { symbol: 'INJ/USDT', name: 'Injective', category: 'DeFi', price: 28.5, change24h: 5.20, confluence: 84 },
+  { symbol: 'BNB/USDT', name: 'BNB Chain', category: 'Layer 1', price: 0, change24h: 0, confluence: 85 },
+  { symbol: 'AVAX/USDT', name: 'Avalanche', category: 'Layer 1', price: 0, change24h: 0, confluence: 71 },
+  { symbol: 'LINK/USDT', name: 'Chainlink', category: 'DeFi', price: 0, change24h: 0, confluence: 86 },
+  { symbol: 'TON/USDT', name: 'Toncoin', category: 'Layer 1', price: 0, change24h: 0, confluence: 81 },
+  { symbol: 'DOGE/USDT', name: 'Dogecoin', category: 'Meme', price: 0, change24h: 0, confluence: 82 },
+  { symbol: 'APT/USDT', name: 'Aptos', category: 'Layer 1', price: 0, change24h: 0, confluence: 80 },
+  { symbol: 'RENDER/USDT', name: 'Render', category: 'AI & Big Data', price: 0, change24h: 0, confluence: 88 },
+  { symbol: 'INJ/USDT', name: 'Injective', category: 'DeFi', price: 0, change24h: 0, confluence: 84 },
 ];
 
 export const WatchlistPage: React.FC<WatchlistPageProps> = ({
@@ -243,20 +232,50 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
   const [notesText, setNotesText] = useState<string>('');
   const [actionNotice, setActionNotice] = useState<string | null>(null);
 
-  // Active items
+  const ssotTickers = useMarketDataStore((s) => s.tickers);
+
+  // Active items overlaid with live SSOT prices
   const currentFolder = folders.find((f) => f.id === activeFolderId) || folders[0];
   const activeItems = useMemo(() => {
-    return items.filter((item) => {
-      if (item.folderId !== activeFolderId) return false;
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        if (!item.symbol.toLowerCase().includes(q) && !item.name.toLowerCase().includes(q)) {
-          return false;
+    return items
+      .filter((item) => {
+        if (item.folderId !== activeFolderId) return false;
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          if (!item.symbol.toLowerCase().includes(q) && !item.name.toLowerCase().includes(q)) {
+            return false;
+          }
         }
-      }
-      return true;
+        return true;
+      })
+      .map((item) => {
+        const ssot = ssotTickers[item.symbol];
+        const livePrice = ssot?.price ?? item.currentPrice;
+        const liveChange = ssot?.change24h ?? item.change24h;
+        const high24h = ssot?.high24h ?? (livePrice > 0 ? livePrice * 1.025 : 0);
+        const low24h = ssot?.low24h ?? (livePrice > 0 ? livePrice * 0.975 : 0);
+        return {
+          ...item,
+          currentPrice: livePrice,
+          change24h: Number(liveChange.toFixed(2)),
+          high24h,
+          low24h,
+          alertPriceHigh: item.alertPriceHigh ?? (livePrice > 0 ? Number((livePrice * 1.05).toPrecision(6)) : undefined),
+          alertPriceLow: item.alertPriceLow ?? (livePrice > 0 ? Number((livePrice * 0.95).toPrecision(6)) : undefined),
+        };
+      });
+  }, [items, activeFolderId, searchQuery, ssotTickers]);
+
+  const liveAvailableAddCoins = useMemo(() => {
+    return AVAILABLE_ADD_COINS.map((c) => {
+      const ssot = ssotTickers[c.symbol];
+      return {
+        ...c,
+        price: ssot?.price ?? 0,
+        change24h: Number((ssot?.change24h ?? 0).toFixed(2)),
+      };
     });
-  }, [items, activeFolderId, searchQuery]);
+  }, [ssotTickers]);
 
   // Average return for active folder
   const avg24hReturn =
@@ -358,13 +377,16 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
             <Star className="w-6 h-6 fill-amber-400" />
           </div>
           <div>
-            <h1 className={`font-mono font-bold text-lg sm:text-xl ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              {isId ? 'Watchlist & Daftar Pantau Kripto' : 'Crypto Watchlist & Favorites'}
-            </h1>
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className={`font-mono font-bold text-lg sm:text-xl ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                {isId ? 'Watchlist & Daftar Pantau Kripto' : 'Crypto Watchlist & Favorites'}
+              </h1>
+              <DataStatusBadge scope="ticker" lang={lang} compact />
+            </div>
             <p className="text-xs font-mono text-slate-400 mt-0.5">
               {isId
-                ? 'Kelola multi-folder daftar pantau, pasang price alerts, dan pantau skor konfluensi aset favorit'
-                : 'Organized folders, custom price alerts & real-time technical scoring for your favorite tokens'}
+                ? 'Kelola multi-folder daftar pantau, pasang price alerts, dan pantau harga live SSOT aset favorit'
+                : 'Organized folders, custom price alerts & real-time SSOT pricing for your favorite tokens'}
             </p>
           </div>
         </div>
@@ -510,14 +532,18 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
                       </td>
 
                       {/* Price */}
-                      <td className="py-3 text-white font-bold text-sm">
-                        ${formatCryptoPrice(item.currentPrice)}
+                      <td className="py-3 text-white font-bold text-sm tabular-nums">
+                        {item.currentPrice > 0
+                          ? `$${formatSmartCryptoPrice(item.currentPrice)}`
+                          : isId
+                          ? 'Sinkron...'
+                          : 'Syncing...'}
                       </td>
 
                       {/* 24h Change */}
                       <td className="py-3">
                         <span
-                          className={`px-2 py-0.5 rounded-md font-bold text-[11px] inline-flex items-center gap-0.5 ${
+                          className={`px-2 py-0.5 rounded-md font-bold text-[11px] inline-flex items-center gap-0.5 tabular-nums ${
                             isBullish
                               ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                               : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
@@ -528,9 +554,9 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
                       </td>
 
                       {/* 24h Range */}
-                      <td className="py-3 text-slate-300">
-                        <div>H: ${formatCryptoPrice(item.high24h)}</div>
-                        <div className="text-slate-400 text-[10px]">L: ${formatCryptoPrice(item.low24h)}</div>
+                      <td className="py-3 text-slate-300 tabular-nums">
+                        <div>H: {item.high24h > 0 ? `$${formatSmartCryptoPrice(item.high24h)}` : '--'}</div>
+                        <div className="text-slate-400 text-[10px]">L: {item.low24h > 0 ? `$${formatSmartCryptoPrice(item.low24h)}` : '--'}</div>
                       </td>
 
                       {/* Confluence */}
@@ -658,7 +684,7 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
             </div>
 
             <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-              {AVAILABLE_ADD_COINS.map((c) => (
+              {liveAvailableAddCoins.map((c) => (
                 <div
                   key={c.symbol}
                   className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between hover:border-slate-700"
@@ -670,12 +696,16 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
                       <div className="text-[10px] text-slate-400">{c.name} • {c.category}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 tabular-nums">
                     <div className="text-right">
-                      <div className="text-xs font-bold text-white">${formatCryptoPrice(c.price)}</div>
-                      <div className={`text-[10px] font-bold ${c.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                        {c.change24h >= 0 ? '+' : ''}{c.change24h}%
+                      <div className="text-xs font-bold text-white">
+                        {c.price > 0 ? `$${formatSmartCryptoPrice(c.price)}` : isId ? 'Sinkron...' : 'Syncing...'}
                       </div>
+                      {c.price > 0 && (
+                        <div className={`text-[10px] font-bold ${c.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          {c.change24h >= 0 ? '+' : ''}{c.change24h}%
+                        </div>
+                      )}
                     </div>
                     <button
                       onClick={() => handleAddCoinToFolder(c)}

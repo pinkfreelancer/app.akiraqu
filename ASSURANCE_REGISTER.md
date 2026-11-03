@@ -20,4 +20,5 @@
 - [x] `/api/v1/health` endpoint returning 200 OK with latency & uptime telemetry.
 - [x] Structured JSON audit logging active.
 - [x] Graceful fallback to deterministic quantitative analysis if API keys are unset.
-- [x] Unit Test Suite (Vitest): Verified coverage for `liquidationEngine`, `mmEngine`, `confluenceEngine`, `riskCalculator`, `indicatorEngine`, `usePortfolioStore`, `useOrderBookStore`, and `privacy` routes (34/34 tests passing).
+- [x] Unit Test Suite (Vitest): Verified coverage for `liquidationEngine`, `mmEngine`, `confluenceEngine`, `riskCalculator`, `indicatorEngine`, `usePortfolioStore`, `useOrderBookStore`, `privacy`, and `market` routes (36/36 tests passing).
+- [x] Real-time Streaming & Fallback Integrity: Strict Spot/Futures market isolation in `MarketWsProxy`, active 25s keepalive heartbeat, 2s auto-polling fallback with synchronized `/api/v1/market-snapshot`, and throttled 100ms intra-candle updates for high-fidelity 60 FPS rendering.

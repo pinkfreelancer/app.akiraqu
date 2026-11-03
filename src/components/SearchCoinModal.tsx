@@ -4,6 +4,7 @@ import { CryptoSymbolInfo } from '../types/crypto.types';
 import { Language, getTranslation } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
 import { CryptoIcon } from './ui/CryptoIcon';
+import { useMarketDataStore } from '../stores/useMarketDataStore';
 
 interface SearchCoinModalProps {
   isOpen: boolean;
@@ -57,6 +58,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
   lang,
 }) => {
   const t = getTranslation(lang);
+  const ssotTickers = useMarketDataStore((s) => s.tickers);
   const [searchQuery, setSearchQuery] = useState('');
   const deferredQuery = useDeferredValue(searchQuery);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
@@ -632,7 +634,10 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
             filteredCoins.map((coin, index) => {
               const isSelected = coin.symbol === selectedSymbol;
               const isHighlighted = index === highlightedIndex;
-              const isPositive = coin.change24h >= 0;
+              const ssot = ssotTickers[coin.symbol];
+              const liveCoinPrice = ssot?.price ?? (coin.basePrice > 0 ? coin.basePrice : 0);
+              const liveCoinChange = ssot?.change24h ?? coin.change24h;
+              const isPositive = liveCoinChange >= 0;
 
               return (
                 <button
@@ -675,21 +680,27 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                     </div>
                   </div>
 
-                  <div className="text-right font-mono shrink-0 ml-3">
+                  <div className="text-right font-mono tabular-nums shrink-0 ml-3">
                     <div className="font-bold text-white text-sm">
-                      ${formatPrice(coin.basePrice)}
+                      {liveCoinPrice > 0
+                        ? `$${formatPrice(liveCoinPrice)}`
+                        : lang === 'id'
+                        ? 'Sinkron...'
+                        : 'Syncing...'}
                     </div>
-                    <div
-                      className={`text-xs font-bold flex items-center justify-end gap-0.5 ${
-                        isPositive ? 'text-emerald-400' : 'text-rose-400'
-                      }`}
-                    >
-                      {isPositive ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
-                      <span>{isPositive ? '+' : ''}{coin.change24h}%</span>
-                      <span className="text-slate-400 text-[10px] ml-1.5 hidden sm:inline font-normal">
-                        Vol: {coin.volume24h}
-                      </span>
-                    </div>
+                    {liveCoinPrice > 0 && (
+                      <div
+                        className={`text-xs font-bold flex items-center justify-end gap-0.5 ${
+                          isPositive ? 'text-emerald-400' : 'text-rose-400'
+                        }`}
+                      >
+                        {isPositive ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
+                        <span>{isPositive ? '+' : ''}{liveCoinChange.toFixed(2)}%</span>
+                        <span className="text-slate-400 text-[10px] ml-1.5 hidden sm:inline font-normal">
+                          Vol: {coin.volume24h}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </button>
               );

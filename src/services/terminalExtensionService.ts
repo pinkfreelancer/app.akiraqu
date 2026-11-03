@@ -16,164 +16,166 @@ import {
 } from '../types/crypto.types';
 import { SUPPORTED_SYMBOLS } from './marketData';
 
+import { useMarketDataStore } from '../stores/useMarketDataStore';
+
+function parseVolumeStringUsd(volStr?: string): number {
+  if (!volStr) return 0;
+  const clean = volStr.replace(/[^0-9.BMK]/gi, '').toUpperCase();
+  const num = parseFloat(clean);
+  if (!Number.isFinite(num)) return 0;
+  if (clean.endsWith('B')) return num * 1_000_000_000;
+  if (clean.endsWith('M')) return num * 1_000_000;
+  if (clean.endsWith('K')) return num * 1_000;
+  return num;
+}
+
 export async function fetchLiveMarketScanner(
   exchange: SupportedExchange = 'BINANCE',
   marketType: MarketType = 'SPOT'
 ): Promise<MarketScannerItem[]> {
-  try {
-    const isFutures = marketType === 'FUTURES';
-    const tickerUrl = isFutures
-      ? 'https://fapi.binance.com/fapi/v1/ticker/24hr'
-      : 'https://api.binance.com/api/v3/ticker/24hr';
+  let serverSymbols: any[] = [];
+  let isLiveFeed = false;
 
+  try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
-    const res = await fetch(tickerUrl, { signal: controller.signal });
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(
+      `/api/v1/symbols?exchange=${encodeURIComponent(exchange)}&marketType=${encodeURIComponent(marketType)}`,
+      { signal: controller.signal }
+    );
     clearTimeout(timeoutId);
 
-    if (!res.ok) throw new Error('Failed to fetch live 24h ticker feed');
-    const data = await res.json();
-
-    const priceMap = new Map<string, any>();
-    if (Array.isArray(data)) {
-      for (const item of data) {
-        priceMap.set(item.symbol, item);
+    if (res.ok) {
+      const json = await res.json();
+      if (Array.isArray(json?.symbols)) {
+        serverSymbols = json.symbols;
+        isLiveFeed = Boolean(json?.meta?.isLiveFeed);
       }
     }
-
-    return SUPPORTED_SYMBOLS.map((sym, index) => {
-      const cleanPair = sym.symbol.replace('/', '').toUpperCase();
-      const live = priceMap.get(cleanPair);
-
-      const price = live ? parseFloat(live.lastPrice) : sym.basePrice;
-      const change24h = live ? parseFloat(live.priceChangePercent) : sym.change24h;
-      const high24h = live ? parseFloat(live.highPrice) : price * 1.035;
-      const low24h = live ? parseFloat(live.lowPrice) : price * 0.965;
-      const volume24hUsd = live ? parseFloat(live.quoteVolume) : parseFloat(sym.volume24h.replace(/[^0-9.]/g, '')) * 1_000_000;
-
-      // Seed deterministic yet dynamic indicators for scanner
-      const hash = sym.symbol.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) + (index * 7);
-      const rsi = Math.min(88, Math.max(18, Math.round(50 + (change24h * 2.2) + ((hash % 15) - 7))));
-      
-      let confluenceScore = Math.min(96, Math.max(34, Math.round(50 + (change24h * 2.5) + (rsi > 55 ? 12 : -10) + (hash % 10))));
-      let bias: any = 'Neutral';
-      if (confluenceScore >= 78) bias = 'Strong Bullish';
-      else if (confluenceScore >= 62) bias = 'Bullish';
-      else if (confluenceScore <= 40) bias = 'Strong Bearish';
-      else if (confluenceScore <= 48) bias = 'Bearish';
-
-      const cvdDelta = Math.round((change24h * 14.5 + (hash % 20 - 10)) * 10) / 10;
-      const fundingRate = parseFloat(((change24h > 0 ? 0.01 : -0.005) + ((hash % 8) * 0.002)).toFixed(4));
-      const openInterestDeltaPct = parseFloat((change24h * 0.8 + ((hash % 10) - 5)).toFixed(2));
-
-      let detectedPattern: string | undefined;
-      if (change24h > 6.5) detectedPattern = 'Aggressive Absorption Breakout';
-      else if (change24h < -6.5) detectedPattern = 'EQL Liquidity Sweep Flush';
-      else if (rsi < 30) detectedPattern = 'Wyckoff Spring Accumulation';
-      else if (rsi > 72) detectedPattern = 'Predatory Top Distribution';
-
-      // Evaluate 9 Bullish Checklist Criteria
-      const trend4h = change24h > 0.5 || confluenceScore >= 64;
-      const rsiCriteria = rsi >= 45 && rsi <= 68;
-      const fundingCriteria = fundingRate >= 0.001 && fundingRate <= 0.035;
-      const ema4tf = (change24h > 0 && confluenceScore >= 60) || ((hash % 3) === 0 && change24h > -1);
-      const volumeCriteria = volume24hUsd > 150_000_000 || change24h > 2.5;
-      const chart1d = confluenceScore >= 58 || change24h > 1.2;
-      const macd = (confluenceScore >= 62 && change24h > -0.5) || ((hash % 4) !== 1 && change24h > 0);
-      const obv = cvdDelta > 0 || (confluenceScore >= 65);
-      
-      const calculatedRRR = parseFloat((1.2 + (confluenceScore / 50) + ((hash % 10) / 10)).toFixed(2));
-      const riskReward = calculatedRRR >= 1.5;
-
-      const criteriaList = [trend4h, rsiCriteria, fundingCriteria, ema4tf, volumeCriteria, chart1d, macd, obv, riskReward];
-      const criteriaMetCount = criteriaList.filter(Boolean).length;
-
-      const bullishCriteria: BullishCriteriaVerification = {
-        trend4h,
-        rsi: rsiCriteria,
-        funding: fundingCriteria,
-        ema4tf,
-        volume: volumeCriteria,
-        chart1d,
-        macd,
-        obv,
-        riskReward,
-        criteriaMetCount,
-        totalCriteria: 9,
-        calculatedRRR,
-        isFullyQualified: criteriaMetCount >= 7,
-      };
-
-      return {
-        symbol: sym.symbol,
-        name: sym.name,
-        category: sym.category,
-        price,
-        change24h,
-        volume24hUsd,
-        high24h,
-        low24h,
-        confluenceScore,
-        bias,
-        rsi,
-        cvdDelta,
-        fundingRate,
-        openInterestDeltaPct,
-        detectedPattern,
-        exchange,
-        isHot: Math.abs(change24h) > 5 || confluenceScore >= 80,
-        bullishCriteria,
-      };
-    });
-  } catch (err) {
-    // Fallback based on supported symbols
-    return SUPPORTED_SYMBOLS.map((sym, index) => {
-      const hash = sym.symbol.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) + (index * 7);
-      const isPositive = sym.change24h > 0;
-      const rsi = 52 + (hash % 20);
-      const fundingRate = 0.0100;
-      const cvdDelta = 12.4;
-      const confluenceScore = 68 + (hash % 25);
-      const calculatedRRR = 1.85;
-
-      const bullishCriteria: BullishCriteriaVerification = {
-        trend4h: isPositive,
-        rsi: rsi >= 45 && rsi <= 68,
-        funding: fundingRate >= 0.001 && fundingRate <= 0.035,
-        ema4tf: isPositive,
-        volume: true,
-        chart1d: confluenceScore >= 60,
-        macd: isPositive,
-        obv: cvdDelta > 0,
-        riskReward: calculatedRRR >= 1.5,
-        criteriaMetCount: 7,
-        totalCriteria: 9,
-        calculatedRRR,
-        isFullyQualified: true,
-      };
-
-      return {
-        symbol: sym.symbol,
-        name: sym.name,
-        category: sym.category,
-        price: sym.basePrice,
-        change24h: sym.change24h,
-        volume24hUsd: 142000000 + (hash * 100000),
-        high24h: sym.basePrice * 1.03,
-        low24h: sym.basePrice * 0.97,
-        confluenceScore,
-        bias: sym.change24h > 0 ? 'Bullish' : 'Bearish',
-        rsi,
-        cvdDelta,
-        fundingRate,
-        openInterestDeltaPct: 3.2,
-        detectedPattern: 'Session VWAP Reclaim',
-        exchange,
-        isHot: index < 5,
-        bullishCriteria,
-      };
-    });
+  } catch {
+    // Fall through to SSOT store state
   }
+
+  if (isLiveFeed && serverSymbols.length > 0) {
+    useMarketDataStore.getState().ingestBatchTickers(
+      serverSymbols
+        .filter((s) => typeof s.basePrice === 'number' && s.basePrice > 0)
+        .map((s) => ({
+          symbol: s.symbol,
+          price: s.basePrice,
+          change24h: s.change24h,
+          volume24h: typeof s.volume24h === 'string' ? s.volume24h : undefined,
+        })),
+      'REST',
+      Date.now()
+    );
+  }
+
+  const ssotTickers = useMarketDataStore.getState().tickers;
+  const serverMap = new Map<string, any>();
+  for (const item of serverSymbols) {
+    if (item?.symbol) serverMap.set(item.symbol, item);
+  }
+
+  return SUPPORTED_SYMBOLS.map((sym, index) => {
+    const ssot = ssotTickers[sym.symbol];
+    const srv = isLiveFeed ? serverMap.get(sym.symbol) : null;
+
+    const price = ssot?.price ?? (srv && srv.basePrice > 0 ? srv.basePrice : 0);
+    const change24h = ssot?.change24h ?? (srv ? srv.change24h : 0);
+    const high24h = ssot?.high24h ?? (price > 0 ? price * 1.03 : 0);
+    const low24h = ssot?.low24h ?? (price > 0 ? price * 0.97 : 0);
+    const ssotVolNum = ssot?.volume24h ? parseVolumeStringUsd(ssot.volume24h) : 0;
+    const volume24hUsd =
+      ssotVolNum > 0 ? ssotVolNum : srv ? parseVolumeStringUsd(srv.volume24h) : 0;
+
+    const hash = sym.symbol.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) + index * 7;
+    const rsi = Math.min(88, Math.max(18, Math.round(50 + change24h * 2.2 + ((hash % 15) - 7))));
+
+    const confluenceScore = Math.min(
+      96,
+      Math.max(34, Math.round(50 + change24h * 2.5 + (rsi > 55 ? 12 : -10) + (hash % 10)))
+    );
+    let bias: any = 'Neutral';
+    if (confluenceScore >= 78) bias = 'Strong Bullish';
+    else if (confluenceScore >= 62) bias = 'Bullish';
+    else if (confluenceScore <= 40) bias = 'Strong Bearish';
+    else if (confluenceScore <= 48) bias = 'Bearish';
+
+    const cvdDelta = Math.round((change24h * 14.5 + ((hash % 20) - 10)) * 10) / 10;
+    const fundingRate = parseFloat(
+      ((change24h > 0 ? 0.01 : -0.005) + (hash % 8) * 0.002).toFixed(4)
+    );
+    const openInterestDeltaPct = parseFloat((change24h * 0.8 + ((hash % 10) - 5)).toFixed(2));
+
+    let detectedPattern: string | undefined;
+    if (change24h > 6.5) detectedPattern = 'Aggressive Absorption Breakout';
+    else if (change24h < -6.5) detectedPattern = 'EQL Liquidity Sweep Flush';
+    else if (rsi < 30) detectedPattern = 'Wyckoff Spring Accumulation';
+    else if (rsi > 72) detectedPattern = 'Predatory Top Distribution';
+
+    const trend4h = change24h > 0.5 || confluenceScore >= 64;
+    const rsiCriteria = rsi >= 45 && rsi <= 68;
+    const fundingCriteria = fundingRate >= 0.001 && fundingRate <= 0.035;
+    const ema4tf = (change24h > 0 && confluenceScore >= 60) || (hash % 3 === 0 && change24h > -1);
+    const volumeCriteria = volume24hUsd > 150_000_000 || change24h > 2.5;
+    const chart1d = confluenceScore >= 58 || change24h > 1.2;
+    const macd = (confluenceScore >= 62 && change24h > -0.5) || (hash % 4 !== 1 && change24h > 0);
+    const obv = cvdDelta > 0 || confluenceScore >= 65;
+
+    const calculatedRRR = parseFloat((1.2 + confluenceScore / 50 + (hash % 10) / 10).toFixed(2));
+    const riskReward = calculatedRRR >= 1.5;
+
+    const criteriaList = [
+      trend4h,
+      rsiCriteria,
+      fundingCriteria,
+      ema4tf,
+      volumeCriteria,
+      chart1d,
+      macd,
+      obv,
+      riskReward,
+    ];
+    const criteriaMetCount = criteriaList.filter(Boolean).length;
+
+    const bullishCriteria: BullishCriteriaVerification = {
+      trend4h,
+      rsi: rsiCriteria,
+      funding: fundingCriteria,
+      ema4tf,
+      volume: volumeCriteria,
+      chart1d,
+      macd,
+      obv,
+      riskReward,
+      criteriaMetCount,
+      totalCriteria: 9,
+      calculatedRRR,
+      isFullyQualified: criteriaMetCount >= 7,
+    };
+
+    return {
+      symbol: sym.symbol,
+      name: sym.name,
+      category: sym.category,
+      price,
+      change24h,
+      volume24hUsd,
+      high24h,
+      low24h,
+      confluenceScore,
+      bias,
+      rsi,
+      cvdDelta,
+      fundingRate,
+      openInterestDeltaPct,
+      detectedPattern,
+      exchange,
+      isHot: Math.abs(change24h) > 5 || confluenceScore >= 80,
+      bullishCriteria,
+    };
+  });
 }
 
 export async function fetchLiveCryptoNewsAndSentiment(): Promise<{
@@ -859,10 +861,10 @@ export const INITIAL_BOT_TRADES: BotTradeRecord[] = [
     isDemo: true,
     entryTime: Date.now() - 3600000 * 16,
     exitTime: Date.now() - 3600000 * 14,
-    entryPrice: 88500,
-    exitPrice: 89600,
+    entryPrice: 79400,
+    exitPrice: 80500,
     qty: 0.08,
-    sizeUsd: 7080,
+    sizeUsd: 6352,
     leverage: 5,
     pnlUsd: 88.0,
     pnlPct: 6.21,

@@ -33,28 +33,13 @@ export interface PortfolioState {
 
 export const usePortfolioStore = create<PortfolioState>((set) => ({
   balances: {
-    USDT: { free: 8500, used: 1500, total: 10000 },
-    BTC: { free: 0.12, used: 0.05, total: 0.17 },
+    USDT: { free: 10000, used: 0, total: 10000 },
   },
   totalEquityUsd: 10000,
-  unrealizedPnlUsd: 245.8,
-  unrealizedPnlPercent: 2.45,
-  activePositions: [
-    {
-      id: 'pos-btc-1',
-      symbol: 'BTC/USDT',
-      side: 'LONG',
-      size: 0.05,
-      entryPrice: 65200,
-      markPrice: 67450,
-      pnl: 112.5,
-      pnlPercent: 3.45,
-      leverage: 3,
-      liquidationPrice: 48000,
-      timestamp: Date.now() - 3600000,
-    },
-  ],
-  marginLevel: 28.5,
+  unrealizedPnlUsd: 0,
+  unrealizedPnlPercent: 0,
+  activePositions: [],
+  marginLevel: 0,
   lastUpdated: Date.now(),
 
   setBalances: (balances) => set({ balances, lastUpdated: Date.now() }),

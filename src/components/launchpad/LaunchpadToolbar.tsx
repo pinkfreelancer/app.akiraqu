@@ -66,7 +66,7 @@ interface LaunchpadToolbarProps {
   livePrice?: number;
   priceDirection?: 'up' | 'down' | 'neutral';
   evaluation: ConfluenceEvaluation | null;
-  wsStatus?: 'connected' | 'connecting' | 'fallback';
+  wsStatus?: 'connected' | 'connecting' | 'fallback' | 'disconnected';
   latencyMs?: number;
   syncMetrics?: WebSocketSyncMetrics;
   soundAlerts: boolean;

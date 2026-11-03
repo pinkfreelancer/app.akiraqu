@@ -55,6 +55,8 @@ import { CryptoIcon } from './ui/CryptoIcon';
 import { EngineThemeId, normalizeEngineTheme } from '../types/theme.types';
 import { useAuth } from '../contexts/AuthContext';
 import { useAlerts } from '../contexts/AlertContext';
+import { useMarketDataStore } from '../stores/useMarketDataStore';
+import { DataStatusBadge } from './ui/DataStatusBadge';
 
 interface HeaderProps {
   symbols: CryptoSymbolInfo[];
@@ -73,7 +75,7 @@ interface HeaderProps {
   healthStatus: { uptime: number; latency: number; ok: boolean };
   livePrice?: number;
   priceDirection?: 'up' | 'down' | 'neutral';
-  wsStatus?: 'connected' | 'connecting' | 'fallback';
+  wsStatus?: 'connected' | 'connecting' | 'fallback' | 'disconnected';
   syncMetrics?: WebSocketSyncMetrics;
   lang: Language;
   onToggleLang: (lang: Language) => void;
@@ -165,8 +167,10 @@ export const Header: React.FC<HeaderProps> = ({
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const ssotTicker = useMarketDataStore((s) => s.tickers[selectedSymbol]);
   const currentCoin = symbols.find((s) => s.symbol === selectedSymbol);
-  const displayPrice = livePrice && livePrice > 0 ? livePrice : currentCoin?.basePrice || 0;
+  const displayPrice = ssotTicker?.price ?? (livePrice && livePrice > 0 ? livePrice : 0);
+  const displayChange24h = ssotTicker ? ssotTicker.change24h : currentCoin?.change24h;
   const timeframes: Timeframe[] = ['1m', '5m', '15m', '1H', '4H', '1D', '1W'];
 
   // Global keyboard shortcut to open pair search (/ or Ctrl+K / Cmd+K)
@@ -802,22 +806,22 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className={`font-bold text-xs sm:text-sm shrink-0 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   {selectedSymbol}
                 </span>
-                <span className={`text-xs font-semibold shrink-0 ${isDark ? 'text-pink-300' : 'text-pink-600'}`}>
-                  ${formatPrice(displayPrice)}
+                <span className={`text-xs font-semibold tabular-nums shrink-0 ${isDark ? 'text-pink-300' : 'text-pink-600'}`}>
+                  {displayPrice > 0 ? `$${formatPrice(displayPrice)}` : isId ? 'Sinkron...' : 'Syncing...'}
                 </span>
               </div>
 
               <div className="flex items-center gap-1 shrink-0">
-                {currentCoin && (
+                {displayPrice > 0 && typeof displayChange24h === 'number' && (
                   <span
-                    className={`text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded-[2px] shrink-0 ${
-                      currentCoin.change24h >= 0
+                    className={`text-[10px] sm:text-[11px] font-bold tabular-nums px-1.5 py-0.5 rounded-[2px] shrink-0 ${
+                      displayChange24h >= 0
                         ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                         : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
                     }`}
                   >
-                    {currentCoin.change24h >= 0 ? '+' : ''}
-                    {currentCoin.change24h}%
+                    {displayChange24h >= 0 ? '+' : ''}
+                    {displayChange24h.toFixed(2)}%
                   </span>
                 )}
                 <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-pink-400 transition-transform duration-200 shrink-0 ${isSearchOpen ? 'rotate-180 text-pink-400' : ''}`} />
@@ -833,6 +837,10 @@ export const Header: React.FC<HeaderProps> = ({
               onSelectSymbol={onSelectSymbol}
               lang={lang}
             />
+          </div>
+
+          <div className="hidden xl:flex items-center px-2 py-1 rounded-[2px] border border-slate-800/70 bg-slate-900/40 shrink-0">
+            <DataStatusBadge symbol={selectedSymbol} scope="ticker" lang={lang} compact />
           </div>
 
           {/* Quick Trigger Analyze Button (Inline with Asset Selector on Mobile) */}

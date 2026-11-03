@@ -10,6 +10,8 @@ import {
 } from '../types/crypto.types';
 import { useCryptoWebsocket } from './useCryptoWebsocket';
 import { fetchFastCandles } from '../services/marketData';
+import { useMarketDataStore } from '../stores/useMarketDataStore';
+import { normalizeSymbol } from '../services/marketDataValidator';
 
 export interface UseMarketDataOptions {
   symbol: string;
@@ -24,7 +26,7 @@ export interface UseMarketDataReturn {
   livePrice: number | null;
   activeDisplayPrice: number | null | undefined;
   priceDirection: 'up' | 'down' | 'neutral';
-  wsStatus: 'connected' | 'connecting' | 'fallback';
+  wsStatus: 'connected' | 'connecting' | 'fallback' | 'disconnected';
   latencyMs: number;
   syncMetrics: WebSocketSyncMetrics;
   recentLiveTrades: LiveTradeTick[];
@@ -63,6 +65,8 @@ export function useMarketData({
   const [candles, setCandles] = useState<OHLCVCandle[]>(initialCandles);
   const isBackfillingRef = useRef<boolean>(false);
   const lastKlineTimeRef = useRef<number>(0);
+  const lastIntraTickTimeRef = useRef<number>(0);
+  const pendingIntraPriceRef = useRef<number | null>(null);
 
   // Sync external initial candles if passed or changed
   useEffect(() => {
@@ -72,22 +76,28 @@ export function useMarketData({
     }
   }, [initialCandles]);
 
+  const normSymbol = normalizeSymbol(symbol) || 'BTC/USDT';
+  const ssotPrice = useMarketDataStore((s) => s.tickers[normSymbol]?.price ?? null);
+
   // Connect to underlying exchange streaming service
   const wsData = useCryptoWebsocket(
     symbol,
     timeframe,
-    fallbackBasePrice,
+    undefined,
     exchange,
     marketType
   );
 
-  // Derived current active display price
+  // Derived current active display price strictly from SSOT / live WS / genuine candles (never static catalog basePrice)
   const activeDisplayPrice = useMemo(() => {
-    return (
-      wsData.livePrice ||
-      (candles.length > 0 ? candles[candles.length - 1].close : fallbackBasePrice)
-    );
-  }, [wsData.livePrice, candles, fallbackBasePrice]);
+    if (ssotPrice && ssotPrice > 0) return ssotPrice;
+    if (wsData.livePrice && wsData.livePrice > 0) return wsData.livePrice;
+    const lastCandle = candles.length > 0 ? candles[candles.length - 1] : null;
+    if (lastCandle && !lastCandle.isSimulated && lastCandle.close > 0) {
+      return lastCandle.close;
+    }
+    return null;
+  }, [ssotPrice, wsData.livePrice, candles]);
 
   // Handle incoming authoritative kline bar with gap detection & backfilling
   useEffect(() => {
@@ -140,26 +150,42 @@ export function useMarketData({
     });
   }, [wsData.liveCandle, symbol, timeframe, exchange, marketType]);
 
-  // Handle intra-candle price ticks between klines cleanly without competing race condition
+  // Handle intra-candle price ticks between klines cleanly with high-efficiency 100ms batching
   useEffect(() => {
-    if (!activeDisplayPrice) return;
+    if (!activeDisplayPrice || isNaN(activeDisplayPrice) || activeDisplayPrice <= 0) return;
+    pendingIntraPriceRef.current = activeDisplayPrice;
 
-    setCandles((prev) => {
-      if (prev.length === 0) return prev;
-      const last = prev[prev.length - 1];
+    const now = Date.now();
+    const elapsed = now - lastIntraTickTimeRef.current;
 
-      // Only update close/high/low if price actually moved and no concurrent kline conflict
-      if (last.close === activeDisplayPrice) return prev;
+    const applyIntraTick = (price: number) => {
+      setCandles((prev) => {
+        if (prev.length === 0) return prev;
+        const last = prev[prev.length - 1];
+        if (last.close === price) return prev;
 
-      const updatedLast: OHLCVCandle = {
-        ...last,
-        close: activeDisplayPrice,
-        high: Math.max(last.high, activeDisplayPrice),
-        low: Math.min(last.low, activeDisplayPrice),
-      };
+        const updatedLast: OHLCVCandle = {
+          ...last,
+          close: price,
+          high: Math.max(last.high, price),
+          low: Math.min(last.low, price),
+        };
 
-      return [...prev.slice(0, prev.length - 1), updatedLast];
-    });
+        return [...prev.slice(0, prev.length - 1), updatedLast];
+      });
+      lastIntraTickTimeRef.current = Date.now();
+    };
+
+    if (elapsed >= 100) {
+      applyIntraTick(activeDisplayPrice);
+    } else {
+      const timer = window.setTimeout(() => {
+        if (pendingIntraPriceRef.current !== null) {
+          applyIntraTick(pendingIntraPriceRef.current);
+        }
+      }, 100 - elapsed);
+      return () => clearTimeout(timer);
+    }
   }, [activeDisplayPrice]);
 
   return {

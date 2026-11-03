@@ -7,9 +7,32 @@ export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
     resolve: {
+      dedupe: ['react', 'react-dom'],
       alias: {
         '@': path.resolve(__dirname, './src'),
+        react: path.resolve(__dirname, './node_modules/react'),
+        'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
       },
+    },
+    optimizeDeps: {
+      entries: ['index.html'],
+      include: [
+        'react',
+        'react-dom',
+        'react-dom/client',
+        'react/jsx-runtime',
+        'react/jsx-dev-runtime',
+        'zustand',
+        'recharts',
+        'lucide-react',
+        'motion/react',
+        '@google/genai',
+        'firebase/app',
+        'firebase/auth',
+        'firebase/firestore',
+        'zod',
+      ],
+      exclude: ['ccxt'],
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
