@@ -31,23 +31,44 @@ export function useTerminalKeyboardShortcuts({
         target &&
         (target.tagName === 'INPUT' ||
           target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
           (target as any).isContentEditable);
 
       // Omnibar Command Palette (Cmd+K / Ctrl+K or /)
-      if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') || (e.key === '/' && !isInput)) {
+      if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') || (e.key === '/' && !isInput && !e.ctrlKey && !e.metaKey && !e.altKey)) {
         e.preventDefault();
         onOpenCommandBar();
         return;
       }
 
+      if (isInput) return;
+
+      if (e.key === 'Escape') {
+        onCloseModals();
+        return;
+      }
+
+      // Alt+Arrow pair cycling (checked before modifier guard)
+      if (e.altKey && !e.ctrlKey && !e.metaKey) {
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          onPrevSymbol();
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          onNextSymbol();
+        }
+        return;
+      }
+
+      // Never hijack browser shortcuts such as Ctrl+R / Cmd+R, Cmd+W, or Cmd+1..7
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
       // Help Shortcut (?)
-      if (e.key === '?' && !isInput) {
+      if (e.key === '?') {
         e.preventDefault();
         onOpenShortcuts();
         return;
       }
-
-      if (isInput) return;
 
       // Timeframe Quick Switches: 1=1m, 2=5m, 3=15m, 4=1H, 5=4H, 6=1D, 7=1W
       if (e.key === '1') {
@@ -80,14 +101,12 @@ export function useTerminalKeyboardShortcuts({
       } else if (e.key.toLowerCase() === 'r') {
         e.preventDefault();
         onTriggerAnalyze();
-      } else if (e.key === '[' || (e.altKey && e.key === 'ArrowUp')) {
+      } else if (e.key === '[') {
         e.preventDefault();
         onPrevSymbol();
-      } else if (e.key === ']' || (e.altKey && e.key === 'ArrowDown')) {
+      } else if (e.key === ']') {
         e.preventDefault();
         onNextSymbol();
-      } else if (e.key === 'Escape') {
-        onCloseModals();
       }
     };
 

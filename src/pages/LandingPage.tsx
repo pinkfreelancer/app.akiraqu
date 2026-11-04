@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { AkiraQuLogo } from '../components/AkiraQuLogo';
+import { useMarketDataStore } from '../stores/useMarketDataStore';
+import { formatSmartCryptoPrice } from '../services/marketDataValidator';
+import { CoinLogo } from '../components/ui/CoinLogo';
 import { 
   ArrowRight, 
   ShieldCheck, 
@@ -65,6 +68,34 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       onNavigateToLogin();
     }
   };
+
+  const liveBtcTicker = useMarketDataStore((s) => s.tickers['BTC/USDT']);
+  const ingestPriceTick = useMarketDataStore((s) => s.ingestPriceTick);
+
+  useEffect(() => {
+    if (liveBtcTicker && liveBtcTicker.price > 0) return;
+    let cancelled = false;
+    fetch('/api/v1/ticker?symbol=BTC/USDT&exchange=BINANCE&marketType=SPOT')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        const d = json?.data ?? json;
+        const p = Number(d?.price ?? d?.last);
+        const chg = Number(d?.priceChangePercent ?? d?.change24h ?? d?.percentage ?? 0);
+        if (!cancelled && Number.isFinite(p) && p > 0) {
+          ingestPriceTick({
+            symbol: 'BTC/USDT',
+            price: p,
+            change24h: Number.isFinite(chg) ? chg : 0,
+            source: 'REST',
+            allowAnchorReset: true,
+          });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [liveBtcTicker, ingestPriceTick]);
 
   // Active persona tab preview in Bento Grid
   const [activePersona, setActivePersona] = useState<'basic' | 'pro' | 'whales'>('basic');
@@ -450,26 +481,42 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 text-left">
                 <div className={`p-4 rounded-[2px] border ${isDark ? 'bg-slate-900/80 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
                   <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
-                    <span>ASSET BIAS</span>
-                    <span className="text-emerald-400 font-bold">BULLISH 84%</span>
+                    <span>LIVE SSOT FEED</span>
+                    <span
+                      className={`font-bold ${
+                        (liveBtcTicker?.change24h ?? 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                      }`}
+                    >
+                      {liveBtcTicker
+                        ? `${liveBtcTicker.change24h >= 0 ? '▲ +' : '▼ '}${liveBtcTicker.change24h.toFixed(2)}%`
+                        : 'LIVE'}
+                    </span>
                   </div>
-                  <div className="text-lg font-bold font-mono text-pink-400">BTC/USDT $68,450.00</div>
+                  <div className="text-lg font-bold font-mono tabular-nums text-pink-400 flex items-center gap-2">
+                    <CoinLogo symbol="BTC/USDT" size="sm" priority decorative />
+                    <span>
+                      BTC/USDT{' '}
+                      {liveBtcTicker && liveBtcTicker.price > 0
+                        ? `$${formatSmartCryptoPrice(liveBtcTicker.price)}`
+                        : '—'}
+                    </span>
+                  </div>
                   <div className="text-[11px] font-mono text-slate-400 mt-1 flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                    <span>Confluence Matrix Verified</span>
+                    <span>Single Source of Truth Active</span>
                   </div>
                 </div>
 
                 <div className={`p-4 rounded-[2px] border ${isDark ? 'bg-slate-900/80 border-slate-800/80' : 'bg-slate-50 border-slate-200'}`}>
                   <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
-                    <span>CYBORG GUIDANCE</span>
-                    <span className="text-pink-400 font-bold">OPTIMAL EDGE</span>
+                    <span>MARKET OVERVIEW</span>
+                    <span className="text-pink-400 font-bold">240+ PAIRS</span>
                   </div>
                   <div className="text-sm font-semibold text-slate-200">
-                    {isId ? 'Akumulasi Whales di Support $67,200' : 'Whale Accumulation at $67,200 Support'}
+                    {isId ? 'Ringkasan Pasar, Heatmap & Screener MTF' : 'Market Overview, Heatmap & MTF Screener'}
                   </div>
                   <div className="text-[11px] font-mono text-slate-400 mt-1">
-                    {isId ? 'Rekomendasi Risk/Reward 1:3.2' : 'Recommended Risk/Reward 1:3.2'}
+                    {isId ? '6 Timeframe Konfluensi Real-Time' : 'Real-Time 6-Timeframe Confluence'}
                   </div>
                 </div>
 
@@ -479,10 +526,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <span className="text-cyan-400 font-bold">READY</span>
                   </div>
                   <div className="text-xs font-mono text-slate-300">
-                    {isId ? '12 Indikator • 0 Latensi Eksternal' : '12 Indicators • 0 External Lag'}
+                    {isId ? '12 Indikator • Sinkronisasi WebSocket' : '12 Indicators • WebSocket Sync'}
                   </div>
                   <button 
-                    onClick={() => onNavigateToTerminal('ticker')}
+                    onClick={() => handleProtectedAction()}
                     className="mt-2 w-full py-1.5 rounded-[2px] bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 border border-pink-500/40 text-[11px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors"
                   >
                     <span>{isId ? 'Akses Layar Utama' : 'Open Main Screen'}</span>
@@ -697,7 +744,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
               <div className="pt-2">
                 <button
-                  onClick={() => onNavigateToTerminal('output')}
+                  onClick={() => handleProtectedAction('output')}
                   className="px-6 py-3 rounded-[2px] bg-pink-500/15 hover:bg-pink-500/25 text-pink-300 border border-pink-500/40 text-xs font-mono font-bold flex items-center gap-2 cursor-pointer transition-colors"
                 >
                   <span>{isId ? 'Coba AI Analysis di Terminal' : 'Try AI Analysis in Terminal'}</span>
@@ -899,6 +946,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="text-[11px] text-slate-500">
               <p>© {new Date().getFullYear()} Akiraqu Analytics. All rights reserved.</p>
               <p className="text-pink-400/80 mt-0.5">Guided by Cybernetic Intelligence.</p>
+              <p className="mt-0.5">
+                <a
+                  href="https://www.coingecko.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-pink-400 transition-colors"
+                >
+                  Data &amp; logo koin oleh CoinGecko
+                </a>
+              </p>
             </div>
           </div>
 

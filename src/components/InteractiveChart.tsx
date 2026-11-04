@@ -20,6 +20,7 @@ import { computeAnchoredVWAPs } from '../services/marketMaker/mmEngine';
 import { formatCryptoPrice } from '../utils/formatters';
 import { ExchangeMarketSelector } from './ExchangeMarketSelector';
 import { DataStatusBadge } from './ui/DataStatusBadge';
+import { CoinLogo } from './ui/CoinLogo';
 
 function formatChartPrice(val: number): string {
   return formatCryptoPrice(val);
@@ -540,7 +541,8 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = React.memo(({
       }`}>
         {/* Left: Symbol & Live OHLCV Telemetry */}
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap font-mono text-xs">
-          <div className="flex items-center gap-1.5 font-bold text-sm text-slate-100">
+          <div className={`flex items-center gap-2 font-bold text-sm ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
+            <CoinLogo symbol={symbol} size="sm" priority decorative showTooltip />
             <span>{symbol}</span>
             <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold border ${
               isDark ? 'bg-pink-950/60 text-pink-400 border-pink-500/40' : 'bg-pink-50 text-pink-700 border-pink-200'

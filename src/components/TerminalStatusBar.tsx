@@ -15,6 +15,7 @@ import { Language } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
 import { useMarketDataStore } from '../stores/useMarketDataStore';
 import { DataStatusBadge } from './ui/DataStatusBadge';
+import { CoinLogo } from './ui/CoinLogo';
 
 interface TerminalStatusBarProps {
   selectedSymbol: string;
@@ -107,8 +108,11 @@ export const TerminalStatusBar: React.FC<TerminalStatusBarProps> = ({
 
           <span className={`hidden sm:inline ${isDark ? 'text-slate-700' : 'text-slate-300'}`}>|</span>
 
-          <span className="hidden sm:inline text-slate-200 font-medium truncate max-w-[140px]">
-            {selectedSymbol} • {selectedTimeframe}
+          <span className="hidden sm:inline-flex items-center gap-1.5 text-slate-200 font-medium truncate max-w-[165px]">
+            <CoinLogo symbol={selectedSymbol} size="xs" decorative />
+            <span className="truncate">
+              {selectedSymbol} • {selectedTimeframe}
+            </span>
           </span>
 
           {effectivePrice > 0 && (

@@ -3,6 +3,7 @@ import { Calculator, ShieldCheck, Zap, RefreshCw } from 'lucide-react';
 import { useMarketDataStore } from '../../stores/useMarketDataStore';
 import { formatSmartCryptoPrice } from '../../services/marketDataValidator';
 import { DataStatusBadge } from '../ui/DataStatusBadge';
+import { CoinLogo } from '../ui/CoinLogo';
 
 interface PositionSizingViewProps {
   currentSymbol?: string;
@@ -88,13 +89,16 @@ export const PositionSizingView: React.FC<PositionSizingViewProps> = ({
                 <h1 className="text-lg sm:text-xl font-bold font-mono tracking-tight">
                   {isId ? 'Kalkulator Position Sizing Otomatis' : 'Automated Position Sizing Engine'}
                 </h1>
-                <span className="text-xs px-2 py-0.5 rounded-[2px] bg-pink-500/15 text-pink-300 border border-pink-500/30 font-mono tabular-nums font-bold">
-                  {currentSymbol}:{' '}
-                  {liveRefPrice > 0
-                    ? `$${formatSmartCryptoPrice(liveRefPrice)}`
-                    : isId
-                    ? 'Sinkron...'
-                    : 'Syncing...'}
+                <span className="text-xs px-2 py-0.5 rounded-[2px] bg-pink-500/15 text-pink-300 border border-pink-500/30 font-mono tabular-nums font-bold inline-flex items-center gap-1.5">
+                  <CoinLogo symbol={currentSymbol} size="xs" priority decorative />
+                  <span>
+                    {currentSymbol}:{' '}
+                    {liveRefPrice > 0
+                      ? `$${formatSmartCryptoPrice(liveRefPrice)}`
+                      : isId
+                      ? 'Sinkron...'
+                      : 'Syncing...'}
+                  </span>
                 </span>
                 <DataStatusBadge symbol={currentSymbol} scope="ticker" lang={lang} compact />
               </div>

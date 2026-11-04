@@ -3,7 +3,7 @@ import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-r
 import { useMarketDataStore } from '../../stores/useMarketDataStore';
 import { useTerminal } from '../../contexts/TerminalContext';
 import { formatSmartCryptoPrice } from '../../services/marketDataValidator';
-import { CryptoIcon } from '../ui/CryptoIcon';
+import { CoinLogo } from '../ui/CoinLogo';
 import { DataStatusBadge } from '../ui/DataStatusBadge';
 
 interface GainersLosersViewProps {
@@ -165,7 +165,7 @@ export const GainersLosersView: React.FC<GainersLosersViewProps> = ({
                     <td className="py-3 px-3 font-bold text-slate-400">#{item.rank}</td>
                     <td className="py-3 px-3">
                       <div className="flex items-center gap-2.5">
-                        <CryptoIcon symbol={item.symbol} size="sm" className="rounded-full shadow-xs shrink-0" />
+                        <CoinLogo symbol={item.symbol} size="sm" decorative />
                         <div>
                           <div className="font-bold text-white flex items-center gap-1.5">
                             <span>{item.symbol}</span>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Bell, BellRing, Plus, Trash2, ShieldCheck, CheckCircle2, Sliders, Zap } from 'lucide-react';
 import { formatCryptoPrice } from '../../utils/formatters';
+import { CoinLogo } from '../ui/CoinLogo';
 
 interface AlertBuilderViewProps {
   currentSymbol?: string;
@@ -115,7 +116,10 @@ export const AlertBuilderView: React.FC<AlertBuilderViewProps> = ({
 
         <form onSubmit={handleAddAlert} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <div>
-            <label className="text-xs font-mono text-slate-400 block mb-1">Pasangan Koin</label>
+            <label className="text-xs font-mono text-slate-400 flex items-center gap-1.5 mb-1">
+              <CoinLogo symbol={newSymbol} size="xs" priority decorative />
+              <span>Pasangan Koin</span>
+            </label>
             <input
               type="text"
               value={newSymbol}
@@ -193,7 +197,12 @@ export const AlertBuilderView: React.FC<AlertBuilderViewProps> = ({
               {alerts.map((a) => (
                 <tr key={a.id} className="hover:bg-slate-800/30 transition-colors">
                   <td className="py-3 px-3 text-slate-400">{a.id}</td>
-                  <td className="py-3 px-3 font-bold text-white">{a.symbol}</td>
+                  <td className="py-3 px-3 font-bold text-white">
+                    <div className="flex items-center gap-2">
+                      <CoinLogo symbol={a.symbol} size="sm" decorative />
+                      <span>{a.symbol}</span>
+                    </div>
+                  </td>
                   <td className="py-3 px-3 text-cyan-400">{a.metric.replace('_', ' ')}</td>
                   <td className="py-3 px-3 font-bold text-white">{a.threshold}</td>
                   <td className="py-3 px-3 text-slate-300">{a.channel}</td>

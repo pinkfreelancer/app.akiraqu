@@ -46,6 +46,7 @@ import { formatCryptoPrice } from '../utils/formatters';
 import { MyExchangesSettings } from '../components/MyExchangesSettings';
 import { BotAnalyticsView } from '../components/BotAnalyticsView';
 import { BotStrategyConfigModal } from '../components/BotStrategyConfigModal';
+import { CoinLogo } from '../components/ui/CoinLogo';
 
 interface BotTradingHubPageProps {
   currentSymbol: string;
@@ -772,8 +773,9 @@ export const BotTradingHubPage: React.FC<BotTradingHubPageProps> = ({
 
                       <div className="flex justify-between items-center text-slate-300 pt-2 border-t border-slate-700/80">
                         <span className="text-slate-400">Target &amp; Leverage:</span>
-                        <span className={isSpot ? 'text-cyan-300 font-bold' : 'text-purple-300 font-bold'}>
-                          {bot.marketType} ({bot.leverage}x) • {bot.targetSymbols.join(', ')}
+                        <span className={`inline-flex items-center gap-1.5 ${isSpot ? 'text-cyan-300 font-bold' : 'text-purple-300 font-bold'}`}>
+                          {bot.targetSymbols[0] && <CoinLogo symbol={bot.targetSymbols[0]} size="xs" decorative />}
+                          <span>{bot.marketType} ({bot.leverage}x) • {bot.targetSymbols.join(', ')}</span>
                         </span>
                       </div>
                     </div>
@@ -886,6 +888,7 @@ export const BotTradingHubPage: React.FC<BotTradingHubPageProps> = ({
                   </span>
                   <div>
                     <div className="flex items-center gap-2">
+                      {log.symbol !== 'SYSTEM' && <CoinLogo symbol={log.symbol} size="xs" decorative />}
                       <span className="text-white font-bold">{log.symbol}</span>
                       <span className="text-slate-300">@{formatCryptoPrice(log.price)}</span>
                     </div>

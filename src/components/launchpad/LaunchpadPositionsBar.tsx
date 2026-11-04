@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { OpenPosition } from '../../types/crypto.types';
 import { Language } from '../../i18n/translations';
 import { formatCryptoPrice } from '../../utils/formatters';
+import { CoinLogo } from '../ui/CoinLogo';
 import {
   TrendingUp,
   TrendingDown,
@@ -137,7 +138,8 @@ export const LaunchpadPositionsBar: React.FC<LaunchpadPositionsBarProps> = ({
                       isDark ? 'border-slate-800/60 hover:bg-slate-900/50' : 'border-slate-200 hover:bg-slate-50'
                     }`}
                   >
-                    <td className="py-2 px-3 font-bold text-white flex items-center gap-1">
+                    <td className="py-2 px-3 font-bold text-white flex items-center gap-1.5">
+                      <CoinLogo symbol={pos.symbol} size="xs" decorative />
                       <span>{pos.symbol}</span>
                       <span className="text-[9px] text-cyan-400 px-1 py-0.2 rounded bg-cyan-500/10 border border-cyan-500/20">
                         {pos.leverage}x

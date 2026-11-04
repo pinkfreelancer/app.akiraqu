@@ -8,3 +8,5 @@ coverage/
 *.key
 .env*
 !.env.example
+server/data/*.cache.json
+

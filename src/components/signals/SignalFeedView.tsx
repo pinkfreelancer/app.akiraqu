@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { formatCryptoPrice } from '../../utils/formatters';
 import { Language } from '../../i18n/translations';
+import { CoinLogo } from '../ui/CoinLogo';
 
 interface SignalFeedViewProps {
   signals: CryptoTradingSignal[];
@@ -346,6 +347,8 @@ export const SignalFeedView: React.FC<SignalFeedViewProps> = ({
                       {isLong ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
                       <span className="font-mono text-xs font-black">{sig.direction}</span>
                     </div>
+
+                    <CoinLogo symbol={sig.symbol} size="lg" decorative />
 
                     <div>
                       <div className="flex items-center gap-2 font-mono">

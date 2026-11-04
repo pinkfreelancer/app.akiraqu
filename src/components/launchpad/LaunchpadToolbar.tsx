@@ -9,6 +9,7 @@ import {
 } from '../../types/crypto.types';
 import { Language } from '../../i18n/translations';
 import { formatCryptoPrice } from '../../utils/formatters';
+import { CoinLogo } from '../ui/CoinLogo';
 import {
   LayoutGrid,
   Zap,
@@ -197,7 +198,7 @@ export const LaunchpadToolbar: React.FC<LaunchpadToolbarProps> = ({
               }`}
               title={isId ? 'Ganti Aset Kripto' : 'Switch Crypto Asset'}
             >
-              <Search className="w-3.5 h-3.5 text-cyan-400" />
+              <CoinLogo symbol={symbol} size="sm" priority decorative />
               <span className="text-cyan-400 font-bold">{symbol}</span>
               <ChevronDown className="w-3 h-3 text-slate-400" />
             </button>
@@ -236,9 +237,12 @@ export const LaunchpadToolbar: React.FC<LaunchpadToolbarProps> = ({
                           : 'hover:bg-slate-100 text-slate-800'
                       }`}
                     >
-                      <div>
-                        <div className="font-bold">{item.symbol}</div>
-                        <div className="text-[10px] text-slate-400">{item.name}</div>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <CoinLogo symbol={item.symbol} size="sm" decorative />
+                        <div className="min-w-0">
+                          <div className="font-bold truncate">{item.symbol}</div>
+                          <div className="text-[10px] text-slate-400 truncate">{item.name}</div>
+                        </div>
                       </div>
                       <span
                         className={`text-[10px] font-bold ${
@@ -404,6 +408,7 @@ export const LaunchpadToolbar: React.FC<LaunchpadToolbarProps> = ({
                     : 'bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200'
                 }`}
               >
+                <CoinLogo symbol={sym} size="xs" decorative />
                 <span>{sym.replace('/USDT', '')}</span>
                 {coinData && (
                   <span className={delta >= 0 ? 'text-emerald-400' : 'text-rose-400'}>

@@ -30,10 +30,12 @@ import { CryptoSymbolInfo, Timeframe, SupportedExchange, MarketType, StageId } f
 import { Language } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
 import { ModalWrapper } from './ui/ModalWrapper';
+import { CoinLogo } from './ui/CoinLogo';
 
 interface CommandItem {
   id: string;
   type: 'symbol' | 'stage' | 'timeframe' | 'exchange' | 'workspace' | 'action';
+  symbol?: string;
   title: string;
   subtitle?: string;
   badge?: string;
@@ -152,7 +154,8 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
 
     // 2. Stage Navigation Items
     const stages: { id: StageId; title: string; subtitle: string; icon: React.ElementType }[] = [
-      { id: 'ticker', title: 'Interactive Chart & Live Ticker', subtitle: 'Grafik Lilin, Live Trades & Depth', icon: CandlestickChart },
+      { id: 'market_overview', title: 'Ringkasan Pasar (Market Overview)', subtitle: 'Kesimpulan pasar hari ini, Heatmap Market Cap, Fear & Greed, Gainers/Losers & Funding/OI', icon: LayoutGrid },
+      { id: 'ticker', title: 'Grafik Utama & Live Ticker', subtitle: 'Grafik Lilin, Live Trades & Depth', icon: CandlestickChart },
       { id: 'signal', title: 'Trading Signals (Sinyal Real-time)', subtitle: 'Sinyal AI Confluence, TP/SL, R:R & Filter Koin', icon: Radio },
       { id: 'screening', title: 'Penyaring Pasar (Market Screener)', subtitle: 'Pemindai Multi-faktor RSI, SuperTrend & Funding Rate', icon: BarChart3 },
       { id: 'watchlist', title: 'Watchlist & Multi-Folder Favorit', subtitle: 'Folder Portofolio Pantauan & Price Alerts', icon: Star },
@@ -234,6 +237,7 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
       list.push({
         id: `sym-${sym.symbol}`,
         type: 'symbol',
+        symbol: sym.symbol,
         title: `${sym.symbol} (${sym.name})`,
         subtitle: `${sym.category} • Vol 24h: ${sym.volume24h}`,
         badge: `${sym.change24h >= 0 ? '+' : ''}${sym.change24h.toFixed(2)}% | $${formatCryptoPrice(sym.basePrice)}`,
@@ -580,15 +584,19 @@ export const CommandBarModal: React.FC<CommandBarModalProps> = ({
                 }`}
               >
                 <div className="flex items-center gap-3 overflow-hidden min-w-0">
-                  <div
-                    className={`p-2 rounded-md shrink-0 border ${
-                      isSelected
-                        ? 'bg-pink-600 text-white border-pink-500 font-bold'
-                        : 'bg-slate-800/90 text-pink-400 border-slate-700'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                  </div>
+                  {cmd.type === 'symbol' && cmd.symbol ? (
+                    <CoinLogo symbol={cmd.symbol} size="lg" decorative />
+                  ) : (
+                    <div
+                      className={`p-2 rounded-md shrink-0 border ${
+                        isSelected
+                          ? 'bg-pink-600 text-white border-pink-500 font-bold'
+                          : 'bg-slate-800/90 text-pink-400 border-slate-700'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </div>
+                  )}
                   <div className="overflow-hidden min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-sm text-white truncate">{cmd.title}</span>

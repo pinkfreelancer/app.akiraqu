@@ -23,6 +23,7 @@ import { PortfolioView } from '../components/trading/PortfolioView';
 import { ReportsView } from '../components/trading/ReportsView';
 import { BotTradingHubPage } from './BotTradingHubPage';
 import { TradingJournalPage } from './TradingJournalPage';
+import { CoinLogo } from '../components/ui/CoinLogo';
 
 interface TradingHubPageProps {
   currentSymbol: string;
@@ -163,6 +164,7 @@ export const TradingHubPage: React.FC<TradingHubPageProps> = ({
 
         {/* Selected Pair & Mode Pill in Right Header */}
         <div className="hidden xl:flex items-center gap-2 text-xs font-mono text-slate-400 px-3 py-1.5 rounded-xl bg-[#090d16] border border-slate-800">
+          <CoinLogo symbol={currentSymbol} size="xs" priority decorative />
           <span>Active Asset: <strong className="text-white">{currentSymbol}</strong></span>
           <span>•</span>
           <span>Exchange: <strong className="text-cyan-400">{selectedExchange}</strong></span>

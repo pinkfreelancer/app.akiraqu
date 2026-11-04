@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { PieChart, TrendingUp, TrendingDown, ArrowUpRight, BarChart3, Globe, Shield, RefreshCw, Zap, Layers } from 'lucide-react';
 import { formatCryptoPrice } from '../../utils/formatters';
-import { CryptoIcon } from '../ui/CryptoIcon';
+import { CoinLogo } from '../ui/CoinLogo';
 
 interface MacroDominanceViewProps {
   onSelectCoin?: (symbol: string) => void;
@@ -144,7 +144,7 @@ export const MacroDominanceView: React.FC<MacroDominanceViewProps> = ({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <CryptoIcon symbol={m.symbol} size="xs" className="rounded-full shadow-xs shrink-0" />
+                    <CoinLogo symbol={m.symbol} size="sm" decorative />
                     <span className="text-xs font-bold text-slate-200">{m.name}</span>
                   </div>
                   <span className={`text-sm font-mono font-bold ${m.text}`}>{m.share}%</span>

@@ -9,6 +9,7 @@ import { calculateAllIndicators } from '../../src/services/indicators/indicatorE
 import { calculateRiskPlan } from '../../src/services/risk/riskCalculator';
 import { evaluateConfluence } from '../../src/services/confluence/confluenceEngine';
 import { computeIndicatorConsensus } from '../../src/services/confluence/signalConsensus';
+import { mtfScreenerEngine } from '../services/mtfScreenerEngine';
 import { AuditLogEntry, ConfluenceEvaluation, MarketBias } from '../../src/types/crypto.types';
 
 export const analysisRouter = Router();
@@ -96,7 +97,9 @@ analysisRouter.post('/analyze', async (req: Request, res: Response) => {
     const candles = await fetchOHLCVOnDemandCCXT(symbol, timeframe, 150, exchange, marketType);
     const indicators = calculateAllIndicators(candles);
     const lastClose = candles[candles.length - 1].close;
-    const { marketBias: weightedBias } = computeIndicatorConsensus(indicators, lastClose);
+    const consensus = computeIndicatorConsensus(indicators, lastClose);
+    const { marketBias: weightedBias } = consensus;
+    mtfScreenerEngine.syncSignalFromAnalysis(symbol, timeframe, consensus);
     const riskPlan = calculateRiskPlan({
       currentPrice: lastClose,
       bias: weightedBias,

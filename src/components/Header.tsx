@@ -51,7 +51,7 @@ import { Language, getTranslation } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
 import { SearchCoinModal } from './SearchCoinModal';
 import { AkiraQuLogo } from './AkiraQuLogo';
-import { CryptoIcon } from './ui/CryptoIcon';
+import { CoinLogo } from './ui/CoinLogo';
 import { EngineThemeId, normalizeEngineTheme } from '../types/theme.types';
 import { useAuth } from '../contexts/AuthContext';
 import { useAlerts } from '../contexts/AlertContext';
@@ -173,11 +173,18 @@ export const Header: React.FC<HeaderProps> = ({
   const displayChange24h = ssotTicker ? ssotTicker.change24h : currentCoin?.change24h;
   const timeframes: Timeframe[] = ['1m', '5m', '15m', '1H', '4H', '1D', '1W'];
 
-  // Global keyboard shortcut to open pair search (/ or Ctrl+K / Cmd+K)
+  // Fallback keyboard shortcut to open pair search ONLY when CommandBar omnibar is not wired
   useEffect(() => {
+    if (onOpenCommandBar) return;
+
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
-      const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA');
+      const isInput =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable);
 
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
@@ -190,7 +197,7 @@ export const Header: React.FC<HeaderProps> = ({
 
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, []);
+  }, [onOpenCommandBar]);
 
   // Close dropdowns on clicking outside
   useEffect(() => {
@@ -208,10 +215,12 @@ export const Header: React.FC<HeaderProps> = ({
       group: isId ? 'Pasar & Berita' : 'Market & News',
       icon: Compass,
       items: [
+        { id: 'market_overview' as StageId, num: '00', name: isId ? 'Ringkasan Pasar' : 'Market Overview', icon: LayoutGrid, highlight: true },
         { id: 'ticker' as StageId, num: '01', name: isId ? 'Grafik Utama' : 'Main Chart', icon: CandlestickChart },
-        { id: 'scanner' as StageId, num: '02', name: isId ? 'Screener Pasar' : 'Market Screener', icon: Search },
-        { id: 'orderflow' as StageId, num: '03', name: isId ? 'Order Flow & Liq' : 'Order Flow & Liq', icon: Flame },
-        { id: 'sentiment' as StageId, num: '04', name: isId ? 'News (Berita & Sentimen)' : 'News & Sentiment', icon: Newspaper, highlight: true },
+        { id: 'mtf_screener' as StageId, num: '02', name: isId ? 'Screener MTF (240+)' : 'MTF Screener (240+)', icon: Layers },
+        { id: 'scanner' as StageId, num: '03', name: isId ? 'Screener Pasar' : 'Market Screener', icon: Search },
+        { id: 'orderflow' as StageId, num: '04', name: isId ? 'Order Flow & Liq' : 'Order Flow & Liq', icon: Flame },
+        { id: 'sentiment' as StageId, num: '05', name: isId ? 'News (Berita & Sentimen)' : 'News & Sentiment', icon: Newspaper, highlight: true },
       ],
     },
     {
@@ -802,7 +811,7 @@ export const Header: React.FC<HeaderProps> = ({
               title={`${t.header.searchModalTitle} (Shortcut: /)`}
             >
               <div className="flex items-center gap-1.5 min-w-0 shrink">
-                <CryptoIcon symbol={selectedSymbol} size="xs" className="rounded-full shadow-xs shrink-0" />
+                <CoinLogo symbol={selectedSymbol} size="sm" priority decorative showTooltip />
                 <span className={`font-bold text-xs sm:text-sm shrink-0 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   {selectedSymbol}
                 </span>
@@ -1032,7 +1041,7 @@ export const Header: React.FC<HeaderProps> = ({
                       onSelectSymbol(sym);
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`px-3 py-1.5 rounded-[2px] text-xs font-mono font-bold transition cursor-pointer min-h-[38px] shrink-0 ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] text-xs font-mono font-bold transition cursor-pointer min-h-[38px] shrink-0 ${
                       isSelected
                         ? isDark
                           ? 'bg-pink-500 text-white shadow-xs'
@@ -1042,7 +1051,8 @@ export const Header: React.FC<HeaderProps> = ({
                         : 'bg-white text-slate-700 border border-slate-200'
                     }`}
                   >
-                    {short}
+                    <CoinLogo symbol={sym} size="xs" decorative />
+                    <span>{short}</span>
                   </button>
                 );
               })}

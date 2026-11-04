@@ -22,6 +22,7 @@ import {
   Info,
 } from 'lucide-react';
 import { FormField } from './ui/FormField';
+import { CoinLogo } from './ui/CoinLogo';
 
 interface BotStrategyConfigModalProps {
   isOpen: boolean;
@@ -344,10 +345,11 @@ export const BotStrategyConfigModal: React.FC<BotStrategyConfigModalProps> = ({
               <Bot className="w-5 h-5" />
             </span>
             <div>
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                Konfigurasi Strategi Bot Spot &amp; Futures
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-500/40 tabular-nums font-bold">
-                  {currentSymbol} • ${formatCryptoPrice(currentPrice)}
+              <h2 className="text-base font-bold text-white flex flex-wrap items-center gap-2">
+                <span>Konfigurasi Strategi Bot Spot &amp; Futures</span>
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-500/40 tabular-nums font-bold inline-flex items-center gap-1.5">
+                  <CoinLogo symbol={currentSymbol} size="xs" priority decorative />
+                  <span>{currentSymbol} • ${formatCryptoPrice(currentPrice)}</span>
                 </span>
               </h2>
               <p className="text-xs text-slate-300 mt-0.5">

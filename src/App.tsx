@@ -16,8 +16,12 @@ import { AlertProvider, useAlerts } from './contexts/AlertContext';
 import { useAuth } from './contexts/AuthContext';
 import { AlertCenterModal } from './components/alerts/AlertCenterModal';
 import { AlertToastContainer } from './components/alerts/AlertToastContainer';
+import { ensureCoinMetadataLoaded, useCoinMetaStore } from './stores/useCoinMetaStore';
+import { prefetchCoinLogos } from './services/coinLogoService';
+import { useWatchlistStore } from './stores/useWatchlistStore';
 
 // Modular Pages
+import { MarketOverviewPage } from './pages/MarketOverviewPage';
 import { TickerPage } from './pages/TickerPage';
 import { SignalPage } from './pages/SignalPage';
 import { ScreeningPage } from './pages/ScreeningPage';
@@ -133,6 +137,19 @@ function TerminalApp() {
   } = useTerminal();
 
   const { setNavigateCallback } = useAlerts();
+  const coinMetaVersion = useCoinMetaStore((s) => s.version);
+  const watchlistItems = useWatchlistStore((s) => s.items);
+
+  // Load static CoinGecko logo metadata AT MOST ONCE on application startup
+  useEffect(() => {
+    void ensureCoinMetadataLoaded();
+  }, []);
+
+  // Prefetch logos strictly for active pair + Watchlist symbols
+  useEffect(() => {
+    if (coinMetaVersion === 0) return;
+    prefetchCoinLogos([selectedSymbol, ...watchlistItems.map((item) => item.symbol)]);
+  }, [coinMetaVersion, selectedSymbol, watchlistItems]);
 
   // Register navigation callback for alert direct links
   useEffect(() => {
@@ -433,7 +450,7 @@ function TerminalApp() {
                 transition={{ duration: 0.15 }}
                 className="w-full"
               >
-                {isLoading && !evaluation && currentStage !== 'journal' && currentStage !== 'bot' && currentStage !== 'backtest' ? (
+                {isLoading && !evaluation && currentStage !== 'market_overview' && currentStage !== 'journal' && currentStage !== 'bot' && currentStage !== 'backtest' ? (
                   <div className={`p-16 rounded-xl border flex flex-col items-center justify-center space-y-4 font-mono ${
                     isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-sm'
                   }`}>
@@ -443,7 +460,7 @@ function TerminalApp() {
                     </span>
                   </div>
                 ) : (
-                  workspaceMode === 'split' && currentStage !== 'ticker' ? (
+                  workspaceMode === 'split' && currentStage !== 'ticker' && currentStage !== 'market_overview' ? (
                     <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
                       {/* Master Anchor: Chart & Live Ticker (Pinned on Left) */}
                       <div className="xl:col-span-5 sticky top-2 z-10 min-w-0">
@@ -823,6 +840,20 @@ function TerminalApp() {
                     </div>
                   ) : (
                   <>
+                    {currentStage === 'market_overview' && (
+                      <MarketOverviewPage
+                        onSelectSymbol={(sym, requireFutures) => {
+                          if (requireFutures && selectedMarketType !== 'FUTURES') {
+                            handleMarketTypeChange('FUTURES');
+                          }
+                          handleSymbolChange(sym);
+                          selectStage('ticker');
+                        }}
+                        onNavigateStage={selectStage}
+                        theme={binaryTheme}
+                        lang={lang}
+                      />
+                    )}
                     {currentStage === 'ticker' && (
                       <TickerPage
                         symbol={selectedSymbol}
@@ -1300,19 +1331,32 @@ function TerminalApp() {
             </div>
           </div>
 
-          {/* Disclaimer: Penafian */}
-          <div className={`pt-2.5 border-t text-[11px] leading-relaxed flex items-start sm:items-center gap-2 ${
+          {/* Disclaimer: Penafian + CoinGecko Attribution */}
+          <div className={`pt-2.5 border-t text-[11px] leading-relaxed flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 ${
             isDark ? 'border-[#1e293b]/70 text-slate-400' : 'border-slate-200 text-slate-600'
           }`}>
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
-            <p className="font-mono">
-              <span className="font-bold text-amber-400 mr-1.5">Disclaimer: Penafian</span>
-              <span>
-                {lang === 'id'
-                  ? 'Segala informasi yang terdapat di halaman ini tidak boleh dianggap sebagai nasihat keuangan. Anda harus melakukan riset sendiri sebelum mengambil keputusan apa pun.'
-                  : 'All information provided on this platform is for analytical purposes only and must not be considered financial advice. Always conduct your own research.'}
-              </span>
-            </p>
+            <div className="flex items-start sm:items-center gap-2">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
+              <p className="font-mono">
+                <span className="font-bold text-amber-400 mr-1.5">Disclaimer: Penafian</span>
+                <span>
+                  {lang === 'id'
+                    ? 'Segala informasi yang terdapat di halaman ini tidak boleh dianggap sebagai nasihat keuangan. Anda harus melakukan riset sendiri sebelum mengambil keputusan apa pun.'
+                    : 'All information provided on this platform is for analytical purposes only and must not be considered financial advice. Always conduct your own research.'}
+                </span>
+              </p>
+            </div>
+            <span className="font-mono text-[11px] shrink-0 text-slate-400">
+              {lang === 'id' ? 'Data & logo koin oleh ' : 'Coin data & logos by '}
+              <a
+                href="https://www.coingecko.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-pink-400 hover:text-pink-300 underline underline-offset-2"
+              >
+                CoinGecko
+              </a>
+            </span>
           </div>
         </div>
       </footer>

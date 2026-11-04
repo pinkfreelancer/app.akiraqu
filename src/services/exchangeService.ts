@@ -487,6 +487,7 @@ export async function fetchMultiExchangeOHLCV(
       : [
           `https://data-api.binance.vision/api/v3/klines?symbol=${bnPair}&interval=${bnTf}&limit=${limit}`,
           `https://api.binance.com/api/v3/klines?symbol=${bnPair}&interval=${bnTf}&limit=${limit}`,
+          `https://fapi.binance.com/fapi/v1/klines?symbol=${bnPair}&interval=${bnTf}&limit=${limit}`,
         ];
 
     let res: Response | null = null;

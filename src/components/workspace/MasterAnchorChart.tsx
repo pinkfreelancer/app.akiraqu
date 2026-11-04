@@ -12,6 +12,7 @@ import { InteractiveChart } from '../InteractiveChart';
 import { formatCryptoPrice } from '../../utils/formatters';
 import { useMarketDataStore } from '../../stores/useMarketDataStore';
 import { DataStatusBadge } from '../ui/DataStatusBadge';
+import { CoinLogo } from '../ui/CoinLogo';
 import {
   Maximize2,
   Minimize2,
@@ -106,7 +107,8 @@ export const MasterAnchorChart: React.FC<MasterAnchorChartProps> = ({
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <DataStatusBadge symbol={symbol} scope="ticker" lang={lang} />
 
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-center gap-2">
+            <CoinLogo symbol={symbol} size="sm" priority decorative />
             <span className="font-mono font-bold text-sm sm:text-base text-slate-100">{symbol}</span>
             <span
               className={`font-mono tabular-nums text-sm sm:text-base font-bold ${

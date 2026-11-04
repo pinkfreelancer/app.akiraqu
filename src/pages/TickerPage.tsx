@@ -23,7 +23,7 @@ import {
   ArrowDownRight,
 } from 'lucide-react';
 import { formatCryptoPrice } from '../utils/formatters';
-import { CryptoIcon } from '../components/ui/CryptoIcon';
+import { CoinLogo } from '../components/ui/CoinLogo';
 import { useMarketDataStore } from '../stores/useMarketDataStore';
 import { DataStatusBadge } from '../components/ui/DataStatusBadge';
 
@@ -147,7 +147,7 @@ export const TickerPage: React.FC<TickerPageProps> = React.memo(({
             isDark ? 'border-slate-800/80' : 'border-slate-200'
           }`}>
             <div className="flex items-center gap-2">
-              <CryptoIcon symbol={symbol} size="sm" className="rounded-full shadow-xs shrink-0" />
+              <CoinLogo symbol={symbol} size="sm" priority decorative showTooltip />
               <span className={`text-xs font-mono font-bold tracking-wider uppercase ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
                 {symbol} {lang === 'id' ? 'Live Order Book' : 'Live Order Book'}
               </span>

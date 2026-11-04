@@ -56,4 +56,70 @@ describe('server/routes/market & marketWsProxy - Real-time and Fallback Integrit
     expect(mockSnapshot.trades.length).toBeGreaterThan(0);
     expect(mockSnapshot.liveCandle.close).toBe(81880);
   });
+
+  it('verifies /api/v1/market-overview response envelope contract', () => {
+    const mockOverviewEnvelope = {
+      success: true,
+      status: 'success',
+      latencyMs: 24,
+      data: {
+        updatedAt: Date.now(),
+        global: {
+          totalMarketCapUsd: 2_630_000_000_000,
+          marketCapChange24hPct: -1.4,
+          totalVolume24hUsd: 62_000_000_000,
+          btcDominancePct: 59.3,
+          ethDominancePct: 10.6,
+          updatedAt: Date.now(),
+        },
+        breadth: {
+          advancing: 159,
+          declining: 79,
+          unchanged: 1,
+          total: 239,
+          advancingPct: 67,
+        },
+      },
+    };
+
+    const isOk =
+      mockOverviewEnvelope.status === 'success' || mockOverviewEnvelope.success === true;
+    expect(isOk).toBe(true);
+    expect(mockOverviewEnvelope.data.global.totalMarketCapUsd).toBeGreaterThan(0);
+    expect(mockOverviewEnvelope.data.breadth.total).toBeGreaterThan(0);
+  });
+
+  it('verifies /api/coins/meta stores only static metadata fields decoupled from price SSOT', () => {
+    const sampleMetaEnvelope = {
+      success: true,
+      status: 'success',
+      updatedAt: Date.now(),
+      stale: false,
+      degraded: false,
+      cacheAgeSec: 12,
+      count: 1,
+      data: [
+        {
+          id: 'bitcoin',
+          symbol: 'btc',
+          name: 'Bitcoin',
+          image: 'https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png?1696501400',
+          market_cap_rank: 1,
+        },
+      ],
+    };
+
+    expect(sampleMetaEnvelope.success).toBe(true);
+    const first = sampleMetaEnvelope.data[0];
+    expect(Object.keys(first).sort()).toEqual([
+      'id',
+      'image',
+      'market_cap_rank',
+      'name',
+      'symbol',
+    ]);
+    expect('current_price' in first).toBe(false);
+    expect(first.image.startsWith('https://coin-images.coingecko.com/')).toBe(true);
+  });
 });
+

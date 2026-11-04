@@ -34,6 +34,7 @@ import { useMarketDataStore } from '../stores/useMarketDataStore';
 import { useTerminal } from '../contexts/TerminalContext';
 import { formatSmartCryptoPrice } from '../services/marketDataValidator';
 import { DataStatusBadge } from '../components/ui/DataStatusBadge';
+import { CoinLogo } from '../components/ui/CoinLogo';
 
 interface ScreeningPageProps {
   currentSymbol?: string;
@@ -818,13 +819,18 @@ export const ScreeningPage: React.FC<ScreeningPageProps> = ({
                     <tr key={coin.symbol} className="hover:bg-slate-800/30 transition-colors">
                       {/* Asset & Name */}
                       <td className="py-3">
-                        <div className="font-bold text-white text-sm flex items-center gap-1.5">
-                          <span>{coin.symbol}</span>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">
-                            {coin.category}
-                          </span>
+                        <div className="flex items-center gap-2.5">
+                          <CoinLogo symbol={coin.symbol} size="sm" decorative />
+                          <div>
+                            <div className="font-bold text-white text-sm flex items-center gap-1.5">
+                              <span>{coin.symbol}</span>
+                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">
+                                {coin.category}
+                              </span>
+                            </div>
+                            <div className="text-[10px] text-slate-400">{coin.name}</div>
+                          </div>
                         </div>
-                        <div className="text-[10px] text-slate-400">{coin.name}</div>
                       </td>
 
                       {/* Price */}

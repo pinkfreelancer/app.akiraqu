@@ -34,6 +34,7 @@ import { Language } from '../../i18n/translations';
 import { useMarketDataStore } from '../../stores/useMarketDataStore';
 import { formatSmartCryptoPrice } from '../../services/marketDataValidator';
 import { DataStatusBadge } from '../ui/DataStatusBadge';
+import { CoinLogo } from '../ui/CoinLogo';
 
 interface ManualTradingViewProps {
   currentSymbol: string;
@@ -404,8 +405,8 @@ export const ManualTradingView: React.FC<ManualTradingViewProps> = ({
         }`}
       >
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-mono font-bold text-sm flex items-center gap-1.5">
-            <Zap className="w-4 h-4 text-cyan-400" />
+          <div className="px-3 py-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-mono font-bold text-sm flex items-center gap-2">
+            <CoinLogo symbol={currentSymbol} size="md" priority decorative />
             <span>{currentSymbol}</span>
           </div>
           <div>
@@ -952,6 +953,7 @@ export const ManualTradingView: React.FC<ManualTradingViewProps> = ({
                       <tr key={pos.id} className="hover:bg-slate-800/30">
                         <td className="py-2.5">
                           <div className="font-bold text-white flex items-center gap-1.5">
+                            <CoinLogo symbol={pos.symbol} size="sm" decorative />
                             <span>{pos.symbol}</span>
                             <span
                               className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
@@ -1044,7 +1046,12 @@ export const ManualTradingView: React.FC<ManualTradingViewProps> = ({
                       <td className="py-2.5 text-slate-400 text-[11px]">
                         {new Date(ord.timestamp).toLocaleTimeString()}
                       </td>
-                      <td className="py-2.5 font-bold text-white">{ord.symbol}</td>
+                      <td className="py-2.5 font-bold text-white">
+                        <div className="flex items-center gap-1.5">
+                          <CoinLogo symbol={ord.symbol} size="xs" decorative />
+                          <span>{ord.symbol}</span>
+                        </div>
+                      </td>
                       <td className="py-2.5">
                         <span
                           className={`px-1.5 py-0.5 rounded font-bold text-[10px] ${

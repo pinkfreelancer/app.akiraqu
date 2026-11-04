@@ -30,6 +30,7 @@ import {
 import { Language } from '../../i18n/translations';
 import { formatCryptoPrice } from '../../utils/formatters';
 import { resolveSignalMetrics } from '../../utils/alertUtils';
+import { CoinLogo } from '../ui/CoinLogo';
 
 interface AlertCenterModalProps {
   lang?: Language;
@@ -509,8 +510,9 @@ export const AlertCenterModal: React.FC<AlertCenterModalProps> = ({
 
                           {/* Symbol */}
                           {alert.symbol && (
-                            <span className="px-2 py-0.5 rounded font-mono font-bold text-xs bg-slate-800 text-amber-400 border border-slate-700">
-                              {alert.symbol}
+                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-mono font-bold text-xs bg-slate-800 text-amber-400 border border-slate-700">
+                              <CoinLogo symbol={alert.symbol} size="xs" decorative />
+                              <span>{alert.symbol}</span>
                             </span>
                           )}
 

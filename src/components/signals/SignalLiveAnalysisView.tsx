@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { formatCryptoPrice } from '../../utils/formatters';
 import { Language } from '../../i18n/translations';
+import { CoinLogo } from '../ui/CoinLogo';
 
 interface SignalLiveAnalysisViewProps {
   selectedSignal: CryptoTradingSignal | null;
@@ -96,6 +97,7 @@ export const SignalLiveAnalysisView: React.FC<SignalLiveAnalysisViewProps> = ({
                     : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
                 }`}
               >
+                <CoinLogo symbol={sig.symbol} size="xs" decorative />
                 <span>{sig.symbol}</span>
                 <span className="text-[10px] opacity-75">{sig.direction}</span>
               </button>
@@ -121,6 +123,7 @@ export const SignalLiveAnalysisView: React.FC<SignalLiveAnalysisViewProps> = ({
             >
               {isLong ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
             </div>
+            <CoinLogo symbol={signal.symbol} size="lg" priority decorative />
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xl font-bold text-white">{signal.symbol}</span>

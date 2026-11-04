@@ -29,8 +29,9 @@ import {
 } from 'lucide-react';
 import { formatCryptoPrice } from '../utils/formatters';
 import { Language } from '../i18n/translations';
-import { CryptoIcon } from '../components/ui/CryptoIcon';
+import { CoinLogo } from '../components/ui/CoinLogo';
 import { useMarketDataStore } from '../stores/useMarketDataStore';
+import { useWatchlistStore } from '../stores/useWatchlistStore';
 import { formatSmartCryptoPrice } from '../services/marketDataValidator';
 import { DataStatusBadge } from '../components/ui/DataStatusBadge';
 
@@ -218,8 +219,10 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
   const isDark = theme === 'dark';
   const isId = lang === 'id';
 
-  const [folders, setFolders] = useState<WatchlistFolder[]>(INITIAL_FOLDERS);
-  const [items, setItems] = useState<WatchlistItem[]>(INITIAL_ITEMS);
+  const folders = useWatchlistStore((s) => s.folders);
+  const items = useWatchlistStore((s) => s.items);
+  const setFolders = useWatchlistStore((s) => s.setFolders);
+  const setItems = useWatchlistStore((s) => s.setItems);
   const [activeFolderId, setActiveFolderId] = useState<string>('fav-core');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -518,7 +521,7 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
                       {/* Asset & Name */}
                       <td className="py-3">
                         <div className="flex items-center gap-2.5">
-                          <CryptoIcon symbol={item.symbol} size="sm" className="rounded-full shadow-xs shrink-0" />
+                          <CoinLogo symbol={item.symbol} size="sm" decorative showTooltip />
                           <div>
                             <div className="font-bold text-white text-sm flex items-center gap-1.5">
                               <span>{item.symbol}</span>
@@ -690,7 +693,7 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
                   className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between hover:border-slate-700"
                 >
                   <div className="flex items-center gap-2.5">
-                    <CryptoIcon symbol={c.symbol} size="sm" className="rounded-full shadow-xs shrink-0" />
+                    <CoinLogo symbol={c.symbol} size="sm" decorative showTooltip />
                     <div>
                       <div className="font-bold text-white text-xs">{c.symbol}</div>
                       <div className="text-[10px] text-slate-400">{c.name} • {c.category}</div>
@@ -786,7 +789,7 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({
           <div className="w-full max-w-md bg-[#0f172a] border border-[#1e293b] rounded-2xl p-5 font-mono space-y-4 shadow-2xl">
             <div className="flex items-center justify-between pb-2 border-b border-slate-800">
               <h3 className="font-bold text-white text-base flex items-center gap-2">
-                <Edit3 className="w-4 h-4 text-cyan-400" />
+                <CoinLogo symbol={editingNotesItem.symbol} size="sm" decorative />
                 <span>Catatan Strategi: {editingNotesItem.symbol}</span>
               </h3>
               <button

@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw, RotateCcw } from 'lucide-react';
+import { reportClientError } from '../utils/clientErrorLogger';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -22,6 +23,10 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   public override componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     console.error('Uncaught error caught by ErrorBoundary:', error, errorInfo);
+    reportClientError(error, {
+      componentStack: errorInfo.componentStack,
+      source: 'ErrorBoundary',
+    });
   }
 
   private handleReset = (): void => {

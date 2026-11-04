@@ -99,7 +99,8 @@ export const TraderWorkflowBar: React.FC<TraderWorkflowBarProps> = ({
         borderColor: 'border-pink-500/40',
         bgColor: 'bg-pink-500/10',
         modules: [
-          { id: 'btc_dominance', label: { id: 'Dominasi BTC', en: 'BTC Dominance' }, icon: PieChart, isPrimary: true },
+          { id: 'market_overview', label: { id: 'Ringkasan Pasar', en: 'Market Overview' }, icon: Compass, isPrimary: true },
+          { id: 'btc_dominance', label: { id: 'Dominasi BTC', en: 'BTC Dominance' }, icon: PieChart },
           { id: 'onchain_data', label: { id: 'Data On-Chain', en: 'On-Chain Metrics' }, icon: Database },
           { id: 'economic_calendar', label: { id: 'Kalender Ekonomi', en: 'Economic Calendar' }, icon: Calendar },
           { id: 'sentiment', label: { id: 'Berita & Sentimen', en: 'News & Sentiment' }, icon: Newspaper, badge: 'Alert' },

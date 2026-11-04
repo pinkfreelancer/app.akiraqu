@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Network, BarChart3, ArrowUpRight, TrendingUp, ShieldCheck } from 'lucide-react';
+import { CoinLogo } from '../ui/CoinLogo';
 
 interface CorrelationBetaViewProps {
   theme?: 'light' | 'dark';
@@ -100,7 +101,12 @@ export const CorrelationBetaView: React.FC<CorrelationBetaViewProps> = ({
             <tbody>
               {assets.map((rowAsset) => (
                 <tr key={rowAsset} className="border-b border-slate-800/40">
-                  <td className="py-3 px-3 text-left font-bold text-white">{rowAsset}</td>
+                  <td className="py-3 px-3 text-left font-bold text-white">
+                    <div className="flex items-center gap-2">
+                      <CoinLogo symbol={rowAsset} size="xs" decorative />
+                      <span>{rowAsset}</span>
+                    </div>
+                  </td>
                   {assets.map((colAsset) => {
                     const val = correlationMatrix[rowAsset][colAsset];
                     return (
@@ -132,9 +138,12 @@ export const CorrelationBetaView: React.FC<CorrelationBetaViewProps> = ({
               className={`p-3.5 rounded-xl border ${isDark ? 'bg-slate-900/80 border-slate-800' : 'bg-slate-50 border-slate-200'}`}
             >
               <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-bold text-white">{item.asset}</span>
-                  <span className="text-[10px] text-slate-400 block">{item.name}</span>
+                <div className="flex items-center gap-2.5">
+                  <CoinLogo symbol={item.asset} size="sm" decorative />
+                  <div>
+                    <span className="text-xs font-bold text-white">{item.asset}</span>
+                    <span className="text-[10px] text-slate-400 block">{item.name}</span>
+                  </div>
                 </div>
                 <span className="text-sm font-bold font-mono text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded border border-pink-500/20">
                   Beta: {item.beta.toFixed(2)}

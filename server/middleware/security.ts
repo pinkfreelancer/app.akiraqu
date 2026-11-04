@@ -18,6 +18,10 @@ const isDistributedRedisConfigured = Boolean(process.env.REDIS_URL && process.en
 export function securityHeadersMiddleware(_req: Request, res: Response, next: NextFunction) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader(
+    'Content-Security-Policy',
+    "img-src 'self' data: blob: https://coin-images.coingecko.com https://assets.coingecko.com https://*.googleusercontent.com https:; object-src 'none'; base-uri 'self';"
+  );
   next();
 }
 

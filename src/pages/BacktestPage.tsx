@@ -38,6 +38,7 @@ import {
   Scale,
   RefreshCw,
 } from 'lucide-react';
+import { CoinLogo } from '../components/ui/CoinLogo';
 import {
   BacktestConfig,
   BacktestDataSourceType,
@@ -612,13 +613,15 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">
                   {isId ? 'Pasangan Aset (Pair)' : 'Trading Pair'}
                 </label>
-                <select
-                  value={apiSymbol}
-                  onChange={(e) => setApiSymbol(e.target.value)}
-                  className={`w-full px-3 py-2 rounded-xl text-xs font-mono font-bold border transition-colors ${
-                    isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
-                  }`}
-                >
+                <div className="flex items-center gap-2">
+                  <CoinLogo symbol={apiSymbol} size="md" priority decorative />
+                  <select
+                    value={apiSymbol}
+                    onChange={(e) => setApiSymbol(e.target.value)}
+                    className={`w-full px-3 py-2 rounded-xl text-xs font-mono font-bold border transition-colors ${
+                      isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                    }`}
+                  >
                   <option value="BTC/USDT">BTC/USDT (Bitcoin)</option>
                   <option value="ETH/USDT">ETH/USDT (Ethereum)</option>
                   <option value="SOL/USDT">SOL/USDT (Solana)</option>
@@ -630,8 +633,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                   <option value="NEAR/USDT">NEAR/USDT (Near Protocol)</option>
                   <option value="SUI/USDT">SUI/USDT (Sui)</option>
                   <option value="LINK/USDT">LINK/USDT (Chainlink)</option>
-                  <option value="DOGE/USDT">DOGE/USDT (Dogecoin)</option>
-                </select>
+                    <option value="DOGE/USDT">DOGE/USDT (Dogecoin)</option>
+                  </select>
+                </div>
               </div>
 
               <div>
@@ -714,8 +718,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                     >
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-[10px] uppercase font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-400">
-                            {preset.symbol} • {preset.timeframe}
+                          <span className="inline-flex items-center gap-1.5 text-[10px] uppercase font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-400">
+                            <CoinLogo symbol={preset.symbol} size="xs" decorative />
+                            <span>{preset.symbol} • {preset.timeframe}</span>
                           </span>
                           {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />}
                         </div>

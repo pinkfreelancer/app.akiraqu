@@ -4,6 +4,7 @@ import { useJournalTrades } from '../services/journalStorageService';
 import { BookOpen, Plus, TrendingUp, TrendingDown, CheckCircle2, XCircle, Clock, Trash2, Download, Filter, Cloud } from 'lucide-react';
 import { formatCryptoPrice } from '../utils/formatters';
 import { useAuth } from '../contexts/AuthContext';
+import { CoinLogo } from '../components/ui/CoinLogo';
 
 interface TradingJournalPageProps {
   currentSymbol: string;
@@ -180,7 +181,8 @@ export const TradingJournalPage: React.FC<TradingJournalPageProps> = ({
             className="flex items-center gap-2 px-3 py-2 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs font-mono transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            Catat Trade Baru ({currentSymbol})
+            <CoinLogo symbol={currentSymbol} size="xs" priority decorative />
+            <span>Catat Trade Baru ({currentSymbol})</span>
           </button>
         </div>
       </div>
@@ -189,7 +191,10 @@ export const TradingJournalPage: React.FC<TradingJournalPageProps> = ({
       {isAddingTrade && (
         <form onSubmit={handleCreateTrade} className={`p-5 rounded-2xl border ${isDark ? 'bg-[#0f172a] border-pink-500/40' : 'bg-slate-50 border-pink-300'} space-y-4`}>
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white font-mono">Catat Trade Setup: {currentSymbol}</h3>
+            <h3 className="text-sm font-bold text-white font-mono flex items-center gap-2">
+              <CoinLogo symbol={currentSymbol} size="sm" priority decorative />
+              <span>Catat Trade Setup: {currentSymbol}</span>
+            </h3>
             <span className="text-xs text-slate-400">Score Confluence: {currentScore}/100</span>
           </div>
 
@@ -337,7 +342,8 @@ export const TradingJournalPage: React.FC<TradingJournalPageProps> = ({
                 <tr key={t.id} className="hover:bg-slate-800/30 transition-colors">
                   <td className="py-3 px-4">
                     <div className="font-bold text-white flex items-center gap-1.5">
-                      {t.symbol}
+                      <CoinLogo symbol={t.symbol} size="sm" decorative />
+                      <span>{t.symbol}</span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${t.side === 'LONG' ? 'bg-emerald-950 text-emerald-400' : 'bg-rose-950 text-rose-400'}`}>
                         {t.side}
                       </span>

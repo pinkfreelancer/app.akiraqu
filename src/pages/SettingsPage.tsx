@@ -1479,6 +1479,79 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 </button>
               </div>
             </div>
+
+            {/* Startup Screen Preference: Ringkasan Pasar vs Grafik Utama */}
+            <div className={`mt-4 p-3.5 sm:p-4 rounded-[2px] border ${isDark ? 'bg-[#070b14] border-[#1e293b]' : 'bg-slate-50 border-slate-200'}`}>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div className="space-y-1">
+                  <span className="text-xs sm:text-sm font-bold font-mono text-white flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-pink-400 shrink-0" />
+                    {isId ? 'Halaman Awal Saat Membuka AKIRAQU' : 'Default Startup Screen'}
+                  </span>
+                  <p className="text-[11px] sm:text-xs text-slate-400">
+                    {isId
+                      ? 'Pilih apakah terminal langsung membuka Ringkasan Pasar (disarankan untuk gambaran cepat) atau langsung ke Grafik Utama.'
+                      : 'Choose whether AKIRAQU opens on Market Overview (recommended) or directly on Main Chart.'}
+                  </p>
+                </div>
+
+                <div
+                  role="group"
+                  aria-label={isId ? 'Pilihan Halaman Awal' : 'Startup Screen Preference'}
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-2 shrink-0"
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleUpdateSettings({
+                        display: {
+                          ...settings.display,
+                          startupStage: 'market_overview',
+                        },
+                      })
+                    }
+                    aria-pressed={(settings.display.startupStage ?? 'market_overview') === 'market_overview'}
+                    className={`px-3.5 py-2 rounded-[2px] border text-xs font-mono font-bold transition cursor-pointer flex items-center justify-center gap-1.5 min-h-[36px] ${
+                      (settings.display.startupStage ?? 'market_overview') === 'market_overview'
+                        ? 'bg-pink-600/25 border-pink-500 text-pink-200'
+                        : isDark
+                        ? 'bg-slate-800/80 border-slate-700 text-slate-300 hover:border-pink-500/40'
+                        : 'bg-white border-slate-300 text-slate-700 hover:border-pink-500'
+                    }`}
+                  >
+                    {(settings.display.startupStage ?? 'market_overview') === 'market_overview' && (
+                      <Check className="w-3.5 h-3.5 text-pink-400 shrink-0" />
+                    )}
+                    <span>{isId ? 'Mulai dari Ringkasan Pasar' : 'Start with Market Overview'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleUpdateSettings({
+                        display: {
+                          ...settings.display,
+                          startupStage: 'ticker',
+                        },
+                      })
+                    }
+                    aria-pressed={settings.display.startupStage === 'ticker'}
+                    className={`px-3.5 py-2 rounded-[2px] border text-xs font-mono font-bold transition cursor-pointer flex items-center justify-center gap-1.5 min-h-[36px] ${
+                      settings.display.startupStage === 'ticker'
+                        ? 'bg-pink-600/25 border-pink-500 text-pink-200'
+                        : isDark
+                        ? 'bg-slate-800/80 border-slate-700 text-slate-300 hover:border-pink-500/40'
+                        : 'bg-white border-slate-300 text-slate-700 hover:border-pink-500'
+                    }`}
+                  >
+                    {settings.display.startupStage === 'ticker' && (
+                      <Check className="w-3.5 h-3.5 text-pink-400 shrink-0" />
+                    )}
+                    <span>{isId ? 'Mulai dari Grafik Utama' : 'Start with Main Chart'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -3,7 +3,7 @@ import { Search, X, Zap, Coins, ArrowUpRight, ArrowDownRight, Sparkles, Clock, F
 import { CryptoSymbolInfo } from '../types/crypto.types';
 import { Language, getTranslation } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
-import { CryptoIcon } from './ui/CryptoIcon';
+import { CoinLogo } from './ui/CoinLogo';
 import { useMarketDataStore } from '../stores/useMarketDataStore';
 
 interface SearchCoinModalProps {
@@ -480,7 +480,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                       : 'bg-slate-900 border border-slate-700 text-slate-200 hover:text-white hover:border-pink-500/60 hover:bg-slate-800'
                   }`}
                 >
-                  <CryptoIcon symbol={ticker} size="xs" />
+                  <CoinLogo symbol={ticker} size="xs" decorative />
                   <span>{base}</span>
                 </button>
               );
@@ -501,7 +501,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                   onClick={() => handleSelect(p)}
                   className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono bg-pink-950/40 border border-pink-700/60 text-pink-200 hover:text-white hover:border-pink-400 transition cursor-pointer shrink-0 font-medium"
                 >
-                  <CryptoIcon symbol={p} size="xs" />
+                  <CoinLogo symbol={p} size="xs" decorative />
                   <span>{p}</span>
                 </button>
               ))}
@@ -593,9 +593,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
           {customPairCandidate && (
             <div className="mb-2 p-3 rounded-lg bg-gradient-to-r from-pink-950/50 via-rose-950/40 to-slate-900 border border-pink-500/50 flex items-center justify-between shadow-xs">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-md bg-pink-500/20 text-pink-400 border border-pink-500/40">
-                  <PlusCircle className="w-4 h-4" />
-                </div>
+                <CoinLogo symbol={customPairCandidate} size="md" decorative />
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-mono font-bold text-white text-sm">
@@ -654,7 +652,7 @@ export const SearchCoinModal: React.FC<SearchCoinModalProps> = ({
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <CryptoIcon symbol={coin.symbol} size="lg" className="rounded-lg shadow-xs shrink-0" />
+                    <CoinLogo symbol={coin.symbol} size="lg" decorative showTooltip />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-mono font-bold text-white text-sm">

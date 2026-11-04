@@ -25,6 +25,7 @@ import { formatCryptoPrice } from '../../utils/formatters';
 import { Language } from '../../i18n/translations';
 import { useMarketDataStore } from '../../stores/useMarketDataStore';
 import { DataStatusBadge } from '../ui/DataStatusBadge';
+import { CoinLogo } from '../ui/CoinLogo';
 
 interface PortfolioViewProps {
   onSelectSymbol?: (symbol: string) => void;
@@ -533,7 +534,10 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
             {holdings.map((asset) => (
               <div key={asset.asset} className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white">{asset.asset}</span>
+                  <div className="flex items-center gap-1.5">
+                    <CoinLogo symbol={asset.asset} size="xs" decorative />
+                    <span className="font-bold text-white">{asset.asset}</span>
+                  </div>
                   <span className="text-cyan-400 font-bold">{asset.allocationPct}%</span>
                 </div>
                 <div className="text-slate-300 font-bold">${asset.valueUsd.toLocaleString()}</div>
@@ -615,8 +619,13 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
                 return (
                   <tr key={h.asset} className="hover:bg-slate-800/30">
                     <td className="py-3">
-                      <div className="font-bold text-white text-sm">{h.asset}</div>
-                      <div className="text-[10px] text-slate-400">{h.name}</div>
+                      <div className="flex items-center gap-2.5">
+                        <CoinLogo symbol={h.asset} size="md" decorative />
+                        <div>
+                          <div className="font-bold text-white text-sm">{h.asset}</div>
+                          <div className="text-[10px] text-slate-400">{h.name}</div>
+                        </div>
+                      </div>
                     </td>
                     <td className="py-3">
                       <div className="text-slate-200 font-bold">{h.total} {h.asset}</div>

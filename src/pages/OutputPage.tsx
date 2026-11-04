@@ -8,6 +8,7 @@ import { Language, getTranslation } from '../i18n/translations';
 import { formatCryptoPrice } from '../utils/formatters';
 import { DualOutputViewer } from '../components/DualOutputViewer';
 import { useJournalNotes, AnalysisJournalNote } from '../services/journalStorageService';
+import { CoinLogo } from '../components/ui/CoinLogo';
 import {
   FileText,
   Layers,
@@ -182,8 +183,9 @@ export const OutputPage: React.FC<OutputPageProps> = React.memo(({
                   <span className={isDark ? 'text-white' : 'text-slate-900'}>
                     {isId ? 'Laporan Sinyal & Analisis Kuantitatif' : 'Quantitative Signal & Analysis Master Report'}
                   </span>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-semibold font-mono">
-                    {symbol} • {timeframe}
+                  <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-semibold font-mono">
+                    <CoinLogo symbol={symbol} size="xs" priority decorative />
+                    <span>{symbol} • {timeframe}</span>
                   </span>
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-400 font-sans mt-0.5">
@@ -645,11 +647,12 @@ export const OutputPage: React.FC<OutputPageProps> = React.memo(({
             </span>
           </div>
           <span
-            className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+            className={`inline-flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded border ${
               isDark ? 'text-slate-400 bg-[#0b0f19] border-[#1e293b]' : 'text-slate-600 bg-slate-50 border-slate-200'
             }`}
           >
-            {symbol} • {timeframe}
+            <CoinLogo symbol={symbol} size="xs" decorative />
+            <span>{symbol} • {timeframe}</span>
           </span>
         </div>
 

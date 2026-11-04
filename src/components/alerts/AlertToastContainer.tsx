@@ -4,6 +4,7 @@ import { Zap, SlidersHorizontal, Newspaper, X, ArrowUpRight, BellRing } from 'lu
 import { Language, getTranslation } from '../../i18n/translations';
 import { formatCryptoPrice } from '../../utils/formatters';
 import { resolveSignalMetrics } from '../../utils/alertUtils';
+import { CoinLogo } from '../ui/CoinLogo';
 
 interface AlertToastContainerProps {
   lang?: Language;
@@ -75,8 +76,9 @@ export const AlertToastContainer: React.FC<AlertToastContainerProps> = ({
                   {config.label}
                 </span>
                 {activeToast.symbol && (
-                  <span className="font-mono text-xs font-bold text-amber-400">
-                    {activeToast.symbol}
+                  <span className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-amber-400">
+                    <CoinLogo symbol={activeToast.symbol} size="xs" priority decorative />
+                    <span>{activeToast.symbol}</span>
                   </span>
                 )}
               </div>

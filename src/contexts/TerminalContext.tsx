@@ -128,7 +128,7 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     navigateToSystemHealth,
     selectStage,
     openBacktest,
-  } = useTerminalNavigation('ticker');
+  } = useTerminalNavigation();
 
   // Localization state
   const [lang, setLang] = useState<Language>(() => {

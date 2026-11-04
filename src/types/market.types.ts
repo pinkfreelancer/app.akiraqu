@@ -3,6 +3,8 @@
 export type Timeframe = '1m' | '5m' | '15m' | '1H' | '4H' | '1D' | '1W';
 
 export type StageId =
+  // 0. RINGKASAN PASAR (DEFAULT LANDING TERMINAL)
+  | 'market_overview'
   // 1. PASAR & SCREENING
   | 'ticker'
   | 'signal'

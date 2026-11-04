@@ -6,6 +6,7 @@ import {
 } from '../types/crypto.types';
 import { calculateBotAnalytics } from '../services/terminalExtensionService';
 import { formatCryptoPrice } from '../utils/formatters';
+import { CoinLogo } from './ui/CoinLogo';
 import {
   TrendingUp,
   BarChart3,
@@ -722,9 +723,12 @@ export const BotAnalyticsView: React.FC<BotAnalyticsViewProps> = ({
                 key={sym.symbol}
                 className="p-3.5 rounded-xl bg-[#070b14] border border-slate-700 flex items-center justify-between text-xs"
               >
-                <div>
-                  <div className="font-bold text-white">{sym.symbol}</div>
-                  <div className="text-xs text-slate-300">{sym.trades} Eksekusi Trade</div>
+                <div className="flex items-center gap-2.5">
+                  <CoinLogo symbol={sym.symbol} size="md" decorative />
+                  <div>
+                    <div className="font-bold text-white">{sym.symbol}</div>
+                    <div className="text-xs text-slate-300">{sym.trades} Eksekusi Trade</div>
+                  </div>
                 </div>
                 <div className="text-right">
                   <div className={`font-black tabular-nums ${sym.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -773,7 +777,8 @@ export const BotAnalyticsView: React.FC<BotAnalyticsViewProps> = ({
                         }`}>
                           {t.side}
                         </span>
-                        {t.symbol}
+                        <CoinLogo symbol={t.symbol} size="xs" decorative />
+                        <span>{t.symbol}</span>
                       </div>
                       <span className="text-xs text-slate-400">
                         {new Date(t.exitTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {t.durationMinutes}m

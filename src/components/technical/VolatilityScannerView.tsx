@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Activity, Gauge, Zap, AlertCircle, ArrowUpRight, Flame } from 'lucide-react';
 import { formatCryptoPrice } from '../../utils/formatters';
+import { CoinLogo } from '../ui/CoinLogo';
 
 interface VolatilityScannerViewProps {
   onSelectCoin?: (symbol: string) => void;
@@ -145,9 +146,12 @@ export const VolatilityScannerView: React.FC<VolatilityScannerViewProps> = ({
             className={`p-4 rounded-2xl border ${isDark ? 'bg-[#0f172a] border-[#1e293b]' : 'bg-white border-slate-200 shadow-sm'}`}
           >
             <div className="flex items-center justify-between">
-              <div>
-                <span className="text-sm font-bold font-mono text-white">{item.symbol}</span>
-                <span className="text-[10px] text-slate-400 block">{item.name}</span>
+              <div className="flex items-center gap-2.5">
+                <CoinLogo symbol={item.symbol} size="md" decorative />
+                <div>
+                  <span className="text-sm font-bold font-mono text-white">{item.symbol}</span>
+                  <span className="text-[10px] text-slate-400 block">{item.name}</span>
+                </div>
               </div>
               <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
                 item.status === 'BB_SQUEEZE'

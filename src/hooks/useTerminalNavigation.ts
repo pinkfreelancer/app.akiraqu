@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { StageId, IndicatorKey } from '../types/crypto.types';
+import { getPreferredStartupStage } from '../services/settingsService';
 
 export type TerminalViewMode = 'landing' | 'login' | 'terminal' | 'docs' | 'system_health';
 
@@ -16,7 +17,7 @@ export interface UseTerminalNavigationReturn {
   openBacktest: (indicatorKey?: IndicatorKey) => void;
 }
 
-export function useTerminalNavigation(initialStage: StageId = 'ticker'): UseTerminalNavigationReturn {
+export function useTerminalNavigation(initialStage?: StageId): UseTerminalNavigationReturn {
   const [viewMode, setViewMode] = useState<TerminalViewMode>(() => {
     if (typeof window !== 'undefined') {
       const pathname = window.location.pathname;
@@ -56,7 +57,15 @@ export function useTerminalNavigation(initialStage: StageId = 'ticker'): UseTerm
     return saved === 'landing' || saved === 'login' ? saved : 'terminal';
   });
 
-  const [currentStage, setCurrentStage] = useState<StageId>(initialStage);
+  const [currentStage, setCurrentStage] = useState<StageId>(() => {
+    if (typeof window !== 'undefined') {
+      const stageParam = new URLSearchParams(window.location.search).get('stage');
+      if (stageParam === 'mtf_screener' || stageParam === 'market_overview' || stageParam === 'ticker') {
+        return stageParam;
+      }
+    }
+    return initialStage || getPreferredStartupStage();
+  });
   const [backtestIndicator, setBacktestIndicator] = useState<IndicatorKey>('confluence');
 
   // Synchronize browser history / URL navigation with viewMode
@@ -129,6 +138,8 @@ export function useTerminalNavigation(initialStage: StageId = 'ticker'): UseTerm
     // CRITICAL: Protect against synthetic MouseEvents or non-string objects passed from onClick handlers
     if (typeof stage === 'string' && stage.length > 0) {
       setCurrentStage(stage as StageId);
+    } else {
+      setCurrentStage(getPreferredStartupStage());
     }
     setViewMode('terminal');
     try {

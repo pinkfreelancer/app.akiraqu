@@ -33,6 +33,7 @@ export interface DisplayPreferences {
   isFullscreen: boolean;
   isFullWidth: boolean;
   workspaceMode: 'classic' | 'launchpad';
+  startupStage: 'market_overview' | 'ticker';
   chartAnimation: boolean;
   soundAlerts: boolean;
   compactTable: boolean;

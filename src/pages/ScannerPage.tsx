@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { formatCryptoPrice } from '../utils/formatters';
 import { Language, getTranslation } from '../i18n/translations';
+import { CoinLogo } from '../components/ui/CoinLogo';
 
 interface ScannerPageProps {
   onSelectCoin: (symbol: string) => void;
@@ -247,8 +248,9 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
               className="flex items-baseline justify-between cursor-pointer group"
               onClick={() => onSelectCoin(bestBullish.symbol)}
             >
-              <div className={`font-mono font-bold text-base group-hover:text-cyan-500 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                {bestBullish.symbol}
+              <div className={`font-mono font-bold text-base group-hover:text-cyan-500 transition-colors flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <CoinLogo symbol={bestBullish.symbol} size="sm" decorative />
+                <span>{bestBullish.symbol}</span>
               </div>
               <div className="font-mono font-bold text-emerald-500 flex items-center gap-1 tabular-nums">
                 <span>{bestBullish.bullishCriteria?.criteriaMetCount}/9</span>
@@ -280,8 +282,9 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
               className="flex items-baseline justify-between cursor-pointer group"
               onClick={() => onSelectCoin(topVolume.symbol)}
             >
-              <div className={`font-mono font-bold text-base group-hover:text-cyan-500 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                {topVolume.symbol}
+              <div className={`font-mono font-bold text-base group-hover:text-cyan-500 transition-colors flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <CoinLogo symbol={topVolume.symbol} size="sm" decorative />
+                <span>{topVolume.symbol}</span>
               </div>
               <div className="font-mono font-bold text-cyan-500 tabular-nums">
                 ${(topVolume.volume24hUsd / 1_000_000).toFixed(1)}M
@@ -603,11 +606,12 @@ export const ScannerPage: React.FC<ScannerPageProps> = ({
                       >
                         {/* 1. Symbol & Details */}
                         <td className="py-3 px-3.5">
-                          <div className="flex items-center gap-2">
-                            {item.isHot && <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
+                          <div className="flex items-center gap-2.5">
+                            <CoinLogo symbol={item.symbol} size="sm" decorative />
                             <div>
                               <div className="font-bold text-white text-sm flex items-center gap-1.5">
-                                {item.symbol}
+                                {item.isHot && <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
+                                <span>{item.symbol}</span>
                                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-normal">
                                   {item.category}
                                 </span>

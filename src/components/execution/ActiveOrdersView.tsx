@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Zap, XCircle, CheckCircle2, Clock, Filter, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { formatCryptoPrice } from '../../utils/formatters';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { CoinLogo } from '../ui/CoinLogo';
 
 interface ActiveOrdersViewProps {
   onNavigateToTrade?: (symbol: string) => void;
@@ -162,7 +163,12 @@ export const ActiveOrdersView: React.FC<ActiveOrdersViewProps> = ({
                 {orders.map((ord) => (
                   <tr key={ord.id} className="hover:bg-slate-800/30 transition-colors">
                     <td className="py-3 px-3 text-slate-400">{ord.id}</td>
-                    <td className="py-3 px-3 font-bold text-white">{ord.symbol}</td>
+                    <td className="py-3 px-3 font-bold text-white">
+                      <div className="flex items-center gap-2">
+                        <CoinLogo symbol={ord.symbol} size="sm" decorative />
+                        <span>{ord.symbol}</span>
+                      </div>
+                    </td>
                     <td className="py-3 px-3 text-pink-400">{ord.exchange}</td>
                     <td className="py-3 px-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${

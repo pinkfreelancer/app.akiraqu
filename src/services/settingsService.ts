@@ -61,6 +61,25 @@ export const DEFAULT_AI_MODELS: AIModelConfig[] = [
 
 const STORAGE_KEY = 'imasbtc_master_user_settings';
 
+export function getPreferredStartupStage(): 'market_overview' | 'ticker' {
+  if (typeof window === 'undefined') return 'market_overview';
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.display?.startupStage === 'ticker') {
+        return 'ticker';
+      }
+      if (parsed?.display?.startupStage === 'market_overview') {
+        return 'market_overview';
+      }
+    }
+  } catch {
+    // Fallback to default market_overview
+  }
+  return 'market_overview';
+}
+
 export const getDefaultMasterSettings = (email?: string, displayName?: string): MasterUserSettings => ({
   account: {
     displayName: displayName || 'Institutional Trader',
@@ -86,6 +105,7 @@ export const getDefaultMasterSettings = (email?: string, displayName?: string): 
     isFullscreen: false,
     isFullWidth: true,
     workspaceMode: 'classic',
+    startupStage: 'market_overview',
     chartAnimation: true,
     soundAlerts: true,
     compactTable: false,

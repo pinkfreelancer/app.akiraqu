@@ -27,6 +27,7 @@ import {
   BellRing,
   Clock,
   PieChart,
+  LayoutDashboard,
   Settings as SettingsIcon,
 } from 'lucide-react';
 import { StageId } from '../types/market.types';
@@ -70,6 +71,16 @@ export const SIDEBAR_NAV_GROUPS: NavGroupConfig[] = [
     groupNameEn: '01. Macro & Context Data',
     icon: Globe,
     items: [
+      {
+        id: 'market_overview',
+        stepNumber: '00',
+        labelId: 'Ringkasan Pasar',
+        labelEn: 'Market Overview',
+        icon: LayoutDashboard,
+        badge: 'Utama',
+        badgeColor: 'bg-pink-500/20 text-pink-300 border-pink-500/40',
+        category: 'macro',
+      },
       {
         id: 'btc_dominance',
         stepNumber: '01',

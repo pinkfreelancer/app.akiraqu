@@ -8,13 +8,16 @@ import {
 } from '../../src/services/ccxtService';
 import { fetchLiveComprehensiveNewsAndSentiment } from '../../src/services/newsSentimentService';
 import { marketWsProxy } from '../services/marketWsProxy';
-import { computeCandleConsensus, MtfCellSignal } from '../../src/services/confluence/signalConsensus';
-import { MarketType, SupportedExchange, Timeframe } from '../../src/types/market.types';
+import { mtfScreenerEngine } from '../services/mtfScreenerEngine';
+import { marketOverviewService } from '../services/marketOverviewService';
+import { coinMetadataService } from '../services/coinMetadataService';
 
 export const marketRouter = Router();
 
-const MTF_CACHE_TTL_MS = 15_000;
-const mtfScreenerCache = new Map<string, { updatedAt: number; payload: any }>();
+// Start background rate-limit-aware 240-coin MTF engine & warm up Market Overview + Coin Metadata caches on boot
+mtfScreenerEngine.start();
+marketOverviewService.warmUp();
+coinMetadataService.warmUp();
 
 function formatUptime(seconds: number): string {
   const d = Math.floor(seconds / (3600 * 24));
@@ -143,6 +146,7 @@ marketRouter.get('/ticker', async (req: Request, res: Response) => {
       : [
           `https://data-api.binance.vision/api/v3/ticker/24hr?symbol=${clean}`,
           `https://api.binance.com/api/v3/ticker/24hr?symbol=${clean}`,
+          `https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${clean}`,
         ];
 
     let data: any = null;
@@ -190,6 +194,7 @@ marketRouter.get(['/depth', '/market/depth'], async (req: Request, res: Response
       : [
           `https://data-api.binance.vision/api/v3/depth?symbol=${clean}&limit=${limit}`,
           `https://api.binance.com/api/v3/depth?symbol=${clean}&limit=${limit}`,
+          `https://fapi.binance.com/fapi/v1/depth?symbol=${clean}&limit=${limit}`,
         ];
 
     let data: any = null;
@@ -235,6 +240,7 @@ marketRouter.get(['/trades', '/market/trades'], async (req: Request, res: Respon
       : [
           `https://data-api.binance.vision/api/v3/trades?symbol=${clean}&limit=${limit}`,
           `https://api.binance.com/api/v3/trades?symbol=${clean}&limit=${limit}`,
+          `https://fapi.binance.com/fapi/v1/trades?symbol=${clean}&limit=${limit}`,
         ];
 
     let data: any = null;
@@ -420,7 +426,11 @@ marketRouter.get(['/market-snapshot', '/market/snapshot'], async (req: Request, 
       const klineInterval = rawTf === '1h' ? '1h' : rawTf === '4h' ? '4h' : rawTf === '1d' ? '1d' : rawTf === '1w' ? '1w' : rawTf;
       const baseCandidates = isFut
         ? ['https://fapi.binance.com/fapi/v1']
-        : ['https://data-api.binance.vision/api/v3', 'https://api.binance.com/api/v3'];
+        : [
+            'https://data-api.binance.vision/api/v3',
+            'https://api.binance.com/api/v3',
+            'https://fapi.binance.com/fapi/v1',
+          ];
 
       const fetchWithFallback = async (pathSuffix: string) => {
         for (const baseUrl of baseCandidates) {
@@ -524,117 +534,121 @@ marketRouter.get('/news-sentiment', async (req: Request, res: Response) => {
   }
 });
 
-// 9. Multi-Timeframe (MTF) Real Candle Screener — Uses Exact Same 12-Indicator Consensus Engine as Main Chart
-const MTF_TIMEFRAMES: Array<{ tf: Timeframe; key: 'tf1m' | 'tf5m' | 'tf15m' | 'tf1h' | 'tf4h' | 'tf1d' }> = [
-  { tf: '1m', key: 'tf1m' },
-  { tf: '5m', key: 'tf5m' },
-  { tf: '15m', key: 'tf15m' },
-  { tf: '1H', key: 'tf1h' },
-  { tf: '4H', key: 'tf4h' },
-  { tf: '1D', key: 'tf1d' },
-];
-
+// 9. Multi-Timeframe (MTF) 240+ Coin Binance Futures USDT-M Screener
 marketRouter.get(['/mtf-screener', '/market/mtf-screener'], async (req: Request, res: Response) => {
   const startTime = Date.now();
   try {
-    const defaultSymbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'XRP/USDT', 'DOGE/USDT', 'NEAR/USDT'];
-    const rawQuerySymbols = typeof req.query.symbols === 'string' && req.query.symbols.trim()
-      ? req.query.symbols.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean).slice(0, 12)
-      : defaultSymbols;
-
-    const exchange = (((req.query.exchange as string) || 'BINANCE').toUpperCase()) as SupportedExchange;
-    const marketType = (((req.query.marketType as string) || 'SPOT').toUpperCase()) as MarketType;
     const force = req.query.force === 'true';
+    const prioritySymbols =
+      typeof req.query.priority === 'string' && req.query.priority.trim()
+        ? req.query.priority
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .slice(0, 60)
+        : undefined;
 
-    const cacheKey = `${exchange}:${marketType}:${rawQuerySymbols.join(',')}`;
-    const cached = mtfScreenerCache.get(cacheKey);
-    const now = Date.now();
-    if (!force && cached && now - cached.updatedAt < MTF_CACHE_TTL_MS) {
-      res.json({
-        status: 'success',
-        cached: true,
-        updatedAt: cached.updatedAt,
-        latencyMs: Date.now() - startTime,
-        data: cached.payload,
-      });
-      return;
-    }
+    const subsetSymbols =
+      typeof req.query.symbols === 'string' && req.query.symbols.trim()
+        ? req.query.symbols
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : undefined;
 
-    const rows = await Promise.all(
-      rawQuerySymbols.map(async (symbol) => {
-        const tfEntries = await Promise.all(
-          MTF_TIMEFRAMES.map(async ({ tf, key }) => {
-            try {
-              const candles = await fetchOHLCVOnDemandCCXT(symbol, tf, 90, exchange, marketType);
-              const consensus = computeCandleConsensus(candles);
-              return { key, tf, consensus };
-            } catch (_err) {
-              return { key, tf, consensus: null };
-            }
-          })
-        );
-
-        const tfSignals: Record<string, MtfCellSignal> = {
-          tf1m: 'NEUTRAL',
-          tf5m: 'NEUTRAL',
-          tf15m: 'NEUTRAL',
-          tf1h: 'NEUTRAL',
-          tf4h: 'NEUTRAL',
-          tf1d: 'NEUTRAL',
-        };
-        const tfScores: Record<string, number> = {};
-
-        for (const entry of tfEntries) {
-          if (entry.consensus) {
-            tfSignals[entry.key] = entry.consensus.mtfSignal;
-            tfScores[entry.tf] = entry.consensus.score;
-          }
-        }
-
-        // Primary indicator diagnostics from 1H (anchor timeframe) or 15m fallback
-        const anchor =
-          tfEntries.find((e) => e.tf === '1H' && e.consensus)?.consensus ||
-          tfEntries.find((e) => e.consensus)?.consensus ||
-          null;
-
-        const catalogInfo = SUPPORTED_SYMBOLS.find((c) => c.symbol === symbol);
-
-        return {
-          symbol,
-          name: catalogInfo?.name || symbol.split('/')[0],
-          tf1m: tfSignals.tf1m,
-          tf5m: tfSignals.tf5m,
-          tf15m: tfSignals.tf15m,
-          tf1h: tfSignals.tf1h,
-          tf4h: tfSignals.tf4h,
-          tf1d: tfSignals.tf1d,
-          tfScores,
-          rsi14: anchor?.rsi14 ?? 50,
-          macdStatus: anchor?.macdStatus ?? 'Converging',
-          supertrend: anchor?.supertrend ?? 'UPTREND',
-          anchorScore: anchor?.score ?? 50,
-          anchorBias: anchor?.marketBias ?? 'Neutral',
-          candleClosePrice: anchor?.closePrice ?? null,
-          computedAt: Date.now(),
-        };
-      })
-    );
-
-    const updatedAt = Date.now();
-    mtfScreenerCache.set(cacheKey, { updatedAt, payload: rows });
+    const snapshot = await mtfScreenerEngine.getSnapshot({
+      prioritySymbols,
+      subsetSymbols,
+      force,
+    });
 
     res.json({
       status: 'success',
-      cached: false,
-      updatedAt,
+      updatedAt: snapshot.updatedAt,
       latencyMs: Date.now() - startTime,
-      data: rows,
+      totalCoins: snapshot.totalCoins,
+      fullyHydratedCoins: snapshot.fullyHydratedCoins,
+      partiallyHydratedCoins: snapshot.partiallyHydratedCoins,
+      hydrationPct: snapshot.hydrationPct,
+      sourceExchange: snapshot.sourceExchange,
+      ttlConfigMs: snapshot.ttlConfigMs,
+      rateLimitTelemetry: snapshot.rateLimitTelemetry,
+      data: snapshot.rows,
     });
   } catch (err: any) {
     res.status(500).json({
-      error: 'Failed to compute MTF screener consensus',
+      error: 'Failed to load MTF screener snapshot',
       details: err.message,
     });
   }
 });
+
+// 10. Unified Market Overview Snapshot ("Ringkasan Pasar" — Reuses 240-coin MTF universe + Global/F&G/OI)
+marketRouter.get(['/market-overview', '/market/overview'], async (req: Request, res: Response) => {
+  const startTime = Date.now();
+  try {
+    const force = req.query.force === 'true';
+    const overview = await marketOverviewService.getOverview(force);
+    res.json({
+      success: true,
+      status: 'success',
+      latencyMs: Date.now() - startTime,
+      data: overview,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      status: 'error',
+      error: 'Failed to load Market Overview',
+      details: err.message,
+    });
+  }
+});
+
+// 11. Static Coin Logo Metadata Proxy (/api/coins/meta & /api/v1/coins/meta)
+// Strictly decoupled from real-time price SSOT; caches CoinGecko /coins/markets { id, symbol, name, image, market_cap_rank }
+marketRouter.get(['/coins/meta', '/market/coins-meta'], async (req: Request, res: Response) => {
+  const startTime = Date.now();
+  try {
+    const force = req.query.force === 'true';
+    const snapshot = await coinMetadataService.getCoinsMetadata({ force });
+
+    if (snapshot.items.length > 0) {
+      res.setHeader(
+        'Cache-Control',
+        'public, max-age=21600, s-maxage=43200, stale-while-revalidate=86400'
+      );
+    } else {
+      res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    }
+
+    res.json({
+      success: true,
+      status: 'success',
+      updatedAt: snapshot.updatedAt,
+      stale: snapshot.stale,
+      degraded: snapshot.degraded,
+      cacheAgeSec: snapshot.cacheAgeSec,
+      count: snapshot.items.length,
+      latencyMs: Date.now() - startTime,
+      data: snapshot.items,
+    });
+  } catch (err: any) {
+    // Graceful fallback: never break UI if CoinGecko upstream fails
+    res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    res.status(200).json({
+      success: true,
+      status: 'success',
+      updatedAt: Date.now(),
+      stale: true,
+      degraded: true,
+      cacheAgeSec: 0,
+      count: 0,
+      latencyMs: Date.now() - startTime,
+      error: err?.message || 'Coin metadata temporarily unavailable',
+      data: [],
+    });
+  }
+});
+
 
